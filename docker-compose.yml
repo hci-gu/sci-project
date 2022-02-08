@@ -2,7 +2,6 @@ version: '3.1'
 services:
   jupyter:
     build: './jupyter'
-    restart: always
     ports:
       - 8888:8888
     environment:
@@ -11,18 +10,30 @@ services:
       - ./jupyter/notebooks:/home/jovyan/work
   mongo:
     image: mongo:5.0.5
-    restart: always
     hostname: mongo
     ports:
       - '27017:27017'
     environment:
       MONGO_INITDB_ROOT_USERNAME: username
       MONGO_INITDB_ROOT_PASSWORD: password
+  postgres:
+    image: postgres:14.1
+    hostname: postgres
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: sci
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
   mongo-express:
     depends_on:
       - mongo
     image: mongo-express
-    restart: always
     ports:
       - 8081:8081
     environment:

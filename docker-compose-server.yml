@@ -66,3 +66,15 @@ services:
       ME_CONFIG_MONGODB_ADMINPASSWORD: password
       ME_CONFIG_BASICAUTH_USERNAME: appademin
       ME_CONFIG_BASICAUTH_PASSWORD: kaffesmakpådongeln
+  postgres:
+    image: postgres:14.1
+    hostname: postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - /data/postgres:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: sci
+      PGDATA: /var/lib/postgresql/data/pgdata
