@@ -42,6 +42,11 @@ services:
       NODE_ENV: 'production'
       MONGO_URL: mongodb://username:password@mongo:27017
       MONGO_DB: sci
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: admin
+      DB_PASSWORD: password
+      DB: sci
   mongo:
     image: mongo:5.0.5
     restart: always
