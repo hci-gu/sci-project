@@ -1,4 +1,4 @@
-const ACCEL_FREQUENCY = 20
+const { FITBIT_ACCEL_FREQUENCY } = process.env
 
 const handleData = (batches) => {
   accelDataPoints = []
@@ -15,7 +15,7 @@ const handleData = (batches) => {
         }
         if (type === 'accel') {
           accelDataPoints.push({
-            t: start + (1000 / ACCEL_FREQUENCY) * i,
+            t: start + (1000 / FITBIT_ACCEL_FREQUENCY) * i,
             v: value,
           })
         }

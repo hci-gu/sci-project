@@ -28,7 +28,7 @@ services:
     volumes:
       - ./jupyter/notebooks:/home/jovyan/work
   api:
-    build: '.'
+    build: './api'
     depends_on:
       - postgres
     ports:
