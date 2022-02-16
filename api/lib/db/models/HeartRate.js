@@ -1,24 +1,22 @@
 const { DataTypes, Op } = require('sequelize')
 
-let Accel
+let HeartRate
 
 module.exports = {
   init: (sequelize) => {
     sequelize.define(
-      'Accel',
+      'HeartRate',
       {
         t: DataTypes.DATE,
-        x: DataTypes.FLOAT,
-        y: DataTypes.FLOAT,
-        z: DataTypes.FLOAT,
+        hr: DataTypes.FLOAT,
       },
-      { timestamps: false }
+      { sequelize }
     )
-    Accel = sequelize.models.Accel
-    return Accel
+    HeartRate = sequelize.models.HeartRate
+    return HeartRate
   },
   associate: (models) => {
-    Accel.belongsTo(models.User, {
+    HeartRate.belongsTo(models.User, {
       foreignKey: {
         allowNull: false,
       },
@@ -28,19 +26,17 @@ module.exports = {
   save: (data, userId) =>
     Promise.all(
       data.map((d) =>
-        Accel.create({
+        HeartRate.create({
           t: d.t,
-          x: d.v[0],
-          y: d.v[1],
-          z: d.v[2],
-          userId,
+          hr: d.v,
+          UserId: userId,
         })
       )
     ),
   find: ({ userId, from, to }) =>
-    Accel.findAll({
+    HeartRate.findAll({
       where: {
-        userId,
+        UserId: userId,
         t: {
           [Op.between]: [from, to],
         },
@@ -48,27 +44,23 @@ module.exports = {
       order: [['t', 'ASC']],
     }),
   group: ({ userId, from, to, unit = 'minute' }) =>
-    Accel.findAll({
+    HeartRate.findAll({
       where: {
-        userId,
+        UserId: userId,
         t: {
           [Op.between]: [from, to],
         },
       },
       attributes: [
         [sequelize.fn('date_trunc', unit, sequelize.col('t')), 'agg_t'],
-        [sequelize.fn('avg', sequelize.col('x')), 'x'],
-        [sequelize.fn('avg', sequelize.col('y')), 'y'],
-        [sequelize.fn('avg', sequelize.col('z')), 'z'],
+        [sequelize.fn('avg', sequelize.col('hr')), 'hr'],
       ],
       group: 'agg_t',
       order: [[sequelize.col('agg_t'), 'ASC']],
     }).then((docs) =>
       docs.map((d) => ({
         t: d.get({ plain: true }).agg_t,
-        x: d.x,
-        y: d.y,
-        z: d.z,
+        hr: d.hr,
       }))
     ),
 }

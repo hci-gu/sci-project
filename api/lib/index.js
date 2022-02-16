@@ -1,15 +1,16 @@
 require('dotenv').config()
+const db = require('./db')
+const createServer = require('./server')
 
-const express = require('express')
-const cors = require('cors')
-const app = express()
-app.use(cors())
-app.use(express.json({ limit: '50mb' }))
+const { DB_HOST, DB_PORT, DB_USERNAME, DB_PASSWORD, DB } = process.env
 
-require('./db')
+db({
+  database: DB,
+  username: DB_USERNAME,
+  password: DB_PASSWORD,
+  host: DB_HOST,
+  port: DB_PORT,
+})
 
-const router = require('./routes')
-
-app.use(router)
-
+const app = createServer()
 app.listen(4000, () => console.log('listening on port 4000'))
