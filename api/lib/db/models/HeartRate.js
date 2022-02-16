@@ -10,7 +10,12 @@ module.exports = {
         t: DataTypes.DATE,
         hr: DataTypes.FLOAT,
       },
-      { sequelize }
+      {
+        timestamps: false,
+        defaultScope: {
+          attributes: { exclude: ['id', 'UserId'] },
+        },
+      }
     )
     HeartRate = sequelize.models.HeartRate
     return HeartRate
