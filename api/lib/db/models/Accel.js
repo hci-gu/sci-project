@@ -12,7 +12,12 @@ module.exports = {
         y: DataTypes.FLOAT,
         z: DataTypes.FLOAT,
       },
-      { timestamps: false }
+      {
+        timestamps: false,
+        defaultScope: {
+          attributes: { exclude: ['id', 'UserId'] },
+        },
+      }
     )
     Accel = sequelize.models.Accel
     return Accel
