@@ -2,32 +2,26 @@ version: '3.1'
 services:
   jupyter:
     build: './jupyter'
-    restart: always
     ports:
       - 8888:8888
     environment:
       JUPYTER_ENABLE_LAB: 'yes'
     volumes:
       - ./jupyter/notebooks:/home/jovyan/work
-  mongo:
-    image: mongo:5.0.5
-    restart: always
-    hostname: mongo
+  postgres:
+    image: postgres:14.1
+    hostname: postgres
     ports:
-      - '27017:27017'
+      - 5432:5432
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
     environment:
-      MONGO_INITDB_ROOT_USERNAME: username
-      MONGO_INITDB_ROOT_PASSWORD: password
-  mongo-express:
-    depends_on:
-      - mongo
-    image: mongo-express
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: sci
+      PGDATA: /var/lib/postgresql/data/pgdata
+  adminer:
+    image: adminer
     restart: always
     ports:
-      - 8081:8081
-    environment:
-      ME_CONFIG_MONGODB_URL: 'mongodb://username:password@mongo:27017/'
-      ME_CONFIG_MONGODB_ADMINUSERNAME: username
-      ME_CONFIG_MONGODB_ADMINPASSWORD: password
-      ME_CONFIG_BASICAUTH_USERNAME: appademin
-      ME_CONFIG_BASICAUTH_PASSWORD: kaffesmakpådongeln
+      - 8080:8080
