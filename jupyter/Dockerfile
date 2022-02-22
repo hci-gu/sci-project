@@ -6,5 +6,6 @@ RUN conda install --quiet --yes \
     'ipywidgets' \
     'scipy' \
     'ruptures' \
+    'resampy' \
     'pandas' && \
     conda clean --all -f -y 
