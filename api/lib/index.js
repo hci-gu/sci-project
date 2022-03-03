@@ -2,14 +2,16 @@ require('dotenv').config()
 const db = require('./db')
 const createServer = require('./server')
 
-const { DB_HOST, DB_PORT, DB_USERNAME, DB_PASSWORD, DB } = process.env
+const { DB_HOST, DB_USERNAME, DB_PASSWORD, DB } = process.env
+
+const [host, port] = DB_HOST.split(':')
 
 db({
   database: DB,
   username: DB_USERNAME,
   password: DB_PASSWORD,
-  host: DB_HOST,
-  port: DB_PORT,
+  host,
+  port,
 })
 
 const app = createServer()

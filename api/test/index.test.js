@@ -82,9 +82,23 @@ describe('/users', () => {
 
       expect(response.body.length).toBe(60)
     })
-  })
-})
 
-afterEach((done) => {
-  done()
+    // cant group in sqlite
+    xtest('GET /users/:id/data/:type grouped', async () => {
+      const body = require('./data/fitbit.accel.json')
+
+      await supertest(app).post(`/users/${userId}/data`).send(body).expect(200)
+
+      const response = await supertest(app)
+        .get(`/users/${userId}/data/accel`)
+        .query({
+          from: '2022-01-01T00:00:00.000Z',
+          to: '2023-01-01T00:00:00.000Z',
+          group: 'minute',
+        })
+        .expect(200)
+
+      expect(response.body.length).toBe(60)
+    })
+  })
 })

@@ -1,9 +1,11 @@
 const { DataTypes, Op } = require('sequelize')
 
 let HeartRate
+let sequelize
 
 module.exports = {
-  init: (sequelize) => {
+  init: (_sequelize) => {
+    sequelize = _sequelize
     sequelize.define(
       'HeartRate',
       {

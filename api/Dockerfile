@@ -1,4 +1,4 @@
-FROM mhart/alpine-node:14
+FROM node:lts
 
 COPY lib lib
 COPY package.json .
