@@ -1,7 +1,7 @@
 const { Sequelize } = require('sequelize')
 const models = require('./models')
 
-module.exports = (conf) => {
+module.exports = async (conf) => {
   const sequelize = conf
     ? new Sequelize({
         define: {
@@ -16,6 +16,10 @@ module.exports = (conf) => {
         ...conf,
       })
     : new Sequelize('sqlite::memory', { logging: false })
+
+  try {
+    await sequelize.query(`CREATE DATABASE ${conf.DB}`)
+  } catch (e) {}
 
   models.init(sequelize)
 

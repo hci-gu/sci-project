@@ -48,21 +48,25 @@ router.get('/:id/data/:type', async (req, res) => {
 
   const model = type === 'accel' ? Accel : HeartRate
   let dataPoints = []
-  if (!group) {
-    dataPoints = await model.find({
-      userId: id,
-      type,
-      from: new Date(from).toISOString(),
-      to: new Date(to).toISOString(),
-    })
-  } else {
-    dataPoints = await model.group({
-      userId: id,
-      type,
-      from: new Date(from).toISOString(),
-      to: new Date(to).toISOString(),
-      unit: group,
-    })
+  try {
+    if (!group) {
+      dataPoints = await model.find({
+        userId: id,
+        type,
+        from: new Date(from).toISOString(),
+        to: new Date(to).toISOString(),
+      })
+    } else {
+      dataPoints = await model.group({
+        userId: id,
+        type,
+        from: new Date(from).toISOString(),
+        to: new Date(to).toISOString(),
+        unit: group,
+      })
+    }
+  } catch (e) {
+    console.log(e)
   }
 
   res.json(dataPoints)
