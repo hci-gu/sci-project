@@ -103,4 +103,17 @@ describe('/users', () => {
       expect(response.body.length).toBe(60)
     })
   })
+
+  describe('/GET /users/:id/enery', () => {
+    let userId
+
+    beforeEach(async () => {
+      response = await supertest(app).post('/users').send({}).expect(200)
+      userId = response.body.id
+    })
+
+    test('GET /users/:id/energy', async () => {
+      await supertest(app).get(`/users/${userId}/energy`).expect(200)
+    })
+  })
 })
