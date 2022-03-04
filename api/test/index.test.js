@@ -4,7 +4,9 @@ const supertest = require('supertest')
 
 const app = createServer()
 
-beforeEach(() => db())
+beforeEach(async () => {
+  await db()
+})
 
 test('GET /ping', () => supertest(app).get('/ping').expect(200))
 
