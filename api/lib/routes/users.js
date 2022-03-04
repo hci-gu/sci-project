@@ -1,5 +1,5 @@
 const express = require('express')
-const { User, Accel, HeartRate } = require('../db/models')
+const { User, Accel, HeartRate, Energy } = require('../db/models')
 const router = express.Router()
 
 const fitbit = require('../adapters/fitbit')
@@ -36,15 +36,12 @@ router.post('/:id/data', async (req, res) => {
 
 router.get('/:id/data/:type', async (req, res) => {
   const { id, type } = req.params
-  let { from, to, group } = req.query
-
-  if (!from) {
-    from = new Date()
-    from.setDate(from.getDate() - 1)
-  }
-  if (!to) {
-    to = new Date()
-  }
+  const now = new Date()
+  let {
+    from = new Date().setDate(now.getDate() - 1),
+    to = now,
+    group,
+  } = req.query
 
   const model = type === 'accel' ? Accel : HeartRate
   let dataPoints = []
@@ -70,6 +67,23 @@ router.get('/:id/data/:type', async (req, res) => {
   }
 
   res.json(dataPoints)
+})
+
+router.get('/:id/energy', async (req, res) => {
+  const { id } = req.params
+  const now = new Date()
+  const { from = new Date().setDate(now.getDate() - 1), to = now } = req.query
+
+  const rows = await Energy.find({
+    userId: id,
+    from: new Date(from).toISOString(),
+    to: new Date(to).toISOString(),
+  })
+
+  if (!rows.length) {
+    // TODO implement calculate energy consumption
+  }
+  res.json([])
 })
 
 module.exports = router
