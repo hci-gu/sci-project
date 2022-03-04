@@ -21,7 +21,8 @@ module.exports = async (conf) => {
     await sequelize.query(`CREATE DATABASE ${conf.DB}`)
   } catch (e) {}
 
-  models.init(sequelize)
+  await models.init(sequelize)
+  await sequelize.sync()
 
-  sequelize.sync()
+  return sequelize
 }
