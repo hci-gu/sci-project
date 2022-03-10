@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:scimovement/model.dart';
+import 'package:scimovement/models/activity.dart';
 import 'package:scimovement/models/auth.dart';
-import 'package:scimovement/screens/login_screen.dart';
+import 'package:scimovement/screens/home.dart';
+import 'package:scimovement/screens/login.dart';
 import 'package:scimovement/theme/theme.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   final auth = AuthModel();
   await auth.init();
   runApp(App(auth: auth));
@@ -17,11 +19,14 @@ class App extends StatelessWidget {
 
   App({Key? key, required this.auth}) : super(key: key);
 
+  final ActivityModel activity = ActivityModel();
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<AuthModel>.value(value: auth),
+        ChangeNotifierProvider<ActivityModel>.value(value: activity),
       ],
       child: MaterialApp.router(
         title: 'SCI-Movement',
@@ -34,12 +39,12 @@ class App extends StatelessWidget {
   }
 
   late final _router = GoRouter(
-    initialLocation: '/login',
+    initialLocation: auth.loggedIn ? '/' : '/login',
     routes: [
       GoRoute(
         name: 'home',
         path: '/',
-        builder: (_, __) => const Home(),
+        builder: (_, __) => const HomeScreen(),
       ),
       GoRoute(
         name: 'login',
@@ -55,18 +60,4 @@ class App extends StatelessWidget {
     },
     refreshListenable: auth,
   );
-}
-
-class Home extends StatelessWidget {
-  const Home({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('SCI-Movement'),
-      ),
-      body: const Center(child: Text('Hello')),
-    );
-  }
 }
