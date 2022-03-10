@@ -16,6 +16,7 @@ class AuthModel extends ChangeNotifier {
     }
 
     _initialized = true;
+    print('inited');
     notifyListeners();
   }
 
