@@ -35,7 +35,7 @@ const getEnergy = ({ accel, hr, weight, coeff = standardCoeff }) => {
     const energy = coeff.constant + coeff.hr * heartrate + coeff.weight * weight + coeff.acc * a.reduce((a, b) => a + b)
 
     return {
-      minute: moment(moment).toISOString(),
+      minute: moment(minute).toISOString(),
       energy,
       accel,
     }
