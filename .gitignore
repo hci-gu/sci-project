@@ -1,2 +1,3 @@
 data/postgres
 .DS_Store
+.npm
