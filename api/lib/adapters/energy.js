@@ -28,9 +28,8 @@ const getEnergy = ({ accel, hr, weight, coeff = standardCoeff }) => {
     const z = await actilife.counts({ acc: accel.map(d => d.z / 9.82), f: 30 })
     const a = x.map((d, i) => d + y[i] + z[i])
 
-    const hrIndex = hr.findIndex(d => moment(d.t).format("YYYY-MM-DD HH:mm") >= minute)
-    if (hrIndex <= 0) return
-    const heartrate = hr[hrIndex].hr
+    const hrs = hr.filter(d => moment(d.t).format("YYYY-MM-DD HH:mm") === minute)
+    const heartrate = hrs.reduce((acc, d) => acc + d.hr, 0) / hrs.length
 
     const energy = coeff.constant + coeff.hr * heartrate + coeff.weight * weight + coeff.acc * a.reduce((a, b) => a + b)
 
