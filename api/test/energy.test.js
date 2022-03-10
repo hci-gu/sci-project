@@ -5,6 +5,7 @@ const hr = require('./data/hr.json')
 describe('getEnergy', () => {
   test('runs', async () => {
     const result = await energy.getEnergy({ accel, hr, weight: 80 })
-    expect(result).toHaveLength(991)
+    // console.log({ result })
+    expect(result).toHaveLength(15)
   })
 })
