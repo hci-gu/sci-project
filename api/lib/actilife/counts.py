@@ -107,5 +107,5 @@ try:
   cs = counts(data, int(freq))
 
   print(json.dumps(cs.tolist()))
-except e:
+except Exception as e:
   print(e)
