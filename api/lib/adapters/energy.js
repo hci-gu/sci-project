@@ -35,7 +35,7 @@ const getEnergy = ({ accel, hr, weight, coeff = standardCoeff }) => {
     const hrs = hr.filter(d => getMinute(d.t) === minute)
     const heartrate = hrs.reduce((acc, d) => acc + d.hr, 0) / hrs.length
 
-    const energy = coeff.constant + coeff.hr * heartrate + coeff.weight * weight + coeff.acc * a.reduce((a, b) => a + b)
+    const energy = weight * (coeff.constant + coeff.hr * heartrate + coeff.weight * weight + coeff.acc * a.reduce((a, b) => a + b))
 
     return {
       minute: (new Date(minute)).toISOString(),
