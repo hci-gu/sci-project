@@ -40,7 +40,6 @@ const getEnergy = ({ accel, hr, weight, coeff = standardCoeff }) => {
     return {
       minute: (new Date(minute)).toISOString(),
       energy,
-      accel,
     }
   }))
 }
