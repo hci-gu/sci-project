@@ -18,15 +18,6 @@ services:
       options:
         max-file: '5'
         max-size: '50m'
-  jupyter:
-    build: './jupyter'
-    restart: always
-    ports:
-      - 8888:8888
-    environment:
-      JUPYTER_ENABLE_LAB: 'yes'
-    volumes:
-      - ./jupyter/notebooks:/home/jovyan/work
   api:
     build: './api'
     depends_on:
@@ -56,7 +47,7 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - /data/postgres:/var/lib/postgresql/data
+      - /data/pg:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: password
