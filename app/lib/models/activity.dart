@@ -19,8 +19,13 @@ class ActivityModel extends ChangeNotifier {
   DateTime get from => _from;
   DateTime get to => _to;
 
+  DateTime? get earliestDataDate =>
+      _heartRates.isEmpty ? null : _heartRates.first.time;
+  DateTime? get lastDataDate =>
+      _heartRates.isEmpty ? null : _heartRates.last.time;
+
   Future getHeartRates() async {
-    _heartRates = await Api().getData(from, to);
+    _heartRates = await Api().getData(from, to, 'hr');
     notifyListeners();
   }
 
