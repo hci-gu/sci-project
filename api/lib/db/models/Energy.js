@@ -32,13 +32,15 @@ module.exports = {
   },
   save: (data, userId) =>
     Promise.all(
-      data.map((d) =>
-        Energy.create({
-          t: d.t,
-          value: d.v,
-          UserId: userId,
-        })
-      )
+      data
+        .filter((d) => d.energy)
+        .map((d) =>
+          Energy.create({
+            t: d.minute,
+            value: d.energy,
+            UserId: userId,
+          })
+        )
     ),
   find: ({ userId, from, to }) =>
     Energy.findAll({
