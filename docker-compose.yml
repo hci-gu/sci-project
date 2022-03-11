@@ -8,6 +8,19 @@ services:
       JUPYTER_ENABLE_LAB: 'yes'
     volumes:
       - ./jupyter/notebooks:/home/jovyan/work
+  # api:
+  #   build: './api'
+  #   depends_on:
+  #     - postgres
+  #   ports:
+  #     - 4000:4000
+  #   environment:
+  #     NODE_ENV: 'production'
+  #     DB_HOST: postgres
+  #     DB_PORT: 5432
+  #     DB_USERNAME: admin
+  #     DB_PASSWORD: password
+  #     DB: sci
   postgres:
     image: postgres:14.1
     hostname: postgres
