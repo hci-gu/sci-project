@@ -3,6 +3,7 @@ const { User, Accel, HeartRate, Energy } = require('../db/models')
 const router = express.Router()
 
 const fitbit = require('../adapters/fitbit')
+const { getEnergy } = require('../adapters/energy')
 
 router.post('/', async (req, res) => {
   const result = await User.save(req.body)
@@ -49,14 +50,12 @@ router.get('/:id/data/:type', async (req, res) => {
     if (!group) {
       dataPoints = await model.find({
         userId: id,
-        type,
         from: new Date(from).toISOString(),
         to: new Date(to).toISOString(),
       })
     } else {
       dataPoints = await model.group({
         userId: id,
-        type,
         from: new Date(from).toISOString(),
         to: new Date(to).toISOString(),
         unit: group,
@@ -72,7 +71,11 @@ router.get('/:id/data/:type', async (req, res) => {
 router.get('/:id/energy', async (req, res) => {
   const { id } = req.params
   const now = new Date()
-  const { from = new Date().setDate(now.getDate() - 1), to = now } = req.query
+  const {
+    from = new Date().setDate(now.getDate() - 1),
+    to = now,
+    overwrite,
+  } = req.query
 
   const rows = await Energy.find({
     userId: id,
@@ -80,10 +83,25 @@ router.get('/:id/energy', async (req, res) => {
     to: new Date(to).toISOString(),
   })
 
-  if (!rows.length) {
-    // TODO implement calculate energy consumption
+  if (!rows.length || !!overwrite) {
+    const [accel, hr] = await Promise.all([
+      await Accel.find({
+        userId: id,
+        from: new Date(from).toISOString(),
+        to: new Date(to).toISOString(),
+      }),
+      await HeartRate.find({
+        userId: id,
+        from: new Date(from).toISOString(),
+        to: new Date(to).toISOString(),
+      }),
+    ])
+    const energy = await getEnergy({ accel, hr, weight: 70 })
+    await Energy.save(energy, id)
+    return res.json(energy)
   }
-  res.json([])
+
+  return res.json(rows)
 })
 
 module.exports = router
