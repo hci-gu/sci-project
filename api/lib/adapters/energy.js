@@ -30,6 +30,12 @@ const getEnergy = ({ accel, hr, weight, coeff = standardCoeff }) => {
   return Promise.all(
     Object.keys(minutes).map(async (minute) => {
       const accel = minutes[minute]
+      if (accel.length < 30) {
+        return {
+          minute: new Date(minute).toISOString(),
+          energy: null,
+        }
+      }
       const [x, y, z] = await Promise.all([
         actilife.counts({
           type: 'x',
