@@ -98,7 +98,7 @@ router.get('/:id/energy', async (req, res) => {
     ])
     const energy = await getEnergy({ accel, hr, weight: 70 })
     await Energy.save(energy, id)
-    return res.json(energy)
+    return res.json(energy.map((d) => ({ t: d.minute, value: d.energy })))
   }
 
   return res.json(rows)
