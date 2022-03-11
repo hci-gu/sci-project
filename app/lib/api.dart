@@ -1,7 +1,10 @@
 import 'dart:convert';
+import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
 
-const String apiUrl = 'https://sci-api.appadem.in';
+const String apiUrl = 'https://api.sci.appadem.in';
+// const String apiUrl = 'http://localhost:4000';
 
 class User {
   final String id;
@@ -31,6 +34,18 @@ class HeartRate {
   }
 }
 
+class Energy {
+  final DateTime time;
+  final double value;
+
+  Energy(this.time, this.value);
+
+  factory Energy.fromJson(Map<String, dynamic> json) {
+    double value = json['value'] != null ? json['value'].toDouble() : 0.0;
+    return Energy(DateTime.parse(json['t']), value);
+  }
+}
+
 class Accel {
   final DateTime time;
   final double x;
@@ -46,6 +61,11 @@ class Accel {
 
 class Api {
   String _userId = '';
+  Dio dio = Dio(BaseOptions(
+    baseUrl: apiUrl,
+    connectTimeout: 5000,
+    receiveTimeout: 45000,
+  ));
 
   void clearUserId() {
     _userId = '';
@@ -67,8 +87,8 @@ class Api {
     return User.fromJson(json.decode(response.body));
   }
 
-  Future<List<HeartRate>> getData(DateTime from, DateTime to) async {
-    var type = 'hr';
+  Future<List<HeartRate>> getData(
+      DateTime from, DateTime to, String type) async {
     var query =
         'from=${from.toIso8601String()}&to=${to.toIso8601String()}&group=minute';
     var url = Uri.parse('$apiUrl/users/$_userId/data/$type?$query');
@@ -82,6 +102,19 @@ class Api {
     if (response.statusCode == 200) {
       List<dynamic> data = json.decode(response.body) as List<dynamic>;
       return data.map((json) => HeartRate.fromJson(json)).toList();
+    }
+    return [];
+  }
+
+  Future<List<Energy>> getEnergy(DateTime from, DateTime to) async {
+    var response = await dio.get('/users/$_userId/energy', queryParameters: {
+      'from': from.toIso8601String(),
+      'to': to.toIso8601String(),
+    });
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = response.data;
+      return data.map((json) => Energy.fromJson(json)).toList();
     }
     return [];
   }

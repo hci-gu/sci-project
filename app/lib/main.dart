@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:scimovement/models/activity.dart';
 import 'package:scimovement/models/auth.dart';
+import 'package:scimovement/models/energy.dart';
 import 'package:scimovement/screens/home.dart';
 import 'package:scimovement/screens/login.dart';
 import 'package:scimovement/theme/theme.dart';
@@ -20,6 +21,7 @@ class App extends StatelessWidget {
   App({Key? key, required this.auth}) : super(key: key);
 
   final ActivityModel activity = ActivityModel();
+  final EnergyModel energy = EnergyModel();
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +29,7 @@ class App extends StatelessWidget {
       providers: [
         ChangeNotifierProvider<AuthModel>.value(value: auth),
         ChangeNotifierProvider<ActivityModel>.value(value: activity),
+        ChangeNotifierProvider<EnergyModel>.value(value: energy),
       ],
       child: MaterialApp.router(
         title: 'SCI-Movement',
