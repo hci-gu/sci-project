@@ -5,7 +5,6 @@ const path = require('path')
 const counts = ({ type, minute, acc, f }) =>
   new Promise((resolve, reject) => {
     const tmpFile = `/tmp/accel_${type}_${minute}.json`
-    console.log('writeFile', tmpFile)
 
     fs.writeFileSync(tmpFile, JSON.stringify(acc))
     const process = spawn('python3', [
