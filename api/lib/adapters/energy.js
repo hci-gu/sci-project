@@ -30,13 +30,13 @@ const getEnergy = ({ accel, hr, weight, coeff = standardCoeff }) => {
   return Promise.all(
     Object.keys(minutes).map(async (minute) => {
       const accel = minutes[minute]
-      if (accel.length < 30) {
+      if (accel.length < 1600) {
         return {
           minute: new Date(minute).toISOString(),
           energy: null,
         }
       }
-      const [x, y, z] = await Promise.all([
+      const [xs, ys, zs] = await Promise.all([
         actilife.counts({
           type: 'x',
           minute,
@@ -56,18 +56,20 @@ const getEnergy = ({ accel, hr, weight, coeff = standardCoeff }) => {
           f: 30,
         }),
       ])
-      const a = x.map((d, i) => Math.sqrt(d * d + y[i] * y[i] + z[i] * y[i]))
+      const x = xs.reduce((a, b) => a + b)
+      const y = ys.reduce((a, b) => a + b)
+      const z = zs.reduce((a, b) => a + b)
+      const accVM = Math.sqrt(x * x + y * y + z * z)
 
       const hrs = hr.filter((d) => getMinute(d.t) === minute)
       const heartrate = hrs.reduce((acc, d) => acc + d.hr, 0) / hrs.length
-      const accTotal = a.reduce((a, b) => a + b)
 
       const energy =
         weight *
         (coeff.constant +
           coeff.hr * heartrate +
           coeff.weight * weight +
-          coeff.acc * accTotal)
+          coeff.acc * accVM)
 
       return {
         minute: new Date(minute).toISOString(),
