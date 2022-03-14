@@ -18,12 +18,25 @@ class AppTheme {
     primaryColor: colors.primary,
     primaryColorDark: colors.primaryDark,
     backgroundColor: colors.white,
+    fontFamily: 'Lato',
   );
 
   static TextStyle buttonTextStyle = TextStyle(
     color: colors.white,
     fontSize: 16,
     fontWeight: FontWeight.w600,
+  );
+  static TextStyle appBarTextStyle = TextStyle(
+    color: colors.white,
+    fontSize: 22,
+    fontWeight: FontWeight.w600,
+    letterSpacing: 1,
+  );
+  static TextStyle titleTextStyle = const TextStyle(
+    color: Colors.black87,
+    fontSize: 24,
+    fontWeight: FontWeight.w900,
+    letterSpacing: 0.5,
   );
 
   static EdgeInsetsGeometry screenPadding = EdgeInsets.symmetric(
