@@ -7,6 +7,9 @@ import 'package:scimovement/models/activity.dart';
 import 'package:scimovement/models/energy.dart';
 import 'dart:math';
 
+import 'package:scimovement/models/settings.dart';
+import 'package:scimovement/theme/theme.dart';
+
 class EnergyDisplay extends HookWidget {
   const EnergyDisplay({Key? key}) : super(key: key);
 
@@ -14,6 +17,7 @@ class EnergyDisplay extends HookWidget {
   Widget build(BuildContext context) {
     EnergyModel energyModel = Provider.of<EnergyModel>(context);
     ActivityModel activityModel = Provider.of<ActivityModel>(context);
+    SettingsModel settings = Provider.of<SettingsModel>(context);
 
     useEffect(() {
       energyModel.setFrom(activityModel.earliestDataDate!);
@@ -25,17 +29,31 @@ class EnergyDisplay extends HookWidget {
       children: [
         Text(
           'Energy',
-          style: Theme.of(context).textTheme.headline6,
+          style: AppTheme.titleTextStyle,
         ),
-        const SizedBox(height: 8),
-        Text(
-          '${energyModel.total.toStringAsFixed(1)} kcal',
-          style: const TextStyle(
-            fontSize: 24,
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              energyModel.total.toStringAsFixed(1),
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.only(left: 2, top: 6.0),
+              child: Text(
+                'kcal',
+                style: TextStyle(fontSize: 16),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 4),
-        if (energyModel.energy.isNotEmpty) _energyChart(energyModel.energy),
+        if (energyModel.energy.isNotEmpty)
+          _energyChart(energyModel.energy, settings),
         const SizedBox(height: 8),
         TextButton(
           style: ButtonStyle(
@@ -61,32 +79,40 @@ class EnergyDisplay extends HookWidget {
                   style: TextStyle(color: Colors.white),
                 ),
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-                'from: ${energyModel.from.toIso8601String().substring(11, 19)}'),
-            Text('to: ${energyModel.to.toIso8601String().substring(11, 19)}'),
-          ],
-        ),
+        EnergyChartSettings(),
+        // Row(
+        //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        //   children: [
+        //     Text(
+        //         'from: ${energyModel.from.toIso8601String().substring(11, 19)}'),
+        //     Text('to: ${energyModel.to.toIso8601String().substring(11, 19)}'),
+        //   ],
+        // ),
       ],
     );
   }
 
-  Widget _energyChart(List<Energy> energy) {
+  Widget _energyChart(List<Energy> energy, SettingsModel settings) {
     List<double> values = energy.map((e) => e.value).toList();
-    // accumulative values
-    List<double> accumulatedValues = values;
-    for (int i = 1; i < values.length; i++) {
-      accumulatedValues[i] = accumulatedValues[i - 1] + values[i];
+    List<double> displayValues = values;
+    if (settings.energyChartMode == EnergyChartMode.accumulative) {
+      for (int i = 1; i < values.length; i++) {
+        displayValues[i] = displayValues[i - 1] + values[i];
+      }
+    } else if (settings.energyChartMode == EnergyChartMode.fiveMin) {
+      // sum up every 5 minutes and display
+      displayValues = List<double>.filled(
+        values.length ~/ 5,
+        0,
+      );
     }
-    double maxValue = accumulatedValues.reduce(max);
+    double maxValue = displayValues.reduce(max);
 
     return AspectRatio(
       aspectRatio: 1.7,
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(12),
           color: const Color(0xff232d37),
           boxShadow: [
             BoxShadow(
@@ -97,7 +123,12 @@ class EnergyDisplay extends HookWidget {
           ],
         ),
         child: Padding(
-          padding: const EdgeInsets.all(12.0),
+          padding: const EdgeInsets.only(
+            left: 12,
+            right: 24,
+            top: 16,
+            bottom: 4,
+          ),
           child: LineChart(
             LineChartData(
               gridData: FlGridData(
@@ -142,24 +173,21 @@ class EnergyDisplay extends HookWidget {
                   getTextStyles: (context, value) => const TextStyle(
                     color: Color(0xff67727d),
                     fontWeight: FontWeight.bold,
-                    fontSize: 15,
+                    fontSize: 12,
                   ),
                 ),
               ),
-              minX: energy.first.time.millisecondsSinceEpoch.toDouble(),
-              maxX: energy.last.time.millisecondsSinceEpoch.toDouble(),
+              minX: settings.minTimeForChart(energy.first.time),
+              maxX: settings.maxTimeForChart(energy.last.time),
               minY: 0,
-              maxY: maxValue + maxValue * 0.2,
+              maxY: (maxValue + maxValue * 0.2).round().toDouble(),
               lineBarsData: [
                 LineChartBarData(
-                  // isCurved: true,
-                  // preventCurveOverShooting: true,
-                  // curveSmoothness: 2,
                   spots: energy
                       .map(
                         (e) => FlSpot(
                           e.time.millisecondsSinceEpoch.toDouble(),
-                          accumulatedValues[energy.indexOf(e)],
+                          displayValues[energy.indexOf(e)],
                         ),
                       )
                       .toList(),
@@ -173,6 +201,47 @@ class EnergyDisplay extends HookWidget {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class EnergyChartSettings extends StatelessWidget {
+  const EnergyChartSettings({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    SettingsModel settings = Provider.of<SettingsModel>(context);
+
+    final List<DropdownMenuItem<EnergyChartMode>> chartModeItems =
+        EnergyChartMode.values.map((EnergyChartMode mode) {
+      return DropdownMenuItem<EnergyChartMode>(
+        value: mode,
+        child: Text(
+          mode.name,
+          style: const TextStyle(
+            color: Colors.black,
+          ),
+        ),
+      );
+    }).toList();
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: DropdownButton(
+          isDense: true,
+          items: chartModeItems,
+          value: settings.energyChartMode,
+          dropdownColor: Colors.white,
+          style: const TextStyle(color: Colors.white),
+          iconEnabledColor: Colors.white,
+          onChanged: (EnergyChartMode? mode) {
+            if (mode != null) {
+              settings.setEnergyChartMode(mode);
+            }
+          },
         ),
       ),
     );

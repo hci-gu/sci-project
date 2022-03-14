@@ -33,7 +33,13 @@ class EnergyModel extends ChangeNotifier {
 
   Future getEnergy(DateTime from, DateTime to) async {
     _loading = true;
+    _energy = [];
     notifyListeners();
+
+    // start by fetching single minute just to make sure we dont ask the server to calculate whole day at once.
+    DateTime testTo = to.add(duration);
+    await Api().getEnergy(from, testTo);
+
     List<Energy> fetchedEnergy = await Api().getEnergy(from, to);
     _energy.addAll(fetchedEnergy);
     _loading = false;
