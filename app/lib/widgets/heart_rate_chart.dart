@@ -2,7 +2,9 @@ import 'dart:math';
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:scimovement/api.dart';
+import 'package:scimovement/models/settings.dart';
 
 class HeartRateChart extends StatelessWidget {
   final DateTime from;
@@ -18,13 +20,14 @@ class HeartRateChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SettingsModel settings = Provider.of<SettingsModel>(context);
     List<double> values = heartRates.map((HeartRate hr) => hr.value).toList();
 
     return AspectRatio(
       aspectRatio: 1.7,
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(12),
           color: const Color(0xff232d37),
           boxShadow: [
             BoxShadow(
@@ -35,14 +38,17 @@ class HeartRateChart extends StatelessWidget {
           ],
         ),
         child: Padding(
-          padding: const EdgeInsets.all(12.0),
+          padding: const EdgeInsets.only(
+            left: 12,
+            right: 24,
+            top: 16,
+            bottom: 4,
+          ),
           child: LineChart(
             LineChartData(
               gridData: FlGridData(
                 show: true,
                 drawVerticalLine: true,
-                // horizontalInterval: 1,
-                // verticalInterval: 1,
                 getDrawingHorizontalLine: (value) {
                   return FlLine(
                     color: const Color(0xff37434d),
@@ -80,14 +86,14 @@ class HeartRateChart extends StatelessWidget {
                   getTextStyles: (context, value) => const TextStyle(
                     color: Color(0xff67727d),
                     fontWeight: FontWeight.bold,
-                    fontSize: 15,
+                    fontSize: 12,
                   ),
                 ),
               ),
-              minX: heartRates.first.time.millisecondsSinceEpoch.toDouble(),
-              maxX: heartRates.last.time.millisecondsSinceEpoch.toDouble(),
+              minX: settings.minTimeForChart(heartRates.first.time),
+              maxX: settings.maxTimeForChart(heartRates.last.time),
               minY: values.reduce(min) - 10,
-              maxY: values.reduce(max) + 10,
+              maxY: (values.reduce(max) + 10).roundToDouble(),
               lineBarsData: [
                 LineChartBarData(
                   spots: heartRates
@@ -98,14 +104,12 @@ class HeartRateChart extends StatelessWidget {
                         ),
                       )
                       .toList(),
-                  // isCurved: true,
-                  // colors: gradientColors,
-                  barWidth: 2,
+                  barWidth: 1,
                   isStrokeCapRound: true,
                   dotData: FlDotData(
                     show: false,
                   ),
-                  belowBarData: BarAreaData(show: true),
+                  belowBarData: BarAreaData(show: false),
                 )
               ],
             ),
