@@ -56,7 +56,7 @@ const getEnergy = ({ accel, hr, weight, coeff = standardCoeff }) => {
           f: 30,
         }),
       ])
-      const a = x.map((d, i) => d + y[i] + z[i])
+      const a = x.map((d, i) => Math.sqrt(d * d + y[i] * y[i] + z[i] * y[i]))
 
       const hrs = hr.filter((d) => getMinute(d.t) === minute)
       const heartrate = hrs.reduce((acc, d) => acc + d.hr, 0) / hrs.length
