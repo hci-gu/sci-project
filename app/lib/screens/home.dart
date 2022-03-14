@@ -4,8 +4,51 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:provider/provider.dart';
 import 'package:scimovement/api.dart';
 import 'package:scimovement/models/activity.dart';
+import 'package:scimovement/models/settings.dart';
+import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/energy_display.dart';
 import 'package:scimovement/widgets/heart_rate_chart.dart';
+
+class ChartSettings extends StatelessWidget {
+  const ChartSettings({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    SettingsModel settings = Provider.of<SettingsModel>(context);
+
+    final List<DropdownMenuItem<ChartMode>> chartModeItems =
+        ChartMode.values.map((ChartMode mode) {
+      return DropdownMenuItem<ChartMode>(
+        value: mode,
+        child: Text(
+          mode.name,
+          style: const TextStyle(
+            color: Colors.white,
+          ),
+        ),
+      );
+    }).toList();
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: DropdownButton(
+          isDense: true,
+          items: chartModeItems,
+          value: settings.chartMode,
+          dropdownColor: Colors.blueGrey,
+          style: const TextStyle(color: Colors.white),
+          iconEnabledColor: Colors.white,
+          onChanged: (ChartMode? mode) {
+            if (mode != null) {
+              settings.setChartMode(mode);
+            }
+          },
+        ),
+      ),
+    );
+  }
+}
 
 class HomeScreen extends HookWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -20,16 +63,18 @@ class HomeScreen extends HookWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('SCI-Movement'),
+        title: Text(
+          'SCI Movement',
+          style: AppTheme.appBarTextStyle,
+        ),
+        actions: const [
+          ChartSettings(),
+        ],
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 32.0, horizontal: 16.0),
+        padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 16.0),
         child: ListView(
           children: [
-            Center(
-                child: Text('HeartRate',
-                    style: Theme.of(context).textTheme.headline6)),
-            const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -46,13 +91,15 @@ class HomeScreen extends HookWidget {
                 )
               ],
             ),
+            Center(child: Text('Heartrate', style: AppTheme.titleTextStyle)),
+            const SizedBox(height: 8),
             HeartRateChart(
               heartRates: activityModel.heartRates,
               from: activityModel.from,
               to: activityModel.to,
             ),
             const SizedBox(
-              height: 24,
+              height: 12,
             ),
             const EnergyDisplay(),
           ],

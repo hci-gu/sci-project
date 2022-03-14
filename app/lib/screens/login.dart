@@ -16,7 +16,10 @@ class LoginScreen extends HookWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blueGrey,
-        title: const Text('SCI Movement'),
+        title: Text(
+          'SCI Movement',
+          style: AppTheme.appBarTextStyle,
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 64.0, vertical: 24.0),

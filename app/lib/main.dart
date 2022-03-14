@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:scimovement/models/activity.dart';
 import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/models/energy.dart';
+import 'package:scimovement/models/settings.dart';
 import 'package:scimovement/screens/home.dart';
 import 'package:scimovement/screens/login.dart';
 import 'package:scimovement/theme/theme.dart';
@@ -22,6 +23,7 @@ class App extends StatelessWidget {
 
   final ActivityModel activity = ActivityModel();
   final EnergyModel energy = EnergyModel();
+  final SettingsModel settings = SettingsModel();
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +32,7 @@ class App extends StatelessWidget {
         ChangeNotifierProvider<AuthModel>.value(value: auth),
         ChangeNotifierProvider<ActivityModel>.value(value: activity),
         ChangeNotifierProvider<EnergyModel>.value(value: energy),
+        ChangeNotifierProvider<SettingsModel>.value(value: settings),
       ],
       child: MaterialApp.router(
         title: 'SCI-Movement',
