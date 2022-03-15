@@ -23,7 +23,6 @@ const checkAndSaveCounts = async (userId) => {
     now.getMinutes() - 1,
     59
   )
-  console.log(from, to)
 
   const accelCounts = await AccelCount.find({
     userId,
@@ -32,7 +31,6 @@ const checkAndSaveCounts = async (userId) => {
   })
 
   if (!!accelCounts.length) {
-    console.log('we have accel counts already')
     return
   }
 
@@ -42,13 +40,10 @@ const checkAndSaveCounts = async (userId) => {
   ])
 
   if (accel.length < 1800) {
-    console.log('not enough accel data yet', accel.length)
     return
   }
   const counts = await calculateCounts({ accel, hr })
-  console.log('got counts', counts.length)
   await AccelCount.save(counts, userId)
-  console.log('saved')
 }
 
 router.post('/', async (req, res) => {
