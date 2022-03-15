@@ -24,6 +24,8 @@ services:
       - postgres
     ports:
       - 3000:3000
+    links:
+      - python-api
     logging:
       driver: 'json-file'
       options:
@@ -33,9 +35,14 @@ services:
       NODE_ENV: 'production'
       DB_HOST: postgres
       DB_PORT: 5432
+      PYTHON_API: python-api
       DB_USERNAME: admin
       DB_PASSWORD: password
       DB: sci
+  python-api:
+    build: './api/python'
+    ports:
+      - 5555:80
   adminer:
     image: adminer
     restart: always

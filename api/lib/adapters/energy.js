@@ -1,82 +1,43 @@
-const actilife = require('../actilife')
-
 const standardCoeff = {
+  constant: -0.019288,
+  hr: 0.000281,
+  weight: 0.000044,
+  acc: 0.000002,
+}
+const oldStandardCoeff = {
   constant: -0.022223,
   hr: 0.000281,
   weight: 0.000081,
   acc: 0.000002,
 }
+const gymCoeff = {
+  constant: 0,
+  hr: 0,
+  weight: 0,
+  acc: 0,
+}
+const paraCoeffs = {
+  sciErgoCoeff: {
+    constant: 0.053278,
+    // constant value used for training session
+    watt: 0.000885,
+    hr: 0,
+    weight: -0.000365,
+    acc: 0,
+  },
+}
 
-const group = (data, f) => {
-  const groups = {}
-  data.forEach((d) => {
-    const key = f(d)
-    if (!groups[key]) groups[key] = []
-    groups[key].push(d)
+const getEnergy = ({ counts, weight, coeff = standardCoeff }) => {
+  return counts.map(({ a, hr, t }) => {
+    const energy =
+      weight *
+      (coeff.constant + coeff.hr * hr + coeff.weight * weight + coeff.acc * a)
+
+    return {
+      t,
+      energy,
+    }
   })
-  return groups
-}
-
-const getMinute = (ts) => {
-  const d = new Date(ts)
-  return `${d.getFullYear()}-${
-    d.getMonth() + 1
-  }-${d.getDate()} ${d.getHours()}:${d.getMinutes()}`
-}
-
-const getEnergy = ({ accel, hr, weight, coeff = standardCoeff }) => {
-  const minutes = group(accel, (d) => getMinute(d.t))
-
-  return Promise.all(
-    Object.keys(minutes).map(async (minute) => {
-      const accel = minutes[minute]
-      if (accel.length < 1600) {
-        return {
-          minute: new Date(minute).toISOString(),
-          energy: null,
-        }
-      }
-      const [xs, ys, zs] = await Promise.all([
-        actilife.counts({
-          type: 'x',
-          minute,
-          acc: accel.map((d) => d.x / 9.82),
-          f: 30,
-        }),
-        actilife.counts({
-          type: 'y',
-          minute,
-          acc: accel.map((d) => d.y / 9.82),
-          f: 30,
-        }),
-        actilife.counts({
-          type: 'z',
-          minute,
-          acc: accel.map((d) => d.z / 9.82),
-          f: 30,
-        }),
-      ])
-      const x = xs.reduce((a, b) => a + b)
-      const y = ys.reduce((a, b) => a + b)
-      const z = zs.reduce((a, b) => a + b)
-      const accVM = Math.sqrt(x * x + y * y + z * z)
-
-      const hrs = hr.filter((d) => getMinute(d.t) === minute)
-      const heartrate = hrs.reduce((acc, d) => acc + d.hr, 0) / hrs.length
-
-      const energy =
-        weight *
-        (coeff.constant +
-          coeff.hr * heartrate +
-          coeff.weight * weight +
-          coeff.acc * accVM)
-
-      return {
-        minute: new Date(minute).toISOString(),
-        energy,
-      }
-    })
-  )
 }
 
 module.exports = {
