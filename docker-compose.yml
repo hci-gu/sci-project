@@ -6,8 +6,8 @@ services:
       - 8888:8888
     environment:
       JUPYTER_ENABLE_LAB: 'yes'
-    volumes:
-      - ./jupyter/notebooks:/home/jovyan/work
+    # volumes:
+    #   - ./jupyter/notebooks:/home/jovyan/work
   # api:
   #   build: './api'
   #   depends_on:
@@ -21,6 +21,10 @@ services:
   #     DB_USERNAME: admin
   #     DB_PASSWORD: password
   #     DB: sci
+  python:
+    build: './api/python'
+    ports:
+      - 5555:80
   postgres:
     image: postgres:14.1
     hostname: postgres

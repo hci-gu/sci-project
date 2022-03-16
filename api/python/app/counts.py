@@ -94,18 +94,3 @@ def counts(data, filesf, B=B_coeff, A=A_coeff):
     fx8 = pptrunc(fx8up[::3], peakThreshold) #downsampling is replaced by slicing with step parameter
 
     return runsum(np.floor(trunc(np.abs(fx8), deadband)/adcResolution), integN, 0)
-
-import sys
-
-try:
-  filename = sys.argv[1]
-  freq = sys.argv[2]
-
-  f = open(sys.argv[1], 'r')
-  data = json.load(f)
-
-  cs = counts(data, int(freq))
-
-  print(json.dumps(cs.tolist()))
-except Exception as e:
-  print(e)

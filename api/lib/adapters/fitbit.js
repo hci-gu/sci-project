@@ -1,18 +1,18 @@
 const handleData = (batches) => {
   accelDataPoints = []
   hrDataPoints = []
-  batches.forEach(({ type, start, data, frequency }) => {
-    data.forEach((value, i) => {
+  batches.forEach(({ type, data }) => {
+    data.forEach((value) => {
       if (type === 'heartRate') {
         hrDataPoints.push({
-          t: start + (1000 / frequency) * i,
-          v: value,
+          t: value[0],
+          v: value[1],
         })
       }
       if (type === 'accel') {
         accelDataPoints.push({
-          t: start + (1000 / frequency) * i,
-          v: value,
+          t: value[0],
+          v: [value[1], value[2], value[3]],
         })
       }
     })
