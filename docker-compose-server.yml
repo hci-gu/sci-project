@@ -9,7 +9,6 @@ services:
       - 443:443
     links:
       - api
-      - jupyter
       - adminer
     volumes:
       - /data/caddy:/root/.caddy
@@ -24,6 +23,8 @@ services:
       - postgres
     ports:
       - 3000:3000
+    links:
+      - python-api
     logging:
       driver: 'json-file'
       options:
@@ -33,9 +34,12 @@ services:
       NODE_ENV: 'production'
       DB_HOST: postgres
       DB_PORT: 5432
+      PYTHON_API: http://python-api
       DB_USERNAME: admin
       DB_PASSWORD: password
       DB: sci
+  python-api:
+    build: './api/python'
   adminer:
     image: adminer
     restart: always
