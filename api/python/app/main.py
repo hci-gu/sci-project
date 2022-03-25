@@ -14,7 +14,7 @@ def hello():
 def calc_counts():
     content = request.get_json(silent=True)
 
-    cs = counts(content, 33)
+    cs = counts(content, 30)
     
     return jsonify(cs.tolist())
 

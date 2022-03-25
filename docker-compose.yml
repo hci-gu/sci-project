@@ -23,6 +23,9 @@ services:
   #     DB: sci
   python:
     build: './api/python'
+    environment:
+      PYTHONPATH: /app
+      UWSGI_MODULE: "main:app"
     ports:
       - 5555:80
   postgres:
