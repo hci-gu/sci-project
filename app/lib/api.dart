@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
 
-const String apiUrl = 'https://api.sci.appadem.in';
+const String apiUrl = 'https://sci-api.appadem.in';
 // const String apiUrl = 'http://localhost:4000';
 
 class User {
@@ -41,7 +41,7 @@ class Energy {
   Energy(this.time, this.value);
 
   factory Energy.fromJson(Map<String, dynamic> json) {
-    double value = json['value'] != null ? json['value'].toDouble() : 0.0;
+    double value = json['energy'] != null ? json['energy'].toDouble() : 0.0;
     return Energy(DateTime.parse(json['t']), value);
   }
 }

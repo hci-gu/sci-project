@@ -5,9 +5,11 @@ import 'package:provider/provider.dart';
 import 'package:scimovement/api.dart';
 import 'package:scimovement/models/activity.dart';
 import 'package:scimovement/models/settings.dart';
+import 'package:scimovement/screens/measure.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/energy_display.dart';
 import 'package:scimovement/widgets/heart_rate_chart.dart';
+import 'package:go_router/go_router.dart';
 
 class ChartSettings extends StatelessWidget {
   const ChartSettings({Key? key}) : super(key: key);
@@ -55,6 +57,8 @@ class HomeScreen extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    ValueNotifier<int> screen = useState(1);
+
     ActivityModel activityModel = Provider.of<ActivityModel>(context);
     useEffect(() {
       activityModel.getHeartRates();
@@ -71,39 +75,60 @@ class HomeScreen extends HookWidget {
           ChartSettings(),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 16.0),
-        child: ListView(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                IconButton(
-                  onPressed: () => activityModel.goBack(),
-                  icon: const Icon(Icons.arrow_back),
-                ),
-                Text(
-                  activityModel.from.toString().substring(0, 10),
-                ),
-                IconButton(
-                  onPressed: () => activityModel.goForward(),
-                  icon: const Icon(Icons.arrow_forward),
-                )
-              ],
-            ),
-            Center(child: Text('Heartrate', style: AppTheme.titleTextStyle)),
-            const SizedBox(height: 8),
-            HeartRateChart(
-              heartRates: activityModel.heartRates,
-              from: activityModel.from,
-              to: activityModel.to,
-            ),
-            const SizedBox(
-              height: 12,
-            ),
-            const EnergyDisplay(),
-          ],
-        ),
+      body: screen.value == 0 ? _body(activityModel) : const MeasureScreen(),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.access_alarm),
+            label: 'Measure',
+          ),
+        ],
+        currentIndex: screen.value,
+        selectedItemColor: Colors.blueGrey[800],
+        onTap: (index) {
+          screen.value = index;
+        },
+      ),
+    );
+  }
+
+  Widget _body(ActivityModel activityModel) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 16.0),
+      child: ListView(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                onPressed: () => activityModel.goBack(),
+                icon: const Icon(Icons.arrow_back),
+              ),
+              Text(
+                activityModel.from.toString().substring(0, 10),
+              ),
+              IconButton(
+                onPressed: () => activityModel.goForward(),
+                icon: const Icon(Icons.arrow_forward),
+              )
+            ],
+          ),
+          Center(child: Text('Heartrate', style: AppTheme.titleTextStyle)),
+          const SizedBox(height: 8),
+          HeartRateChart(
+            heartRates: activityModel.heartRates,
+            from: activityModel.from,
+            to: activityModel.to,
+          ),
+          const SizedBox(
+            height: 12,
+          ),
+          const EnergyDisplay(),
+        ],
       ),
     );
   }
