@@ -1,7 +1,6 @@
 const { DataTypes } = require('sequelize')
 
 let User
-
 module.exports = {
   init: (sequelize) => {
     sequelize.define(
@@ -14,6 +13,9 @@ module.exports = {
           primaryKey: true,
         },
         weight: DataTypes.FLOAT,
+        gender: DataTypes.ENUM('male', 'female', 'other'),
+        condition: DataTypes.ENUM('paraplegic', 'tetraplegic', 'none'),
+        injuryLevel: DataTypes.INTEGER,
         deviceId: DataTypes.STRING,
         createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
       },

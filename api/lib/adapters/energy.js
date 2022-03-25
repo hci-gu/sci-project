@@ -27,7 +27,13 @@ const paraCoeffs = {
   },
 }
 
-const getEnergy = ({ counts, weight, coeff = standardCoeff }) => {
+const getEnergy = ({
+  counts,
+  weight,
+  gender = 'female',
+  injuryLevel = 5,
+  coeff = standardCoeff,
+}) => {
   return counts.map(({ a, hr, t }) => {
     const energy =
       weight *
