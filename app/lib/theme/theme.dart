@@ -23,8 +23,8 @@ class AppTheme {
 
   static TextStyle buttonTextStyle = TextStyle(
     color: colors.white,
-    fontSize: 16,
-    fontWeight: FontWeight.w600,
+    fontSize: 14,
+    fontWeight: FontWeight.w500,
   );
   static TextStyle appBarTextStyle = TextStyle(
     color: colors.white,

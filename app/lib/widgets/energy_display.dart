@@ -55,30 +55,30 @@ class EnergyDisplay extends HookWidget {
         if (energyModel.energy.isNotEmpty)
           _energyChart(energyModel.energy, settings),
         const SizedBox(height: 8),
-        TextButton(
-          style: ButtonStyle(
-            minimumSize: MaterialStateProperty.all(const Size(100, 40)),
-            backgroundColor: MaterialStateProperty.all(Colors.blueGrey),
-          ),
-          onPressed: () {
-            if (!energyModel.loading) {
-              energyModel.calculateEnergy(activityModel.lastDataDate!);
-            }
-          },
-          child: energyModel.loading
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 2,
-                  ),
-                )
-              : const Text(
-                  'Calculate energy',
-                  style: TextStyle(color: Colors.white),
-                ),
-        ),
+        // TextButton(
+        //   style: ButtonStyle(
+        //     minimumSize: MaterialStateProperty.all(const Size(100, 40)),
+        //     backgroundColor: MaterialStateProperty.all(Colors.blueGrey),
+        //   ),
+        //   onPressed: () {
+        //     if (!energyModel.loading) {
+        //       energyModel.calculateEnergy(activityModel.lastDataDate!);
+        //     }
+        //   },
+        //   child: energyModel.loading
+        //       ? const SizedBox(
+        //           width: 20,
+        //           height: 20,
+        //           child: CircularProgressIndicator(
+        //             color: Colors.white,
+        //             strokeWidth: 2,
+        //           ),
+        //         )
+        //       : const Text(
+        //           'Calculate energy',
+        //           style: TextStyle(color: Colors.white),
+        //         ),
+        // ),
         EnergyChartSettings(),
         // Row(
         //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -155,7 +155,7 @@ class EnergyDisplay extends HookWidget {
                 topTitles: SideTitles(showTitles: false),
                 bottomTitles: SideTitles(
                   showTitles: true,
-                  interval: 60 * 1000 * 300,
+                  interval: 60 * 1000 * 200,
                   getTextStyles: (context, value) => const TextStyle(
                     color: Color(0xff68737d),
                     fontWeight: FontWeight.bold,
