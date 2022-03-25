@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: python-counts
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: python-counts
+  template:
+    metadata:
+      labels:
+        app: python-counts
+    spec:
+      nodeSelector:
+        type: worker
+      containers:
+        - name: python-counts
+          image: 'appademin/sci-python-counts'
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+              name: web
+              protocol: TCP
+          env:
+          - name: PYTHONPATH
+            value: /app
+          - name: UWSGI_MODULE
+            value: 'main:app'
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: python-counts-service
+spec:
+  selector:
+    app: python-counts
+  ports:
+    - protocol: TCP
+      port: 80

@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: adminer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: adminer
+  template:
+    metadata:
+      labels:
+        app: adminer
+    spec:
+      nodeSelector:
+        type: worker
+      containers:
+        - name: adminer
+          image: 'adminer:latest'
+          ports:
+            - containerPort: 8080
+              name: web
+              protocol: TCP
+          imagePullPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: adminer-service
+spec:
+  selector:
+    app: adminer
+  ports:
+    - protocol: TCP
+      port: 8080
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: sci-adminer-ingress
+spec:
+  routes:
+  - match: Host(`sci-db.appadem.in`) && PathPrefix(`/`)
+    kind: Rule
+    services:
+    - name: adminer-service
+      port: 8080
