@@ -1,4 +1,5 @@
 const energy = require('../lib/adapters/energy')
+const { calculateCounts } = require('../lib/adapters/counts')
 const accel = require('./data/accel.json')
 const hr = require('./data/hr.json')
 
@@ -8,8 +9,9 @@ beforeAll(() => {
 
 describe('getEnergy', () => {
   test('runs', async () => {
-    const result = await energy.getEnergy({ accel, hr, weight: 80 })
-    // console.log({ result })
+    const counts = await calculateCounts({ accel, hr })
+    const result = await energy.getEnergy({ counts, weight: 80 })
+
     expect(result).toHaveLength(15)
   })
 })

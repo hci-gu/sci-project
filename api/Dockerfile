@@ -1,8 +1,4 @@
-FROM nikolaik/python-nodejs:python3.8-nodejs17
-
-ADD ./requirements.txt /python/requirements.txt
-
-RUN pip3 install -r /python/requirements.txt
+FROM node:16.14
 
 COPY lib lib
 COPY package.json .

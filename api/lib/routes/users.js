@@ -51,6 +51,14 @@ router.post('/', async (req, res) => {
   res.send(result)
 })
 
+router.get('/register', async (req, res) => {
+  const { redirect_uri, state } = req.query
+
+  const user = await User.save(req.body)
+
+  res.redirect(`${redirect_uri}?state=${state}&userId=${user.id}`)
+})
+
 router.get('/:id', async (req, res) => {
   const { id } = req.params
 
@@ -62,6 +70,27 @@ router.get('/:id', async (req, res) => {
   return res.send(result)
 })
 
+router.patch('/:id', async (req, res) => {
+  const { id } = req.params
+  const { weight } = req.body
+
+  try {
+    const user = await User.get(id)
+
+    if (!user) {
+      return res.sendStatus(404)
+    }
+
+    user.weight = parseInt(weight)
+
+    await user.save()
+
+    return res.send(user)
+  } catch (e) {
+    return res.sendStatus(500)
+  }
+})
+
 router.post('/:id/data', async (req, res) => {
   const { id } = req.params
   const { hrDataPoints, accelDataPoints } = fitbit.handleData(req.body)
@@ -69,7 +98,7 @@ router.post('/:id/data', async (req, res) => {
   try {
     if (accelDataPoints.length) await Accel.save(accelDataPoints, id)
     if (hrDataPoints.length) await HeartRate.save(hrDataPoints, id)
-    checkAndSaveCounts(id)
+    await checkAndSaveCounts(id)
   } catch (e) {
     return res.sendStatus(400)
   }

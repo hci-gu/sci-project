@@ -51,12 +51,6 @@ describe('/users', () => {
       userId = response.body.id
     })
 
-    test('POST /users/:id/data', async () => {
-      const body = require('./data/fitbit.accel.json')
-
-      await supertest(app).post(`/users/${userId}/data`).send(body).expect(200)
-    })
-
     test('GET /users/:id/data/:type empty', async () => {
       const response = await supertest(app)
         .get(`/users/${userId}/data/accel`)
@@ -67,6 +61,12 @@ describe('/users', () => {
         .expect(200)
 
       expect(response.body.length).toBe(0)
+    })
+
+    test('POST /users/:id/data', async () => {
+      const body = require('./data/fitbit.accel.json')
+
+      await supertest(app).post(`/users/${userId}/data`).send(body).expect(200)
     })
 
     test('GET /users/:id/data/:type with data', async () => {
@@ -82,7 +82,7 @@ describe('/users', () => {
         })
         .expect(200)
 
-      expect(response.body.length).toBe(60)
+      expect(response.body.length).toBe(90)
     })
 
     // cant group in sqlite
@@ -104,7 +104,7 @@ describe('/users', () => {
     })
   })
 
-  describe('/GET /users/:id/enery', () => {
+  describe('/GET /users/:id/energy', () => {
     let userId
 
     beforeEach(async () => {
