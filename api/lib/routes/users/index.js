@@ -1,52 +1,13 @@
 const express = require('express')
-const { User, Accel, AccelCount, HeartRate } = require('../db/models')
+const { User, Accel, AccelCount, HeartRate } = require('../../db/models')
 const router = express.Router()
 
-const fitbit = require('../adapters/fitbit')
-const { getEnergy } = require('../adapters/energy')
-const { calculateCounts } = require('../adapters/counts')
+const fitbit = require('../../adapters/fitbit')
+const { getEnergy } = require('../../adapters/energy')
+const { checkAndSaveCounts } = require('./utils')
+const validation = require('./validation')
 
-const checkAndSaveCounts = async (userId) => {
-  const now = new Date()
-  const from = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate(),
-    now.getHours(),
-    now.getMinutes() - 1
-  )
-  const to = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate(),
-    now.getHours(),
-    now.getMinutes() - 1,
-    59
-  )
-
-  const accelCounts = await AccelCount.find({
-    userId,
-    from,
-    to,
-  })
-
-  if (!!accelCounts.length) {
-    return
-  }
-
-  const [accel, hr] = await Promise.all([
-    Accel.find({ userId, from, to }),
-    HeartRate.find({ userId, from, to }),
-  ])
-
-  if (accel.length < 1800) {
-    return
-  }
-  const counts = await calculateCounts({ accel, hr })
-  await AccelCount.save(counts, userId)
-}
-
-router.post('/', async (req, res) => {
+router.post('/', validation.userBody, async (req, res) => {
   const result = await User.save(req.body)
   res.send(result)
 })
@@ -70,14 +31,12 @@ router.get('/:id', async (req, res) => {
     }
     return res.send(result)
   } catch (e) {
-    console.log(e)
     return res.sendStatus(500)
   }
 })
 
-router.patch('/:id', async (req, res) => {
+router.patch('/:id', validation.userBody, async (req, res) => {
   const { id } = req.params
-  const { weight } = req.body
 
   try {
     const user = await User.get(id)
@@ -86,7 +45,9 @@ router.patch('/:id', async (req, res) => {
       return res.sendStatus(404)
     }
 
-    user.weight = parseInt(weight)
+    Object.keys(req.body).forEach((key) => {
+      user[key] = req.body[key]
+    })
 
     await user.save()
 
@@ -137,9 +98,7 @@ router.get('/:id/data/:type', async (req, res) => {
         unit: group,
       })
     }
-  } catch (e) {
-    console.log(e)
-  }
+  } catch (e) {}
 
   res.json(dataPoints)
 })
