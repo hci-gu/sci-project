@@ -62,12 +62,17 @@ router.get('/register', async (req, res) => {
 router.get('/:id', async (req, res) => {
   const { id } = req.params
 
-  const result = await User.get(id)
+  try {
+    const result = await User.get(id)
 
-  if (!result) {
-    return res.sendStatus(404)
+    if (!result) {
+      return res.sendStatus(404)
+    }
+    return res.send(result)
+  } catch (e) {
+    console.log(e)
+    return res.sendStatus(500)
   }
-  return res.send(result)
 })
 
 router.patch('/:id', async (req, res) => {
