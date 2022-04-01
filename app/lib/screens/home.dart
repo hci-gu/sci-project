@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:scimovement/api.dart';
 import 'package:scimovement/models/activity.dart';
 import 'package:scimovement/models/settings.dart';
+import 'package:scimovement/screens/energy_params.dart';
 import 'package:scimovement/screens/measure.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/energy_display.dart';
@@ -75,8 +76,9 @@ class HomeScreen extends HookWidget {
           ChartSettings(),
         ],
       ),
-      body: screen.value == 0 ? _body(activityModel) : const MeasureScreen(),
+      body: _page(screen.value, activityModel),
       bottomNavigationBar: BottomNavigationBar(
+        elevation: 12,
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
@@ -86,6 +88,10 @@ class HomeScreen extends HookWidget {
             icon: Icon(Icons.access_alarm),
             label: 'Measure',
           ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Settings',
+          ),
         ],
         currentIndex: screen.value,
         selectedItemColor: Colors.blueGrey[800],
@@ -94,6 +100,19 @@ class HomeScreen extends HookWidget {
         },
       ),
     );
+  }
+
+  _page(int index, ActivityModel model) {
+    switch (index) {
+      case 0:
+        return _body(model);
+      case 1:
+        return const MeasureScreen();
+      case 2:
+        return const EnergySettingsScreen();
+      default:
+        return _body;
+    }
   }
 
   Widget _body(ActivityModel activityModel) {

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
+import 'package:scimovement/models/energy.dart';
 
 const String apiUrl = 'https://sci-api.appadem.in';
 // const String apiUrl = 'http://localhost:4000';
@@ -106,10 +107,15 @@ class Api {
     return [];
   }
 
-  Future<List<Energy>> getEnergy(DateTime from, DateTime to) async {
+  Future<List<Energy>> getEnergy(
+    DateTime from,
+    DateTime to,
+    EnergyParams params,
+  ) async {
     var response = await dio.get('/users/$_userId/energy', queryParameters: {
-      'from': from.toIso8601String(),
-      'to': to.toIso8601String(),
+      'from': from.toUtc().toIso8601String(),
+      'to': to.toUtc().toIso8601String(),
+      ...params.toQueryParams(),
     });
 
     if (response.statusCode == 200) {
