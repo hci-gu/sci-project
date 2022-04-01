@@ -1,10 +1,9 @@
 const express = require('express')
-const { User, Accel, AccelCount, HeartRate } = require('../../db/models')
+const { User, Accel, HeartRate } = require('../../db/models')
 const router = express.Router()
 
 const fitbit = require('../../adapters/fitbit')
-const { getEnergy } = require('../../adapters/energy')
-const { checkAndSaveCounts } = require('./utils')
+const { checkAndSaveCounts, energyForPeriod } = require('./utils')
 const validation = require('./validation')
 
 router.post('/', validation.userBody, async (req, res) => {
@@ -109,18 +108,48 @@ router.get('/:id/energy', async (req, res) => {
   const {
     from = new Date().setDate(now.getDate() - 1),
     to = now,
-    mode,
+    activity,
+    watt,
   } = req.query
 
-  const user = await User.get(id)
-  const counts = await AccelCount.find({
-    userId: id,
-    from: new Date(from).toISOString(),
-    to: new Date(to).toISOString(),
+  const energy = await energyForPeriod({
+    id,
+    from,
+    to,
+    activity,
+    watt,
+    overwrite: req.query,
   })
-  const energy = await getEnergy({ counts, weight: user.weight })
 
   return res.json(energy)
+})
+
+router.get('/:id/energy/today', async (req, res) => {
+  const { id } = req.params
+  const { activity, watt } = req.query
+  const now = new Date()
+  const startOfDay = new Date(now.setHours(0, 0, 0, 0))
+  const endOfDay = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    23,
+    59,
+    59
+  )
+
+  const energy = await energyForPeriod({
+    id,
+    activity,
+    watt,
+    from: startOfDay,
+    to: endOfDay,
+  })
+
+  return res.json({
+    // total energy
+    energy: energy.reduce((acc, curr) => acc + curr.energy, 0),
+  })
 })
 
 module.exports = router

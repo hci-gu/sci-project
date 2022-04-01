@@ -1,43 +1,36 @@
-const standardCoeff = {
-  constant: -0.019288,
-  hr: 0.000281,
-  weight: 0.000044,
-  acc: 0.000002,
-}
-const oldStandardCoeff = {
-  constant: -0.022223,
-  hr: 0.000281,
-  weight: 0.000081,
-  acc: 0.000002,
-}
-const gymCoeff = {
-  constant: 0,
-  hr: 0,
-  weight: 0,
-  acc: 0,
-}
-const paraCoeffs = {
-  sciErgoCoeff: {
-    constant: 0.053278,
-    // constant value used for training session
-    watt: 0.000885,
-    hr: 0,
-    weight: -0.000365,
-    acc: 0,
-  },
+const getCoeff = require('./coeff')
+
+const valueForGender = (gender) => {
+  if (gender === 'male') return 2
+  if (gender === 'female') return 1
+  return 0
 }
 
 const getEnergy = ({
   counts,
   weight,
+  watt,
+  activity,
   gender = 'female',
   injuryLevel = 5,
-  coeff = standardCoeff,
+  condition = 'paraplegic',
 }) => {
+  const coeff = getCoeff({ condition, activity })
+
   return counts.map(({ a, hr, t }) => {
-    const energy =
-      weight *
-      (coeff.constant + coeff.hr * hr + coeff.weight * weight + coeff.acc * a)
+    const values = {
+      acc: a,
+      hr,
+      weight,
+      gender: valueForGender(gender),
+      watt,
+      injuryLevel,
+    }
+    let energyPerKg = coeff.constant
+    Object.keys(coeff.values).forEach((key) => {
+      energyPerKg += coeff.values[key] * values[key]
+    })
+    const energy = weight * energyPerKg
 
     return {
       t,

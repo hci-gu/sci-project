@@ -8,9 +8,11 @@ import 'package:scimovement/models/settings.dart';
 import 'package:scimovement/screens/home.dart';
 import 'package:scimovement/screens/login.dart';
 import 'package:scimovement/theme/theme.dart';
+import 'package:timezone/data/latest.dart' as tz;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  tz.initializeTimeZones();
   final auth = AuthModel();
   await auth.init();
   runApp(App(auth: auth));
