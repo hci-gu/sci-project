@@ -16,33 +16,33 @@ describe('activityForPeriod', () => {
     models.AccelCount.find = jest.fn()
     models.AccelCount.find.mockResolvedValue([
       {
-        t: '2022-01-01T00:00:00',
+        t: '2022-01-01T00:00:00Z',
         a: 0,
         hr: 60,
       },
       {
-        t: '2022-01-01T00:01:00',
+        t: '2022-01-01T00:01:00Z',
         a: 5000,
         hr: 60,
       },
       {
-        t: '2022-01-01T00:02:00',
+        t: '2022-01-01T00:02:00Z',
         a: 0,
         hr: 60,
       },
       {
-        t: '2022-01-01T00:03:00',
+        t: '2022-01-01T00:03:00Z',
         a: 0,
         hr: 60,
       },
       {
-        t: '2022-01-01T00:04:00',
+        t: '2022-01-01T00:04:00Z',
         a: 0,
         hr: 60,
       },
     ])
 
-    const result = await utils.activityForPeriod({ id: -1, from: '2022-01-01', to: '2022-01-02' })
+    const result = await utils.activityForPeriod({ id: -1, from: '2022-01-01T00:00:00Z', to: '2022-01-01T00:04:00Z' })
     expect(result.minutesInactive).toBe(3)
     expect(result.averageInactiveDuration).toBe(2)
   })
