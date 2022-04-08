@@ -42,7 +42,11 @@ describe('activityForPeriod', () => {
       },
     ])
 
-    const result = await utils.activityForPeriod({ id: -1, from: '2022-01-01T00:00:00Z', to: '2022-01-01T00:04:00Z' })
+    const result = await utils.activityForPeriod({
+      id: -1,
+      from: '2022-01-01T00:00:00Z',
+      to: '2022-01-01T00:04:00Z',
+    })
     expect(result.minutesInactive).toBe(3)
     expect(result.averageInactiveDuration).toBe(2)
   })

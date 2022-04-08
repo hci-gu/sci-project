@@ -159,10 +159,7 @@ router.get('/:id/energy/today', async (req, res) => {
 router.get('/:id/activity', async (req, res) => {
   const { id } = req.params
   const now = new Date()
-  const {
-    from = new Date().setDate(now.getDate() - 1),
-    to = now,
-  } = req.query
+  const { from = new Date().setDate(now.getDate() - 1), to = now } = req.query
 
   const activity = await activityForPeriod({
     id,
