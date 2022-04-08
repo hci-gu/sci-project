@@ -57,7 +57,6 @@ const energyForPeriod = async ({ from, to, id, activity, watt, overwrite }) => {
 }
 
 const activityForPeriod = async ({ from, to, id }) => {
-  const user = await User.get(id)
   const counts = await AccelCount.find({
     userId: id,
     from: new Date(from).toISOString(),
@@ -65,19 +64,36 @@ const activityForPeriod = async ({ from, to, id }) => {
   })
 
   // minutes inactive
-  const firstActiveIndexReversed = counts.reverse().findIndex(({ a }) => a > INACTIVE_THRESHOLD)
-  const minutesInactive = moment(to).diff(firstActiveIndexReversed >= 0 ? counts[firstActiveIndexReversed].t : from, 'minutes')
+  const firstActiveIndexReversed = counts
+    .reverse()
+    .findIndex(({ a }) => a > INACTIVE_THRESHOLD)
+  const minutesInactive = moment(to).diff(
+    firstActiveIndexReversed >= 0 ? counts[firstActiveIndexReversed].t : from,
+    'minutes'
+  )
 
   // average inactive duration
-  const inactiveIntervals = counts.reduce((intervals, count) => {
-    if (count.a < INACTIVE_THRESHOLD) {
-      intervals[intervals.length - 1].push(count)
-    } else if (intervals[intervals.length - 1].length >= 0) {
-      intervals.push([])
-    }
-    return intervals
-  }, [[]]).filter(x => x.length > 0)
-  const averageInactiveDuration = inactiveIntervals.reduce((sum, interval) => sum + moment(interval[0].t).diff(interval[interval.length - 1].t, 'minutes') + 1, 0) / (inactiveIntervals.length || 1)
+  const inactiveIntervals = counts
+    .reduce(
+      (intervals, count) => {
+        if (count.a < INACTIVE_THRESHOLD) {
+          intervals[intervals.length - 1].push(count)
+        } else if (intervals[intervals.length - 1].length >= 0) {
+          intervals.push([])
+        }
+        return intervals
+      },
+      [[]]
+    )
+    .filter((x) => x.length > 0)
+  const averageInactiveDuration =
+    inactiveIntervals.reduce(
+      (sum, interval) =>
+        sum +
+        moment(interval[0].t).diff(interval[interval.length - 1].t, 'minutes') +
+        1,
+      0
+    ) / (inactiveIntervals.length || 1)
 
   return {
     minutesInactive,
