@@ -25,7 +25,7 @@ class ActivityModel extends ChangeNotifier {
       _heartRates.isEmpty ? null : _heartRates.last.time;
 
   Future getHeartRates() async {
-    _heartRates = await Api().getData(from, to, 'hr');
+    _heartRates = await Api().getHeartRate(from, to);
     notifyListeners();
   }
 

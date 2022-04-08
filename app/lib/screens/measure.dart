@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:scimovement/models/energy.dart';
 import 'package:scimovement/theme/theme.dart';
+import 'package:scimovement/widgets/accel_display.dart';
 import 'package:scimovement/widgets/energy_display.dart';
 import 'package:scimovement/screens/energy_params.dart';
 
@@ -29,7 +30,7 @@ class MeasureScreen extends HookWidget {
         energyModel.setFrom(DateTime.now());
         energyModel.setTo(DateTime.now());
         energyModel.getEnergy();
-        timer = Timer.periodic(const Duration(seconds: 10), (timer) {
+        timer = Timer.periodic(const Duration(seconds: 5), (timer) {
           energyModel.setTo(DateTime.now());
           energyModel.getEnergy();
         });
@@ -42,13 +43,15 @@ class MeasureScreen extends HookWidget {
       child: ListView(
         shrinkWrap: true,
         children: [
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
           const EnergyDisplay(),
-          const SizedBox(height: 24),
+          AccelDisplay(showEmpty: measuring.value),
+          Text('Select period', style: AppTheme.titleTextStyle),
+          const SizedBox(height: 16),
           _fromTo(context, energyModel),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
           const Center(child: Text('- Or -')),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
           _startStop(context, measuring)
         ],
       ),
@@ -63,7 +66,7 @@ class MeasureScreen extends HookWidget {
       },
       icon: const Icon(Icons.timer, color: Colors.white),
       label: Text(
-        measuring.value ? 'Stop' : 'Start from now',
+        measuring.value ? 'Stop' : 'Start timer',
         style: AppTheme.buttonTextStyle,
       ),
     );
@@ -71,43 +74,48 @@ class MeasureScreen extends HookWidget {
 
   Widget _fromTo(BuildContext context, EnergyModel energyModel) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        TextButton.icon(
-          style: AppTheme.buttonStyle,
-          onPressed: () async {
-            TimeOfDay? time = await _selectTime(
-              context,
-              TimeOfDay.fromDateTime(energyModel.from),
-            );
-            if (time != null) {
+        Column(
+          children: [
+            const Text('From'),
+            const SizedBox(height: 4),
+            _clockButton(context, energyModel.from, (TimeOfDay time) {
               energyModel.setTimeOfDay('from', time);
-            }
-          },
-          icon: const Icon(Icons.timer, color: Colors.white),
-          label: Text(
-            'From ${DateFormat.Hm().format(energyModel.from)}',
-            style: AppTheme.buttonTextStyle,
-          ),
+            }),
+          ],
         ),
-        TextButton.icon(
-          style: AppTheme.buttonStyle,
-          onPressed: () async {
-            TimeOfDay? time = await _selectTime(
-              context,
-              TimeOfDay.fromDateTime(energyModel.to),
-            );
-            if (time != null) {
+        const SizedBox(width: 16),
+        Column(
+          children: [
+            const Text('To'),
+            const SizedBox(height: 4),
+            _clockButton(context, energyModel.to, (TimeOfDay time) {
               energyModel.setTimeOfDay('to', time);
-            }
-          },
-          icon: const Icon(Icons.timer, color: Colors.white),
-          label: Text(
-            'To ${DateFormat.Hm().format(energyModel.to)}',
-            style: AppTheme.buttonTextStyle,
-          ),
+            })
+          ],
         ),
       ],
+    );
+  }
+
+  Widget _clockButton(BuildContext context, DateTime date, Function onPressed) {
+    return TextButton.icon(
+      style: AppTheme.buttonStyle,
+      onPressed: () async {
+        TimeOfDay? time = await _selectTime(
+          context,
+          TimeOfDay.fromDateTime(date),
+        );
+        if (time != null) {
+          onPressed(time);
+        }
+      },
+      icon: const Icon(Icons.timer, color: Colors.white),
+      label: Text(
+        DateFormat.Hm().format(date),
+        style: AppTheme.buttonTextStyle,
+      ),
     );
   }
 

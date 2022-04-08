@@ -91,12 +91,6 @@ class EnergyDisplay extends HookWidget {
       for (int i = 1; i < values.length; i++) {
         displayValues[i] = displayValues[i - 1] + values[i];
       }
-    } else if (settings.energyChartMode == EnergyChartMode.fiveMin) {
-      // sum up every 5 minutes and display
-      displayValues = List<double>.filled(
-        values.length ~/ 5,
-        0,
-      );
     }
     double maxValue = displayValues.reduce(max);
 

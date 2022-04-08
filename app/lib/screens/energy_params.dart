@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:provider/provider.dart';
@@ -33,9 +35,14 @@ class EnergySettingsScreen extends HookWidget {
               ),
             ),
             const SizedBox(height: 16),
+            _activity(energyModel),
+            const SizedBox(height: 8),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [_activity(energyModel), _gender(energyModel)],
+              children: [
+                _condition(energyModel),
+                const SizedBox(width: 24),
+                _gender(energyModel),
+              ],
             ),
             const SizedBox(height: 16),
             TextField(
@@ -97,6 +104,27 @@ class EnergySettingsScreen extends HookWidget {
           },
           items: Activity.values.map((Activity value) {
             return DropdownMenuItem<Activity>(
+              value: value,
+              child: Text(value.name),
+            );
+          }).toList(),
+        )
+      ],
+    );
+  }
+
+  _condition(EnergyModel energyModel) {
+    return Row(
+      children: [
+        const Text('Condition'),
+        const SizedBox(width: 16),
+        DropdownButton<Condition>(
+          value: energyModel.params.condition,
+          onChanged: (Condition? newValue) {
+            energyModel.updateParams('condition', newValue);
+          },
+          items: Condition.values.map((Condition value) {
+            return DropdownMenuItem<Condition>(
               value: value,
               child: Text(value.name),
             );
