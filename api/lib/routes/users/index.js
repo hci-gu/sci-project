@@ -3,7 +3,11 @@ const { User, Accel, HeartRate } = require('../../db/models')
 const router = express.Router()
 
 const fitbit = require('../../adapters/fitbit')
-const { checkAndSaveCounts, energyForPeriod } = require('./utils')
+const {
+  checkAndSaveCounts,
+  energyForPeriod,
+  activityForPeriod,
+} = require('./utils')
 const validation = require('./validation')
 
 router.post('/', validation.userBody, async (req, res) => {
@@ -150,6 +154,20 @@ router.get('/:id/energy/today', async (req, res) => {
     // total energy
     energy: energy.reduce((acc, curr) => acc + curr.energy, 0),
   })
+})
+
+router.get('/:id/activity', async (req, res) => {
+  const { id } = req.params
+  const now = new Date()
+  const { from = new Date().setDate(now.getDate() - 1), to = now } = req.query
+
+  const activity = await activityForPeriod({
+    id,
+    from,
+    to,
+  })
+
+  return res.json(activity)
 })
 
 module.exports = router

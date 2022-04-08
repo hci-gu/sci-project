@@ -1,7 +1,10 @@
+const moment = require('moment')
 const { User, Accel, AccelCount, HeartRate } = require('../../db/models')
 
 const { getEnergy } = require('../../adapters/energy')
 const { calculateCounts } = require('../../adapters/counts')
+
+const INACTIVE_THRESHOLD = 3000
 
 const checkAndSaveCounts = async (userId) => {
   const now = new Date()
@@ -53,7 +56,53 @@ const energyForPeriod = async ({ from, to, id, activity, watt, overwrite }) => {
   return getEnergy({ counts, ...user.dataValues, ...overwrite, activity, watt })
 }
 
+const activityForPeriod = async ({ from, to, id }) => {
+  const counts = await AccelCount.find({
+    userId: id,
+    from: new Date(from).toISOString(),
+    to: new Date(to).toISOString(),
+  })
+
+  // minutes inactive
+  const firstActiveIndexReversed = counts
+    .reverse()
+    .findIndex(({ a }) => a > INACTIVE_THRESHOLD)
+  const minutesInactive = moment(to).diff(
+    firstActiveIndexReversed >= 0 ? counts[firstActiveIndexReversed].t : from,
+    'minutes'
+  )
+
+  // average inactive duration
+  const inactiveIntervals = counts
+    .reduce(
+      (intervals, count) => {
+        if (count.a < INACTIVE_THRESHOLD) {
+          intervals[intervals.length - 1].push(count)
+        } else if (intervals[intervals.length - 1].length >= 0) {
+          intervals.push([])
+        }
+        return intervals
+      },
+      [[]]
+    )
+    .filter((x) => x.length > 0)
+  const averageInactiveDuration =
+    inactiveIntervals.reduce(
+      (sum, interval) =>
+        sum +
+        moment(interval[0].t).diff(interval[interval.length - 1].t, 'minutes') +
+        1,
+      0
+    ) / (inactiveIntervals.length || 1)
+
+  return {
+    minutesInactive,
+    averageInactiveDuration,
+  }
+}
+
 module.exports = {
   checkAndSaveCounts,
   energyForPeriod,
+  activityForPeriod,
 }
