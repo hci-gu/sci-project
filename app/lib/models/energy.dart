@@ -22,7 +22,7 @@ class EnergyParams {
 
   EnergyParams({
     this.activity = Activity.none,
-    this.condition = Condition.tetraplegic,
+    this.condition = Condition.paraplegic,
     this.gender = Gender.female,
     this.weight = 60,
     this.watt = 10,
@@ -55,10 +55,11 @@ class EnergyParams {
 class EnergyModel extends ChangeNotifier {
   List<Energy> _energy = [];
   List<Energy> get energy => _energy;
+  List<Accel> _accel = [];
+  List<Accel> get accel => _accel;
   final duration = const Duration(minutes: 1);
 
-  EnergyParams _params = EnergyParams();
-
+  final EnergyParams _params = EnergyParams();
   DateTime _from = DateTime.now();
   DateTime _to = DateTime.now();
 
@@ -84,6 +85,9 @@ class EnergyModel extends ChangeNotifier {
     notifyListeners();
 
     _energy = await Api().getEnergy(_from, _to, _params);
+    if (_to.difference(_from).inMinutes < 5) {
+      _accel = await Api().getAccel(_from, _to);
+    }
     _loading = false;
 
     notifyListeners();
@@ -127,6 +131,9 @@ class EnergyModel extends ChangeNotifier {
         break;
       case 'gender':
         _params.gender = value;
+        break;
+      case 'condition':
+        _params.condition = value;
         break;
       case 'watt':
         _params.watt = value;

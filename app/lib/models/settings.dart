@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 enum ChartMode { fullDay, fit }
-enum EnergyChartMode { minute, accumulative, fiveMin }
+enum EnergyChartMode { minute, accumulative }
 
 class SettingsModel extends ChangeNotifier {
   ChartMode _chartMode = ChartMode.fit;

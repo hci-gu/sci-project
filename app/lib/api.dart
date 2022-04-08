@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
 import 'package:scimovement/models/energy.dart';
@@ -52,11 +53,16 @@ class Accel {
   final double x;
   final double y;
   final double z;
+  final double a;
 
-  Accel(this.time, this.x, this.y, this.z);
+  Accel(this.time, this.x, this.y, this.z, this.a);
 
   factory Accel.fromJson(Map<String, dynamic> json) {
-    return Accel(DateTime.parse(json['t']), json['x'], json['y'], json['z']);
+    // calculate a from x, y, z
+    double a = sqrt(pow(json['x'].toDouble(), 2) +
+        pow(json['y'].toDouble(), 2) +
+        pow(json['z'].toDouble(), 2));
+    return Accel(DateTime.parse(json['t']), json['x'], json['y'], json['z'], a);
   }
 }
 
@@ -88,21 +94,31 @@ class Api {
     return User.fromJson(json.decode(response.body));
   }
 
-  Future<List<HeartRate>> getData(
-      DateTime from, DateTime to, String type) async {
-    var query =
-        'from=${from.toIso8601String()}&to=${to.toIso8601String()}&group=minute';
-    var url = Uri.parse('$apiUrl/users/$_userId/data/$type?$query');
-    var response = await http.get(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    );
+  Future<List<HeartRate>> getHeartRate(DateTime from, DateTime to) async {
+    var response = await dio.get('/users/$_userId/data/hr', queryParameters: {
+      'from': from.toUtc().toIso8601String(),
+      'to': to.toUtc().toIso8601String(),
+      'group': 'minute',
+    });
 
     if (response.statusCode == 200) {
-      List<dynamic> data = json.decode(response.body) as List<dynamic>;
+      List<dynamic> data = response.data;
       return data.map((json) => HeartRate.fromJson(json)).toList();
+    }
+    return [];
+  }
+
+  Future<List<Accel>> getAccel(DateTime from, DateTime to) async {
+    var response =
+        await dio.get('/users/$_userId/data/accel', queryParameters: {
+      'from': from.toUtc().toIso8601String(),
+      'to': to.toUtc().toIso8601String(),
+      'group': 'second',
+    });
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = response.data;
+      return data.map((json) => Accel.fromJson(json)).toList();
     }
     return [];
   }
