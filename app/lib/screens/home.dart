@@ -4,6 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:provider/provider.dart';
 import 'package:scimovement/api.dart';
 import 'package:scimovement/models/activity.dart';
+import 'package:scimovement/models/energy.dart';
 import 'package:scimovement/models/settings.dart';
 import 'package:scimovement/screens/energy_params.dart';
 import 'package:scimovement/screens/measure.dart';
@@ -53,18 +54,12 @@ class ChartSettings extends StatelessWidget {
   }
 }
 
-class HomeScreen extends HookWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+class MainScreen extends HookWidget {
+  const MainScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     ValueNotifier<int> screen = useState(1);
-
-    ActivityModel activityModel = Provider.of<ActivityModel>(context);
-    useEffect(() {
-      activityModel.getHeartRates();
-      return () => {};
-    }, []);
 
     return Scaffold(
       appBar: AppBar(
@@ -76,7 +71,7 @@ class HomeScreen extends HookWidget {
           ChartSettings(),
         ],
       ),
-      body: _page(screen.value, activityModel),
+      body: _page(screen.value),
       bottomNavigationBar: BottomNavigationBar(
         elevation: 12,
         items: const <BottomNavigationBarItem>[
@@ -102,20 +97,40 @@ class HomeScreen extends HookWidget {
     );
   }
 
-  _page(int index, ActivityModel model) {
+  _page(int index) {
     switch (index) {
       case 0:
-        return _body(model);
+        return const HomeScreen();
       case 1:
         return const MeasureScreen();
       case 2:
         return const EnergySettingsScreen();
       default:
-        return _body;
+        return const HomeScreen();
     }
   }
+}
 
-  Widget _body(ActivityModel activityModel) {
+class HomeScreen extends HookWidget {
+  const HomeScreen({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    ActivityModel activityModel = Provider.of<ActivityModel>(context);
+    EnergyModel energyModel = Provider.of<EnergyModel>(context);
+
+    useEffect(() {
+      activityModel.getHeartRates();
+      return () => {};
+    }, []);
+
+    useEffect(() {
+      energyModel.setFrom(activityModel.from);
+      energyModel.setTo(activityModel.to);
+      energyModel.getEnergy();
+      return () => {};
+    }, [activityModel.from, activityModel.to]);
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 16.0),
       child: ListView(

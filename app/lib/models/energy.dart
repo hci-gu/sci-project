@@ -105,13 +105,11 @@ class EnergyModel extends ChangeNotifier {
   }
 
   setTimeOfDay(String key, TimeOfDay time) async {
-    DateTime now = DateTime.now();
-    DateTime date =
-        DateTime(now.year, now.month, now.day, time.hour, time.minute, 0);
     if (key == 'from') {
-      _from = date;
+      _from =
+          DateTime(from.year, from.month, from.day, time.hour, time.minute, 0);
     } else {
-      _to = date;
+      _to = DateTime(to.year, to.month, to.day, time.hour, time.minute, 0);
     }
     notifyListeners();
 

@@ -8,6 +8,7 @@ import 'dart:math';
 
 import 'package:scimovement/models/settings.dart';
 import 'package:scimovement/theme/theme.dart';
+import 'package:scimovement/widgets/chart_wrapper.dart';
 
 class EnergyDisplay extends HookWidget {
   const EnergyDisplay({Key? key}) : super(key: key);
@@ -44,10 +45,10 @@ class EnergyDisplay extends HookWidget {
           ],
         ),
         const SizedBox(height: 4),
-        _wrapper(
-          energyModel.energy.isEmpty
-              ? const Center(child: CircularProgressIndicator())
-              : _energyChart(energyModel.energy, settings),
+        ChartWrapper(
+          child: _energyChart(energyModel.energy, settings),
+          loading: energyModel.loading,
+          isEmpty: energyModel.energy.isEmpty,
         ),
         const SizedBox(height: 8),
         const EnergyChartSettings(),
@@ -55,36 +56,9 @@ class EnergyDisplay extends HookWidget {
     );
   }
 
-  Widget _wrapper(Widget child) {
-    return AspectRatio(
-      aspectRatio: 1.7,
-      child: Container(
-        height: 300,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          color: const Color(0xff232d37),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              offset: const Offset(0, 4),
-              blurRadius: 30,
-            ),
-          ],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.only(
-            left: 12,
-            right: 24,
-            top: 16,
-            bottom: 4,
-          ),
-          child: child,
-        ),
-      ),
-    );
-  }
-
   Widget _energyChart(List<Energy> energy, SettingsModel settings) {
+    if (energy.isEmpty) return Container();
+
     List<double> values = energy.map((e) => e.value).toList();
     List<double> displayValues = values;
     if (settings.energyChartMode == EnergyChartMode.accumulative) {
@@ -92,7 +66,7 @@ class EnergyDisplay extends HookWidget {
         displayValues[i] = displayValues[i - 1] + values[i];
       }
     }
-    double maxValue = displayValues.reduce(max);
+    double maxValue = displayValues.isNotEmpty ? displayValues.reduce(max) : 0;
 
     return LineChart(
       LineChartData(
