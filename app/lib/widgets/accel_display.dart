@@ -6,6 +6,8 @@ import 'package:scimovement/api.dart';
 import 'package:scimovement/models/energy.dart';
 import 'dart:math';
 
+import 'package:scimovement/widgets/chart_wrapper.dart';
+
 class AccelDisplay extends HookWidget {
   final bool showEmpty;
 
@@ -15,45 +17,20 @@ class AccelDisplay extends HookWidget {
   Widget build(BuildContext context) {
     EnergyModel energyModel = Provider.of<EnergyModel>(context);
 
-    if (energyModel.accel.isEmpty) {
-      if (showEmpty) {
-        return _wrapper(const Center(child: CircularProgressIndicator()));
-      }
+    if (energyModel.accel.isEmpty && !showEmpty) {
       return Container();
     }
 
-    return _wrapper(_chart(energyModel.accel));
-  }
-
-  Widget _wrapper(Widget child) {
-    return AspectRatio(
+    return ChartWrapper(
+      child: _chart(energyModel.accel),
+      loading: energyModel.loading,
+      isEmpty: energyModel.accel.isEmpty,
       aspectRatio: 4,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(6),
-          color: const Color(0xff232d37),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              offset: const Offset(0, 4),
-              blurRadius: 30,
-            ),
-          ],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.only(
-            left: 4,
-            right: 4,
-            top: 4,
-            bottom: 4,
-          ),
-          child: child,
-        ),
-      ),
     );
   }
 
   Widget _chart(List<Accel> accel) {
+    if (accel.isEmpty) return Container();
     List<double> values = accel.map((e) => e.a).toList();
     List<double> displayValues = values;
     double maxValue = displayValues.reduce(max);

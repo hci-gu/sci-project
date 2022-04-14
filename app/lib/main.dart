@@ -52,7 +52,7 @@ class App extends StatelessWidget {
       GoRoute(
         name: 'home',
         path: '/',
-        builder: (_, __) => const HomeScreen(),
+        builder: (_, __) => const MainScreen(),
       ),
       GoRoute(
         name: 'login',

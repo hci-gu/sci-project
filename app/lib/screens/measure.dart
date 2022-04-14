@@ -20,17 +20,12 @@ class MeasureScreen extends HookWidget {
     EnergyModel energyModel = Provider.of<EnergyModel>(context);
 
     useEffect(() {
-      energyModel.getEnergy();
-      return () => {};
-    }, []);
-
-    useEffect(() {
       Timer timer = Timer.periodic(const Duration(minutes: 1), (timer) {});
       if (measuring.value) {
         energyModel.setFrom(DateTime.now());
         energyModel.setTo(DateTime.now());
         energyModel.getEnergy();
-        timer = Timer.periodic(const Duration(seconds: 5), (timer) {
+        timer = Timer.periodic(const Duration(seconds: 15), (timer) {
           energyModel.setTo(DateTime.now());
           energyModel.getEnergy();
         });
