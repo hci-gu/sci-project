@@ -1,5 +1,8 @@
 const express = require('express')
 const { User, Accel, HeartRate } = require('../../db/models')
+const Joi = require('joi')
+const validator = require('express-joi-validation').createValidator({})
+
 const router = express.Router()
 
 const fitbit = require('../../adapters/fitbit')
@@ -7,6 +10,7 @@ const {
   checkAndSaveCounts,
   energyForPeriod,
   activityForPeriod,
+  promiseSeries,
 } = require('./utils')
 const validation = require('./validation')
 
@@ -69,6 +73,7 @@ router.post('/:id/data', async (req, res) => {
     if (hrDataPoints.length) await HeartRate.save(hrDataPoints, id)
     await checkAndSaveCounts(id)
   } catch (e) {
+    console.log('POST /users/:id/data', e)
     return res.sendStatus(400)
   }
 
@@ -101,12 +106,24 @@ router.get('/:id/data/:type', async (req, res) => {
         unit: group,
       })
     }
-  } catch (e) {}
+  } catch (e) {
+    return res.sendStatus(500)
+  }
 
   res.json(dataPoints)
 })
 
-router.get('/:id/energy', async (req, res) => {
+const querySchema = Joi.object({
+  from: Joi.string(),
+  to: Joi.string(),
+  activity: Joi.string(),
+  gender: Joi.string(),
+  condition: Joi.string(),
+  watt: Joi.number(),
+  injuryLevel: Joi.number(),
+  weight: Joi.number(),
+})
+router.get('/:id/energy', validator.query(querySchema), async (req, res) => {
   const { id } = req.params
   const now = new Date()
   const {
@@ -116,16 +133,21 @@ router.get('/:id/energy', async (req, res) => {
     watt,
   } = req.query
 
-  const energy = await energyForPeriod({
-    id,
-    from,
-    to,
-    activity,
-    watt,
-    overwrite: req.query,
-  })
+  try {
+    const energy = await energyForPeriod({
+      id,
+      from,
+      to,
+      activity,
+      watt,
+      overwrite: req.query,
+    })
 
-  return res.json(energy)
+    return res.json(energy)
+  } catch (e) {
+    console.log('GET /users/:id/energy', e)
+    return res.sendStatus(500)
+  }
 })
 
 router.get('/:id/energy/today', async (req, res) => {
@@ -142,18 +164,22 @@ router.get('/:id/energy/today', async (req, res) => {
     59
   )
 
-  const energy = await energyForPeriod({
-    id,
-    activity,
-    watt,
-    from: startOfDay,
-    to: endOfDay,
-  })
+  try {
+    const energy = await energyForPeriod({
+      id,
+      activity,
+      watt,
+      from: startOfDay,
+      to: endOfDay,
+    })
 
-  return res.json({
-    // total energy
-    energy: energy.reduce((acc, curr) => acc + curr.energy, 0),
-  })
+    return res.json({
+      energy: energy.reduce((acc, curr) => acc + curr.energy, 0),
+    })
+  } catch (e) {
+    console.log('GET /users/:id/energy/today', e)
+    return res.sendStatus(500)
+  }
 })
 
 router.get('/:id/activity', async (req, res) => {
@@ -161,13 +187,26 @@ router.get('/:id/activity', async (req, res) => {
   const now = new Date()
   const { from = new Date().setDate(now.getDate() - 1), to = now } = req.query
 
-  const activity = await activityForPeriod({
-    id,
-    from,
-    to,
-  })
+  try {
+    const activity = await activityForPeriod({
+      id,
+      from,
+      to,
+    })
 
-  return res.json(activity)
+    return res.json(activity)
+  } catch (e) {
+    console.log('GET /users/:id/activity', e)
+    return res.sendStatus(500)
+  }
+})
+
+// repair missing counts,
+router.get('/:id/fill', async (req, res) => {
+  await promiseSeries([], (date) => {
+    return checkAndSaveCounts('5abdb7ad-f973-46ae-b1f1-1bc904885068', date)
+  })
+  res.send('done')
 })
 
 module.exports = router

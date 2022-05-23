@@ -6,21 +6,23 @@ const { calculateCounts } = require('../../adapters/counts')
 
 const INACTIVE_THRESHOLD = 3000
 
-const checkAndSaveCounts = async (userId) => {
+const checkAndSaveCounts = async (userId, overWriteFrom) => {
   const now = new Date()
-  const from = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate(),
-    now.getHours(),
-    now.getMinutes() - 1
-  )
+  const from = overWriteFrom
+    ? overWriteFrom
+    : new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        now.getHours(),
+        now.getMinutes() - 1
+      )
   const to = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate(),
-    now.getHours(),
-    now.getMinutes() - 1,
+    from.getFullYear(),
+    from.getMonth(),
+    from.getDate(),
+    from.getHours(),
+    from.getMinutes(),
     59
   )
 
@@ -43,7 +45,10 @@ const checkAndSaveCounts = async (userId) => {
     return
   }
   const counts = await calculateCounts({ accel, hr })
-  await AccelCount.save(counts, userId)
+
+  if (!overWriteFrom) {
+    await AccelCount.save(counts, userId)
+  }
 }
 
 const energyForPeriod = async ({ from, to, id, activity, watt, overwrite }) => {
@@ -101,8 +106,31 @@ const activityForPeriod = async ({ from, to, id }) => {
   }
 }
 
+const promiseSeries = (items, method) => {
+  const results = []
+
+  function runMethod(item) {
+    return new Promise((resolve, reject) => {
+      method(item)
+        .then((res) => {
+          results.push(res)
+          resolve(res)
+        })
+        .catch((err) => reject(err))
+    })
+  }
+
+  return items
+    .reduce(
+      (promise, item) => promise.then(() => runMethod(item)),
+      Promise.resolve()
+    )
+    .then(() => results)
+}
+
 module.exports = {
   checkAndSaveCounts,
   energyForPeriod,
   activityForPeriod,
+  promiseSeries,
 }

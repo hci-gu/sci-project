@@ -2,15 +2,21 @@ const ACTIVITY = {
   WEIGHTS: 'weights',
   SKI_ERGO: 'ski-ergo',
   ARM_ERGO: 'arm-ergo',
+  STILL: 'still',
 }
 
 const standardCoeff = {
-  constant: -0.019288,
+  constant: -1.235591,
   values: {
-    hr: 0.000281,
-    weight: 0.000044,
-    acc: 0.000002,
+    hr: 0.01391,
+    weight: 0.007091,
+    gender: 0.569553,
+    acc: 0.000035,
   },
+}
+const zeroCoeff = {
+  constant: 0,
+  values: {},
 }
 const skiErgo = {
   constant: 0.230183284229348,
@@ -20,10 +26,13 @@ const skiErgo = {
   },
 }
 const armErgo = {
-  constant: -0.815131155028469,
+  constant: -0.603421,
   values: {
-    weight: 0.0105698546966573,
-    hr: 0.00739732983672685,
+    weight: 0.013435,
+    hr: 0.012068,
+    acc: 0.000091,
+    gender: 0.590387,
+    condition: -0.493678,
   },
 }
 const paraWeights = {
@@ -61,6 +70,8 @@ const getCoeff = ({ condition, activity }) => {
       return skiErgo
     case ACTIVITY.ARM_ERGO:
       return armErgo
+    case ACTIVITY.STILL:
+      return zeroCoeff
     default:
       return standardCoeff
   }
