@@ -6,6 +6,12 @@ const valueForGender = (gender) => {
   return 0
 }
 
+const valueForCondition = (condition) => {
+  if (condition === 'paraplegic') return 3
+  if (condition === 'tetraplegic') return 4
+  return 0
+}
+
 const getEnergy = ({
   counts,
   weight,
@@ -15,9 +21,9 @@ const getEnergy = ({
   injuryLevel = 5,
   condition = 'paraplegic',
 }) => {
-  const coeff = getCoeff({ condition, activity })
+  let coeff = getCoeff({ condition, activity })
 
-  return counts.map(({ a, hr, t }) => {
+  const returnVal = counts.map(({ a, hr, t }) => {
     const values = {
       acc: a,
       hr,
@@ -25,18 +31,32 @@ const getEnergy = ({
       gender: valueForGender(gender),
       watt,
       injuryLevel,
+      condition: valueForCondition(condition),
     }
-    let energyPerKg = coeff.constant
+    let still = false
+    if ((!activity || activity === 'none') && a < 2000) {
+      still = true
+      coeff = getCoeff({ activity: 'still' })
+      modCount++
+    } else {
+      coeff = getCoeff({ condition, activity })
+    }
+    totalCount++
+
+    let energy = coeff.constant
     Object.keys(coeff.values).forEach((key) => {
-      energyPerKg += coeff.values[key] * values[key]
+      formulaStr += ` + (${coeff.values[key]} * ${values[key]})`
+      energy += coeff.values[key] * values[key]
     })
-    const energy = weight * energyPerKg
 
     return {
       t,
-      energy,
+      still,
+      energy: Math.max(energy, 0),
     }
   })
+
+  return returnVal.reduce((acc, curr) => acc + curr.energy, 0)
 }
 
 module.exports = {
