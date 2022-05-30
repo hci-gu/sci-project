@@ -1,54 +1,52 @@
 const moment = require('moment')
-const { User, Accel, AccelCount, HeartRate } = require('../../db/models')
+const redis = require('../../adapters/redis')
+const { User, AccelCount } = require('../../db/models')
 
 const { getEnergy } = require('../../adapters/energy')
 const { calculateCounts } = require('../../adapters/counts')
 
 const INACTIVE_THRESHOLD = 3000
 
-const checkAndSaveCounts = async (userId, overWriteFrom) => {
-  const now = new Date()
-  const from = overWriteFrom
-    ? overWriteFrom
-    : new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate(),
-        now.getHours(),
-        now.getMinutes() - 1
-      )
-  const to = new Date(
-    from.getFullYear(),
-    from.getMonth(),
-    from.getDate(),
-    from.getHours(),
-    from.getMinutes(),
-    59
-  )
-
-  const accelCounts = await AccelCount.find({
-    userId,
-    from,
-    to,
+const group = (data, f) => {
+  const groups = {}
+  data.forEach((d) => {
+    const key = f(d)
+    if (!groups[key]) groups[key] = []
+    groups[key].push(d)
   })
+  return groups
+}
 
-  if (!!accelCounts.length) {
-    return
-  }
+const getMinute = (ts) => {
+  const d = new Date(ts)
+  return `${d.getFullYear()}-${
+    d.getMonth() + 1
+  }-${d.getDate()} ${d.getHours()}:${d.getMinutes()}`
+}
 
-  const [accel, hr] = await Promise.all([
-    Accel.find({ userId, from, to }),
-    HeartRate.find({ userId, from, to }),
-  ])
+const countsCacheKey = (userId, minute) => `${userId}-${minute}`
 
-  if (accel.length < 1800) {
-    return
-  }
-  const counts = await calculateCounts({ accel, hr })
+const checkAndSaveCounts = async (userId, accelDataPoints, hrDataPoints) => {
+  const accMinutes = group(accelDataPoints, (d) => getMinute(d.t))
+  const hrMinutes = group(hrDataPoints, (d) => getMinute(d.t))
 
-  if (!overWriteFrom) {
+  Object.keys(accMinutes).forEach(async (minute) => {
+    const cacheKey = countsCacheKey(userId, minute)
+    const cached = await redis.get(cacheKey)
+
+    const accel = [...cached.accel, ...accMinutes[minute]]
+    const hr = [...cached.hr, ...(hrMinutes[minute] ? hrMinutes[minute] : [])]
+    if (accel.length < 1800) {
+      redis.set(cacheKey, {
+        accel,
+        hr,
+      })
+      return
+    }
+
+    const counts = await calculateCounts({ accel, hr })
     await AccelCount.save(counts, userId)
-  }
+  })
 }
 
 const energyForPeriod = async ({ from, to, id, activity, watt, overwrite }) => {

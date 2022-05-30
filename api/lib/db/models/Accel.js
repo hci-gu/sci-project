@@ -36,10 +36,7 @@ module.exports = {
     Promise.all(
       data.map((d) =>
         Accel.create({
-          t: d.t,
-          x: d.v[0],
-          y: d.v[1],
-          z: d.v[2],
+          ...d,
           UserId: userId,
         })
       )
