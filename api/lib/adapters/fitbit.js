@@ -6,13 +6,15 @@ const handleData = (batches) => {
       if (type === 'heartRate') {
         hrDataPoints.push({
           t: value[0],
-          v: value[1],
+          hr: value[1],
         })
       }
       if (type === 'accel') {
         accelDataPoints.push({
           t: value[0],
-          v: [value[1], value[2], value[3]],
+          x: value[1],
+          y: value[2],
+          z: value[3],
         })
       }
     })

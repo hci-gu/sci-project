@@ -10,7 +10,6 @@ const {
   checkAndSaveCounts,
   energyForPeriod,
   activityForPeriod,
-  promiseSeries,
 } = require('./utils')
 const validation = require('./validation')
 
@@ -71,7 +70,7 @@ router.post('/:id/data', async (req, res) => {
   try {
     if (accelDataPoints.length) await Accel.save(accelDataPoints, id)
     if (hrDataPoints.length) await HeartRate.save(hrDataPoints, id)
-    await checkAndSaveCounts(id)
+    await checkAndSaveCounts(id, accelDataPoints, hrDataPoints)
   } catch (e) {
     console.log('POST /users/:id/data', e)
     return res.sendStatus(400)
@@ -202,11 +201,11 @@ router.get('/:id/activity', async (req, res) => {
 })
 
 // repair missing counts,
-router.get('/:id/fill', async (req, res) => {
-  await promiseSeries([], (date) => {
-    return checkAndSaveCounts('5abdb7ad-f973-46ae-b1f1-1bc904885068', date)
-  })
-  res.send('done')
-})
+// router.get('/:id/fill', async (req, res) => {
+//   await promiseSeries([], (date) => {
+//     return checkAndSaveCounts('5abdb7ad-f973-46ae-b1f1-1bc904885068', date)
+//   })
+//   res.send('done')
+// })
 
 module.exports = router

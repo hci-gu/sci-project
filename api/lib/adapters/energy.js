@@ -21,8 +21,6 @@ const getEnergy = ({
   injuryLevel = 5,
   condition = 'paraplegic',
 }) => {
-  let coeff = getCoeff({ condition, activity })
-
   const returnVal = counts.map(({ a, hr, t }) => {
     const values = {
       acc: a,
@@ -34,10 +32,10 @@ const getEnergy = ({
       condition: valueForCondition(condition),
     }
     let still = false
+    let coeff
     if ((!activity || activity === 'none') && a < 2000) {
       still = true
       coeff = getCoeff({ activity: 'still' })
-      modCount++
     } else {
       coeff = getCoeff({ condition, activity })
     }

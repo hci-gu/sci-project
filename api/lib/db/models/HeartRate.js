@@ -34,8 +34,7 @@ module.exports = {
     Promise.all(
       data.map((d) =>
         HeartRate.create({
-          t: d.t,
-          hr: d.v,
+          ...d,
           UserId: userId,
         })
       )
