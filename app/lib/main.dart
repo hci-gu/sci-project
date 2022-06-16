@@ -17,7 +17,7 @@ void main() async {
   final auth = AuthModel();
   final push = PushModel();
   await auth.init();
-  await push.init();
+  await push.init(auth.loggedIn);
   runApp(App(auth: auth, push: push));
 }
 
@@ -86,7 +86,9 @@ class App extends StatelessWidget {
       ),
     ],
     redirect: (state) {
-      if (!auth.loggedIn && state.location == '/') {
+      if (auth.loggedIn && state.location != '/') {
+        return '/';
+      } else if (!auth.loggedIn && state.location == '/') {
         return '/login';
       }
       return null;
