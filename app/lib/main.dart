@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:push/push.dart';
 import 'package:scimovement/models/activity.dart';
 import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/models/energy.dart';
+import 'package:scimovement/models/push.dart';
 import 'package:scimovement/models/settings.dart';
 import 'package:scimovement/screens/home.dart';
 import 'package:scimovement/screens/login.dart';
@@ -16,14 +15,17 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   tz.initializeTimeZones();
   final auth = AuthModel();
+  final push = PushModel();
   await auth.init();
-  runApp(App(auth: auth));
+  await push.init();
+  runApp(App(auth: auth, push: push));
 }
 
 class App extends StatelessWidget {
   final AuthModel auth;
+  final PushModel push;
 
-  App({Key? key, required this.auth}) : super(key: key);
+  App({Key? key, required this.auth, required this.push}) : super(key: key);
 
   final ActivityModel activity = ActivityModel();
   final EnergyModel energy = EnergyModel();
@@ -31,40 +33,13 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // useEffect(() {
-    //   Push.instance.requestPermission(
-    //     sound: true,
-    //     alert: true,
-    //     badge: true,
-    //   );
-    //   Push.instance.onNewToken.listen((token) {
-    //     print("Just got a new FCM registration token: ${token}");
-    //   });
-
-    //   Push.instance.onMessage.listen((message) {
-    //     print('RemoteMessage received while app is in foreground:\n'
-    //         'RemoteMessage.Notification: ${message.notification} \n'
-    //         ' title: ${message.notification?.title.toString()}\n'
-    //         ' body: ${message.notification?.body.toString()}\n'
-    //         'RemoteMessage.Data: ${message.data}');
-    //   });
-
-    //   // Handle push notifications
-    //   Push.instance.onBackgroundMessage.listen((message) {
-    //     print('RemoteMessage received while app is in background:\n'
-    //         'RemoteMessage.Notification: ${message.notification} \n'
-    //         ' title: ${message.notification?.title.toString()}\n'
-    //         ' body: ${message.notification?.body.toString()}\n'
-    //         'RemoteMessage.Data: ${message.data}');
-    //   });
-    // }, []);
-
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<AuthModel>.value(value: auth),
         ChangeNotifierProvider<ActivityModel>.value(value: activity),
         ChangeNotifierProvider<EnergyModel>.value(value: energy),
         ChangeNotifierProvider<SettingsModel>.value(value: settings),
+        ChangeNotifierProvider<PushModel>.value(value: push),
       ],
       child: MaterialApp.router(
         title: 'SCI-Movement',

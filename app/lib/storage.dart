@@ -16,4 +16,14 @@ class Storage {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.remove('userId');
   }
+
+  static Future storeNotificationRequest(bool enabled) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool('notificationRequest', enabled);
+  }
+
+  static Future getNotificationRequest() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('notificationRequest');
+  }
 }

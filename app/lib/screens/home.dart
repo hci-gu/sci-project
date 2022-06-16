@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:scimovement/models/activity.dart';
 import 'package:scimovement/models/energy.dart';
+import 'package:scimovement/models/push.dart';
 import 'package:scimovement/models/settings.dart';
 import 'package:scimovement/screens/settings.dart';
 import 'package:scimovement/theme/theme.dart';
@@ -111,10 +112,14 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     ActivityModel activityModel = Provider.of<ActivityModel>(context);
     EnergyModel energyModel = Provider.of<EnergyModel>(context);
+    PushModel pushModel = Provider.of<PushModel>(context);
 
     return SmartRefresher(
       controller: _refreshController,
       onRefresh: () async {
+        if (pushModel.shouldAsk) {
+          await pushModel.requestPermission();
+        }
         await activityModel.getHeartRates();
         await energyModel.getEnergy();
         _refreshController.refreshCompleted();
