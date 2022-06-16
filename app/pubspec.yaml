@@ -3,10 +3,10 @@ description: A new Flutter project.
 
 publish_to: 'none'
 
-version: 1.0.1+2
+version: 1.0.2+3
 
 environment:
-  sdk: ">=2.16.0-134.5.beta <3.0.0"
+  sdk: ">=2.15.1 <3.0.0"
 
 dependencies:
   flutter:
@@ -22,6 +22,10 @@ dependencies:
   dio: ^4.0.4
   timezone: ^0.8.0
   intl: ^0.17.0
+  push: ^0.1.0
+  reactive_forms: ^13.0.0
+  pull_to_refresh: ^2.0.0
+  hexcolor: ^2.0.7
 
 dev_dependencies:
   flutter_test:

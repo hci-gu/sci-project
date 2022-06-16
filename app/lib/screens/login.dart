@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/theme/theme.dart';
+import 'package:scimovement/widgets/button.dart';
 
 class LoginScreen extends HookWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -32,15 +33,14 @@ class LoginScreen extends HookWidget {
               ),
             ),
             const SizedBox(height: 16.0),
-            TextButton.icon(
-              style: AppTheme.buttonStyle,
+            Button(
+              title: 'Login',
+              icon: Icons.login,
               onPressed: () async {
                 bool success = await auth.login(_userIdController.text);
                 if (success) context.goNamed('home');
               },
-              icon: Icon(Icons.login, color: AppTheme.colors.white),
-              label: Text('Login', style: AppTheme.buttonTextStyle),
-            )
+            ),
           ],
         ),
       ),

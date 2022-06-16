@@ -6,22 +6,62 @@ import 'package:http/http.dart' as http;
 import 'package:scimovement/models/energy.dart';
 
 const String apiUrl = 'https://sci-api.appadem.in';
+// const String apiUrl = 'http://192.168.0.33:4000';
 // const String apiUrl = 'http://localhost:4000';
+
+enum Gender { male, female }
+
+Gender genderFromString(String gender) {
+  if (gender == 'female') {
+    return Gender.female;
+  }
+  return Gender.male;
+}
+
+enum Condition { paraplegic, tetraplegic }
+
+Condition conditionFromString(String condition) {
+  if (condition == 'tetraplegic') {
+    return Condition.tetraplegic;
+  }
+  return Condition.paraplegic;
+}
 
 class User {
   final String id;
-  final double weight;
+  final double? weight;
+  final Gender? gender;
+  final Condition? condition;
+  final int? injuryLevel;
 
   User({
     required this.id,
-    required this.weight,
+    this.weight,
+    this.gender,
+    this.condition,
+    this.injuryLevel,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'],
-      weight: json['weight'].toDouble(),
+      weight: json['weight'] != null ? json['weight'].toDouble() : 0,
+      gender: json['gender'] != null ? genderFromString(json['gender']) : null,
+      condition: json['condition'] != null
+          ? conditionFromString(json['condition'])
+          : null,
+      injuryLevel: json['injuryLevel'] ?? 0,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'weight': weight,
+      'gender': gender.toString(),
+      'condition': condition.toString(),
+      'injuryLevel': injuryLevel,
+    };
   }
 }
 
@@ -126,12 +166,11 @@ class Api {
   Future<List<Energy>> getEnergy(
     DateTime from,
     DateTime to,
-    EnergyParams params,
   ) async {
+    print('$apiUrl/users/$_userId/energy');
     var response = await dio.get('/users/$_userId/energy', queryParameters: {
       'from': from.toUtc().toIso8601String(),
       'to': to.toUtc().toIso8601String(),
-      ...params.toQueryParams(),
     });
 
     if (response.statusCode == 200) {
@@ -139,6 +178,19 @@ class Api {
       return data.map((json) => Energy.fromJson(json)).toList();
     }
     return [];
+  }
+
+  Future<User?> updateUser(Map<String, dynamic> userdata) async {
+    try {
+      await dio.patch(
+        '/users/$_userId',
+        data: userdata,
+      );
+    } catch (e) {
+      print(e);
+    }
+
+    return getUser(_userId);
   }
 
   // Use API as a singleton

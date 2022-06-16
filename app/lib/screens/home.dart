@@ -1,17 +1,14 @@
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:provider/provider.dart';
-import 'package:scimovement/api.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:scimovement/models/activity.dart';
 import 'package:scimovement/models/energy.dart';
 import 'package:scimovement/models/settings.dart';
-import 'package:scimovement/screens/energy_params.dart';
-import 'package:scimovement/screens/measure.dart';
+import 'package:scimovement/screens/settings.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/energy_display.dart';
 import 'package:scimovement/widgets/heart_rate_chart.dart';
-import 'package:go_router/go_router.dart';
 
 class ChartSettings extends StatelessWidget {
   const ChartSettings({Key? key}) : super(key: key);
@@ -59,7 +56,7 @@ class MainScreen extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    ValueNotifier<int> screen = useState(1);
+    ValueNotifier<int> screen = useState(0);
 
     return Scaffold(
       appBar: AppBar(
@@ -67,8 +64,8 @@ class MainScreen extends HookWidget {
           'SCI Movement',
           style: AppTheme.appBarTextStyle,
         ),
-        actions: const [
-          ChartSettings(),
+        actions: [
+          if (screen.value == 0) const ChartSettings(),
         ],
       ),
       body: _page(screen.value),
@@ -78,10 +75,6 @@ class MainScreen extends HookWidget {
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.access_alarm),
-            label: 'Measure',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
@@ -100,40 +93,34 @@ class MainScreen extends HookWidget {
   _page(int index) {
     switch (index) {
       case 0:
-        return const HomeScreen();
+        return HomeScreen();
       case 1:
-        return const MeasureScreen();
-      case 2:
-        return const EnergySettingsScreen();
+        return SettingsScreen();
       default:
-        return const HomeScreen();
+        return HomeScreen();
     }
   }
 }
 
-class HomeScreen extends HookWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+class HomeScreen extends StatelessWidget {
+  HomeScreen({Key? key}) : super(key: key);
+  final RefreshController _refreshController =
+      RefreshController(initialRefresh: true);
 
   @override
   Widget build(BuildContext context) {
     ActivityModel activityModel = Provider.of<ActivityModel>(context);
     EnergyModel energyModel = Provider.of<EnergyModel>(context);
 
-    useEffect(() {
-      activityModel.getHeartRates();
-      return () => {};
-    }, []);
-
-    useEffect(() {
-      energyModel.setFrom(activityModel.from);
-      energyModel.setTo(activityModel.to);
-      energyModel.getEnergy();
-      return () => {};
-    }, [activityModel.from, activityModel.to]);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 16.0),
+    return SmartRefresher(
+      controller: _refreshController,
+      onRefresh: () async {
+        await activityModel.getHeartRates();
+        await energyModel.getEnergy();
+        _refreshController.refreshCompleted();
+      },
       child: ListView(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

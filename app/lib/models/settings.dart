@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:scimovement/api.dart';
 
 enum ChartMode { fullDay, fit }
+
 enum EnergyChartMode { minute, accumulative }
 
 class SettingsModel extends ChangeNotifier {
