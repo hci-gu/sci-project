@@ -91,6 +91,8 @@ class UserSettings extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             _submitButton(context, form),
+            const SizedBox(height: 16),
+            _logoutButton(context),
           ],
         );
       },
@@ -120,6 +122,18 @@ class UserSettings extends StatelessWidget {
             message: 'Updated',
           ),
         );
+      },
+    );
+  }
+
+  Widget _logoutButton(BuildContext context) {
+    return Button(
+      title: 'Logout',
+      width: 220,
+      secondary: true,
+      onPressed: () async {
+        FocusManager.instance.primaryFocus?.unfocus();
+        await auth.logout();
       },
     );
   }

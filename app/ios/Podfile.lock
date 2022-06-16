@@ -1,27 +1,39 @@
 PODS:
   - Flutter (1.0.0)
+  - hexcolor (0.0.1):
+    - Flutter
   - push_ios (0.0.1):
     - Flutter
   - shared_preferences_ios (0.0.1):
     - Flutter
+  - url_launcher_ios (0.0.1):
+    - Flutter
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
+  - hexcolor (from `.symlinks/plugins/hexcolor/ios`)
   - push_ios (from `.symlinks/plugins/push_ios/ios`)
   - shared_preferences_ios (from `.symlinks/plugins/shared_preferences_ios/ios`)
+  - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
 
 EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
+  hexcolor:
+    :path: ".symlinks/plugins/hexcolor/ios"
   push_ios:
     :path: ".symlinks/plugins/push_ios/ios"
   shared_preferences_ios:
     :path: ".symlinks/plugins/shared_preferences_ios/ios"
+  url_launcher_ios:
+    :path: ".symlinks/plugins/url_launcher_ios/ios"
 
 SPEC CHECKSUMS:
   Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
+  hexcolor: fdfb9c4258ad96e949c2dbcdf790a62194b8aa89
   push_ios: 347ca1075a0c296a48544bd1424f401dddb942ee
   shared_preferences_ios: 548a61f8053b9b8a49ac19c1ffbc8b92c50d68ad
+  url_launcher_ios: 839c58cdb4279282219f5e248c3321761ff3c4de
 
 PODFILE CHECKSUM: fe0e1ee7f3d1f7d00b11b474b62dd62134535aea
 

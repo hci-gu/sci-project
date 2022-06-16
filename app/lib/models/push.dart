@@ -7,13 +7,13 @@ class PushModel extends ChangeNotifier {
   bool _inited = false;
   bool _shouldAsk = false;
 
-  init() async {
+  init(bool loggedIn) async {
     _inited = true;
 
     _shouldAsk = await Storage.getNotificationRequest() == null;
 
     String? deviceToken = await token;
-    if (deviceToken != null && deviceToken.isNotEmpty) {
+    if (deviceToken != null && deviceToken.isNotEmpty && loggedIn) {
       await Api().updateUser({
         'deviceId': deviceToken,
       });
