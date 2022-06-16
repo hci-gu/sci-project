@@ -59,7 +59,6 @@ class EnergyModel extends ChangeNotifier {
   List<Accel> get accel => _accel;
   final duration = const Duration(minutes: 1);
 
-  final EnergyParams _params = EnergyParams();
   DateTime _from = DateTime.now();
   DateTime _to = DateTime.now();
 
@@ -69,8 +68,6 @@ class EnergyModel extends ChangeNotifier {
     _from = DateTime(now.year, now.month, now.day);
     _to = DateTime(now.year, now.month, now.day, 23, 59, 59);
   }
-
-  EnergyParams get params => _params;
 
   DateTime get from => _from;
   DateTime get to => _to;
@@ -84,7 +81,7 @@ class EnergyModel extends ChangeNotifier {
     _loading = true;
     notifyListeners();
 
-    _energy = await Api().getEnergy(_from, _to, _params);
+    _energy = await Api().getEnergy(_from, _to);
     if (_to.difference(_from).inMinutes < 5) {
       _accel = await Api().getAccel(_from, _to);
     }
@@ -110,33 +107,6 @@ class EnergyModel extends ChangeNotifier {
           DateTime(from.year, from.month, from.day, time.hour, time.minute, 0);
     } else {
       _to = DateTime(to.year, to.month, to.day, time.hour, time.minute, 0);
-    }
-    notifyListeners();
-
-    await getEnergy();
-  }
-
-  updateParams(String key, dynamic value) async {
-    switch (key) {
-      case 'activity':
-        _params.activity = value;
-        break;
-      case 'weight':
-        _params.weight = value;
-        break;
-      case 'injuryLevel':
-        _params.injuryLevel = value;
-        break;
-      case 'gender':
-        _params.gender = value;
-        break;
-      case 'condition':
-        _params.condition = value;
-        break;
-      case 'watt':
-        _params.watt = value;
-        break;
-      default:
     }
     notifyListeners();
 
