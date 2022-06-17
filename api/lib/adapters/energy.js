@@ -21,7 +21,7 @@ const getEnergy = ({
   injuryLevel = 5,
   condition = 'paraplegic',
 }) => {
-  const returnVal = counts.map(({ a, hr, t }) => {
+  return counts.map(({ a, hr, t }) => {
     const values = {
       acc: a,
       hr,
@@ -39,11 +39,9 @@ const getEnergy = ({
     } else {
       coeff = getCoeff({ condition, activity })
     }
-    totalCount++
 
     let energy = coeff.constant
     Object.keys(coeff.values).forEach((key) => {
-      formulaStr += ` + (${coeff.values[key]} * ${values[key]})`
       energy += coeff.values[key] * values[key]
     })
 
@@ -53,8 +51,6 @@ const getEnergy = ({
       energy: Math.max(energy, 0),
     }
   })
-
-  return returnVal.reduce((acc, curr) => acc + curr.energy, 0)
 }
 
 module.exports = {

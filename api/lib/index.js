@@ -1,6 +1,7 @@
 require('dotenv').config()
 const db = require('./db')
 const createServer = require('./server')
+require('./cron')
 
 const { DB_HOST, DB_USERNAME, DB_PASSWORD, DB } = process.env
 
