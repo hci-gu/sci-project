@@ -30,7 +30,7 @@ module.exports = {
         body: message.body,
         topic: process.env.APN_TOPIC,
       })
-      .then(console.info)
+      .then((res) => console.info(JSON.stringify(res, null, 2)))
       .catch(console.error)
   },
 }

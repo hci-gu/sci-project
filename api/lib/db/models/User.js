@@ -40,4 +40,5 @@ module.exports = {
       weight: data.weight,
     }),
   get: (id) => User.findOne({ where: { id } }),
+  getAll: () => User.findAll(),
 }

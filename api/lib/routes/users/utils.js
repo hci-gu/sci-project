@@ -32,7 +32,8 @@ const checkAndSaveCounts = async (userId, accelDataPoints, hrDataPoints) => {
 
   Object.keys(accMinutes).forEach(async (minute) => {
     const cacheKey = countsCacheKey(userId, minute)
-    const cached = await redis.get(cacheKey)
+    let cached = await redis.get(cacheKey)
+    if (!cached) cached = { hr: [], accel: [] }
 
     const accel = [...cached.accel, ...accMinutes[minute]]
     const hr = [...cached.hr, ...(hrMinutes[minute] ? hrMinutes[minute] : [])]
@@ -126,9 +127,13 @@ const promiseSeries = (items, method) => {
     .then(() => results)
 }
 
+const getUsers = () =>
+  User.getAll().then((users) => users.map((user) => user.dataValues))
+
 module.exports = {
   checkAndSaveCounts,
   energyForPeriod,
   activityForPeriod,
+  getUsers,
   promiseSeries,
 }
