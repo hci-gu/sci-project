@@ -5,52 +5,12 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:scimovement/models/activity.dart';
 import 'package:scimovement/models/energy.dart';
 import 'package:scimovement/models/push.dart';
-import 'package:scimovement/models/settings.dart';
 import 'package:scimovement/screens/settings.dart';
 import 'package:scimovement/theme/theme.dart';
+import 'package:scimovement/widgets/date_select.dart';
 import 'package:scimovement/widgets/energy_display.dart';
-import 'package:scimovement/widgets/heart_rate_chart.dart';
-
-class ChartSettings extends StatelessWidget {
-  const ChartSettings({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    SettingsModel settings = Provider.of<SettingsModel>(context);
-
-    final List<DropdownMenuItem<ChartMode>> chartModeItems =
-        ChartMode.values.map((ChartMode mode) {
-      return DropdownMenuItem<ChartMode>(
-        value: mode,
-        child: Text(
-          mode.name,
-          style: const TextStyle(
-            color: Colors.white,
-          ),
-        ),
-      );
-    }).toList();
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: DropdownButton(
-          isDense: true,
-          items: chartModeItems,
-          value: settings.chartMode,
-          dropdownColor: Colors.blueGrey,
-          style: const TextStyle(color: Colors.white),
-          iconEnabledColor: Colors.white,
-          onChanged: (ChartMode? mode) {
-            if (mode != null) {
-              settings.setChartMode(mode);
-            }
-          },
-        ),
-      ),
-    );
-  }
-}
+import 'package:scimovement/widgets/stat_widget.dart';
+import 'package:go_router/go_router.dart';
 
 class MainScreen extends HookWidget {
   const MainScreen({Key? key}) : super(key: key);
@@ -60,30 +20,23 @@ class MainScreen extends HookWidget {
     ValueNotifier<int> screen = useState(0);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'SCI Movement',
-          style: AppTheme.appBarTextStyle,
-        ),
-        actions: [
-          if (screen.value == 0) const ChartSettings(),
-        ],
+      body: SafeArea(
+        child: _page(screen.value),
       ),
-      body: _page(screen.value),
       bottomNavigationBar: BottomNavigationBar(
-        elevation: 12,
-        items: const <BottomNavigationBarItem>[
+        elevation: 4,
+        items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
+            icon: Icon(Icons.home_outlined),
+            label: 'Hem',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
+            icon: Icon(Icons.settings_outlined),
+            label: 'Inställningar',
           ),
         ],
         currentIndex: screen.value,
-        selectedItemColor: Colors.blueGrey[800],
+        selectedItemColor: AppTheme.colors.primary,
         onTap: (index) {
           screen.value = index;
         },
@@ -127,32 +80,29 @@ class HomeScreen extends StatelessWidget {
       child: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
         children: [
+          const DateSelect(),
+          const SizedBox(height: 32),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              IconButton(
-                onPressed: () => activityModel.goBack(),
-                icon: const Icon(Icons.arrow_back),
+              GestureDetector(
+                onTap: () => context.goNamed('calories'),
+                child: StatWidget(
+                  value: energyModel.energyTotal.toInt(),
+                  oldValue: energyModel.prevTotal.toInt(),
+                  unit: Unit.calories,
+                  asset: 'assets/svg/flame.svg',
+                ),
               ),
-              Text(
-                activityModel.from.toString().substring(0, 10),
+              StatWidget(
+                value: energyModel.minutesInactive,
+                oldValue: energyModel.prevMinutesInactive,
+                unit: Unit.sedentary,
+                asset: 'assets/svg/wheelchair.svg',
               ),
-              IconButton(
-                onPressed: () => activityModel.goForward(),
-                icon: const Icon(Icons.arrow_forward),
-              )
             ],
           ),
-          Center(child: Text('Heartrate', style: AppTheme.titleTextStyle)),
-          const SizedBox(height: 8),
-          HeartRateChart(
-            heartRates: activityModel.heartRates,
-            from: activityModel.from,
-            to: activityModel.to,
-          ),
-          const SizedBox(
-            height: 12,
-          ),
+          const SizedBox(height: 16),
           const EnergyDisplay(),
         ],
       ),

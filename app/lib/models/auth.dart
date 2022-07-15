@@ -1,6 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:push/push.dart';
 import 'package:scimovement/api.dart';
 import 'package:scimovement/storage.dart';
 
@@ -37,14 +35,6 @@ class AuthModel extends ChangeNotifier {
     if (_user != null) {
       await Storage.storeUserId(userId);
       _loggedIn = true;
-
-      if (!kIsWeb) {
-        // String? token = await Push.instance.token;
-        // print(token);
-        // if (token != null) {
-        // await Api().updateDeviceId(token);
-        // }
-      }
       _loading = false;
       notifyListeners();
     }

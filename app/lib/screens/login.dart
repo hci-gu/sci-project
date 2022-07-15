@@ -18,18 +18,18 @@ class LoginScreen extends HookWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'SCI Movement',
+          'RullaPå',
           style: AppTheme.appBarTextStyle,
         ),
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 64.0, vertical: 24.0),
-        child: Column(
+        child: ListView(
+          shrinkWrap: true,
           children: [
-            // https://gallery.fitbit.com/details/1c0a1dfd-e31d-4ed7-bb74-b653337a9e8d
             Image.asset('assets/png/ryggmarg_logo.png', width: 125),
             const Text(
-              'Welcome to the\n SCI Movement app!',
+              'Välkommen till\n RullaPå appen!',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
@@ -38,7 +38,7 @@ class LoginScreen extends HookWidget {
             ),
             const SizedBox(height: 8.0),
             const Text(
-              'To get started open the link below to install the watch app on your Fitbit.',
+              'För att komma igång öppna länken nedan för att installera klockappen på din Fitbit.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 16,
@@ -46,7 +46,7 @@ class LoginScreen extends HookWidget {
             ),
             const SizedBox(height: 16.0),
             Button(
-              title: 'Launch Fitbit',
+              title: 'Starta Fitbit',
               width: 180,
               onPressed: () async {
                 await _launchFitbitGallery();
@@ -54,7 +54,7 @@ class LoginScreen extends HookWidget {
             ),
             const SizedBox(height: 16.0),
             const Text(
-              'Or you can login manually if you already have done this process before.',
+              'Om du redan gjort den här processen tidigare kan du logga in manuellt nedan med ditt användarID.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 16,
@@ -69,7 +69,7 @@ class LoginScreen extends HookWidget {
             ),
             const SizedBox(height: 16.0),
             Button(
-              title: 'Manual Login',
+              title: 'Logga in',
               icon: Icons.login,
               secondary: true,
               width: 180,

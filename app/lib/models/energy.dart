@@ -52,27 +52,78 @@ class EnergyParams {
   }
 }
 
-class EnergyModel extends ChangeNotifier {
-  List<Energy> _energy = [];
-  List<Energy> get energy => _energy;
-  List<Accel> _accel = [];
-  List<Accel> get accel => _accel;
-  final duration = const Duration(minutes: 1);
+class ActivityDay {
+  final DateTime date;
+  int minutes = 0;
 
-  DateTime _from = DateTime.now();
-  DateTime _to = DateTime.now();
+  DateTime get from => DateTime(date.year, date.month, date.day);
+  DateTime get to => DateTime(date.year, date.month, date.day, 23, 59, 59);
+  ActivityDay(this.date);
 
-  EnergyModel() {
-    DateTime now = DateTime.now();
+  Future getActivity() async {
+    minutes = await Api().getActivity(from, to);
+  }
+}
 
-    _from = DateTime(now.year, now.month, now.day);
-    _to = DateTime(now.year, now.month, now.day, 23, 59, 59);
+class EnergyDay {
+  final DateTime date;
+  List<Energy> energy = [];
+
+  List<EnergyDay> get averageEnergy => [];
+
+  DateTime get from => DateTime(date.year, date.month, date.day);
+  DateTime get to => DateTime(date.year, date.month, date.day, 23, 59, 59);
+  double get total => energy.fold(0, (a, b) => a + b.value);
+
+  EnergyDay(this.date);
+
+  Future getEnergy() async {
+    energy = await Api().getEnergy(from, to);
   }
 
-  DateTime get from => _from;
-  DateTime get to => _to;
+  List<Energy> getAverageEnergy([int divisor = 20]) {
+    var averageEnergy = <Energy>[];
+    var total = 0.0;
+    for (var i = 0; i < energy.length; i++) {
+      total += energy[i].value;
+      if (i % divisor == 0) {
+        averageEnergy.add(Energy(
+          energy[i].time,
+          total / divisor,
+        ));
+        total = 0.0;
+      }
+    }
+    return averageEnergy;
+  }
+}
 
-  double get total => _energy.fold(0, (a, b) => a + b.value);
+class EnergyModel extends ChangeNotifier {
+  final duration = const Duration(minutes: 1);
+  late EnergyDay _day;
+  late ActivityDay _activityDay;
+  late EnergyDay _previousDay;
+  late ActivityDay _prevActivityDay;
+
+  List<Energy> get energy => _day.energy;
+  List<Energy> get averageEnergy => _day.getAverageEnergy();
+  double get energyTotal => _day.total;
+  List<Energy> get prevEnergy => _previousDay.energy;
+  double get prevTotal => _previousDay.total;
+  List<Energy> get prevAverage => _previousDay.getAverageEnergy();
+
+  int get minutesInactive => _activityDay.minutes;
+  int get prevMinutesInactive => _prevActivityDay.minutes;
+
+  DateTime _date = DateTime.now();
+
+  EnergyModel() {
+    DateTime previousDayDate = _date.subtract(const Duration(days: 1));
+    _day = EnergyDay(_date);
+    _previousDay = EnergyDay(previousDayDate);
+    _activityDay = ActivityDay(_date);
+    _prevActivityDay = ActivityDay(previousDayDate);
+  }
 
   bool _loading = false;
   bool get loading => _loading;
@@ -81,35 +132,24 @@ class EnergyModel extends ChangeNotifier {
     _loading = true;
     notifyListeners();
 
-    _energy = await Api().getEnergy(_from, _to);
-    if (_to.difference(_from).inMinutes < 5) {
-      _accel = await Api().getAccel(_from, _to);
-    }
+    await Future.wait([
+      _day.getEnergy(),
+      _activityDay.getActivity(),
+      _previousDay.getEnergy(),
+      _prevActivityDay.getActivity(),
+    ]);
     _loading = false;
 
     notifyListeners();
   }
 
-  setFrom(DateTime date) {
-    _from =
-        DateTime(date.year, date.month, date.day, date.hour, date.minute, 0);
+  setDate(DateTime date) {
+    _date = date;
+    DateTime previousDayDate = _date.subtract(const Duration(days: 1));
+    _day = EnergyDay(_date);
+    _previousDay = EnergyDay(previousDayDate);
+    _activityDay = ActivityDay(_date);
+    _prevActivityDay = ActivityDay(previousDayDate);
     notifyListeners();
-  }
-
-  setTo(DateTime date) {
-    _to = DateTime(date.year, date.month, date.day, date.hour, date.minute, 0);
-    notifyListeners();
-  }
-
-  setTimeOfDay(String key, TimeOfDay time) async {
-    if (key == 'from') {
-      _from =
-          DateTime(from.year, from.month, from.day, time.hour, time.minute, 0);
-    } else {
-      _to = DateTime(to.year, to.month, to.day, time.hour, time.minute, 0);
-    }
-    notifyListeners();
-
-    await getEnergy();
   }
 }

@@ -1,11 +1,10 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
-import 'package:scimovement/models/energy.dart';
+import 'package:intl/intl.dart';
 
-const String apiUrl = 'https://sci-api.appadem.in';
+const String apiUrl = 'https://sci-api.prod.appadem.in';
 // const String apiUrl = 'http://192.168.0.33:4000';
 // const String apiUrl = 'http://localhost:4000';
 
@@ -19,6 +18,19 @@ Gender genderFromString(String gender) {
 }
 
 enum Condition { paraplegic, tetraplegic }
+
+extension ParseToString on Condition {
+  String displayString() {
+    switch (this) {
+      case Condition.paraplegic:
+        return 'Paraplegic';
+      case Condition.tetraplegic:
+        return 'Tetraplegic';
+      default:
+        return toString();
+    }
+  }
+}
 
 Condition conditionFromString(String condition) {
   if (condition == 'tetraplegic') {
@@ -167,10 +179,9 @@ class Api {
     DateTime from,
     DateTime to,
   ) async {
-    print('$apiUrl/users/$_userId/energy');
     var response = await dio.get('/users/$_userId/energy', queryParameters: {
-      'from': from.toUtc().toIso8601String(),
-      'to': to.toUtc().toIso8601String(),
+      'from': DateFormat('yyyy-MM-dd HH:mm').format(from),
+      'to': DateFormat('yyyy-MM-dd HH:mm').format(to),
     });
 
     if (response.statusCode == 200) {
@@ -178,6 +189,24 @@ class Api {
       return data.map((json) => Energy.fromJson(json)).toList();
     }
     return [];
+  }
+
+  Future<int> getActivity(DateTime from, DateTime to) async {
+    var response = await dio.get('/users/$_userId/activity', queryParameters: {
+      'from': DateFormat('yyyy-MM-dd HH:mm').format(from),
+      'to': DateFormat('yyyy-MM-dd HH:mm').format(to),
+    });
+
+    if (response.statusCode == 200) {
+      Map<String, dynamic> data = response.data;
+      try {
+        double value = data['averageInactiveDuration'] ?? 0.0;
+        return value.round();
+      } catch (e) {
+        return data['averageInactiveDuration'] ?? 0;
+      }
+    }
+    return 0;
   }
 
   Future<User?> updateUser(Map<String, dynamic> userdata) async {

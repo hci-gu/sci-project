@@ -22,7 +22,7 @@ class AppTheme {
     primaryColor: colors.primary,
     primaryColorDark: colors.primaryDark,
     backgroundColor: colors.white,
-    fontFamily: 'Lato',
+    fontFamily: 'Cabin',
   );
 
   static TextStyle appBarTextStyle = TextStyle(
