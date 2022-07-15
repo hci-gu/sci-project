@@ -11,7 +11,7 @@ const settings = {
       keyId: '8DLWUFMYJ3',
       teamId: '5KQ3D3FG5H',
     },
-    production: false,
+    production: process.env.NODE_ENV === 'production',
   },
 }
 
@@ -19,11 +19,6 @@ const push = new PushNotifications(settings)
 
 module.exports = {
   send: ({ deviceId, message }) => {
-    console.log({
-      title: message.title,
-      body: message.body,
-      topic: process.env.APN_TOPIC,
-    })
     return push
       .send([deviceId], {
         title: message.title,

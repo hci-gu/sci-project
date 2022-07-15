@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node ./lib/index.js",
+    "start-prod": "NODE_ENV=production node ./lib/index.js",
     "test": "jest --runInBand --testTimeout=30000"
   },
   "keywords": [],

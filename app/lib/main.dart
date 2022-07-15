@@ -5,7 +5,7 @@ import 'package:scimovement/models/activity.dart';
 import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/models/energy.dart';
 import 'package:scimovement/models/push.dart';
-import 'package:scimovement/models/settings.dart';
+import 'package:scimovement/screens/calories.dart';
 import 'package:scimovement/screens/home.dart';
 import 'package:scimovement/screens/login.dart';
 import 'package:scimovement/theme/theme.dart';
@@ -29,7 +29,6 @@ class App extends StatelessWidget {
 
   final ActivityModel activity = ActivityModel();
   final EnergyModel energy = EnergyModel();
-  final SettingsModel settings = SettingsModel();
 
   @override
   Widget build(BuildContext context) {
@@ -38,11 +37,10 @@ class App extends StatelessWidget {
         ChangeNotifierProvider<AuthModel>.value(value: auth),
         ChangeNotifierProvider<ActivityModel>.value(value: activity),
         ChangeNotifierProvider<EnergyModel>.value(value: energy),
-        ChangeNotifierProvider<SettingsModel>.value(value: settings),
         ChangeNotifierProvider<PushModel>.value(value: push),
       ],
       child: MaterialApp.router(
-        title: 'SCI-Movement',
+        title: 'RullaPå',
         theme: AppTheme.theme,
         routeInformationParser: _router.routeInformationParser,
         routerDelegate: _router.routerDelegate,
@@ -58,6 +56,13 @@ class App extends StatelessWidget {
         name: 'home',
         path: '/',
         builder: (_, __) => const MainScreen(),
+        routes: [
+          GoRoute(
+            name: 'calories',
+            path: 'calories',
+            builder: (_, __) => const CaloriesScreen(),
+          ),
+        ],
       ),
       GoRoute(
         name: 'login',
@@ -86,9 +91,7 @@ class App extends StatelessWidget {
       ),
     ],
     redirect: (state) {
-      if (auth.loggedIn && state.location != '/') {
-        return '/';
-      } else if (!auth.loggedIn && state.location == '/') {
+      if (!auth.loggedIn && state.location == '/') {
         return '/login';
       }
       return null;

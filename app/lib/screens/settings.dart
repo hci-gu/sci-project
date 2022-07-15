@@ -8,6 +8,8 @@ import 'package:scimovement/widgets/text_field.dart';
 import 'package:provider/provider.dart';
 
 class SettingsScreen extends StatelessWidget {
+  const SettingsScreen({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     AuthModel auth = Provider.of<AuthModel>(context);
@@ -29,24 +31,32 @@ class UserSettings extends StatelessWidget {
     required this.auth,
   }) : super(key: key);
 
-  FormGroup buildForm() => fb.group({
-        'weight': FormControl<int>(
-          value: user.weight != null ? user.weight!.toInt() : 0,
-          validators: [],
-        ),
-        'injuryLevel': FormControl<int>(
-          value: user.injuryLevel ?? 0,
-          validators: [],
-        ),
-        'gender': FormControl<Gender>(
-          value: user.gender,
-          validators: [],
-        ),
-        'condition': FormControl<Condition>(
-          value: user.condition,
-          validators: [],
-        ),
-      });
+  FormGroup buildForm() => fb.group(
+        {
+          'weight': FormControl<int>(
+            value: user.weight != null ? user.weight!.toInt() : 0,
+            validators: [
+              Validators.required,
+            ],
+          ),
+          'injuryLevel': FormControl<int>(
+            value: user.injuryLevel ?? 0,
+            validators: [
+              Validators.number,
+            ],
+          ),
+          'gender': FormControl<Gender>(
+            value: user.gender,
+            validators: [],
+          ),
+          'condition': FormControl<Condition>(
+            value: user.condition,
+            validators: [],
+          ),
+        },
+      );
+
+  Widget get spacer => const SizedBox(height: 16);
 
   @override
   Widget build(BuildContext context) {
@@ -56,20 +66,54 @@ class UserSettings extends StatelessWidget {
         return ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
           children: [
-            ReactiveDropdownField(
-              formControlName: 'condition',
-              hint: const Text('Select condition'),
-              items: Condition.values
-                  .map((condition) => DropdownMenuItem(
-                        value: condition,
-                        child: Text(condition.name),
-                      ))
-                  .toList(),
+            const Text(
+              'Profile',
+              style: TextStyle(
+                fontSize: 36,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            const SizedBox(height: 16),
-            ReactiveDropdownField(
-              formControlName: 'gender',
-              hint: const Text('Select gender'),
+            spacer,
+            ReactiveFormConsumer(
+                builder: ((context, formGroup, child) => Row(
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Flexible(
+                          child: FormDropdown(
+                            form: form,
+                            formKey: 'condition',
+                            title: 'Condition',
+                            items: Condition.values
+                                .map((condition) => DropdownMenuItem(
+                                      value: condition,
+                                      child: Text(condition.name),
+                                    ))
+                                .toList(),
+                          ),
+                        ),
+                        if (form.value['condition'] == Condition.tetraplegic)
+                          const SizedBox(width: 16),
+                        if (form.value['condition'] == Condition.tetraplegic)
+                          Flexible(
+                            child: FormDropdown(
+                              form: form,
+                              formKey: 'injuryLevel',
+                              title: 'Injury level',
+                              items: [5, 6, 7, 8, 9]
+                                  .map((value) => DropdownMenuItem(
+                                        value: value,
+                                        child: Text(value.toString()),
+                                      ))
+                                  .toList(),
+                            ),
+                          )
+                      ],
+                    ))),
+            spacer,
+            FormDropdown(
+              form: form,
+              formKey: 'gender',
+              title: 'Gender',
               items: Gender.values
                   .map((gender) => DropdownMenuItem(
                         value: gender,
@@ -77,22 +121,39 @@ class UserSettings extends StatelessWidget {
                       ))
                   .toList(),
             ),
-            const SizedBox(height: 16),
+            spacer,
             const StyledTextField(
               formControlName: 'weight',
-              placeholder: 'Weight',
+              placeholder: 'Vikt',
               keyboardType: TextInputType.number,
             ),
-            const SizedBox(height: 16),
-            const StyledTextField(
-              formControlName: 'injuryLevel',
-              placeholder: 'Injury level',
-              keyboardType: TextInputType.number,
+            spacer,
+            ReactiveFormConsumer(
+              builder: ((context, formGroup, child) =>
+                  _submitButton(context, form)),
             ),
-            const SizedBox(height: 16),
-            _submitButton(context, form),
-            const SizedBox(height: 16),
+            spacer,
+            _separator(),
+            spacer,
+            const Text(
+              'App settings',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+            spacer,
+            _separator(),
+            spacer,
             _logoutButton(context),
+            spacer,
+            _separator(),
+            spacer,
+            const Text(
+              'AnvändarID:',
+              textAlign: TextAlign.center,
+            ),
+            Text(
+              auth.user?.id ?? '',
+              textAlign: TextAlign.center,
+            ),
           ],
         );
       },
@@ -102,8 +163,10 @@ class UserSettings extends StatelessWidget {
   Widget _submitButton(BuildContext context, FormGroup form) {
     return Button(
       loading: auth.loading,
-      title: 'Update',
-      width: 220,
+      title: 'Save profile information',
+      width: 240,
+      disabled: form.pristine || !form.valid,
+      secondary: true,
       onPressed: () async {
         FocusManager.instance.primaryFocus?.unfocus();
         try {
@@ -119,7 +182,7 @@ class UserSettings extends StatelessWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackbarMessage(
             context: context,
-            message: 'Updated',
+            message: 'Uppdaterad',
           ),
         );
       },
@@ -128,13 +191,79 @@ class UserSettings extends StatelessWidget {
 
   Widget _logoutButton(BuildContext context) {
     return Button(
-      title: 'Logout',
+      title: 'Logga ut',
       width: 220,
       secondary: true,
       onPressed: () async {
         FocusManager.instance.primaryFocus?.unfocus();
         await auth.logout();
       },
+    );
+  }
+
+  Widget _separator() {
+    return Container(
+      color: const Color.fromRGBO(0, 0, 0, 0.1),
+      width: 5000,
+      height: 1,
+    );
+  }
+}
+
+class FormDropdown extends StatelessWidget {
+  final String formKey;
+  final String title;
+  final FormGroup form;
+  final List<DropdownMenuItem> items;
+
+  const FormDropdown({
+    Key? key,
+    required this.formKey,
+    required this.title,
+    required this.form,
+    this.items = const [],
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ReactiveDropdownField<dynamic>(
+      formControlName: formKey,
+      hint: const Text('Välj typ'),
+      icon: const Icon(Icons.keyboard_arrow_down),
+      iconSize: 32,
+      selectedItemBuilder: (_) {
+        return items
+            .map((i) => Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(fontSize: 11),
+                    ),
+                    // const SizedBox(height: 8),
+                    i.child,
+                  ],
+                ))
+            .toList();
+      },
+      decoration: InputDecoration(
+        isDense: true,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(4.0),
+          borderSide: const BorderSide(
+            color: Color.fromRGBO(0, 0, 0, 0.1),
+            width: 1,
+          ),
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(4.0),
+          borderSide: const BorderSide(
+            color: Color.fromRGBO(0, 255, 0, 0.1),
+            width: 1,
+          ),
+        ),
+      ),
+      items: items,
     );
   }
 }

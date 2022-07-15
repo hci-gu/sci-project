@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "616068137593",
+    "project_id": "sci-movement",
+    "storage_bucket": "sci-movement.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:616068137593:android:9af831135582937e97caa8",
+        "android_client_info": {
+          "package_name": "com.appademin.scimovement"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "616068137593-fuh9v9oe38s8eo9n58khsjkq0mh7orjo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAKMq3mxD8ANJu5OF5v671U7loDFHKPOMA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "616068137593-fuh9v9oe38s8eo9n58khsjkq0mh7orjo.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

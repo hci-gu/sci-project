@@ -2,6 +2,7 @@ const express = require('express')
 const { User, Accel, HeartRate } = require('../../db/models')
 const Joi = require('joi')
 const validator = require('express-joi-validation').createValidator({})
+const push = require('../../push')
 
 const router = express.Router()
 
@@ -196,6 +197,28 @@ router.get('/:id/activity', async (req, res) => {
     return res.json(activity)
   } catch (e) {
     console.log('GET /users/:id/activity', e)
+    return res.sendStatus(500)
+  }
+})
+
+router.get('/:id/test-push', async (req, res) => {
+  const { id } = req.params
+
+  try {
+    const user = await User.get(id)
+    if (!user) {
+      return res.sendStatus(404)
+    }
+    push.send({
+      deviceId: user.deviceId,
+      message: {
+        title: 'Test',
+        body: 'Test',
+      },
+    })
+    return res.send(user)
+  } catch (e) {
+    console.log(e)
     return res.sendStatus(500)
   }
 })

@@ -4,6 +4,7 @@ class ChartWrapper extends StatelessWidget {
   final Widget child;
   final bool loading;
   final bool isEmpty;
+  final bool isCard;
   final double aspectRatio;
 
   const ChartWrapper({
@@ -11,6 +12,7 @@ class ChartWrapper extends StatelessWidget {
     required this.child,
     required this.loading,
     required this.isEmpty,
+    this.isCard = true,
     this.aspectRatio = 1.7,
   }) : super(key: key);
 
@@ -40,24 +42,18 @@ class ChartWrapper extends StatelessWidget {
       aspectRatio: aspectRatio,
       child: Container(
         height: 300,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          color: const Color(0xff232d37),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              offset: const Offset(0, 4),
-              blurRadius: 30,
-            ),
-          ],
-        ),
+        decoration: isCard
+            ? BoxDecoration(
+                borderRadius: BorderRadius.circular(32),
+                border: Border.all(
+                  color: const Color.fromRGBO(0, 0, 0, 0.1),
+                  width: 1,
+                ),
+              )
+            : null,
         child: Padding(
-          padding: const EdgeInsets.only(
-            left: 12,
-            right: 24,
-            top: 16,
-            bottom: 4,
-          ),
+          padding:
+              const EdgeInsets.only(left: 8, right: 24, top: 24, bottom: 24),
           child: child,
         ),
       ),

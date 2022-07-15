@@ -2,9 +2,7 @@ import 'dart:math';
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:scimovement/api.dart';
-import 'package:scimovement/models/settings.dart';
 import 'package:scimovement/widgets/chart_wrapper.dart';
 
 class HeartRateChart extends StatelessWidget {
@@ -21,16 +19,14 @@ class HeartRateChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    SettingsModel settings = Provider.of<SettingsModel>(context);
-
     return ChartWrapper(
-      child: _chart(settings),
+      child: _chart(),
       loading: false,
       isEmpty: heartRates.isEmpty,
     );
   }
 
-  Widget _chart(SettingsModel settings) {
+  Widget _chart() {
     if (heartRates.isEmpty) return Container();
 
     List<double> values = heartRates.map((HeartRate hr) => hr.value).toList();
@@ -79,8 +75,8 @@ class HeartRateChart extends StatelessWidget {
             ),
           ),
         ),
-        minX: settings.minTimeForChart(heartRates.first.time),
-        maxX: settings.maxTimeForChart(heartRates.last.time),
+        minX: heartRates.first.time.microsecondsSinceEpoch.toDouble(),
+        maxX: heartRates.last.time.microsecondsSinceEpoch.toDouble(),
         minY: values.reduce(min) - 10,
         maxY: (values.reduce(max) + 10).roundToDouble(),
         lineBarsData: [
