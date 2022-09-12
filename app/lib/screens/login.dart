@@ -1,27 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class LoginScreen extends HookWidget {
+class LoginScreen extends HookConsumerWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    AuthModel auth = Provider.of<AuthModel>(context, listen: false);
+  Widget build(BuildContext context, WidgetRef ref) {
     final _userIdController = useTextEditingController();
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'RullaPå',
-          style: AppTheme.appBarTextStyle,
-        ),
-      ),
+      appBar: AppTheme.appBar('RullaPå'),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 64.0, vertical: 24.0),
         child: ListView(
@@ -74,8 +67,7 @@ class LoginScreen extends HookWidget {
               secondary: true,
               width: 180,
               onPressed: () async {
-                bool success = await auth.login(_userIdController.text);
-                if (success) context.goNamed('home');
+                ref.read(userProvider.notifier).login(_userIdController.text);
               },
             ),
           ],

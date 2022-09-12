@@ -21,17 +21,24 @@ extension ParseToString on Unit {
   }
 }
 
+class WidgetValues {
+  final int previous;
+  final int current;
+
+  const WidgetValues(this.current, this.previous);
+
+  double get percentChange => ((current - previous) / previous) * 100;
+}
+
 class StatWidget extends StatelessWidget {
   final Unit unit;
-  final int value;
-  final int oldValue;
+  final WidgetValues values;
   final String asset;
 
   const StatWidget({
     Key? key,
     required this.unit,
-    required this.value,
-    required this.oldValue,
+    required this.values,
     required this.asset,
   }) : super(key: key);
 
@@ -50,19 +57,15 @@ class StatWidget extends StatelessWidget {
         child: Column(
           children: [
             SvgPicture.asset(asset),
-            const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.baseline,
               textBaseline: TextBaseline.alphabetic,
               children: [
                 AnimatedDigitWidget(
-                  value: value,
+                  value: values.current,
                   duration: const Duration(milliseconds: 250),
-                  textStyle: const TextStyle(
-                    fontSize: 48,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  textStyle: AppTheme.headLine1,
                 ),
                 Text(
                   ' ${unit.displayString()}',
@@ -78,11 +81,8 @@ class StatWidget extends StatelessWidget {
               textBaseline: TextBaseline.alphabetic,
               children: [
                 Text(
-                  oldValue.toString(),
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  values.previous.toString(),
+                  style: AppTheme.labelLarge,
                 ),
                 Text(
                   ' ${unit.displayString()}',
@@ -98,20 +98,16 @@ class StatWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               textBaseline: TextBaseline.alphabetic,
               children: [
-                iconForChange(calcPercent),
+                iconForChange(values.percentChange),
                 Text(
-                  '${calcPercent.toStringAsFixed(1)}%',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: colorForChange(calcPercent),
+                  '${values.percentChange.toStringAsFixed(1)}%',
+                  style: AppTheme.labelTiny.copyWith(
+                    color: colorForChange(values.percentChange),
                   ),
                 ),
-                const Text(
+                Text(
                   ' from yesterday.',
-                  style: TextStyle(
-                    fontSize: 11,
-                  ),
+                  style: AppTheme.labelTiny,
                 )
               ],
             )
@@ -120,8 +116,6 @@ class StatWidget extends StatelessWidget {
       ),
     );
   }
-
-  double get calcPercent => ((value - oldValue) / oldValue) * 100;
 
   Color colorForChange(double change) {
     bool isPositive = unit == Unit.calories ? change > 0 : change < 0;

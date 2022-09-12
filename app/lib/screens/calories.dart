@@ -1,7 +1,5 @@
 import 'package:animated_digit/animated_digit.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:scimovement/models/energy.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/energy_display.dart';
 import 'package:scimovement/widgets/stat_widget.dart';
@@ -11,22 +9,15 @@ class CaloriesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    EnergyModel energyModel = Provider.of<EnergyModel>(context);
-
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Calories',
-          style: AppTheme.appBarTextStyle,
-        ),
-      ),
+      appBar: AppTheme.appBar('Calories'),
       body: Padding(
         padding: AppTheme.screenPadding,
         child: Column(
           children: [
             StatHeader(
               unit: Unit.calories,
-              value: energyModel.energyTotal.toInt(),
+              value: 0,
             ),
             _separator(),
             const EnergyDisplay(isCard: false),

@@ -1,13 +1,45 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:provider/provider.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api.dart';
-import 'package:scimovement/models/energy.dart';
+import 'package:scimovement/models/activity.dart';
+import 'package:scimovement/models/config.dart';
 import 'dart:math';
 import 'package:scimovement/widgets/chart_wrapper.dart';
 
-class EnergyDisplay extends HookWidget {
+class ChartValues {
+  final List<Energy> previous;
+  final List<Energy> current;
+
+  const ChartValues(this.current, this.previous);
+}
+
+final energyChartProvider = FutureProvider<ChartValues>((ref) async {
+  List<Energy> current =
+      await ref.watch(averageEnergyProvider(const Pagination()).future);
+  List<Energy> previous = await ref.watch(averageEnergyProvider(
+          const Pagination(page: 1, duration: Duration(days: 1)))
+      .future);
+  return ChartValues(
+    current,
+    previous
+        .map(
+          (e) => Energy(
+            DateTime(
+              e.time.year,
+              e.time.month,
+              e.time.day + 1,
+              e.time.hour,
+              e.time.minute,
+            ),
+            e.value,
+          ),
+        )
+        .toList(),
+  );
+});
+
+class EnergyDisplay extends ConsumerWidget {
   final bool isCard;
 
   const EnergyDisplay({
@@ -16,33 +48,29 @@ class EnergyDisplay extends HookWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    EnergyModel energyModel = Provider.of<EnergyModel>(context);
-
+  Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       children: [
-        ChartWrapper(
-          isCard: isCard,
-          child: _energyChart(
-            energyModel.averageEnergy,
-            energyModel.prevAverage
-                .map(
-                  (e) => Energy(
-                    DateTime(
-                      e.time.year,
-                      e.time.month,
-                      e.time.day + 1,
-                      e.time.hour,
-                      e.time.minute,
-                    ),
-                    e.value,
-                  ),
-                )
-                .toList(),
-          ),
-          loading: energyModel.loading,
-          isEmpty: energyModel.energy.isEmpty,
-        ),
+        ref.watch(energyChartProvider).when(
+              data: (values) => ChartWrapper(
+                loading: false,
+                isEmpty: false,
+                child: _energyChart(values.current, values.previous),
+              ),
+              error: (_, __) => ChartWrapper(
+                loading: false,
+                isEmpty: true,
+                child: Container(),
+              ),
+              loading: () => ChartWrapper(
+                loading: true,
+                isEmpty: false,
+                child: Container(),
+              ),
+            ),
+        //   loading: energyModel.loading,
+        //   isEmpty: energyModel.energy.isEmpty,
+        // ),
         const SizedBox(height: 8),
       ],
     );

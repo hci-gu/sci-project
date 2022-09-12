@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import 'package:scimovement/api.dart';
 import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/snackbar_message.dart';
 import 'package:scimovement/widgets/text_field.dart';
-import 'package:provider/provider.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    AuthModel auth = Provider.of<AuthModel>(context);
+  Widget build(BuildContext context, WidgetRef ref) {
+    User? user = ref.watch(userProvider);
 
-    if (auth.user != null) {
-      return UserSettings(auth.user!, auth: auth);
+    if (user != null) {
+      return UserSettings(user);
     }
     return const Center(child: CircularProgressIndicator());
   }
@@ -23,12 +23,10 @@ class SettingsScreen extends StatelessWidget {
 
 class UserSettings extends StatelessWidget {
   final User user;
-  final AuthModel auth;
 
   const UserSettings(
     this.user, {
     Key? key,
-    required this.auth,
   }) : super(key: key);
 
   FormGroup buildForm() => fb.group(
@@ -128,10 +126,7 @@ class UserSettings extends StatelessWidget {
               keyboardType: TextInputType.number,
             ),
             spacer,
-            ReactiveFormConsumer(
-              builder: ((context, formGroup, child) =>
-                  _submitButton(context, form)),
-            ),
+            const SubmitButton(),
             spacer,
             _separator(),
             spacer,
@@ -142,7 +137,7 @@ class UserSettings extends StatelessWidget {
             spacer,
             _separator(),
             spacer,
-            _logoutButton(context),
+            const LogoutButton(),
             spacer,
             _separator(),
             spacer,
@@ -151,52 +146,11 @@ class UserSettings extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             Text(
-              auth.user?.id ?? '',
+              user.id,
               textAlign: TextAlign.center,
             ),
           ],
         );
-      },
-    );
-  }
-
-  Widget _submitButton(BuildContext context, FormGroup form) {
-    return Button(
-      loading: auth.loading,
-      title: 'Save profile information',
-      width: 240,
-      disabled: form.pristine || !form.valid,
-      secondary: true,
-      onPressed: () async {
-        FocusManager.instance.primaryFocus?.unfocus();
-        try {
-          await auth.updateUser({
-            'weight': form.value['weight'],
-            'injuryLevel': form.value['injuryLevel'],
-            'gender': (form.value['gender'] as Gender).name,
-            'condition': (form.value['condition'] as Condition).name,
-          });
-        } catch (e) {
-          return;
-        }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackbarMessage(
-            context: context,
-            message: 'Uppdaterad',
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _logoutButton(BuildContext context) {
-    return Button(
-      title: 'Logga ut',
-      width: 220,
-      secondary: true,
-      onPressed: () async {
-        FocusManager.instance.primaryFocus?.unfocus();
-        await auth.logout();
       },
     );
   }
@@ -206,6 +160,55 @@ class UserSettings extends StatelessWidget {
       color: const Color.fromRGBO(0, 0, 0, 0.1),
       width: 5000,
       height: 1,
+    );
+  }
+}
+
+class SubmitButton extends ConsumerWidget {
+  const SubmitButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ReactiveFormConsumer(
+      builder: ((context, form, child) => Button(
+            title: 'Save profile information',
+            width: 240,
+            disabled: form.pristine || !form.valid,
+            secondary: true,
+            onPressed: () async {
+              FocusManager.instance.primaryFocus?.unfocus();
+              try {
+                await ref.read(userProvider.notifier).update({
+                  'weight': form.value['weight'],
+                  'injuryLevel': form.value['injuryLevel'],
+                  'gender': (form.value['gender'] as Gender).name,
+                  'condition': (form.value['condition'] as Condition).name,
+                });
+              } catch (e) {
+                return;
+              }
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackbarMessage(
+                  context: context,
+                  message: 'Uppdaterad',
+                ),
+              );
+            },
+          )),
+    );
+  }
+}
+
+class LogoutButton extends ConsumerWidget {
+  const LogoutButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Button(
+      title: 'Logga ut',
+      width: 220,
+      secondary: true,
+      onPressed: () => ref.read(userProvider.notifier).logout(),
     );
   }
 }

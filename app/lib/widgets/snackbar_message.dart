@@ -31,8 +31,7 @@ class SnackbarMessage extends SnackBar {
                   message,
                   textAlign: TextAlign.center,
                   maxLines: 3,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 16),
+                  style: AppTheme.labelLarge,
                 ),
               ),
             ],
