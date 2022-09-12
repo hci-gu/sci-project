@@ -11,6 +11,7 @@ const {
   checkAndSaveCounts,
   energyForPeriod,
   activityForPeriod,
+  fromToForDate,
 } = require('./utils')
 const validation = require('./validation')
 
@@ -153,24 +154,15 @@ router.get('/:id/energy', validator.query(querySchema), async (req, res) => {
 router.get('/:id/energy/today', async (req, res) => {
   const { id } = req.params
   const { activity, watt } = req.query
-  const now = new Date()
-  const startOfDay = new Date(now.setHours(0, 0, 0, 0))
-  const endOfDay = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate(),
-    23,
-    59,
-    59
-  )
+  const [from, to] = fromToForDate(new Date())
 
   try {
     const energy = await energyForPeriod({
       id,
       activity,
       watt,
-      from: startOfDay,
-      to: endOfDay,
+      from,
+      to,
     })
 
     return res.json({
@@ -199,6 +191,15 @@ router.get('/:id/activity', async (req, res) => {
     console.log('GET /users/:id/activity', e)
     return res.sendStatus(500)
   }
+})
+
+router.get('/:id/day/:date', async (req, res) => {
+  const [from, to] = fromToForDate(new Date(req.params.date))
+
+  res.send({
+    from,
+    to,
+  })
 })
 
 router.get('/:id/test-push', async (req, res) => {

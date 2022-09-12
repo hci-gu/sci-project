@@ -130,10 +130,24 @@ const promiseSeries = (items, method) => {
 const getUsers = () =>
   User.getAll().then((users) => users.map((user) => user.dataValues))
 
+const fromToForDate = (date) => {
+  const from = new Date(date.setHours(0, 0, 0, 0))
+  const to = new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    23,
+    59,
+    59
+  )
+  return [from, to]
+}
+
 module.exports = {
   checkAndSaveCounts,
   energyForPeriod,
   activityForPeriod,
   getUsers,
   promiseSeries,
+  fromToForDate,
 }

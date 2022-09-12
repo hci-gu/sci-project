@@ -3,7 +3,7 @@ const fs = require('fs')
 
 const settings = {
   gcm: {
-    // id: process.env.GCM_KEY,
+    id: process.env.GCM_KEY,
   },
   apn: {
     token: {

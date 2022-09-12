@@ -3,6 +3,8 @@ const ACTIVITY = {
   SKI_ERGO: 'ski-ergo',
   ARM_ERGO: 'arm-ergo',
   STILL: 'still',
+  MOVEMENT: 'movement',
+  HIGH_ACTIVITY: 'high-activity',
 }
 
 const {
@@ -39,4 +41,7 @@ const getCoeff = ({ condition, activity }) => {
   }
 }
 
-module.exports = getCoeff
+module.exports = {
+  getCoeff,
+  ACTIVITY,
+}

@@ -1,4 +1,4 @@
-const getCoeff = require('./coeff')
+const { ACTIVITY, getCoeff } = require('./coeff')
 
 const valueForGender = (gender) => {
   if (gender === 'male') return 2
@@ -32,12 +32,22 @@ const getEnergy = ({
       condition: valueForCondition(condition),
     }
     let still = false
+    let activityLevel = 'sedentary'
     let coeff
-    if ((!activity || activity === 'none') && a < 2000) {
-      still = true
-      coeff = getCoeff({ activity: 'still' })
-    } else {
+    if (activity && activity != ACTIVITY.still) {
       coeff = getCoeff({ condition, activity })
+    } else if (
+      (condition === 'paraplegic' && a > 9515) ||
+      (condition === 'tetraplegic' && a > 4887)
+    ) {
+      coeff = getCoeff({ condition, activity: ACTIVITY.HIGH_ACTIVITY })
+      activityLevel = 'high-activity'
+    } else if (a > 2700) {
+      coeff = getCoeff({ condition, activity: ACTIVITY.MOVEMENT })
+      activityLevel = 'movement'
+    } else {
+      coeff = getCoeff({ condition, activity: ACTIVITY.STILL })
+      activityLevel = 'sedentary'
     }
 
     let energy = coeff.constant
@@ -49,6 +59,7 @@ const getEnergy = ({
       t,
       still,
       energy: Math.max(energy, 0),
+      activityLevel,
     }
   })
 }

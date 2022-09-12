@@ -15,12 +15,12 @@ const checkActivityAndSendMessage = async (user) => {
 
   const cacheKey = `${user.id}-activity-notification`
   const notification = await redis.get(cacheKey)
-  if (activity.minutesInactive > 45 && !notification) {
+  if (activity.minutesInactive >= 60 && !notification) {
     const message = {
       title: 'Dags att rulla',
       body: `Du har varit inaktiv i ${activity.minutesInactive} minuter, dags att rulla lite.`,
     }
-    await redis.set(cacheKey, message, 60 * 60)
+    await redis.set(cacheKey, message, 60 * 90)
     push.send({
       deviceId: user.deviceId,
       message,
@@ -31,7 +31,7 @@ const checkActivityAndSendMessage = async (user) => {
 const checkForDataAndSendMessage = async (user) => {
   const counts = await AccelCount.find({
     userId: user.id,
-    from: moment().subtract(10, 'minutes').toDate(),
+    from: moment().subtract(1, 'hour').toDate(),
     to: new Date(),
   })
 
@@ -41,9 +41,9 @@ const checkForDataAndSendMessage = async (user) => {
     if (!notification) {
       const message = {
         title: 'Ingen data',
-        body: `Din klocka har inte skickat någon data de senaste 10 minuterna, se till att klock appen och Fitbit är igång på din mobil.`,
+        body: `Din klocka har inte skickat någon data den senaste timmen, se till att klock appen och Fitbit är igång på din mobil.`,
       }
-      await redis.set(cacheKey, message, 60 * 60 * 3)
+      await redis.set(cacheKey, message, 60 * 60 * 5)
       push.send({
         deviceId: user.deviceId,
         message,
@@ -61,7 +61,7 @@ const sendMessages = async (user) => {
 }
 
 // run every other minute during the day
-const job = new CronJob('0 */2 9-21 * * *', async () => {
+const job = new CronJob('0 */2 8-19 * * *', async () => {
   const users = await getUsers()
 
   await Promise.all(users.filter((u) => u.deviceId).map(sendMessages))
