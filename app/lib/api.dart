@@ -88,15 +88,31 @@ class HeartRate {
   }
 }
 
+enum ActivityLevel {
+  sedentary,
+  movement,
+  active,
+}
+
 class Energy {
   final DateTime time;
   final double value;
+  final ActivityLevel activityLevel;
 
-  Energy(this.time, this.value);
+  Energy(this.time, this.value, [this.activityLevel = ActivityLevel.sedentary]);
 
   factory Energy.fromJson(Map<String, dynamic> json) {
     double value = json['energy'] != null ? json['energy'].toDouble() : 0.0;
-    return Energy(DateTime.parse(json['t']), value);
+    ActivityLevel activityLevel;
+
+    if (json['activityLevel'] == 'sedentary') {
+      activityLevel = ActivityLevel.sedentary;
+    } else if (json['activityLevel'] == 'high-activity') {
+      activityLevel = ActivityLevel.active;
+    } else {
+      activityLevel = ActivityLevel.movement;
+    }
+    return Energy(DateTime.parse(json['t']), value, activityLevel);
   }
 }
 

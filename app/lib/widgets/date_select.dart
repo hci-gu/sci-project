@@ -1,55 +1,49 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:scimovement/models/activity.dart';
-import 'package:scimovement/models/energy.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:scimovement/models/config.dart';
 import 'package:scimovement/widgets/button.dart';
 
-class DateSelect extends StatelessWidget {
+class DateSelect extends ConsumerWidget {
   const DateSelect({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    ActivityModel activityModel = Provider.of<ActivityModel>(context);
-    EnergyModel energyModel = Provider.of<EnergyModel>(context);
+  Widget build(BuildContext context, WidgetRef ref) {
+    DateTime date = ref.watch(dateProvider);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         IconButton(
           onPressed: () {
-            activityModel.goBack();
-            energyModel.setDate(activityModel.from);
-            energyModel.getEnergy();
+            ref.read(dateProvider.notifier).state = date.subtract(
+              const Duration(days: 1),
+            );
           },
           icon: const Icon(Icons.arrow_back_ios_new),
         ),
         Button(
           width: 120,
-          title: _textForButton(activityModel),
-          subtitle: !activityModel.canFoForward
-              ? activityModel.from.toString().substring(0, 10)
-              : null,
+          title: date.toString().substring(0, 10),
           onPressed: () {},
         ),
-        if (activityModel.canFoForward)
-          IconButton(
-            onPressed: () {
-              activityModel.goForward();
-              energyModel.setDate(activityModel.from);
-              energyModel.getEnergy();
-            },
-            icon: const Icon(Icons.arrow_forward),
-          )
-        else
-          const SizedBox(width: 40)
+        IconButton(
+          onPressed: () {
+            ref.read(dateProvider.notifier).state = date.add(
+              const Duration(days: 1),
+            );
+          },
+          icon: const Icon(Icons.arrow_forward),
+        )
       ],
     );
   }
 
-  String _textForButton(ActivityModel activityModel) {
-    if (!activityModel.canFoForward) {
-      return 'Today';
-    }
-    return activityModel.from.toString().substring(0, 10);
-  }
+  bool canGoForward(date) => date.isBefore(DateTime.now());
+
+  // String _textForButton(ActivityModel activityModel) {
+  //   if (!activityModel.canFoForward) {
+  //     return 'Today';
+  //   }
+  //   return activityModel.from.toString().substring(0, 10);
+  // }
 }
