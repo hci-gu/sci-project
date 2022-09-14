@@ -4,8 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "clean": "rimraf dist/",
+    "copy-files": "copyfiles -u 1 lib/**/*.json dist/",
     "dev": "ts-node ./lib/index.ts",
-    "start-prod": "NODE_ENV=production node ./lib/index.js",
+    "build": "yarn clean && tsc && yarn copy-files",
+    "start-prod": "NODE_ENV=production node ./dist/index.js",
     "test": "jest --runInBand --testTimeout=30000"
   },
   "keywords": [],
@@ -33,7 +36,9 @@
     "@types/express": "^4.17.13",
     "@types/node": "^18.7.16",
     "@types/node-pushnotifications": "^1.0.4",
+    "copyfiles": "^2.4.1",
     "jest": "^27.5.1",
+    "rimraf": "^3.0.2",
     "supertest": "^6.2.2",
     "ts-node": "^10.9.1",
     "typescript": "^4.8.3"

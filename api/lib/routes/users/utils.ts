@@ -7,8 +7,8 @@ import { Activity, getEnergy } from '../../adapters/energy'
 import { calculateCounts } from '../../adapters/counts'
 
 import * as utils from '../../utils'
-import { Accel } from '../../db/models/Accel'
-import { HeartRate } from '../../db/models/HeartRate'
+import { Accel, AccelData } from '../../db/models/Accel'
+import { HeartRate, HeartRateData } from '../../db/models/HeartRate'
 
 const INACTIVE_THRESHOLD = 3000
 
@@ -17,8 +17,8 @@ export const countsCacheKey = (userId: string, minute: string) =>
 
 export const checkAndSaveCounts = async (
   userId: string,
-  accelDataPoints: Accel[],
-  hrDataPoints: HeartRate[]
+  accelDataPoints: AccelData[],
+  hrDataPoints: HeartRateData[]
 ) => {
   const accMinutes = utils.group(accelDataPoints, (d) => utils.getMinute(d.t))
   const hrMinutes = utils.group(hrDataPoints, (d) => utils.getMinute(d.t))
