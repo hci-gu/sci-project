@@ -3,3 +3,5 @@ node_modules
 lib/push/cert
 
 lib/adapters/coeff.json
+
+dist
