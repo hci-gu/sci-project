@@ -1,12 +1,13 @@
-const { getUsers, activityForPeriod } = require('./routes/users/utils')
-const moment = require('moment')
-const redis = require('./adapters/redis')
-const push = require('./push')
-const { AccelCount } = require('./db/models')
+import { activityForPeriod } from './routes/users/utils'
+import moment from 'moment'
+import * as redis from './adapters/redis'
+import UserModel, { User } from './db/models/User'
+import * as push from './push'
+import AccelCount from './db/models/AccelCount'
 
 const CronJob = require('cron').CronJob
 
-const checkActivityAndSendMessage = async (user) => {
+const checkActivityAndSendMessage = async (user: User) => {
   const activity = await activityForPeriod({
     from: moment().subtract(1, 'hour').toDate(),
     to: new Date(),
@@ -16,7 +17,7 @@ const checkActivityAndSendMessage = async (user) => {
   const cacheKey = `${user.id}-activity-notification`
   const notification = await redis.get(cacheKey)
   if (activity.minutesInactive >= 60 && !notification) {
-    const message = {
+    const message: push.PushMessage = {
       title: 'Dags att rulla',
       body: `Du har varit inaktiv i ${activity.minutesInactive} minuter, dags att rulla lite.`,
     }
@@ -28,7 +29,7 @@ const checkActivityAndSendMessage = async (user) => {
   }
 }
 
-const checkForDataAndSendMessage = async (user) => {
+const checkForDataAndSendMessage = async (user: User) => {
   const counts = await AccelCount.find({
     userId: user.id,
     from: moment().subtract(1, 'hour').toDate(),
@@ -53,7 +54,7 @@ const checkForDataAndSendMessage = async (user) => {
   return counts.length > 0
 }
 
-const sendMessages = async (user) => {
+const sendMessages = async (user: User) => {
   const hasData = await checkForDataAndSendMessage(user)
   if (hasData) {
     checkActivityAndSendMessage(user)
@@ -62,7 +63,7 @@ const sendMessages = async (user) => {
 
 // run every other minute during the day
 const job = new CronJob('0 */2 8-19 * * *', async () => {
-  const users = await getUsers()
+  const users = await UserModel.getAll()
 
   await Promise.all(users.filter((u) => u.deviceId).map(sendMessages))
 })

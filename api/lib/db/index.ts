@@ -1,7 +1,15 @@
-const { Sequelize } = require('sequelize')
-const models = require('./models')
+import { Sequelize } from 'sequelize'
+import { init } from './models'
 
-module.exports = async (conf) => {
+type DBProps = {
+  database: string
+  username: string
+  password: string
+  host: string
+  port: number
+}
+
+export default async (conf: DBProps) => {
   const sequelize = conf
     ? new Sequelize({
         define: {
@@ -18,10 +26,10 @@ module.exports = async (conf) => {
     : new Sequelize('sqlite::memory', { logging: false })
 
   try {
-    await sequelize.query(`CREATE DATABASE ${conf.DB}`)
+    await sequelize.query(`CREATE DATABASE ${conf.database}`)
   } catch (e) {}
 
-  await models.init(sequelize)
+  await init(sequelize)
   await sequelize.sync()
 
   return sequelize

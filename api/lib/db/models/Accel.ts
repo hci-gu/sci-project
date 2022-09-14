@@ -1,0 +1,120 @@
+import {
+  Model,
+  DataTypes,
+  Op,
+  InferAttributes,
+  InferCreationAttributes,
+  Sequelize,
+  CreationOptional,
+  NonAttribute,
+  ForeignKey,
+  ModelStatic,
+} from 'sequelize'
+import { User } from './User'
+
+export class Accel extends Model<
+  InferAttributes<Accel>,
+  InferCreationAttributes<Accel>
+> {
+  declare id: CreationOptional<number>
+  declare t: Date
+  declare x: number
+  declare y: number
+  declare z: number
+
+  declare UserId?: ForeignKey<User['id']>
+}
+
+let AccelModel: ModelStatic<Accel>
+let sequelizeInstance: Sequelize
+
+export default {
+  init: (sequelize: Sequelize) => {
+    sequelizeInstance = sequelizeInstance
+    AccelModel = sequelize.define<Accel>(
+      'Accel',
+      {
+        id: {
+          type: DataTypes.INTEGER,
+          primaryKey: true,
+          autoIncrement: true,
+        },
+        t: DataTypes.DATE,
+        x: DataTypes.FLOAT,
+        y: DataTypes.FLOAT,
+        z: DataTypes.FLOAT,
+      },
+      {
+        timestamps: false,
+        defaultScope: {
+          attributes: { exclude: ['id', 'UserId'] },
+        },
+      }
+    )
+    return Accel
+  },
+  associate: (sequelize: Sequelize) => {
+    AccelModel.belongsTo(sequelize.models.User, {
+      foreignKey: {
+        allowNull: false,
+      },
+      onDelete: 'CASCADE',
+    })
+  },
+  save: (data: any[], userId: string) =>
+    Promise.all(
+      data.map((d) =>
+        AccelModel.create({
+          ...d,
+          UserId: userId,
+        })
+      )
+    ),
+  find: ({ userId, from, to }: { userId: string; from: Date; to: Date }) =>
+    AccelModel.findAll({
+      where: {
+        UserId: userId,
+        t: {
+          [Op.between]: [from, to],
+        },
+      },
+      order: [['t', 'ASC']],
+    }),
+  group: ({
+    userId,
+    from,
+    to,
+    unit = 'minute',
+  }: {
+    userId: string
+    from: Date
+    to: Date
+    unit: string
+  }) =>
+    AccelModel.findAll({
+      where: {
+        UserId: userId,
+        t: {
+          [Op.between]: [from, to],
+        },
+      },
+      attributes: [
+        [
+          sequelizeInstance.fn('date_trunc', unit, sequelizeInstance.col('t')),
+          'agg_t',
+        ],
+        [sequelizeInstance.fn('avg', sequelizeInstance.col('x')), 'x'],
+        [sequelizeInstance.fn('avg', sequelizeInstance.col('y')), 'y'],
+        [sequelizeInstance.fn('avg', sequelizeInstance.col('z')), 'z'],
+      ],
+      group: 'agg_t',
+      order: [[sequelizeInstance.col('agg_t'), 'ASC']],
+    }).then((docs: any[]) =>
+      docs.map((d) => ({
+        t: d.get({ plain: true }).agg_t,
+        x: d.x,
+        y: d.y,
+        z: d.z,
+      }))
+    ),
+}
