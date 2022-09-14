@@ -12,6 +12,11 @@ import {
 } from 'sequelize'
 import { User } from './User'
 
+export type HeartRateData = {
+  t: Date
+  hr: number
+}
+
 export class HeartRate extends Model<
   InferAttributes<HeartRate>,
   InferCreationAttributes<HeartRate>
@@ -56,11 +61,12 @@ export default {
       onDelete: 'CASCADE',
     })
   },
-  save: (data: any[], userId: string) =>
+  save: (data: HeartRateData[], userId: string) =>
     Promise.all(
       data.map((d) =>
         HeartRateModel.create({
-          ...d,
+          t: new Date(d.t),
+          hr: d.hr,
           UserId: userId,
         })
       )

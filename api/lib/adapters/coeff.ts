@@ -1,3 +1,6 @@
+import { Condition } from '../db/models/User'
+import { Activity } from './energy'
+
 const {
   standardCoeff,
   zeroCoeff,

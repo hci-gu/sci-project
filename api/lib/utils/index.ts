@@ -1,5 +1,4 @@
 type DataPoint = {
-  id: number
   t: Date
   [key: string]: any
 }

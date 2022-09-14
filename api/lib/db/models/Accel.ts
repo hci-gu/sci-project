@@ -12,6 +12,13 @@ import {
 } from 'sequelize'
 import { User } from './User'
 
+export type AccelData = {
+  t: Date
+  x: number
+  y: number
+  z: number
+}
+
 export class Accel extends Model<
   InferAttributes<Accel>,
   InferCreationAttributes<Accel>
@@ -61,11 +68,12 @@ export default {
       onDelete: 'CASCADE',
     })
   },
-  save: (data: any[], userId: string) =>
+  save: (data: AccelData[], userId: string) =>
     Promise.all(
       data.map((d) =>
         AccelModel.create({
           ...d,
+          t: new Date(d.t),
           UserId: userId,
         })
       )

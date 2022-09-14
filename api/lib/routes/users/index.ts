@@ -1,15 +1,12 @@
 import express from 'express'
-import Joi from 'joi'
-import { createValidator, ValidatedRequest } from 'express-joi-validation'
-const validator = createValidator({})
+import { ValidatedRequest } from 'express-joi-validation'
 import UserModel from '../../db/models/User'
 import AccelModel from '../../db/models/Accel'
-import AccelCountModel from '../../db/models/AccelCount'
 import HeartRateModel from '../../db/models/HeartRate'
 
 const router = express.Router()
 
-const handleFitbitData = require('../../adapters/fitbit')
+import handleFitbitData from '../../adapters/fitbit'
 import {
   checkAndSaveCounts,
   energyForPeriod,
