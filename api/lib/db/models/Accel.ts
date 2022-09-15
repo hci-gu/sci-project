@@ -98,7 +98,7 @@ export default {
     from: Date
     to: Date
     unit: string
-  }) =>
+  }): Promise<Accel[]> =>
     AccelModel.findAll({
       where: {
         UserId: userId,
@@ -117,12 +117,14 @@ export default {
       ],
       group: 'agg_t',
       order: [[sequelizeInstance.col('agg_t'), 'ASC']],
-    }).then((docs: any[]) =>
-      docs.map((d) => ({
-        t: d.get({ plain: true }).agg_t,
-        x: d.x,
-        y: d.y,
-        z: d.z,
-      }))
+    }).then(
+      (docs) =>
+        docs.map((d) => ({
+          // @ts-ignore
+          t: d.get({ plain: true }).agg_t,
+          x: d.x,
+          y: d.y,
+          z: d.z,
+        })) as Accel[]
     ),
 }

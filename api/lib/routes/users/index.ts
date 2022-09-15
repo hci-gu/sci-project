@@ -1,22 +1,21 @@
 import express from 'express'
 import { ValidatedRequest } from 'express-joi-validation'
-import UserModel from '../../db/models/User'
 import AccelModel from '../../db/models/Accel'
 import HeartRateModel from '../../db/models/HeartRate'
 
 const router = express.Router()
 
 import handleFitbitData from '../../adapters/fitbit'
+import { checkAndSaveCounts } from './utils'
 import {
-  checkAndSaveCounts,
-  energyForPeriod,
-  activityForPeriod,
-  fromToForDate,
-} from './utils'
-import { getQuery, GetQuerySchema, UserBodySchema } from './validation'
-const validation = require('./validation')
+  getQuery,
+  GetQuerySchema,
+  userBody,
+  UserBodySchema,
+} from './validation'
+import UserModel from '../../db/models/User'
 
-router.post('/', validation.userBody, async (req, res) => {
+router.post('/', userBody, async (req, res) => {
   const result = await UserModel.save(req.body)
   res.send(result)
 })
@@ -46,7 +45,7 @@ router.get('/:id', async (req, res) => {
 
 router.patch(
   '/:id',
-  validation.userBody,
+  userBody,
   async (req: ValidatedRequest<UserBodySchema>, res) => {
     const { id } = req.params
 
@@ -87,6 +86,7 @@ router.post('/:id/data', async (req, res) => {
   res.sendStatus(200)
 })
 
+// remove this later
 router.get(
   '/:id/data/:type',
   getQuery,
@@ -118,89 +118,5 @@ router.get(
     res.json(dataPoints)
   }
 )
-
-router.get(
-  '/:id/energy',
-  getQuery,
-  async (req: ValidatedRequest<GetQuerySchema>, res) => {
-    const { id } = req.params
-    const now = new Date()
-    const { from, to, activity, watt } = req.query
-
-    try {
-      const energy = await energyForPeriod({
-        id,
-        from,
-        to,
-        activity,
-        watt,
-        overwrite: req.query,
-      })
-
-      return res.json(energy)
-    } catch (e) {
-      console.log('GET /users/:id/energy', e)
-      return res.sendStatus(500)
-    }
-  }
-)
-
-router.get(
-  '/:id/energy/today',
-  getQuery,
-  async (req: ValidatedRequest<GetQuerySchema>, res) => {
-    const { id } = req.params
-    const { activity, watt } = req.query
-    const [from, to] = fromToForDate(new Date())
-
-    try {
-      const energy = await energyForPeriod({
-        id,
-        activity,
-        watt,
-        from,
-        to,
-      })
-
-      return res.json({
-        energy: energy.reduce((acc, curr) => acc + curr.energy, 0),
-      })
-    } catch (e) {
-      console.log('GET /users/:id/energy/today', e)
-      return res.sendStatus(500)
-    }
-  }
-)
-
-router.get(
-  '/:id/activity',
-  getQuery,
-  async (req: ValidatedRequest<GetQuerySchema>, res) => {
-    const { id } = req.params
-    const { from, to } = req.query
-
-    try {
-      const activity = await activityForPeriod({
-        id,
-        from,
-        to,
-      })
-
-      return res.json(activity)
-    } catch (e) {
-      console.log('GET /users/:id/activity', e)
-      return res.sendStatus(500)
-    }
-  }
-)
-
-router.get('/:id/day/:date', async (req, res) => {
-  const [from, to] = fromToForDate(new Date(req.params.date))
-
-  res.send({
-    from,
-    to,
-  })
-})
 
 export default router
