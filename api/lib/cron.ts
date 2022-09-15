@@ -1,4 +1,4 @@
-import { activityForPeriod } from './routes/users/utils'
+import { activityForPeriod } from './routes/sedentary/utils'
 import moment from 'moment'
 import * as redis from './adapters/redis'
 import UserModel, { User } from './db/models/User'

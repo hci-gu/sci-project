@@ -1,10 +1,10 @@
 import Joi from 'joi'
+import moment from 'moment'
 import {
   ContainerTypes,
   createValidator,
   ValidatedRequestSchema,
 } from 'express-joi-validation'
-import { Activity } from '../../adapters/energy'
 import { Condition, Gender } from '../../db/models/User'
 const validator = createValidator({})
 
@@ -43,12 +43,6 @@ export interface GetQuerySchema extends ValidatedRequestSchema {
     from: Date
     to: Date
     group: string
-    activity: Activity
-    gender: Gender
-    condition: Condition
-    watt: number
-    injuryLevel: number
-    weight: number
   }
 }
 
@@ -56,22 +50,10 @@ export const getQuery = validator.query(
   Joi.object({
     from: Joi.date()
       .optional()
-      .default(new Date().setDate(new Date().getDate() - 1)),
+      .default(moment().subtract(1, 'day').endOf('day').toDate()),
     to: Joi.date().optional().default(new Date()),
     group: Joi.string()
       .valid('hour', 'day', 'week', 'month', 'year')
       .optional(),
-    activity: Joi.string()
-      .valid(...Object.values(Activity))
-      .optional(),
-    gender: Joi.string()
-      .valid(...Object.values(Gender))
-      .optional(),
-    condition: Joi.string()
-      .valid(...Object.values(Condition))
-      .optional(),
-    watt: Joi.number().optional(),
-    injuryLevel: Joi.number().optional(),
-    weight: Joi.number().optional(),
   })
 )
