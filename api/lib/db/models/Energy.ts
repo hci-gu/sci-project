@@ -9,53 +9,28 @@ import {
   ForeignKey,
   ModelStatic,
 } from 'sequelize'
-import {
-  getEnergyForCountAndActivity,
-  movementLevelForAccAndCondition,
-} from '../../adapters/energy'
-import UserModel, { User } from './User'
-import EnergyModel from './Energy'
+import { Activity } from '../../constants'
+import { User } from './User'
 
-export class AccelCount extends Model<
-  InferAttributes<AccelCount>,
-  InferCreationAttributes<AccelCount>
+export class Energy extends Model<
+  InferAttributes<Energy>,
+  InferCreationAttributes<Energy>
 > {
   declare id: CreationOptional<number>
   declare t: Date
-  declare hr: number
-  declare a: number
+  declare kcal: number
+  declare activity: Activity
 
   declare UserId?: ForeignKey<User['id']>
 }
 
-const afterCreate = async (count: AccelCount) => {
-  if (!count.UserId) return
-  const user = await UserModel.get(count.UserId)
-
-  if (!user) return
-
-  const activity = movementLevelForAccAndCondition(count.a, user.condition)
-  const kcal = getEnergyForCountAndActivity(user, count)
-
-  await EnergyModel.save(
-    [
-      {
-        t: count.t,
-        activity,
-        kcal,
-      },
-    ],
-    count.UserId
-  )
-}
-
 let sequelizeInstance: Sequelize
-let AccelCountModel: ModelStatic<AccelCount>
+let EnergyModel: ModelStatic<Energy>
 export default {
   init: (sequelize: Sequelize) => {
     sequelizeInstance = sequelize
-    AccelCountModel = sequelize.define<AccelCount>(
-      'AccelCount',
+    EnergyModel = sequelize.define<Energy>(
+      'Energy',
       {
         id: {
           type: DataTypes.INTEGER,
@@ -63,36 +38,36 @@ export default {
           autoIncrement: true,
         },
         t: DataTypes.DATE,
-        hr: DataTypes.FLOAT,
-        a: DataTypes.FLOAT,
+        kcal: DataTypes.FLOAT,
+        activity: DataTypes.ENUM(...Object.values(Activity)),
       },
       {
         timestamps: false,
         defaultScope: {
           attributes: { exclude: ['id', 'UserId'] },
         },
-        hooks: {
-          afterCreate,
-        },
       }
     )
-    return AccelCount
+    return EnergyModel
   },
   associate: (sequelize: Sequelize) => {
-    AccelCountModel.belongsTo(sequelize.models.User, {
+    EnergyModel.belongsTo(sequelize.models.User, {
       foreignKey: {
         allowNull: false,
       },
       onDelete: 'CASCADE',
     })
   },
-  save: (data: any[], userId: string) =>
+  save: (
+    data: { t: Date; kcal: number; activity: Activity }[],
+    userId: string
+  ) =>
     Promise.all(
       data.map((d) =>
-        AccelCountModel.create({
+        EnergyModel.create({
           t: d.t,
-          a: d.a,
-          hr: d.hr,
+          kcal: d.kcal,
+          activity: d.activity,
           UserId: userId,
         })
       )
@@ -105,8 +80,8 @@ export default {
     userId: string
     from: Date
     to: Date
-  }): Promise<AccelCount[]> =>
-    AccelCountModel.findAll({
+  }): Promise<Energy[]> =>
+    EnergyModel.findAll({
       where: {
         UserId: userId,
         t: {
@@ -125,8 +100,8 @@ export default {
     from: Date
     to: Date
     unit: string
-  }): Promise<AccelCount[]> =>
-    AccelCountModel.findAll({
+  }): Promise<Energy[]> =>
+    EnergyModel.findAll({
       where: {
         UserId: userId,
         t: {
@@ -138,8 +113,7 @@ export default {
           sequelizeInstance.fn('date_trunc', unit, sequelizeInstance.col('t')),
           'agg_t',
         ],
-        [sequelizeInstance.fn('avg', sequelizeInstance.col('hr')), 'hr'],
-        [sequelizeInstance.fn('avg', sequelizeInstance.col('a')), 'a'],
+        [sequelizeInstance.fn('sum', sequelizeInstance.col('kcal')), 'kcal'],
       ],
       group: 'agg_t',
       order: [[sequelizeInstance.col('agg_t'), 'ASC']],
@@ -149,9 +123,8 @@ export default {
           ({
             // @ts-ignore
             t: d.get({ plain: true }).agg_t,
-            hr: d.hr,
-            a: d.a,
-          } as AccelCount)
+            kcal: d.kcal,
+          } as Energy)
       )
     ),
 }

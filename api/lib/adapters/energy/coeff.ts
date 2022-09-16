@@ -1,5 +1,4 @@
 import { Condition } from '../../db/models/User'
-import { MovementLevel } from '../movement'
 import {
   standardCoeff,
   zeroCoeff,
@@ -36,28 +35,23 @@ const weights = (condition: Condition) => {
 export default function getCoeff({
   condition,
   activity,
-  movementLevel,
 }: {
   condition: Condition
-  activity?: Activity
-  movementLevel: MovementLevel
+  activity: Activity
 }): Coeff {
-  if (activity) {
-    switch (activity) {
-      case Activity.skiErgo:
-        return skiErgo
-      case Activity.armErgo:
-        return armErgo
-      case Activity.weights:
-        return weights(condition)
-    }
-  }
-
-  switch (movementLevel) {
-    case MovementLevel.sedentary:
+  switch (activity) {
+    // training
+    case Activity.skiErgo:
+      return skiErgo
+    case Activity.armErgo:
+      return armErgo
+    case Activity.weights:
+      return weights(condition)
+    // movement
+    case Activity.sedentary:
       return zeroCoeff
-    case MovementLevel.active:
-    case MovementLevel.moving:
+    case Activity.active:
+    case Activity.moving:
     default:
       return standardCoeff
   }
