@@ -1,7 +1,7 @@
 import express from 'express'
 import { ValidatedRequest } from 'express-joi-validation'
 import { getQuery, GetQuerySchema } from '../validation'
-import { energyForPeriod } from './utils'
+import { energyForPeriod, fillEnergyFromCounts } from './utils'
 
 const router = express.Router()
 
@@ -11,7 +11,6 @@ router.get(
   async (req: ValidatedRequest<GetQuerySchema>, res) => {
     const { id } = req.params
     const { from, to, activity, watt, group } = req.query
-    console.log('GET /ENERGY/:id', { from, to, activity, watt, group })
 
     try {
       const energy = await energyForPeriod({
@@ -24,6 +23,26 @@ router.get(
       })
 
       return res.json(energy)
+    } catch (e) {
+      console.log('GET /users/:id/energy', e)
+      return res.sendStatus(500)
+    }
+  }
+)
+
+router.get(
+  '/:id/fill',
+  getQuery,
+  async (req: ValidatedRequest<GetQuerySchema>, res) => {
+    const { id } = req.params
+    const { from, to } = req.query
+    try {
+      await fillEnergyFromCounts({
+        id,
+        from,
+        to,
+      })
+      res.send('OK')
     } catch (e) {
       console.log('GET /users/:id/energy', e)
       return res.sendStatus(500)

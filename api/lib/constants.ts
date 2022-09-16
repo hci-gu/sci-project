@@ -1,4 +1,7 @@
 export enum Activity {
+  sedentary = 'sedentary',
+  moving = 'moving',
+  active = 'active',
   weights = 'weights',
   skiErgo = 'skiErgo',
   armErgo = 'armErgo',
