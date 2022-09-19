@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { Accel } from '../db/models/Accel'
+import { AccelCount } from '../db/models/AccelCount'
 import { HeartRate } from '../db/models/HeartRate'
 import * as utils from '../utils'
 const { PYTHON_API = 'http://localhost:5555' } = process.env
@@ -15,18 +16,16 @@ export const calculateCounts = ({
 }: {
   accel: Accel[]
   hr: HeartRate[]
-}) => {
+}): Promise<AccelCount[]> => {
   const minutes = utils.group(accel, (d) => utils.getMinute(d.t))
+  const minutesWithData = Object.keys(minutes).filter((minute) => {
+    const accel = minutes[minute] as Accel[]
+    return accel.length >= 1600
+  })
 
   return Promise.all(
-    Object.keys(minutes).map(async (minute) => {
+    minutesWithData.map(async (minute) => {
       const accel = minutes[minute] as Accel[]
-      if (accel.length < 1600) {
-        return {
-          minute: new Date(minute).toISOString(),
-          energy: null,
-        }
-      }
       const [xs, ys, zs] = await Promise.all([
         getCounts(accel.map((d) => d.x / 9.82)),
         getCounts(accel.map((d) => d.y / 9.82)),
@@ -41,10 +40,10 @@ export const calculateCounts = ({
       const heartrate = hrs.reduce((acc, d) => acc + d.hr, 0) / hrs.length
 
       return {
-        t: new Date(minute).toISOString(),
+        t: new Date(minute),
         a: accVM,
         hr: heartrate,
-      }
+      } as AccelCount
     })
   )
 }

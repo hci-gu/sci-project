@@ -1,4 +1,4 @@
-const { getCounts } = require('../../lib/adapters/counts')
+import { getCounts } from '../../lib/adapters/counts'
 const accel = require('../data/accel.json')
 
 beforeAll(() => {
@@ -7,7 +7,7 @@ beforeAll(() => {
 
 describe.only('actilife', () => {
   test('correct count', async () => {
-    const accelx = accel.map((d) => d.x / 9.82)
+    const accelx = accel.map((d: any) => d.x / 9.82)
 
     const x = await getCounts(accelx)
     expect(x).toHaveLength(991)

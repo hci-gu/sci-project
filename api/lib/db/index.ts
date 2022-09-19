@@ -9,7 +9,7 @@ type DBProps = {
   port: number
 }
 
-export default async (conf: DBProps) => {
+export default async (conf?: DBProps) => {
   const sequelize = conf
     ? new Sequelize({
         define: {
@@ -26,7 +26,7 @@ export default async (conf: DBProps) => {
     : new Sequelize('sqlite::memory', { logging: false })
 
   try {
-    await sequelize.query(`CREATE DATABASE ${conf.database}`)
+    if (conf) await sequelize.query(`CREATE DATABASE ${conf.database}`)
   } catch (e) {}
 
   await init(sequelize)
