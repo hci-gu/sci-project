@@ -29,7 +29,6 @@ dependencies:
   flutter_svg: ^1.1.1+1
   animated_digit: ^3.2.1
   hooks_riverpod: ^1.0.4
-  flutter_circle_chart: ^1.0.0
 
 dev_dependencies:
   flutter_test:

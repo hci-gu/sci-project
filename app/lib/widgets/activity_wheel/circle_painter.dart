@@ -31,37 +31,24 @@ class CirclePainter extends CustomPainter {
     final center = size.center(Offset.zero);
     final radius = chartRadius - strokeWidth * 0.5;
     final totalValue = items.fold<double>(0, (a, b) => a + b.value);
-    final totalRad = animationValue * math.pi * 2;
+    final totalRad = (animationValue * math.pi * 2) - 0.3;
     double startAngle = 0;
 
-    /// draw circle background
-    // canvas.drawCircle(
-    //     center,
-    //     radius,
-    //     Paint()
-    //       ..color = Colors.black54
-    //       ..strokeWidth = circleStrokeWidth
-    //       ..strokeCap = StrokeCap.round
-    //       ..strokeJoin = StrokeJoin.round
-    //       ..style = PaintingStyle.stroke);
-
     for (var item in items) {
-      var sweepAngle =
-          totalRad * 0.86 * item.animationValue * item.value / totalValue;
-      var offset =
-          totalRad * 0.075 * item.animationValue * item.value / totalValue;
+      var sweepAngle = totalRad * item.animationValue * item.value / totalValue;
       canvas.drawArc(
-          Rect.fromCircle(center: center, radius: radius),
-          startAngle,
-          sweepAngle,
-          false,
-          Paint()
-            ..color = item.color
-            ..strokeWidth = strokeWidth
-            ..strokeCap = StrokeCap.round
-            ..strokeJoin = StrokeJoin.round
-            ..style = PaintingStyle.stroke);
-      startAngle += sweepAngle + (offset * (items.indexOf(item) + 1));
+        Rect.fromCircle(center: center, radius: radius),
+        startAngle - 0.3,
+        sweepAngle - 0.2,
+        false,
+        Paint()
+          ..color = item.color
+          ..strokeWidth = strokeWidth
+          ..strokeCap = StrokeCap.round
+          ..strokeJoin = StrokeJoin.round
+          ..style = PaintingStyle.stroke,
+      );
+      startAngle += sweepAngle + 0.1;
     }
   }
 

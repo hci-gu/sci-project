@@ -9,6 +9,7 @@ class DateSelect extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     DateTime date = ref.watch(dateProvider);
+    String dateText = ref.watch(dateDisplayProvider);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -23,27 +24,42 @@ class DateSelect extends ConsumerWidget {
         ),
         Button(
           width: 120,
-          title: date.toString().substring(0, 10),
-          onPressed: () {},
-        ),
-        IconButton(
-          onPressed: () {
-            ref.read(dateProvider.notifier).state = date.add(
-              const Duration(days: 1),
-            );
+          title: dateText,
+          subtitle:
+              dateText.length != 10 ? date.toString().substring(0, 10) : null,
+          onPressed: () async {
+            DateTime? selectedDate = await _selectDate(context, date);
+
+            if (selectedDate != null) {
+              ref.read(dateProvider.notifier).state = selectedDate;
+            }
           },
-          icon: const Icon(Icons.arrow_forward),
-        )
+        ),
+        if (canGoForward(date))
+          IconButton(
+            onPressed: () {
+              ref.read(dateProvider.notifier).state = date.add(
+                const Duration(days: 1),
+              );
+            },
+            icon: const Icon(Icons.arrow_forward_ios),
+          )
+        else
+          const SizedBox(width: 48),
       ],
     );
   }
 
-  bool canGoForward(date) => date.isBefore(DateTime.now());
+  DateTime get _now => DateTime.now();
+  DateTime get _today => DateTime(_now.year, _now.month, _now.day);
+  bool canGoForward(date) => date.isBefore(_today);
 
-  // String _textForButton(ActivityModel activityModel) {
-  //   if (!activityModel.canFoForward) {
-  //     return 'Today';
-  //   }
-  //   return activityModel.from.toString().substring(0, 10);
-  // }
+  Future<DateTime?> _selectDate(BuildContext context, DateTime date) {
+    return showDatePicker(
+      context: context,
+      initialDate: date,
+      firstDate: date.subtract(const Duration(days: 365 * 10)),
+      lastDate: DateTime.now(),
+    );
+  }
 }
