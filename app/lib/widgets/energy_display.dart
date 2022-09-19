@@ -2,8 +2,9 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api.dart';
-import 'package:scimovement/models/activity.dart';
+import 'package:scimovement/models/energy.dart';
 import 'package:scimovement/models/config.dart';
+import 'package:scimovement/theme/theme.dart';
 import 'dart:math';
 import 'package:scimovement/widgets/chart_wrapper.dart';
 
@@ -16,10 +17,9 @@ class ChartValues {
 
 final energyChartProvider = FutureProvider<ChartValues>((ref) async {
   List<Energy> current =
-      await ref.watch(averageEnergyProvider(const Pagination()).future);
-  List<Energy> previous = await ref.watch(averageEnergyProvider(
-          const Pagination(page: 1, duration: Duration(days: 1)))
-      .future);
+      await ref.watch(dailyEnergyChartProvider(const Pagination()).future);
+  List<Energy> previous = await ref
+      .watch(dailyEnergyChartProvider(const Pagination(page: 1)).future);
   return ChartValues(
     current,
     previous
@@ -55,16 +55,19 @@ class EnergyDisplay extends ConsumerWidget {
               data: (values) => ChartWrapper(
                 loading: false,
                 isEmpty: false,
+                isCard: isCard,
                 child: _energyChart(values.current, values.previous),
               ),
               error: (_, __) => ChartWrapper(
                 loading: false,
                 isEmpty: true,
+                isCard: isCard,
                 child: Container(),
               ),
               loading: () => ChartWrapper(
                 loading: true,
                 isEmpty: false,
+                isCard: isCard,
                 child: Container(),
               ),
             ),
@@ -142,12 +145,9 @@ class EnergyDisplay extends ConsumerWidget {
                   ),
                 )
                 .toList(),
-            preventCurveOverShooting: false,
             barWidth: 3,
             isCurved: true,
-            colors: [
-              Color.fromARGB(255, 205, 12, 86),
-            ],
+            colors: [AppTheme.colors.orange],
             dotData: FlDotData(
               show: true,
               checkToShowDot: (spot, data) => spot.x == data.spots.last.x,
@@ -163,15 +163,14 @@ class EnergyDisplay extends ConsumerWidget {
                   ),
                 )
                 .toList(),
-            preventCurveOverShooting: false,
+            preventCurveOverShooting: true,
             barWidth: 3,
             isCurved: true,
-            colors: const [
-              Color.fromRGBO(0, 0, 0, 0.1),
-            ],
+            colors: [AppTheme.colors.lightGray],
             dotData: FlDotData(
               show: false,
             ),
+            dashArray: [4, 4],
             belowBarData: BarAreaData(show: false),
           ),
         ],

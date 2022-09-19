@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import 'package:scimovement/api.dart';
 import 'package:scimovement/models/auth.dart';
+import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/snackbar_message.dart';
 import 'package:scimovement/widgets/text_field.dart';
@@ -234,19 +235,21 @@ class FormDropdown extends StatelessWidget {
       hint: const Text('Välj typ'),
       icon: const Icon(Icons.keyboard_arrow_down),
       iconSize: 32,
+      isDense: false,
       selectedItemBuilder: (_) {
         return items
-            .map((i) => Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(fontSize: 11),
-                    ),
-                    // const SizedBox(height: 8),
-                    i.child,
-                  ],
-                ))
+            .map(
+              (i) => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: AppTheme.labelTiny,
+                  ),
+                  i.child,
+                ],
+              ),
+            )
             .toList();
       },
       decoration: InputDecoration(

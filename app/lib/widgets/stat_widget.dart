@@ -65,7 +65,9 @@ class StatWidget extends StatelessWidget {
                 AnimatedDigitWidget(
                   value: values.current,
                   duration: const Duration(milliseconds: 250),
-                  textStyle: AppTheme.headLine1,
+                  textStyle: AppTheme.headLine1.copyWith(
+                    letterSpacing: 2,
+                  ),
                 ),
                 Text(
                   ' ${unit.displayString()}',

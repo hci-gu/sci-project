@@ -2,17 +2,16 @@ import 'dart:math';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_circle_chart/flutter_circle_chart.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api.dart';
-import 'package:scimovement/models/activity.dart';
+import 'package:scimovement/models/energy.dart';
 import 'package:scimovement/models/config.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/activity_wheel/circle_painter.dart';
 
 class Activity {
-  ActivityLevel level;
+  MovementLevel level;
   List<Energy> energy;
 
   Activity(this.level, this.energy);
@@ -25,11 +24,11 @@ final activityProvider = FutureProvider<List<Activity>>((ref) async {
   List<Energy> energy =
       await ref.watch(energyProvider(const Pagination()).future);
 
-  return ActivityLevel.values
+  return MovementLevel.values
       .map(
         (level) => Activity(
           level,
-          energy.where((e) => e.activityLevel == level).toList(),
+          energy.where((e) => e.movementLevel == level).toList(),
         ),
       )
       .toList();
@@ -163,7 +162,7 @@ class AnimatedWheel extends HookWidget {
                         value: e.count.toDouble(),
                         color: AppTheme.colors.activityLevelToColor(e.level),
                         animationValue: CurvedAnimation(
-                                curve: _intervalForActivityLevel(e.level),
+                                curve: _intervalForMovementLevel(e.level),
                                 parent: controller)
                             .value,
                       ),
@@ -180,13 +179,13 @@ class AnimatedWheel extends HookWidget {
     );
   }
 
-  Interval _intervalForActivityLevel(ActivityLevel level) {
+  Interval _intervalForMovementLevel(MovementLevel level) {
     switch (level) {
-      case ActivityLevel.sedentary:
+      case MovementLevel.sedentary:
         return const Interval(0, 0.3, curve: Curves.easeInCubic);
-      case ActivityLevel.movement:
+      case MovementLevel.moving:
         return const Interval(0.4, 0.6, curve: Curves.easeInCubic);
-      case ActivityLevel.active:
+      case MovementLevel.active:
         return const Interval(0.7, 1, curve: Curves.easeInCubic);
     }
   }

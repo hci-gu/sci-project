@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:scimovement/models/config.dart';
 
 const String apiUrl = 'https://sci-api.prod.appadem.in';
 // const String apiUrl = 'http://192.168.0.33:4000';
@@ -77,42 +78,31 @@ class User {
   }
 }
 
-class HeartRate {
-  final DateTime time;
-  final double value;
-
-  HeartRate(this.time, this.value);
-
-  factory HeartRate.fromJson(Map<String, dynamic> json) {
-    return HeartRate(DateTime.parse(json['t']), json['hr'].toDouble());
-  }
-}
-
-enum ActivityLevel {
+enum MovementLevel {
   sedentary,
-  movement,
+  moving,
   active,
 }
 
 class Energy {
   final DateTime time;
   final double value;
-  final ActivityLevel activityLevel;
+  final MovementLevel movementLevel;
 
-  Energy(this.time, this.value, [this.activityLevel = ActivityLevel.sedentary]);
+  Energy(this.time, this.value, [this.movementLevel = MovementLevel.sedentary]);
 
   factory Energy.fromJson(Map<String, dynamic> json) {
-    double value = json['energy'] != null ? json['energy'].toDouble() : 0.0;
-    ActivityLevel activityLevel;
+    double value = json['kcal'] != null ? json['kcal'].toDouble() : 0.0;
+    MovementLevel movementLevel;
 
-    if (json['activityLevel'] == 'sedentary') {
-      activityLevel = ActivityLevel.sedentary;
-    } else if (json['activityLevel'] == 'high-activity') {
-      activityLevel = ActivityLevel.active;
+    if (json['activity'] == 'sedentary') {
+      movementLevel = MovementLevel.sedentary;
+    } else if (json['activity'] == 'active') {
+      movementLevel = MovementLevel.active;
     } else {
-      activityLevel = ActivityLevel.movement;
+      movementLevel = MovementLevel.moving;
     }
-    return Energy(DateTime.parse(json['t']), value, activityLevel);
+    return Energy(DateTime.parse(json['t']), value, movementLevel);
   }
 }
 
@@ -162,43 +152,19 @@ class Api {
     return User.fromJson(json.decode(response.body));
   }
 
-  Future<List<HeartRate>> getHeartRate(DateTime from, DateTime to) async {
-    var response = await dio.get('/users/$_userId/data/hr', queryParameters: {
-      'from': from.toUtc().toIso8601String(),
-      'to': to.toUtc().toIso8601String(),
-      'group': 'minute',
-    });
-
-    if (response.statusCode == 200) {
-      List<dynamic> data = response.data;
-      return data.map((json) => HeartRate.fromJson(json)).toList();
-    }
-    return [];
-  }
-
-  Future<List<Accel>> getAccel(DateTime from, DateTime to) async {
-    var response =
-        await dio.get('/users/$_userId/data/accel', queryParameters: {
-      'from': from.toUtc().toIso8601String(),
-      'to': to.toUtc().toIso8601String(),
-      'group': 'second',
-    });
-
-    if (response.statusCode == 200) {
-      List<dynamic> data = response.data;
-      return data.map((json) => Accel.fromJson(json)).toList();
-    }
-    return [];
-  }
-
   Future<List<Energy>> getEnergy(
     DateTime from,
     DateTime to,
+    ChartMode mode,
   ) async {
-    var response = await dio.get('/users/$_userId/energy', queryParameters: {
+    Map<String, String> params = {
       'from': DateFormat('yyyy-MM-dd HH:mm').format(from),
       'to': DateFormat('yyyy-MM-dd HH:mm').format(to),
-    });
+    };
+    if (mode != ChartMode.day) {
+      params['group'] = chartModeToGroup(mode);
+    }
+    var response = await dio.get('/energy/$_userId', queryParameters: params);
 
     if (response.statusCode == 200) {
       List<dynamic> data = response.data;
@@ -208,7 +174,7 @@ class Api {
   }
 
   Future<int> getActivity(DateTime from, DateTime to) async {
-    var response = await dio.get('/users/$_userId/activity', queryParameters: {
+    var response = await dio.get('/sedentary/$_userId', queryParameters: {
       'from': DateFormat('yyyy-MM-dd HH:mm').format(from),
       'to': DateFormat('yyyy-MM-dd HH:mm').format(to),
     });
@@ -236,6 +202,18 @@ class Api {
     }
 
     return getUser(_userId);
+  }
+
+  String chartModeToGroup(ChartMode mode) {
+    switch (mode) {
+      case ChartMode.week:
+      case ChartMode.month:
+        return 'day';
+      case ChartMode.year:
+        return 'month';
+      default:
+        return 'hour';
+    }
   }
 
   // Use API as a singleton

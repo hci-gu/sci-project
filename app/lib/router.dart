@@ -4,8 +4,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api.dart';
 import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/screens/calories.dart';
-import 'package:scimovement/screens/home.dart';
 import 'package:scimovement/screens/login.dart';
+import 'package:scimovement/screens/main.dart';
 
 class RouterNotifier extends ChangeNotifier {
   final Ref _ref;
@@ -51,11 +51,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/',
         builder: (_, __) => const MainScreen(),
         routes: [
-          // GoRoute(
-          //   name: 'calories',
-          //   path: 'calories',
-          //   builder: (_, __) => const CaloriesScreen(),
-          // ),
+          GoRoute(
+            name: 'calories',
+            path: 'calories',
+            builder: (_, __) => CaloriesScreen(),
+          ),
         ],
       ),
       GoRoute(
