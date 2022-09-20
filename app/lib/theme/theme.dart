@@ -172,4 +172,12 @@ class AppTheme {
       ),
     );
   }
+
+  static Widget get separator => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16.0),
+        child: Container(
+          height: 1,
+          color: const Color.fromRGBO(0, 0, 0, 0.1),
+        ),
+      );
 }

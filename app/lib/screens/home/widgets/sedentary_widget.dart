@@ -23,11 +23,11 @@ class SedentaryWidget extends ConsumerWidget {
             onTap: () => context.goNamed('sedentary'),
             child: StatWidget(
               values: values,
-              unit: Unit.sedentary,
+              unit: Unit.time,
               asset: asset,
             ),
           ),
-          error: (_, __) => Container(),
+          error: (_, __) => StatWidget.error(asset),
           loading: () => StatWidget.loading(asset),
         );
   }

@@ -42,8 +42,7 @@ final averageMovementMinutesProvider =
     return 0;
   }
 
-  return energy.fold<double>(0, (a, b) => a + (b.minutes?.toDouble() ?? 0)) /
-      energy.length;
+  return energy.fold<int>(0, (a, b) => a + b.minutes) / energy.length;
 });
 
 final totalMovementMinutesProvider =
@@ -51,7 +50,7 @@ final totalMovementMinutesProvider =
   List<Energy> energy = await ref.watch(energyProvider(pagination).future);
   return energy
       .where((element) => element.movementLevel != MovementLevel.sedentary)
-      .length;
+      .fold<int>(0, (a, b) => a + b.minutes);
 });
 
 final dailyEnergyChartProvider =
