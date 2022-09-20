@@ -24,7 +24,7 @@ class ActivityLineChart extends ConsumerWidget {
             isCard: isCard,
             child: _energyChart(values),
           ),
-          error: (_, __) => ChartWrapper.empty(),
+          error: (e, stacktrace) => ChartWrapper.error(e.toString()),
           loading: () => ChartWrapper.loading(),
         );
   }

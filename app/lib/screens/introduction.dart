@@ -1,21 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:go_router/go_router.dart';
 
-class LoginScreen extends HookConsumerWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+class IntroductionScreen extends StatelessWidget {
+  const IntroductionScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final _userIdController = useTextEditingController();
-
+  Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppTheme.appBar('Logga in'),
       body: Padding(
         padding: AppTheme.screenPadding,
         child: ListView(
@@ -24,22 +19,22 @@ class LoginScreen extends HookConsumerWidget {
             const SizedBox(height: 100),
             _header(),
             const SizedBox(height: 16.0),
-            TextField(
-              controller: _userIdController,
-              decoration: const InputDecoration(
-                labelText: 'User ID',
-              ),
+            Button(
+              title: 'Starta Fitbit',
+              width: 180,
+              onPressed: () async {
+                await _launchFitbitGallery();
+              },
             ),
             const SizedBox(height: 16.0),
             Button(
               title: 'Logga in',
-              icon: Icons.login,
-              secondary: true,
               width: 180,
-              onPressed: () async {
-                ref.read(userProvider.notifier).login(_userIdController.text);
-              },
+              secondary: true,
+              onPressed: () => context.goNamed('login'),
             ),
+            const SizedBox(height: 32.0),
+            Image.asset('assets/png/ryggmarg_logo.png', width: 200),
           ],
         ),
       ),
@@ -54,6 +49,17 @@ class LoginScreen extends HookConsumerWidget {
           'spåra din rörelse',
           style:
               AppTheme.headLine3Light.copyWith(color: AppTheme.colors.primary),
+        ),
+        const SizedBox(height: 32),
+        SvgPicture.asset('assets/svg/person.svg', width: 100),
+        const SizedBox(height: 16),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+            'För att komma igång öppna länken nedan för att installera klockappen på din Fitbit.',
+            textAlign: TextAlign.center,
+            style: AppTheme.paragraphMedium,
+          ),
         ),
       ],
     );

@@ -108,12 +108,12 @@ class Energy {
     } else {
       movementLevel = MovementLevel.moving;
     }
+    String minutesString = json['minutes']?.toString() ?? '1';
     return Energy(
       time: DateTime.parse(json['t']),
       value: value,
       movementLevel: movementLevel,
-      minutes:
-          json['minutes'] != null ? (json['minutes'] as double).toInt() : 1,
+      minutes: int.parse(minutesString),
     );
   }
 }
