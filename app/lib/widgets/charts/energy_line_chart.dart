@@ -1,12 +1,13 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:scimovement/api.dart';
 import 'package:scimovement/models/energy.dart';
 import 'package:scimovement/models/config.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'dart:math';
-import 'package:scimovement/widgets/chart_wrapper.dart';
+import 'package:scimovement/widgets/charts/chart_wrapper.dart';
 
 class ChartValues {
   final List<Energy> previous;
@@ -16,67 +17,47 @@ class ChartValues {
 }
 
 final energyChartProvider = FutureProvider<ChartValues>((ref) async {
-  List<Energy> current =
-      await ref.watch(dailyEnergyChartProvider(const Pagination()).future);
+  Pagination page = ref.watch(paginationProvider);
+  List<Energy> current = await ref.watch(dailyEnergyChartProvider(page).future);
   List<Energy> previous = await ref
-      .watch(dailyEnergyChartProvider(const Pagination(page: 1)).future);
+      .watch(dailyEnergyChartProvider(Pagination(page: page.page + 1)).future);
   return ChartValues(
     current,
     previous
         .map(
           (e) => Energy(
-            DateTime(
+            time: DateTime(
               e.time.year,
               e.time.month,
               e.time.day + 1,
               e.time.hour,
               e.time.minute,
             ),
-            e.value,
+            value: e.value,
           ),
         )
         .toList(),
   );
 });
 
-class EnergyDisplay extends ConsumerWidget {
+class EnergyLineChart extends ConsumerWidget {
   final bool isCard;
 
-  const EnergyDisplay({
+  const EnergyLineChart({
     Key? key,
     this.isCard = true,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Column(
-      children: [
-        ref.watch(energyChartProvider).when(
-              data: (values) => ChartWrapper(
-                loading: false,
-                isEmpty: false,
-                isCard: isCard,
-                child: _energyChart(values.current, values.previous),
-              ),
-              error: (_, __) => ChartWrapper(
-                loading: false,
-                isEmpty: true,
-                isCard: isCard,
-                child: Container(),
-              ),
-              loading: () => ChartWrapper(
-                loading: true,
-                isEmpty: false,
-                isCard: isCard,
-                child: Container(),
-              ),
-            ),
-        //   loading: energyModel.loading,
-        //   isEmpty: energyModel.energy.isEmpty,
-        // ),
-        const SizedBox(height: 8),
-      ],
-    );
+    return ref.watch(energyChartProvider).when(
+          data: (values) => ChartWrapper(
+            isCard: isCard,
+            child: _energyChart(values.current, values.previous),
+          ),
+          error: (_, __) => ChartWrapper.empty(),
+          loading: () => ChartWrapper.loading(),
+        );
   }
 
   Widget _energyChart(List<Energy> energy, List<Energy> prevEnergy) {
@@ -87,7 +68,14 @@ class EnergyDisplay extends ConsumerWidget {
     List<double> values = energy.map((e) => e.value).toList();
     List<double> prevValues = prevEnergy.map((e) => e.value).toList();
     List<double> allValues = [...values, ...prevValues];
+
     double maxValue = allValues.isNotEmpty ? allValues.reduce(max) : 0;
+    double minX = DateTime(day.year, day.month, day.day)
+        .millisecondsSinceEpoch
+        .toDouble();
+    double maxX = DateTime(day.year, day.month, day.day, 23, 59)
+        .millisecondsSinceEpoch
+        .toDouble();
 
     return LineChart(
       LineChartData(
@@ -99,61 +87,33 @@ class EnergyDisplay extends ConsumerWidget {
         ),
         titlesData: FlTitlesData(
           show: true,
-          rightTitles: SideTitles(showTitles: false),
-          topTitles: SideTitles(showTitles: false),
-          bottomTitles: SideTitles(
-            showTitles: true,
-            interval: 60 * 1000 * 60 * 5,
-            rotateAngle: -30,
-            getTextStyles: (context, value) => const TextStyle(
-              color: Color(0xff67727d),
-              fontWeight: FontWeight.bold,
-              fontSize: 10,
-            ),
-            getTitles: (value) {
-              final date = DateTime.fromMillisecondsSinceEpoch(value.toInt());
-              return date.toString().substring(10, 16);
-            },
-          ),
-          leftTitles: SideTitles(
-            margin: 0,
-            reservedSize: 20,
-            showTitles: true,
-            getTextStyles: (context, value) => const TextStyle(
-              color: Color(0xff67727d),
-              fontWeight: FontWeight.bold,
-              fontSize: 11,
+          topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              interval: 60 * 1000 * 60 * 5,
+              reservedSize: 24,
+              getTitlesWidget: (value, _) {
+                if (value == minX || value == maxX) return const SizedBox();
+                final date = DateTime.fromMillisecondsSinceEpoch(value.toInt());
+                return Center(
+                  child: Text(
+                    DateFormat('HH:mm').format(date),
+                    style: AppTheme.labelTiny,
+                  ),
+                );
+              },
             ),
           ),
         ),
-        minX: DateTime(day.year, day.month, day.day)
-            .millisecondsSinceEpoch
-            .toDouble(),
-        maxX: DateTime(day.year, day.month, day.day, 23, 59)
-            .millisecondsSinceEpoch
-            .toDouble(),
-        minY: 0,
+        minX: minX,
+        maxX: maxX,
+        minY: -0.1,
         maxY: (maxValue + maxValue * 0.2).round().toDouble(),
         backgroundColor: Colors.transparent,
         lineBarsData: [
-          LineChartBarData(
-            spots: energy
-                .map(
-                  (e) => FlSpot(
-                    e.time.millisecondsSinceEpoch.toDouble(),
-                    values[energy.indexOf(e)],
-                  ),
-                )
-                .toList(),
-            barWidth: 3,
-            isCurved: true,
-            colors: [AppTheme.colors.orange],
-            dotData: FlDotData(
-              show: true,
-              checkToShowDot: (spot, data) => spot.x == data.spots.last.x,
-            ),
-            belowBarData: BarAreaData(show: false),
-          ),
           LineChartBarData(
             spots: prevEnergy
                 .map(
@@ -166,11 +126,29 @@ class EnergyDisplay extends ConsumerWidget {
             preventCurveOverShooting: true,
             barWidth: 3,
             isCurved: true,
-            colors: [AppTheme.colors.lightGray],
+            color: AppTheme.colors.gray,
             dotData: FlDotData(
               show: false,
             ),
             dashArray: [4, 4],
+            belowBarData: BarAreaData(show: false),
+          ),
+          LineChartBarData(
+            spots: energy
+                .map(
+                  (e) => FlSpot(
+                    e.time.millisecondsSinceEpoch.toDouble(),
+                    values[energy.indexOf(e)],
+                  ),
+                )
+                .toList(),
+            barWidth: 3,
+            isCurved: true,
+            color: AppTheme.colors.orange,
+            dotData: FlDotData(
+              show: true,
+              checkToShowDot: (spot, data) => spot.x == data.spots.last.x,
+            ),
             belowBarData: BarAreaData(show: false),
           ),
         ],

@@ -9,15 +9,15 @@ import 'package:scimovement/widgets/charts/energy_line_chart.dart';
 import 'package:scimovement/widgets/stat_header.dart';
 import 'package:scimovement/widgets/stat_widget.dart';
 
-class CaloriesScreen extends ConsumerWidget {
-  const CaloriesScreen({Key? key}) : super(key: key);
+class ActivityScreen extends ConsumerWidget {
+  const ActivityScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     Pagination page = ref.watch(paginationProvider);
 
     return Scaffold(
-      appBar: AppTheme.appBar('Kalorier'),
+      appBar: AppTheme.appBar('Rörelse'),
       body: Padding(
         padding: AppTheme.screenPadding,
         child: Column(
@@ -27,9 +27,9 @@ class CaloriesScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 StatHeader(
-                  unit: Unit.calories,
-                  averageProvider: averageEnergyProvider(page),
-                  totalProvider: totalEnergyProvider(page),
+                  unit: Unit.sedentary,
+                  averageProvider: averageMovementMinutesProvider(page),
+                  totalProvider: totalMovementMinutesProvider(page),
                 ),
                 const ChartModeSelect()
               ],
@@ -37,7 +37,7 @@ class CaloriesScreen extends ConsumerWidget {
             _separator(),
             _isDay(ref)
                 ? const EnergyLineChart(isCard: false)
-                : const EnergyBarChart(),
+                : const EnergyBarChart(displayCalories: false),
             _separator(),
           ],
         ),
