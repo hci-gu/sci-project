@@ -17,17 +17,19 @@ class EnergyWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ref.watch(energyWidgetProvider).when(
-          data: (WidgetValues values) => GestureDetector(
-            onTap: () => context.goNamed('calories'),
-            child: StatWidget(
+    String asset = 'assets/svg/flame.svg';
+
+    return GestureDetector(
+      onTap: () => context.goNamed('calories'),
+      child: ref.watch(energyWidgetProvider).when(
+            data: (WidgetValues values) => StatWidget(
               values: values,
               unit: Unit.calories,
-              asset: 'assets/svg/flame.svg',
+              asset: asset,
             ),
+            error: (_, __) => Container(),
+            loading: () => StatWidget.loading(asset),
           ),
-          error: (_, __) => Container(),
-          loading: () => const Center(child: CircularProgressIndicator()),
-        );
+    );
   }
 }

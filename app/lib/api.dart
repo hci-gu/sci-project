@@ -87,9 +87,15 @@ enum MovementLevel {
 class Energy {
   final DateTime time;
   final double value;
+  final int? minutes;
   final MovementLevel movementLevel;
 
-  Energy(this.time, this.value, [this.movementLevel = MovementLevel.sedentary]);
+  Energy({
+    required this.time,
+    required this.value,
+    this.movementLevel = MovementLevel.sedentary,
+    this.minutes,
+  });
 
   factory Energy.fromJson(Map<String, dynamic> json) {
     double value = json['kcal'] != null ? json['kcal'].toDouble() : 0.0;
@@ -102,7 +108,12 @@ class Energy {
     } else {
       movementLevel = MovementLevel.moving;
     }
-    return Energy(DateTime.parse(json['t']), value, movementLevel);
+    return Energy(
+      time: DateTime.parse(json['t']),
+      value: value,
+      movementLevel: movementLevel,
+      minutes: json['minutes'],
+    );
   }
 }
 

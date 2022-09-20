@@ -109,6 +109,8 @@ class AppTheme {
   );
 
   static Widget spacer = SizedBox(width: basePadding, height: basePadding);
+  static Widget spacer2x =
+      SizedBox(width: basePadding * 2, height: basePadding * 2);
 
   static EdgeInsetsGeometry screenPadding = EdgeInsets.symmetric(
       horizontal: basePadding * 3, vertical: basePadding * 2);

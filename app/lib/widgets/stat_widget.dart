@@ -27,7 +27,12 @@ class WidgetValues {
 
   const WidgetValues(this.current, this.previous);
 
-  double get percentChange => ((current - previous) / previous) * 100;
+  double get percentChange {
+    if (previous == 0) {
+      return 0;
+    }
+    return ((current - previous) / previous) * 100;
+  }
 }
 
 class StatWidget extends StatelessWidget {
@@ -44,77 +49,67 @@ class StatWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(
-          width: 1.0,
-          color: const Color.fromRGBO(0, 0, 0, 0.1),
-        ),
-        borderRadius: BorderRadius.circular(32),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12.0),
-        child: Column(
-          children: [
-            SvgPicture.asset(asset),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: [
-                AnimatedDigitWidget(
-                  value: values.current,
-                  duration: const Duration(milliseconds: 250),
-                  textStyle: AppTheme.headLine1.copyWith(
-                    letterSpacing: 2,
-                  ),
+    return _container(
+      Column(
+        children: [
+          SvgPicture.asset(asset),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              AnimatedDigitWidget(
+                value: values.current,
+                duration: const Duration(milliseconds: 250),
+                textStyle: AppTheme.headLine1.copyWith(
+                  letterSpacing: 2,
                 ),
-                Text(
-                  ' ${unit.displayString()}',
-                  style: const TextStyle(
-                    color: Colors.grey,
-                  ),
-                )
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: [
-                Text(
-                  values.previous.toString(),
-                  style: AppTheme.labelLarge,
+              ),
+              Text(
+                ' ${unit.displayString()}',
+                style: const TextStyle(
+                  color: Colors.grey,
                 ),
-                Text(
-                  ' ${unit.displayString()}',
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: Colors.grey,
-                  ),
-                )
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              textBaseline: TextBaseline.alphabetic,
-              children: [
-                iconForChange(values.percentChange),
-                Text(
-                  '${values.percentChange.toStringAsFixed(1)}%',
-                  style: AppTheme.labelTiny.copyWith(
-                    color: colorForChange(values.percentChange),
-                  ),
+              )
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                values.previous.toString(),
+                style: AppTheme.labelLarge,
+              ),
+              Text(
+                ' ${unit.displayString()}',
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: Colors.grey,
                 ),
-                Text(
-                  ' from yesterday.',
-                  style: AppTheme.labelTiny,
-                )
-              ],
-            )
-          ],
-        ),
+              )
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              iconForChange(values.percentChange),
+              Text(
+                '${values.percentChange.toStringAsFixed(1)}%',
+                style: AppTheme.labelTiny.copyWith(
+                  color: colorForChange(values.percentChange),
+                ),
+              ),
+              Text(
+                ' from yesterday.',
+                style: AppTheme.labelTiny,
+              )
+            ],
+          )
+        ],
       ),
     );
   }
@@ -141,4 +136,35 @@ class StatWidget extends StatelessWidget {
       color: colorForChange(change),
     );
   }
+
+  static Widget _container(Widget child) {
+    return Container(
+      width: 170,
+      height: 170,
+      decoration: BoxDecoration(
+        border: Border.all(
+          width: 1.0,
+          color: const Color.fromRGBO(0, 0, 0, 0.1),
+        ),
+        borderRadius: BorderRadius.circular(32),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12.0),
+        child: child,
+      ),
+    );
+  }
+
+  static Widget loading(String asset) => _container(
+        Center(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SvgPicture.asset(asset),
+              const SizedBox(height: 16),
+              const CircularProgressIndicator(),
+            ],
+          ),
+        ),
+      );
 }

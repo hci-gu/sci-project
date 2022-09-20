@@ -1,6 +1,3 @@
-import 'dart:math';
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -9,6 +6,7 @@ import 'package:scimovement/models/energy.dart';
 import 'package:scimovement/models/config.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/activity_wheel/circle_painter.dart';
+import 'package:go_router/go_router.dart';
 
 class Activity {
   MovementLevel level;
@@ -39,28 +37,22 @@ class ActivityWheel extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ref.watch(activityProvider).when(
-          error: _error,
-          loading: _loading,
-          data: _body,
-        );
+    return GestureDetector(
+      onTap: () => context.goNamed('activity'),
+      child: ref.watch(activityProvider).when(
+            error: _error,
+            loading: _loading,
+            data: _body,
+          ),
+    );
   }
 
   Widget _body(List<Activity> levels) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(32),
-        border: Border.all(
-          color: const Color.fromRGBO(0, 0, 0, 0.1),
-          width: 1,
-        ),
-      ),
-      padding: const EdgeInsets.only(left: 8, right: 24, top: 24, bottom: 24),
-      child: Column(
+    return _container(
+      Column(
         children: [
           AnimatedWheel(levels: levels),
-          AppTheme.spacer,
-          AppTheme.spacer,
+          AppTheme.spacer2x,
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: levels
@@ -90,13 +82,30 @@ class ActivityWheel extends ConsumerWidget {
     );
   }
 
+  Widget _container(Widget child) {
+    return Container(
+      height: 300,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(32),
+        border: Border.all(
+          color: const Color.fromRGBO(0, 0, 0, 0.1),
+          width: 1,
+        ),
+      ),
+      padding: const EdgeInsets.only(left: 8, right: 24, top: 24, bottom: 24),
+      child: child,
+    );
+  }
+
   Widget _error(_, __) {
     return const Text('Error');
   }
 
   Widget _loading() {
-    return const Center(
-      child: CircularProgressIndicator(),
+    return _container(
+      const Center(
+        child: CircularProgressIndicator(),
+      ),
     );
   }
 }
@@ -113,8 +122,7 @@ class AnimatedWheel extends HookWidget {
 
     useEffect(() {
       controller.forward(from: 0.1);
-      return () => {};
-      // return () => controller.reset();
+      return () => controller.reset();
     }, []);
 
     return SizedBox(

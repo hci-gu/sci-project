@@ -48,8 +48,8 @@ class Pagination {
 }
 
 final dateProvider = StateProvider<DateTime>((ref) => DateTime.now());
-final pageProvider = StateProvider<int>((ref) => 0);
-final chartModeProvider = StateProvider<ChartMode>((ref) => ChartMode.day);
+final paginationProvider =
+    StateProvider<Pagination>((ref) => const Pagination());
 
 final dateDisplayProvider = Provider<String>((ref) {
   DateTime date = ref.watch(dateProvider);
@@ -65,12 +65,3 @@ final dateDisplayProvider = Provider<String>((ref) {
 
   return date.toString().substring(0, 10);
 });
-
-// final dateFromProvider = Provider<DateTime>((ref) {
-//   DateTime date = ref.watch(dateProvider);
-//   return DateTime(date.year, date.month, date.day);
-// });
-// final dateToProvider = Provider<DateTime>((ref) {
-//   DateTime date = ref.watch(dateProvider);
-//   return DateTime(date.year, date.month, date.day, 23, 59, 59);
-// });
