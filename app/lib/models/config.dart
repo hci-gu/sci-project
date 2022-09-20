@@ -58,9 +58,9 @@ final dateDisplayProvider = Provider<String>((ref) {
   DateTime yesterday = today.subtract(const Duration(days: 1));
 
   if (!date.isBefore(today)) {
-    return 'Today';
+    return 'Idag';
   } else if (!date.isBefore(yesterday)) {
-    return 'Yesterday';
+    return 'Igår';
   }
 
   return date.toString().substring(0, 10);

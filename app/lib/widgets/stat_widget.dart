@@ -5,7 +5,7 @@ import 'package:scimovement/theme/theme.dart';
 
 enum Unit {
   calories,
-  sedentary,
+  time,
 }
 
 extension ParseToString on Unit {
@@ -13,7 +13,7 @@ extension ParseToString on Unit {
     switch (this) {
       case Unit.calories:
         return 'kcal';
-      case Unit.sedentary:
+      case Unit.time:
         return 'min';
       default:
         return toString();
@@ -154,6 +154,19 @@ class StatWidget extends StatelessWidget {
       ),
     );
   }
+
+  static Widget error(String asset) => _container(
+        Center(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SvgPicture.asset(asset),
+              const SizedBox(height: 16),
+              const Text('error'),
+            ],
+          ),
+        ),
+      );
 
   static Widget loading(String asset) => _container(
         Center(

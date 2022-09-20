@@ -3,8 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api.dart';
 import 'package:scimovement/models/auth.dart';
-import 'package:scimovement/screens/activity.dart';
-import 'package:scimovement/screens/calories.dart';
+import 'package:scimovement/screens/detail/activity.dart';
+import 'package:scimovement/screens/detail/calories.dart';
+import 'package:scimovement/screens/detail/sedentary.dart';
 import 'package:scimovement/screens/login.dart';
 import 'package:scimovement/screens/main.dart';
 
@@ -61,6 +62,11 @@ final routerProvider = Provider<GoRouter>((ref) {
             name: 'activity',
             path: 'activity',
             builder: (_, __) => const ActivityScreen(),
+          ),
+          GoRoute(
+            name: 'sedentary',
+            path: 'sedentary',
+            builder: (_, __) => const SedentaryScreen(),
           ),
         ],
       ),

@@ -27,7 +27,7 @@ class EnergyWidget extends ConsumerWidget {
               unit: Unit.calories,
               asset: asset,
             ),
-            error: (_, __) => Container(),
+            error: (_, __) => StatWidget.error(asset),
             loading: () => StatWidget.loading(asset),
           ),
     );
