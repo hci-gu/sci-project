@@ -6,6 +6,7 @@ import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/screens/detail/activity.dart';
 import 'package:scimovement/screens/detail/calories.dart';
 import 'package:scimovement/screens/detail/sedentary.dart';
+import 'package:scimovement/screens/introduction.dart';
 import 'package:scimovement/screens/login.dart';
 import 'package:scimovement/screens/main.dart';
 
@@ -22,23 +23,19 @@ class RouterNotifier extends ChangeNotifier {
   }
 
   String? _redirectLogic(GoRouterState state) {
-    final user = _ref.read(userProvider);
+    bool loggedIn = _ref.read(userProvider) != null;
 
-    // From here we can use the state and implement our custom logic
-    final areWeLoggingIn = state.location == '/login';
-
-    if (user == null) {
-      // We're not logged in
-      // So, IF we aren't in the login page, go there.
-      return areWeLoggingIn ? null : '/login';
+    if (loggedIn && _isLoginRoute(state.subloc)) {
+      return '/';
     }
-    // We're logged in
-
-    // At this point, IF we're in the login page, go to the home page
-    if (areWeLoggingIn) return '/';
-
-    // There's no need for a redirect at this point.
+    if (!loggedIn && !_isLoginRoute(state.subloc)) {
+      return '/introduction';
+    }
     return null;
+  }
+
+  bool _isLoginRoute(String route) {
+    return route == '/introduction' || route == '/introduction/login';
   }
 }
 
@@ -46,8 +43,20 @@ final routerProvider = Provider<GoRouter>((ref) {
   final routerNotifier = RouterNotifier(ref);
 
   return GoRouter(
-    initialLocation: '/login',
+    initialLocation: '/introduction',
     routes: [
+      GoRoute(
+        name: 'introduction',
+        path: '/introduction',
+        builder: (_, state) => const IntroductionScreen(),
+        routes: [
+          GoRoute(
+            name: 'login',
+            path: 'login',
+            builder: (_, state) => const LoginScreen(),
+          ),
+        ],
+      ),
       GoRoute(
         name: 'home',
         path: '/',
@@ -69,11 +78,6 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (_, __) => const SedentaryScreen(),
           ),
         ],
-      ),
-      GoRoute(
-        name: 'login',
-        path: '/login',
-        builder: (_, state) => const LoginScreen(),
       ),
     ],
     redirect: routerNotifier._redirectLogic,

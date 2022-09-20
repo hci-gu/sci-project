@@ -28,7 +28,7 @@ class EnergyBarChart extends ConsumerWidget {
             ref.watch(paginationProvider).mode,
             values,
           ),
-          error: (_, __) => ChartWrapper.empty(),
+          error: (e, stacktrace) => ChartWrapper.error(e.toString()),
           loading: () => ChartWrapper.loading(),
         );
   }
@@ -42,18 +42,17 @@ class EnergyBarChart extends ConsumerWidget {
     double maxValue = energy.map(_getValue).reduce(max);
     double width = mode == ChartMode.week ? 32 : 6;
 
-    Map<DateTime, List<Energy>> groups = groupBy(
-        energy,
-        (Energy e) => mode == ChartMode.day
-            ? DateTime(e.time.year, e.time.month, e.time.day, e.time.hour)
-            : e.time);
+    var groups = {
+      ..._emptyMapForMode(energy.last.time, mode),
+      ..._groupForMode(energy, mode),
+    };
 
     return ChartWrapper(
       isCard: false,
       child: BarChart(
         BarChartData(
           maxY: mode == ChartMode.day ? 60 : maxValue + (maxValue * 0.1),
-          alignment: BarChartAlignment.spaceAround,
+          alignment: BarChartAlignment.spaceEvenly,
           titlesData: FlTitlesData(
             show: true,
             topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
@@ -61,8 +60,9 @@ class EnergyBarChart extends ConsumerWidget {
             rightTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
+                reservedSize: 40,
                 getTitlesWidget: (double value, _) {
-                  if (value == maxValue) return Container();
+                  if (value == maxValue + (maxValue * 0.1)) return Container();
                   return Center(
                     child: Text(
                       value.toString(),
@@ -77,11 +77,12 @@ class EnergyBarChart extends ConsumerWidget {
                 showTitles: true,
                 reservedSize: 24,
                 getTitlesWidget: (double value, _) {
-                  return Center(
+                  return SideTitleWidget(
                     child: Text(
                       _getTitle(value, mode),
                       style: AppTheme.labelTiny,
                     ),
+                    axisSide: AxisSide.bottom,
                   );
                 },
               ),
@@ -90,10 +91,11 @@ class EnergyBarChart extends ConsumerWidget {
           borderData: FlBorderData(show: false),
           gridData: FlGridData(show: false),
           barGroups: groups.entries
+              .sorted((a, b) => a.key.compareTo(b.key))
               .map((timestamp) => BarChartGroupData(
                     x: timestamp.key.millisecondsSinceEpoch,
                     groupVertically: true,
-                    barRods: groupToBars(
+                    barRods: _groupToBars(
                       timestamp.value.where((e) => _getValue(e) > 0).toList(),
                       width,
                       mode,
@@ -105,8 +107,74 @@ class EnergyBarChart extends ConsumerWidget {
     );
   }
 
-  List<BarChartRodData> groupToBars(
+  // DateTime
+  Map<DateTime, List<Energy>> _emptyMapForMode(DateTime base, ChartMode mode) {
+    switch (mode) {
+      case ChartMode.day:
+        return {
+          for (int i = 0; i < 24; i++)
+            DateTime(base.year, base.month, base.day, i): [],
+        };
+      case ChartMode.week:
+        return {
+          for (int i = 0; i < 6; i++)
+            DateTime(
+              base.subtract(Duration(days: i)).year,
+              base.subtract(Duration(days: i)).month,
+              base.subtract(Duration(days: i)).day,
+            ): [],
+        };
+      case ChartMode.month:
+        return {
+          for (int i = 0; i < 30; i++)
+            DateTime(
+              base.subtract(Duration(days: i)).year,
+              base.subtract(Duration(days: i)).month,
+              base.subtract(Duration(days: i)).day,
+            ): [],
+        };
+      case ChartMode.year:
+        return {
+          for (int i = 0; i < 11; i++)
+            DateTime(
+              base.subtract(Duration(days: 31 * i)).year,
+              base.subtract(Duration(days: 31 * i)).month,
+            ): [],
+        };
+    }
+  }
+
+  Map<DateTime, List<Energy>> _groupForMode(
+      List<Energy> energy, ChartMode mode) {
+    switch (mode) {
+      case ChartMode.day:
+        return groupBy(
+          energy,
+          (Energy e) =>
+              DateTime(e.time.year, e.time.month, e.time.day, e.time.hour),
+        );
+      case ChartMode.week:
+      case ChartMode.month:
+        return groupBy(
+          energy,
+          (Energy e) => DateTime(e.time.year, e.time.month, e.time.day),
+        );
+      case ChartMode.year:
+        return groupBy(
+          energy,
+          (Energy e) => DateTime(e.time.year, e.time.month),
+        );
+      default:
+    }
+    return groupBy(energy, (Energy e) => e.time);
+  }
+
+  List<BarChartRodData> _groupToBars(
       List<Energy> energy, double width, ChartMode mode) {
+    if (energy.isEmpty) {
+      return [BarChartRodData(fromY: 0, toY: 0, width: width)];
+    }
+
     if (mode == ChartMode.day) {
       int value = energy.fold<int>(0, (a, b) => a + b.minutes);
       return [
@@ -181,13 +249,13 @@ class EnergyBarChart extends ConsumerWidget {
 
     switch (mode) {
       case ChartMode.day:
-        return DateFormat('HH:mm').format(time);
+        return time.hour % 7 == 0 ? DateFormat('HH:mm').format(time) : '';
       case ChartMode.week:
         return DateFormat('EEE').format(time);
       case ChartMode.month:
-        return DateFormat('MMMd').format(time);
+        return time.day % 7 == 0 ? DateFormat('MMMd').format(time) : '';
       case ChartMode.year:
-        return DateFormat('MMMM').format(time);
+        return DateFormat('MMM').format(time);
       default:
         return time.toIso8601String().substring(0, 10);
     }

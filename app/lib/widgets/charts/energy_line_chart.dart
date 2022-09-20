@@ -55,7 +55,7 @@ class EnergyLineChart extends ConsumerWidget {
             isCard: isCard,
             child: _energyChart(values.current, values.previous),
           ),
-          error: (_, __) => ChartWrapper.empty(),
+          error: (e, stacktrace) => ChartWrapper.error(e.toString()),
           loading: () => ChartWrapper.loading(),
         );
   }
