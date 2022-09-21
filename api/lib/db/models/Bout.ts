@@ -1,10 +1,11 @@
 import { DataTypes, Op, Sequelize, ModelStatic } from 'sequelize'
+import { activityForAccAndCondition } from '../../adapters/energy'
 import { Activity } from '../../constants'
-import { Bout } from '../classes'
+import { AccelCount, Bout, User } from '../classes'
 
 let sequelizeInstance: Sequelize
 let BoutModel: ModelStatic<Bout>
-export default {
+const Model = {
   init: (sequelize: Sequelize) => {
     sequelizeInstance = sequelize
     BoutModel = sequelize.define<Bout>(
@@ -110,4 +111,22 @@ export default {
           } as Bout)
       )
     ),
+}
+
+export default Model
+
+export const createBoutFromCount = async (user: User, count: AccelCount) => {
+  if (!count.UserId) return
+  const activity = activityForAccAndCondition(count.a, user.condition)
+
+  await Model.save(
+    [
+      {
+        t: count.t,
+        activity,
+        minutes: 1,
+      },
+    ],
+    count.UserId
+  )
 }

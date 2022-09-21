@@ -1,6 +1,10 @@
 import { DataTypes, Op, Sequelize, ModelStatic } from 'sequelize'
+import {
+  activityForAccAndCondition,
+  getEnergyForCountAndActivity,
+} from '../../adapters/energy'
 import { Activity } from '../../constants'
-import { Energy } from '../classes'
+import { AccelCount, Energy, User } from '../classes'
 
 interface AggregatedEnergy extends Energy {
   minutes: number
@@ -8,7 +12,7 @@ interface AggregatedEnergy extends Energy {
 
 let sequelizeInstance: Sequelize
 let EnergyModel: ModelStatic<Energy>
-export default {
+const Model = {
   init: (sequelize: Sequelize) => {
     sequelizeInstance = sequelize
     EnergyModel = sequelize.define<Energy>(
@@ -117,4 +121,21 @@ export default {
           } as AggregatedEnergy)
       )
     ),
+}
+export default Model
+
+export const saveEnergyFromCount = async (user: User, count: AccelCount) => {
+  const activity = activityForAccAndCondition(count.a, user.condition)
+  const kcal = getEnergyForCountAndActivity(user, count)
+
+  await Model.save(
+    [
+      {
+        t: count.t,
+        activity,
+        kcal,
+      },
+    ],
+    user.id
+  )
 }

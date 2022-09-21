@@ -1,10 +1,6 @@
 import { DataTypes, Op, Sequelize, ModelStatic } from 'sequelize'
-import {
-  getEnergyForCountAndActivity,
-  activityForAccAndCondition,
-} from '../../adapters/energy'
 import UserModel from './User'
-import EnergyModel from './Energy'
+import { saveEnergyFromCount } from './Energy'
 import { AccelCount } from '../classes'
 
 const afterCreate = async (count: AccelCount) => {
@@ -13,19 +9,7 @@ const afterCreate = async (count: AccelCount) => {
 
   if (!user) return
 
-  const activity = activityForAccAndCondition(count.a, user.condition)
-  const kcal = getEnergyForCountAndActivity(user, count)
-
-  await EnergyModel.save(
-    [
-      {
-        t: count.t,
-        activity,
-        kcal,
-      },
-    ],
-    count.UserId
-  )
+  saveEnergyFromCount(user, count)
 }
 
 let sequelizeInstance: Sequelize
