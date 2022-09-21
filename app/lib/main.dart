@@ -7,10 +7,6 @@ import 'package:timezone/data/latest.dart' as tz;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   tz.initializeTimeZones();
-  // final auth = AuthModel();
-  // final push = PushModel();
-  // await auth.init();
-  // await push.init(auth.loggedIn);
   runApp(const ProviderScope(child: App()));
 }
 

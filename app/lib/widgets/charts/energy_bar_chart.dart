@@ -15,15 +15,17 @@ enum BarChartDisplayMode { energy, activity, sedentary }
 
 class EnergyBarChart extends ConsumerWidget {
   final BarChartDisplayMode displayMode;
+  final Pagination pagination;
 
   const EnergyBarChart({
     Key? key,
+    this.pagination = const Pagination(),
     this.displayMode = BarChartDisplayMode.energy,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ref.watch(energyProvider(ref.watch(paginationProvider))).when(
+    return ref.watch(energyProvider(pagination)).when(
           data: (values) => _body(
             ref.watch(paginationProvider).mode,
             values,
@@ -191,6 +193,8 @@ class EnergyBarChart extends ConsumerWidget {
 
     double startValue = 0;
     List<BarChartRodData> bars = [];
+    energy
+        .sort((a, b) => a.movementLevel.index.compareTo(b.movementLevel.index));
     for (Energy e in energy) {
       int index = energy.indexOf(e);
       double value = _getValue(e);

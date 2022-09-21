@@ -14,21 +14,18 @@ class SedentaryScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    Pagination page = ref.watch(paginationProvider);
+    Pagination pagination = ref.watch(paginationProvider);
 
     return DetailScreen(
       title: 'Stillasittande',
       header: StatHeader(
         unit: Unit.time,
-        averageProvider: averageSedentaryMinutesProvider(page),
-        totalProvider: totalSedentaryMinutesProvider(page),
+        averageProvider: averageSedentaryMinutesProvider(pagination),
+        totalProvider: totalSedentaryMinutesProvider(pagination),
       ),
-      body: Column(
-        children: [
-          AppTheme.separator,
-          const EnergyBarChart(displayMode: BarChartDisplayMode.sedentary),
-          AppTheme.separator,
-        ],
+      pageBuilder: (ctx, page) => EnergyBarChart(
+        displayMode: BarChartDisplayMode.sedentary,
+        pagination: Pagination(page: page, mode: pagination.mode),
       ),
     );
   }

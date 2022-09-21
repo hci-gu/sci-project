@@ -28,18 +28,27 @@ class CirclePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    double max = items.map((e) => e.value).reduce(math.max);
+    double minValue = max * 0.05;
+
     final center = size.center(Offset.zero);
     final radius = chartRadius - strokeWidth * 0.5;
-    final totalValue = items.fold<double>(0, (a, b) => a + b.value);
-    final totalRad = (animationValue * math.pi * 2) - 0.3;
+
+    final totalValue =
+        items.fold<double>(0, (a, b) => a + math.max(b.value, minValue));
+    final totalRad =
+        (animationValue * math.pi * 2) - ((items.length - 1) * 0.15);
     double startAngle = 0;
 
     for (var item in items) {
-      var sweepAngle = totalRad * item.animationValue * item.value / totalValue;
+      var sweepAngle = totalRad *
+          item.animationValue *
+          math.max(item.value, minValue) /
+          totalValue;
       canvas.drawArc(
         Rect.fromCircle(center: center, radius: radius),
-        startAngle - 0.3,
-        sweepAngle - 0.2,
+        startAngle,
+        sweepAngle - 0.175,
         false,
         Paint()
           ..color = item.color

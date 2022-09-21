@@ -16,11 +16,12 @@ class ChartValues {
   const ChartValues(this.current, this.previous);
 }
 
-final energyChartProvider = FutureProvider<ChartValues>((ref) async {
-  Pagination page = ref.watch(paginationProvider);
-  List<Energy> current = await ref.watch(dailyEnergyChartProvider(page).future);
-  List<Energy> previous = await ref
-      .watch(dailyEnergyChartProvider(Pagination(page: page.page + 1)).future);
+final energyChartProvider =
+    FutureProvider.family<ChartValues, Pagination>((ref, pagination) async {
+  List<Energy> current =
+      await ref.watch(dailyEnergyChartProvider(pagination).future);
+  List<Energy> previous = await ref.watch(
+      dailyEnergyChartProvider(Pagination(page: pagination.page + 1)).future);
   return ChartValues(
     current,
     previous
@@ -42,15 +43,17 @@ final energyChartProvider = FutureProvider<ChartValues>((ref) async {
 
 class EnergyLineChart extends ConsumerWidget {
   final bool isCard;
+  final Pagination pagination;
 
   const EnergyLineChart({
     Key? key,
+    this.pagination = const Pagination(),
     this.isCard = true,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ref.watch(energyChartProvider).when(
+    return ref.watch(energyChartProvider(pagination)).when(
           data: (values) => ChartWrapper(
             isCard: isCard,
             child: _energyChart(values.current, values.previous),
