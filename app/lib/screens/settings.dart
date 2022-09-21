@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import 'package:scimovement/api.dart';
 import 'package:scimovement/models/auth.dart';
+import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/snackbar_message.dart';
 import 'package:scimovement/widgets/text_field.dart';
-import 'package:provider/provider.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends ConsumerWidget {
+  const SettingsScreen({Key? key}) : super(key: key);
+
   @override
-  Widget build(BuildContext context) {
-    AuthModel auth = Provider.of<AuthModel>(context);
+  Widget build(BuildContext context, WidgetRef ref) {
+    User? user = ref.watch(userProvider);
 
-    if (auth.user != null) {
-      return UserSettings(auth.user!, auth: auth);
+    if (user != null) {
+      return UserSettings(user);
     }
     return const Center(child: CircularProgressIndicator());
   }
@@ -21,32 +24,38 @@ class SettingsScreen extends StatelessWidget {
 
 class UserSettings extends StatelessWidget {
   final User user;
-  final AuthModel auth;
 
   const UserSettings(
     this.user, {
     Key? key,
-    required this.auth,
   }) : super(key: key);
 
-  FormGroup buildForm() => fb.group({
-        'weight': FormControl<int>(
-          value: user.weight != null ? user.weight!.toInt() : 0,
-          validators: [],
-        ),
-        'injuryLevel': FormControl<int>(
-          value: user.injuryLevel ?? 0,
-          validators: [],
-        ),
-        'gender': FormControl<Gender>(
-          value: user.gender,
-          validators: [],
-        ),
-        'condition': FormControl<Condition>(
-          value: user.condition,
-          validators: [],
-        ),
-      });
+  FormGroup buildForm() => fb.group(
+        {
+          'weight': FormControl<int>(
+            value: user.weight != null ? user.weight!.toInt() : 0,
+            validators: [
+              Validators.required,
+            ],
+          ),
+          'injuryLevel': FormControl<int>(
+            value: user.injuryLevel ?? 0,
+            validators: [
+              Validators.number,
+            ],
+          ),
+          'gender': FormControl<Gender>(
+            value: user.gender,
+            validators: [],
+          ),
+          'condition': FormControl<Condition>(
+            value: user.condition,
+            validators: [],
+          ),
+        },
+      );
+
+  Widget get spacer => const SizedBox(height: 16);
 
   @override
   Widget build(BuildContext context) {
@@ -56,20 +65,54 @@ class UserSettings extends StatelessWidget {
         return ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
           children: [
-            ReactiveDropdownField(
-              formControlName: 'condition',
-              hint: const Text('Select condition'),
-              items: Condition.values
-                  .map((condition) => DropdownMenuItem(
-                        value: condition,
-                        child: Text(condition.name),
-                      ))
-                  .toList(),
+            const Text(
+              'Profile',
+              style: TextStyle(
+                fontSize: 36,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            const SizedBox(height: 16),
-            ReactiveDropdownField(
-              formControlName: 'gender',
-              hint: const Text('Select gender'),
+            spacer,
+            ReactiveFormConsumer(
+                builder: ((context, formGroup, child) => Row(
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        Flexible(
+                          child: FormDropdown(
+                            form: form,
+                            formKey: 'condition',
+                            title: 'Condition',
+                            items: Condition.values
+                                .map((condition) => DropdownMenuItem(
+                                      value: condition,
+                                      child: Text(condition.name),
+                                    ))
+                                .toList(),
+                          ),
+                        ),
+                        if (form.value['condition'] == Condition.tetraplegic)
+                          const SizedBox(width: 16),
+                        if (form.value['condition'] == Condition.tetraplegic)
+                          Flexible(
+                            child: FormDropdown(
+                              form: form,
+                              formKey: 'injuryLevel',
+                              title: 'Injury level',
+                              items: [5, 6, 7, 8, 9]
+                                  .map((value) => DropdownMenuItem(
+                                        value: value,
+                                        child: Text(value.toString()),
+                                      ))
+                                  .toList(),
+                            ),
+                          )
+                      ],
+                    ))),
+            spacer,
+            FormDropdown(
+              form: form,
+              formKey: 'gender',
+              title: 'Gender',
               items: Gender.values
                   .map((gender) => DropdownMenuItem(
                         value: gender,
@@ -77,64 +120,156 @@ class UserSettings extends StatelessWidget {
                       ))
                   .toList(),
             ),
-            const SizedBox(height: 16),
+            spacer,
             const StyledTextField(
               formControlName: 'weight',
-              placeholder: 'Weight',
+              placeholder: 'Vikt',
               keyboardType: TextInputType.number,
             ),
-            const SizedBox(height: 16),
-            const StyledTextField(
-              formControlName: 'injuryLevel',
-              placeholder: 'Injury level',
-              keyboardType: TextInputType.number,
+            spacer,
+            const SubmitButton(),
+            spacer,
+            _separator(),
+            spacer,
+            const Text(
+              'App settings',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
-            const SizedBox(height: 16),
-            _submitButton(context, form),
-            const SizedBox(height: 16),
-            _logoutButton(context),
+            spacer,
+            _separator(),
+            spacer,
+            const LogoutButton(),
+            spacer,
+            _separator(),
+            spacer,
+            const Text(
+              'AnvändarID:',
+              textAlign: TextAlign.center,
+            ),
+            Text(
+              user.id,
+              textAlign: TextAlign.center,
+            ),
           ],
         );
       },
     );
   }
 
-  Widget _submitButton(BuildContext context, FormGroup form) {
-    return Button(
-      loading: auth.loading,
-      title: 'Update',
-      width: 220,
-      onPressed: () async {
-        FocusManager.instance.primaryFocus?.unfocus();
-        try {
-          await auth.updateUser({
-            'weight': form.value['weight'],
-            'injuryLevel': form.value['injuryLevel'],
-            'gender': (form.value['gender'] as Gender).name,
-            'condition': (form.value['condition'] as Condition).name,
-          });
-        } catch (e) {
-          return;
-        }
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackbarMessage(
-            context: context,
-            message: 'Updated',
-          ),
-        );
-      },
+  Widget _separator() {
+    return Container(
+      color: const Color.fromRGBO(0, 0, 0, 0.1),
+      width: 5000,
+      height: 1,
     );
   }
+}
 
-  Widget _logoutButton(BuildContext context) {
+class SubmitButton extends ConsumerWidget {
+  const SubmitButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ReactiveFormConsumer(
+      builder: ((context, form, child) => Button(
+            title: 'Save profile information',
+            width: 240,
+            disabled: form.pristine || !form.valid,
+            secondary: true,
+            onPressed: () async {
+              FocusManager.instance.primaryFocus?.unfocus();
+              try {
+                await ref.read(userProvider.notifier).update({
+                  'weight': form.value['weight'],
+                  'injuryLevel': form.value['injuryLevel'],
+                  'gender': (form.value['gender'] as Gender).name,
+                  'condition': (form.value['condition'] as Condition).name,
+                });
+              } catch (e) {
+                return;
+              }
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackbarMessage(
+                  context: context,
+                  message: 'Uppdaterad',
+                ),
+              );
+            },
+          )),
+    );
+  }
+}
+
+class LogoutButton extends ConsumerWidget {
+  const LogoutButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     return Button(
-      title: 'Logout',
+      title: 'Logga ut',
       width: 220,
       secondary: true,
-      onPressed: () async {
-        FocusManager.instance.primaryFocus?.unfocus();
-        await auth.logout();
+      onPressed: () => ref.read(userProvider.notifier).logout(),
+    );
+  }
+}
+
+class FormDropdown extends StatelessWidget {
+  final String formKey;
+  final String title;
+  final FormGroup form;
+  final List<DropdownMenuItem> items;
+
+  const FormDropdown({
+    Key? key,
+    required this.formKey,
+    required this.title,
+    required this.form,
+    this.items = const [],
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ReactiveDropdownField<dynamic>(
+      formControlName: formKey,
+      hint: const Text('Välj typ'),
+      icon: const Icon(Icons.keyboard_arrow_down),
+      iconSize: 32,
+      isDense: false,
+      selectedItemBuilder: (_) {
+        return items
+            .map(
+              (i) => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: AppTheme.labelTiny,
+                  ),
+                  i.child,
+                ],
+              ),
+            )
+            .toList();
       },
+      decoration: InputDecoration(
+        isDense: true,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(4.0),
+          borderSide: const BorderSide(
+            color: Color.fromRGBO(0, 0, 0, 0.1),
+            width: 1,
+          ),
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(4.0),
+          borderSide: const BorderSide(
+            color: Color.fromRGBO(0, 255, 0, 0.1),
+            width: 1,
+          ),
+        ),
+      ),
+      items: items,
     );
   }
 }
