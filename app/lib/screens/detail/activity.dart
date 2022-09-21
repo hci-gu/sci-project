@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:scimovement/models/energy.dart';
+import 'package:scimovement/models/activity.dart';
 import 'package:scimovement/models/config.dart';
 import 'package:scimovement/screens/detail/screen.dart';
 import 'package:scimovement/theme/theme.dart';

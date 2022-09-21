@@ -52,7 +52,9 @@ final paginationProvider =
     StateProvider<Pagination>((ref) => const Pagination());
 
 final dateDisplayProvider = Provider<String>((ref) {
-  DateTime date = ref.watch(dateProvider);
+  Pagination pagination = ref.watch(paginationProvider);
+  DateTime date =
+      ref.watch(dateProvider).subtract(pagination.duration * pagination.page);
   DateTime now = DateTime.now();
   DateTime today = DateTime(now.year, now.month, now.day);
   DateTime yesterday = today.subtract(const Duration(days: 1));
