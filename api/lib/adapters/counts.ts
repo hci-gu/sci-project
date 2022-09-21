@@ -1,7 +1,5 @@
 import axios from 'axios'
-import { Accel } from '../db/models/Accel'
-import { AccelCount } from '../db/models/AccelCount'
-import { HeartRate } from '../db/models/HeartRate'
+import { Accel, AccelCount, HeartRate } from '../db/classes'
 import * as utils from '../utils'
 const { PYTHON_API = 'http://localhost:5555' } = process.env
 

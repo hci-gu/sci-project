@@ -1,4 +1,3 @@
-import { Condition } from '../../db/models/User'
 import {
   standardCoeff,
   zeroCoeff,
@@ -7,7 +6,7 @@ import {
   paraWeights,
   tetraWeights,
 } from './coeffs.json'
-import { Activity } from '../../constants'
+import { Activity, Condition } from '../../constants'
 
 type Coeff = {
   constant: number

@@ -1,32 +1,11 @@
-import {
-  Model,
-  DataTypes,
-  Op,
-  InferAttributes,
-  InferCreationAttributes,
-  Sequelize,
-  CreationOptional,
-  ForeignKey,
-  ModelStatic,
-} from 'sequelize'
+import { DataTypes, Op, Sequelize, ModelStatic } from 'sequelize'
 import {
   getEnergyForCountAndActivity,
-  movementLevelForAccAndCondition,
+  activityForAccAndCondition,
 } from '../../adapters/energy'
-import UserModel, { User } from './User'
+import UserModel from './User'
 import EnergyModel from './Energy'
-
-export class AccelCount extends Model<
-  InferAttributes<AccelCount>,
-  InferCreationAttributes<AccelCount>
-> {
-  declare id: CreationOptional<number>
-  declare t: Date
-  declare hr: number
-  declare a: number
-
-  declare UserId?: ForeignKey<User['id']>
-}
+import { AccelCount } from '../classes'
 
 const afterCreate = async (count: AccelCount) => {
   if (!count.UserId) return
@@ -34,7 +13,7 @@ const afterCreate = async (count: AccelCount) => {
 
   if (!user) return
 
-  const activity = movementLevelForAccAndCondition(count.a, user.condition)
+  const activity = activityForAccAndCondition(count.a, user.condition)
   const kcal = getEnergyForCountAndActivity(user, count)
 
   await EnergyModel.save(

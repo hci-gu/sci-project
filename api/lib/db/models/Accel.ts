@@ -1,35 +1,11 @@
-import {
-  Model,
-  DataTypes,
-  Op,
-  InferAttributes,
-  InferCreationAttributes,
-  Sequelize,
-  CreationOptional,
-  NonAttribute,
-  ForeignKey,
-  ModelStatic,
-} from 'sequelize'
-import { User } from './User'
+import { DataTypes, Op, Sequelize, ModelStatic } from 'sequelize'
+import { Accel } from '../classes'
 
 export type AccelData = {
   t: Date
   x: number
   y: number
   z: number
-}
-
-export class Accel extends Model<
-  InferAttributes<Accel>,
-  InferCreationAttributes<Accel>
-> {
-  declare id: CreationOptional<number>
-  declare t: Date
-  declare x: number
-  declare y: number
-  declare z: number
-
-  declare UserId?: ForeignKey<User['id']>
 }
 
 let AccelModel: ModelStatic<Accel>
