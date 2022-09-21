@@ -24,6 +24,10 @@ export class Energy extends Model<
   declare UserId?: ForeignKey<User['id']>
 }
 
+interface AggregatedEnergy extends Energy {
+  minutes: number
+}
+
 let sequelizeInstance: Sequelize
 let EnergyModel: ModelStatic<Energy>
 export default {
@@ -100,7 +104,7 @@ export default {
     from: Date
     to: Date
     unit: string
-  }): Promise<Energy[]> =>
+  }): Promise<AggregatedEnergy[]> =>
     EnergyModel.findAll({
       where: {
         UserId: userId,
@@ -114,8 +118,13 @@ export default {
           'agg_t',
         ],
         [sequelizeInstance.fn('sum', sequelizeInstance.col('kcal')), 'kcal'],
+        'activity',
+        [
+          sequelizeInstance.fn('count', sequelizeInstance.col('activity')),
+          'minutes',
+        ],
       ],
-      group: 'agg_t',
+      group: ['agg_t', 'activity'],
       order: [[sequelizeInstance.col('agg_t'), 'ASC']],
     }).then((docs) =>
       docs.map(
@@ -123,8 +132,11 @@ export default {
           ({
             // @ts-ignore
             t: d.get({ plain: true }).agg_t,
+            // @ts-ignore
+            minutes: parseInt(d.get({ plain: true }).minutes),
+            activity: d.activity,
             kcal: d.kcal,
-          } as Energy)
+          } as AggregatedEnergy)
       )
     ),
 }
