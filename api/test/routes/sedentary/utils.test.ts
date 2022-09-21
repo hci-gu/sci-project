@@ -1,6 +1,7 @@
 import db from '../../../lib/db'
 import * as utils from '../../../lib/routes/sedentary/utils'
-import AccelCountModel, { AccelCount } from '../../../lib/db/models/AccelCount'
+import AccelCountModel from '../../../lib/db/models/AccelCount'
+import { AccelCount } from '../../../lib/db/classes'
 
 jest.mock('../../../lib/db/models/AccelCount')
 
