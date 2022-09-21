@@ -17,7 +17,6 @@ class ChartWrapper extends StatelessWidget {
     return AspectRatio(
       aspectRatio: aspectRatio,
       child: Container(
-        height: 320,
         decoration: isCard
             ? BoxDecoration(
                 borderRadius: BorderRadius.circular(32),

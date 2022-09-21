@@ -3,7 +3,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/models/activity.dart';
 import 'package:scimovement/models/config.dart';
 import 'package:scimovement/screens/detail/screen.dart';
-import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/charts/activity_line_chart.dart';
 import 'package:scimovement/widgets/charts/energy_bar_chart.dart';
 import 'package:scimovement/widgets/stat_header.dart';
@@ -14,24 +13,24 @@ class ActivityScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    Pagination page = ref.watch(paginationProvider);
+    Pagination pagination = ref.watch(paginationProvider);
 
     return DetailScreen(
       title: 'Rörelse',
       header: StatHeader(
         unit: Unit.time,
-        averageProvider: averageMovementMinutesProvider(page),
-        totalProvider: totalMovementMinutesProvider(page),
+        averageProvider: averageMovementMinutesProvider(pagination),
+        totalProvider: totalMovementMinutesProvider(pagination),
       ),
-      body: Column(
-        children: [
-          AppTheme.separator,
-          _isDay(ref)
-              ? const ActivityLineChart(isCard: false)
-              : const EnergyBarChart(displayMode: BarChartDisplayMode.activity),
-          AppTheme.separator,
-        ],
-      ),
+      pageBuilder: (ctx, page) => _isDay(ref)
+          ? ActivityLineChart(
+              isCard: false,
+              pagination: Pagination(page: page, mode: pagination.mode),
+            )
+          : EnergyBarChart(
+              displayMode: BarChartDisplayMode.activity,
+              pagination: Pagination(page: page, mode: pagination.mode),
+            ),
     );
   }
 

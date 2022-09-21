@@ -11,15 +11,17 @@ import 'package:scimovement/widgets/charts/chart_wrapper.dart';
 
 class ActivityLineChart extends ConsumerWidget {
   final bool isCard;
+  final Pagination pagination;
 
   const ActivityLineChart({
     Key? key,
+    this.pagination = const Pagination(),
     this.isCard = true,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ref.watch(energyProvider(ref.watch(paginationProvider))).when(
+    return ref.watch(energyProvider(pagination)).when(
           data: (values) => ChartWrapper(
             isCard: isCard,
             child: _energyChart(values),
