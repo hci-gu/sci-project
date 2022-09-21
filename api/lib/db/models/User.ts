@@ -1,37 +1,5 @@
-import {
-  DataTypes,
-  Model,
-  InferAttributes,
-  Sequelize,
-  InferCreationAttributes,
-  CreationOptional,
-  ModelStatic,
-} from 'sequelize'
-
-export enum Gender {
-  male = 'male',
-  female = 'female',
-  other = 'other',
-}
-
-export enum Condition {
-  paraplegic = 'paraplegic',
-  tetraplegic = 'tetraplegic',
-  none = 'none',
-}
-
-export class User extends Model<
-  InferAttributes<User>,
-  InferCreationAttributes<User>
-> {
-  declare id: CreationOptional<string>
-  declare weight: CreationOptional<number>
-  declare gender: CreationOptional<Gender>
-  declare condition: CreationOptional<Condition>
-  declare injuryLevel: CreationOptional<number>
-  declare deviceId: CreationOptional<string>
-  declare createdAt: CreationOptional<Date>
-}
+import { DataTypes, Sequelize, ModelStatic } from 'sequelize'
+import { User } from '../classes'
 
 let UserModel: ModelStatic<User>
 export default {

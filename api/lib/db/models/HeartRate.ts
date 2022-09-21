@@ -1,31 +1,9 @@
-import {
-  Model,
-  DataTypes,
-  Op,
-  InferAttributes,
-  InferCreationAttributes,
-  Sequelize,
-  CreationOptional,
-  NonAttribute,
-  ForeignKey,
-  ModelStatic,
-} from 'sequelize'
-import { User } from './User'
+import { DataTypes, Op, Sequelize, ModelStatic } from 'sequelize'
+import { HeartRate } from '../classes'
 
 export type HeartRateData = {
   t: Date
   hr: number
-}
-
-export class HeartRate extends Model<
-  InferAttributes<HeartRate>,
-  InferCreationAttributes<HeartRate>
-> {
-  declare id: CreationOptional<number>
-  declare t: Date
-  declare hr: number
-
-  declare UserId?: ForeignKey<User['id']>
 }
 
 let HeartRateModel: ModelStatic<HeartRate>

@@ -1,18 +1,14 @@
 import { DataTypes, Op, Sequelize, ModelStatic } from 'sequelize'
 import { Activity } from '../../constants'
-import { Energy } from '../classes'
-
-interface AggregatedEnergy extends Energy {
-  minutes: number
-}
+import { Bout } from '../classes'
 
 let sequelizeInstance: Sequelize
-let EnergyModel: ModelStatic<Energy>
+let BoutModel: ModelStatic<Bout>
 export default {
   init: (sequelize: Sequelize) => {
     sequelizeInstance = sequelize
-    EnergyModel = sequelize.define<Energy>(
-      'Energy',
+    BoutModel = sequelize.define<Bout>(
+      'Bout',
       {
         id: {
           type: DataTypes.INTEGER,
@@ -20,7 +16,7 @@ export default {
           autoIncrement: true,
         },
         t: DataTypes.DATE,
-        kcal: DataTypes.FLOAT,
+        minutes: DataTypes.INTEGER,
         activity: DataTypes.ENUM(...Object.values(Activity)),
       },
       {
@@ -30,10 +26,10 @@ export default {
         },
       }
     )
-    return EnergyModel
+    return BoutModel
   },
   associate: (sequelize: Sequelize) => {
-    EnergyModel.belongsTo(sequelize.models.User, {
+    BoutModel.belongsTo(sequelize.models.User, {
       foreignKey: {
         allowNull: false,
       },
@@ -41,14 +37,14 @@ export default {
     })
   },
   save: (
-    data: { t: Date; kcal: number; activity: Activity }[],
+    data: { t: Date; minutes: number; activity: Activity }[],
     userId: string
   ) =>
     Promise.all(
       data.map((d) =>
-        EnergyModel.create({
+        BoutModel.create({
           t: d.t,
-          kcal: d.kcal,
+          minutes: d.minutes,
           activity: d.activity,
           UserId: userId,
         })
@@ -62,8 +58,8 @@ export default {
     userId: string
     from: Date
     to: Date
-  }): Promise<Energy[]> =>
-    EnergyModel.findAll({
+  }): Promise<Bout[]> =>
+    Bout.findAll({
       where: {
         UserId: userId,
         t: {
@@ -82,8 +78,8 @@ export default {
     from: Date
     to: Date
     unit: string
-  }): Promise<AggregatedEnergy[]> =>
-    EnergyModel.findAll({
+  }): Promise<Bout[]> =>
+    BoutModel.findAll({
       where: {
         UserId: userId,
         t: {
@@ -95,12 +91,11 @@ export default {
           sequelizeInstance.fn('date_trunc', unit, sequelizeInstance.col('t')),
           'agg_t',
         ],
-        [sequelizeInstance.fn('sum', sequelizeInstance.col('kcal')), 'kcal'],
-        'activity',
         [
-          sequelizeInstance.fn('count', sequelizeInstance.col('activity')),
+          sequelizeInstance.fn('avg', sequelizeInstance.col('minutes')),
           'minutes',
         ],
+        'activity',
       ],
       group: ['agg_t', 'activity'],
       order: [[sequelizeInstance.col('agg_t'), 'ASC']],
@@ -110,11 +105,9 @@ export default {
           ({
             // @ts-ignore
             t: d.get({ plain: true }).agg_t,
-            // @ts-ignore
-            minutes: parseInt(d.get({ plain: true }).minutes),
+            minutes: d.get({ plain: true }).minutes,
             activity: d.activity,
-            kcal: d.kcal,
-          } as AggregatedEnergy)
+          } as Bout)
       )
     ),
 }

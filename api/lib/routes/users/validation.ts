@@ -5,7 +5,7 @@ import {
   createValidator,
   ValidatedRequestSchema,
 } from 'express-joi-validation'
-import { Condition, Gender } from '../../db/models/User'
+import { Condition, Gender } from '../../constants'
 const validator = createValidator({})
 
 const user = Joi.object({

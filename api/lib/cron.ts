@@ -1,9 +1,10 @@
 import { activityForPeriod } from './routes/sedentary/utils'
 import moment from 'moment'
 import * as redis from './adapters/redis'
-import UserModel, { User } from './db/models/User'
+import UserModel from './db/models/User'
 import * as push from './push'
 import AccelCount from './db/models/AccelCount'
+import { User } from './db/classes'
 
 const CronJob = require('cron').CronJob
 

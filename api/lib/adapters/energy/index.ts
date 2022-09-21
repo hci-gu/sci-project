@@ -1,12 +1,13 @@
-import { Condition, Gender, User } from '../../db/models/User'
 import {
   Activity,
+  Condition,
+  Gender,
   MOVING_THRESHOLD_PARA,
   MOVING_THRESHOLD_TETRA,
   SEDENTARY_THRESHOLD,
 } from '../../constants'
 import getCoeff from './coeff'
-import { AccelCount } from '../../db/models/AccelCount'
+import { AccelCount, User } from '../../db/classes'
 
 const valueForGender = (gender: Gender) => {
   switch (gender) {
@@ -30,10 +31,7 @@ const valueForCondition = (condition: Condition) => {
   }
 }
 
-export const movementLevelForAccAndCondition = (
-  a: number,
-  condition: Condition
-) => {
+export const activityForAccAndCondition = (a: number, condition: Condition) => {
   if (
     (condition === Condition.paraplegic && a > MOVING_THRESHOLD_PARA) ||
     (condition === Condition.tetraplegic && a > MOVING_THRESHOLD_TETRA)
@@ -62,8 +60,7 @@ export const getEnergyForCountAndActivity = (
 
   const coeff = getCoeff({
     condition: user.condition,
-    activity:
-      activity ?? movementLevelForAccAndCondition(count.a, user.condition),
+    activity: activity ?? activityForAccAndCondition(count.a, user.condition),
   })
 
   let energy: number = coeff.constant

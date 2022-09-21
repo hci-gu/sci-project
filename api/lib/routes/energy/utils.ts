@@ -4,7 +4,7 @@ import EnergyModel from '../../db/models/Energy'
 import AccelCountModel from '../../db/models/AccelCount'
 import {
   getEnergyForCountAndActivity,
-  movementLevelForAccAndCondition,
+  activityForAccAndCondition,
 } from '../../adapters/energy'
 
 export const energyForPeriod = async ({
@@ -70,7 +70,7 @@ export const fillEnergyFromCounts = async ({
   })
 
   const energies = counts.map((count) => {
-    const activity = movementLevelForAccAndCondition(count.a, user.condition)
+    const activity = activityForAccAndCondition(count.a, user.condition)
     const kcal = getEnergyForCountAndActivity(user, count)
 
     return {
