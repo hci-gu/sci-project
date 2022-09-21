@@ -1,11 +1,11 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
-import 'package:scimovement/models/energy.dart';
+import 'package:intl/intl.dart';
+import 'package:scimovement/models/config.dart';
 
-const String apiUrl = 'https://sci-api.appadem.in';
+const String apiUrl = 'https://sci-api.prod.appadem.in';
 // const String apiUrl = 'http://192.168.0.33:4000';
 // const String apiUrl = 'http://localhost:4000';
 
@@ -19,6 +19,19 @@ Gender genderFromString(String gender) {
 }
 
 enum Condition { paraplegic, tetraplegic }
+
+extension ParseToString on Condition {
+  String displayString() {
+    switch (this) {
+      case Condition.paraplegic:
+        return 'Paraplegic';
+      case Condition.tetraplegic:
+        return 'Tetraplegic';
+      default:
+        return toString();
+    }
+  }
+}
 
 Condition conditionFromString(String condition) {
   if (condition == 'tetraplegic') {
@@ -65,26 +78,43 @@ class User {
   }
 }
 
-class HeartRate {
-  final DateTime time;
-  final double value;
-
-  HeartRate(this.time, this.value);
-
-  factory HeartRate.fromJson(Map<String, dynamic> json) {
-    return HeartRate(DateTime.parse(json['t']), json['hr'].toDouble());
-  }
+enum MovementLevel {
+  sedentary,
+  moving,
+  active,
 }
 
 class Energy {
   final DateTime time;
   final double value;
+  final int minutes;
+  final MovementLevel movementLevel;
 
-  Energy(this.time, this.value);
+  Energy({
+    required this.time,
+    required this.value,
+    this.minutes = 1,
+    this.movementLevel = MovementLevel.sedentary,
+  });
 
   factory Energy.fromJson(Map<String, dynamic> json) {
-    double value = json['energy'] != null ? json['energy'].toDouble() : 0.0;
-    return Energy(DateTime.parse(json['t']), value);
+    double value = json['kcal'] != null ? json['kcal'].toDouble() : 0.0;
+    MovementLevel movementLevel;
+
+    if (json['activity'] == 'sedentary') {
+      movementLevel = MovementLevel.sedentary;
+    } else if (json['activity'] == 'active') {
+      movementLevel = MovementLevel.active;
+    } else {
+      movementLevel = MovementLevel.moving;
+    }
+    String minutesString = json['minutes']?.toString() ?? '1';
+    return Energy(
+      time: DateTime.parse(json['t']),
+      value: value,
+      movementLevel: movementLevel,
+      minutes: int.parse(minutesString),
+    );
   }
 }
 
@@ -110,7 +140,7 @@ class Api {
   String _userId = '';
   Dio dio = Dio(BaseOptions(
     baseUrl: apiUrl,
-    connectTimeout: 5000,
+    connectTimeout: 30000,
     receiveTimeout: 45000,
   ));
 
@@ -134,50 +164,43 @@ class Api {
     return User.fromJson(json.decode(response.body));
   }
 
-  Future<List<HeartRate>> getHeartRate(DateTime from, DateTime to) async {
-    var response = await dio.get('/users/$_userId/data/hr', queryParameters: {
-      'from': from.toUtc().toIso8601String(),
-      'to': to.toUtc().toIso8601String(),
-      'group': 'minute',
-    });
-
-    if (response.statusCode == 200) {
-      List<dynamic> data = response.data;
-      return data.map((json) => HeartRate.fromJson(json)).toList();
-    }
-    return [];
-  }
-
-  Future<List<Accel>> getAccel(DateTime from, DateTime to) async {
-    var response =
-        await dio.get('/users/$_userId/data/accel', queryParameters: {
-      'from': from.toUtc().toIso8601String(),
-      'to': to.toUtc().toIso8601String(),
-      'group': 'second',
-    });
-
-    if (response.statusCode == 200) {
-      List<dynamic> data = response.data;
-      return data.map((json) => Accel.fromJson(json)).toList();
-    }
-    return [];
-  }
-
   Future<List<Energy>> getEnergy(
     DateTime from,
     DateTime to,
+    ChartMode mode,
   ) async {
-    print('$apiUrl/users/$_userId/energy');
-    var response = await dio.get('/users/$_userId/energy', queryParameters: {
-      'from': from.toUtc().toIso8601String(),
-      'to': to.toUtc().toIso8601String(),
-    });
+    Map<String, String> params = {
+      'from': DateFormat('yyyy-MM-dd HH:mm').format(from),
+      'to': DateFormat('yyyy-MM-dd HH:mm').format(to),
+    };
+    if (mode != ChartMode.day) {
+      params['group'] = chartModeToGroup(mode);
+    }
+    var response = await dio.get('/energy/$_userId', queryParameters: params);
 
     if (response.statusCode == 200) {
       List<dynamic> data = response.data;
       return data.map((json) => Energy.fromJson(json)).toList();
     }
     return [];
+  }
+
+  Future<int> getActivity(DateTime from, DateTime to) async {
+    var response = await dio.get('/sedentary/$_userId', queryParameters: {
+      'from': DateFormat('yyyy-MM-dd HH:mm').format(from),
+      'to': DateFormat('yyyy-MM-dd HH:mm').format(to),
+    });
+
+    if (response.statusCode == 200) {
+      Map<String, dynamic> data = response.data;
+      try {
+        double value = data['averageInactiveDuration'] ?? 0.0;
+        return value.round();
+      } catch (e) {
+        return data['averageInactiveDuration'] ?? 0;
+      }
+    }
+    return 0;
   }
 
   Future<User?> updateUser(Map<String, dynamic> userdata) async {
@@ -191,6 +214,18 @@ class Api {
     }
 
     return getUser(_userId);
+  }
+
+  String chartModeToGroup(ChartMode mode) {
+    switch (mode) {
+      case ChartMode.week:
+      case ChartMode.month:
+        return 'day';
+      case ChartMode.year:
+        return 'month';
+      default:
+        return 'hour';
+    }
   }
 
   // Use API as a singleton

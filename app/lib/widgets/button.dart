@@ -3,6 +3,7 @@ import 'package:scimovement/theme/theme.dart';
 
 class Button extends StatelessWidget {
   final String? title;
+  final String? subtitle;
   final VoidCallback onPressed;
   final IconData? icon;
   final double? width;
@@ -18,6 +19,7 @@ class Button extends StatelessWidget {
     Key? key,
     required this.onPressed,
     this.title,
+    this.subtitle,
     this.icon,
     this.width,
     this.color,
@@ -49,6 +51,21 @@ class Button extends StatelessWidget {
 
     ButtonStyle style = AppTheme.buttonStyle(
         rounded: rounded, secondary: secondary, small: small, color: color);
+    Widget _text = Text(
+      title ?? '',
+      style: AppTheme.buttonTextStyle(secondary, color, small),
+    );
+    if (subtitle != null) {
+      _text = Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _text,
+          Text(subtitle ?? '',
+              style: AppTheme.buttonTextStyle(secondary, color, true)),
+        ],
+      );
+    }
 
     if (icon != null) {
       Widget _icon =
@@ -60,8 +77,6 @@ class Button extends StatelessWidget {
           child: loading ? loadingIndicator : _icon,
         );
       } else {
-        Widget _text = Text(title ?? '',
-            style: AppTheme.buttonTextStyle(secondary, color, small));
         button = TextButton.icon(
           style: style,
           onPressed: onPressed,
@@ -77,12 +92,7 @@ class Button extends StatelessWidget {
       button = TextButton(
         style: style,
         onPressed: onPressed,
-        child: loading
-            ? loadingIndicator
-            : Text(
-                title ?? '',
-                style: AppTheme.buttonTextStyle(secondary, color, small),
-              ),
+        child: loading ? loadingIndicator : _text,
       );
     }
 
