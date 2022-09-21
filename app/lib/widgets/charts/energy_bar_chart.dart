@@ -103,6 +103,7 @@ class EnergyBarChart extends ConsumerWidget {
                   ))
               .toList(),
         ),
+        swapAnimationCurve: Curves.easeOut,
       ),
     );
   }

@@ -38,16 +38,19 @@ class ChartWrapper extends StatelessWidget {
   }
 
   static ChartWrapper loading() => const ChartWrapper(
+        isCard: false,
         child: Center(
           child: CircularProgressIndicator(),
         ),
       );
   static ChartWrapper error(String err) => ChartWrapper(
+        isCard: false,
         child: Center(
           child: Text(err),
         ),
       );
   static ChartWrapper empty() => const ChartWrapper(
+        isCard: false,
         child: Center(
           child: Text('Ingen data'),
         ),

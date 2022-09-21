@@ -140,7 +140,7 @@ class Api {
   String _userId = '';
   Dio dio = Dio(BaseOptions(
     baseUrl: apiUrl,
-    connectTimeout: 5000,
+    connectTimeout: 30000,
     receiveTimeout: 45000,
   ));
 

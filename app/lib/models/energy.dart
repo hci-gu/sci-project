@@ -32,27 +32,6 @@ final averageEnergyProvider =
   return energy.fold<double>(0, (a, b) => a + b.value) / energy.length;
 });
 
-final averageMovementMinutesProvider =
-    FutureProvider.family<double, Pagination>((ref, pagination) async {
-  List<Energy> energy = (await ref.watch(energyProvider(pagination).future))
-      .where((element) => element.movementLevel != MovementLevel.sedentary)
-      .toList();
-
-  if (energy.isEmpty) {
-    return 0;
-  }
-
-  return energy.fold<int>(0, (a, b) => a + b.minutes) / energy.length;
-});
-
-final totalMovementMinutesProvider =
-    FutureProvider.family<int, Pagination>((ref, pagination) async {
-  List<Energy> energy = await ref.watch(energyProvider(pagination).future);
-  return energy
-      .where((element) => element.movementLevel != MovementLevel.sedentary)
-      .fold<int>(0, (a, b) => a + b.minutes);
-});
-
 final dailyEnergyChartProvider =
     FutureProvider.family<List<Energy>, Pagination>((ref, pagination) async {
   List<Energy> energy = await ref.watch(energyProvider(pagination).future);
