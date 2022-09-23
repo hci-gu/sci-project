@@ -23,10 +23,3 @@ export async function init(sequelize: Sequelize) {
   Energy.associate(sequelize)
   HeartRate.associate(sequelize)
 }
-
-export default {
-  Accel,
-  AccelCount,
-  HeartRate,
-  User,
-}

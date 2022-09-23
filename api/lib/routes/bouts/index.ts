@@ -1,7 +1,7 @@
 import express from 'express'
 import { ValidatedRequest } from 'express-joi-validation'
 import { getQuery, GetQuerySchema } from '../validation'
-import { activityForPeriod } from './utils'
+import { boutsForPeriod } from './utils'
 
 const router = express.Router()
 
@@ -10,18 +10,19 @@ router.get(
   getQuery,
   async (req: ValidatedRequest<GetQuerySchema>, res) => {
     const { id } = req.params
-    const { from, to } = req.query
+    const { from, to, group } = req.query
 
     try {
-      const activity = await activityForPeriod({
+      const bouts = await boutsForPeriod({
         id,
         from,
         to,
+        group,
       })
 
-      return res.json(activity)
+      return res.json(bouts)
     } catch (e) {
-      console.log('GET /sedentary/:id', e)
+      console.log('GET /bouts/:id', e)
       return res.sendStatus(500)
     }
   }
