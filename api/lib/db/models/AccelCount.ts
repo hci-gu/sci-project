@@ -2,6 +2,8 @@ import { DataTypes, Op, Sequelize, ModelStatic } from 'sequelize'
 import UserModel from './User'
 import { saveEnergyFromCount } from './Energy'
 import { AccelCount } from '../classes'
+import moment from 'moment'
+import { createBoutFromCounts } from './Bout'
 
 const afterCreate = async (count: AccelCount) => {
   if (!count.UserId) return
@@ -10,11 +12,20 @@ const afterCreate = async (count: AccelCount) => {
   if (!user) return
 
   saveEnergyFromCount(user, count)
+
+  const countsFromLastFiveMinutes = await Model.find({
+    userId: user.id,
+    from: moment(count.t).subtract(4, 'minutes').toDate(),
+    to: count.t,
+  })
+  if (countsFromLastFiveMinutes.length === 5) {
+    createBoutFromCounts(user, countsFromLastFiveMinutes)
+  }
 }
 
 let sequelizeInstance: Sequelize
 let AccelCountModel: ModelStatic<AccelCount>
-export default {
+const Model = {
   init: (sequelize: Sequelize) => {
     sequelizeInstance = sequelize
     AccelCountModel = sequelize.define<AccelCount>(
@@ -118,3 +129,5 @@ export default {
       )
     ),
 }
+
+export default Model

@@ -4,6 +4,7 @@ import {
   InferCreationAttributes,
   CreationOptional,
   ForeignKey,
+  VirtualDataType,
 } from 'sequelize'
 import { Activity, Condition, Gender } from '../constants'
 
