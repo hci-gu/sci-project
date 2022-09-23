@@ -51,3 +51,24 @@ final dailyEnergyChartProvider =
   }
   return averageEnergy;
 });
+
+final averageMovementMinutesProvider =
+    FutureProvider.family<double, Pagination>((ref, pagination) async {
+  List<Energy> energy = (await ref.watch(energyProvider(pagination).future))
+      .where((e) => e.activity != Activity.sedentary)
+      .toList();
+
+  if (energy.isEmpty) {
+    return 0;
+  }
+
+  return energy.fold<int>(0, (a, b) => a + b.minutes) / energy.length;
+});
+
+final totalMovementMinutesProvider =
+    FutureProvider.family<int, Pagination>((ref, pagination) async {
+  List<Energy> energy = await ref.watch(energyProvider(pagination).future);
+  return energy
+      .where((e) => e.activity != Activity.sedentary)
+      .fold<int>(0, (a, b) => a + b.minutes);
+});
