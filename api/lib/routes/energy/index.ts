@@ -24,7 +24,7 @@ router.get(
 
       return res.json(energy)
     } catch (e) {
-      console.log('GET /users/:id/energy', e)
+      console.log('GET /energy/:id', e)
       return res.sendStatus(500)
     }
   }
@@ -44,7 +44,7 @@ router.get(
       })
       res.send('OK')
     } catch (e) {
-      console.log('GET /users/:id/energy', e)
+      console.log('GET /energy/:id/fill', e)
       return res.sendStatus(500)
     }
   }

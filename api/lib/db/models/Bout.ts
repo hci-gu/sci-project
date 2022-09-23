@@ -57,7 +57,7 @@ const Model = {
     from: Date
     to: Date
   }): Promise<Bout[]> =>
-    Bout.findAll({
+    BoutModel.findAll({
       where: {
         UserId: userId,
         t: {
