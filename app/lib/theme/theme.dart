@@ -21,13 +21,13 @@ class AppColors {
   final active = HexColor('#44BD7A');
   final sedentary = HexColor('#C82D38');
 
-  Color activityLevelToColor(MovementLevel level) {
-    switch (level) {
-      case MovementLevel.moving:
+  Color activityLevelToColor(Activity activity) {
+    switch (activity) {
+      case Activity.moving:
         return moving;
-      case MovementLevel.active:
+      case Activity.active:
         return active;
-      case MovementLevel.sedentary:
+      case Activity.sedentary:
         return sedentary;
       default:
         return black;

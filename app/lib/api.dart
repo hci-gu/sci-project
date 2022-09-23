@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:math';
 import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -78,61 +77,65 @@ class User {
   }
 }
 
-enum MovementLevel {
+enum Activity {
   sedentary,
   moving,
   active,
+}
+
+Activity activityFromString(string) {
+  switch (string) {
+    case 'sedentary':
+      return Activity.sedentary;
+    case 'moving':
+      return Activity.moving;
+    case 'active':
+      return Activity.active;
+    default:
+      return Activity.moving;
+  }
 }
 
 class Energy {
   final DateTime time;
   final double value;
   final int minutes;
-  final MovementLevel movementLevel;
+  final Activity activity;
 
   Energy({
     required this.time,
     required this.value,
     this.minutes = 1,
-    this.movementLevel = MovementLevel.sedentary,
+    this.activity = Activity.sedentary,
   });
 
   factory Energy.fromJson(Map<String, dynamic> json) {
     double value = json['kcal'] != null ? json['kcal'].toDouble() : 0.0;
-    MovementLevel movementLevel;
+    Activity activity = activityFromString(json['activity']);
 
-    if (json['activity'] == 'sedentary') {
-      movementLevel = MovementLevel.sedentary;
-    } else if (json['activity'] == 'active') {
-      movementLevel = MovementLevel.active;
-    } else {
-      movementLevel = MovementLevel.moving;
-    }
     String minutesString = json['minutes']?.toString() ?? '1';
     return Energy(
       time: DateTime.parse(json['t']),
       value: value,
-      movementLevel: movementLevel,
+      activity: activity,
       minutes: int.parse(minutesString),
     );
   }
 }
 
-class Accel {
+class Bout {
   final DateTime time;
-  final double x;
-  final double y;
-  final double z;
-  final double a;
+  final int minutes;
+  final Activity activity;
 
-  Accel(this.time, this.x, this.y, this.z, this.a);
+  Bout({required this.time, required this.minutes, required this.activity});
 
-  factory Accel.fromJson(Map<String, dynamic> json) {
-    // calculate a from x, y, z
-    double a = sqrt(pow(json['x'].toDouble(), 2) +
-        pow(json['y'].toDouble(), 2) +
-        pow(json['z'].toDouble(), 2));
-    return Accel(DateTime.parse(json['t']), json['x'], json['y'], json['z'], a);
+  factory Bout.fromJson(Map<String, dynamic> json) {
+    return Bout(
+      time: DateTime.parse(json['t']),
+      minutes: json['minutes'],
+      activity: activityFromString(json['activity']),
+    );
   }
 }
 
@@ -181,6 +184,24 @@ class Api {
     if (response.statusCode == 200) {
       List<dynamic> data = response.data;
       return data.map((json) => Energy.fromJson(json)).toList();
+    }
+    return [];
+  }
+
+  Future<List<Bout>> getBouts(
+      DateTime from, DateTime to, ChartMode mode) async {
+    Map<String, String> params = {
+      'from': DateFormat('yyyy-MM-dd HH:mm').format(from),
+      'to': DateFormat('yyyy-MM-dd HH:mm').format(to),
+    };
+    if (mode != ChartMode.day) {
+      params['group'] = chartModeToGroup(mode);
+    }
+    var response = await dio.get('/bouts/$_userId', queryParameters: params);
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = response.data;
+      return data.map((json) => Bout.fromJson(json)).toList();
     }
     return [];
   }

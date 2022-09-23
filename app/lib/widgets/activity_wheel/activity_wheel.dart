@@ -8,25 +8,25 @@ import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/activity_wheel/circle_painter.dart';
 import 'package:go_router/go_router.dart';
 
-class Activity {
-  MovementLevel level;
+class ActivityGroup {
+  Activity activity;
   List<Energy> energy;
 
-  Activity(this.level, this.energy);
+  ActivityGroup(this.activity, this.energy);
 
   double get value => energy.fold<double>(0, (a, b) => a + b.value);
   int get count => energy.length;
 }
 
-final activityProvider = FutureProvider<List<Activity>>((ref) async {
+final activityProvider = FutureProvider<List<ActivityGroup>>((ref) async {
   List<Energy> energy =
       await ref.watch(energyProvider(const Pagination()).future);
 
-  return MovementLevel.values
+  return Activity.values
       .map(
-        (level) => Activity(
-          level,
-          energy.where((e) => e.movementLevel == level).toList(),
+        (activity) => ActivityGroup(
+          activity,
+          energy.where((e) => e.activity == activity).toList(),
         ),
       )
       .toList();
@@ -47,15 +47,15 @@ class ActivityWheel extends ConsumerWidget {
     );
   }
 
-  Widget _body(List<Activity> levels) {
+  Widget _body(List<ActivityGroup> activityGroups) {
     return _container(
       Column(
         children: [
-          AnimatedWheel(levels: levels),
+          AnimatedWheel(activityGroups: activityGroups),
           AppTheme.spacer2x,
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: levels
+            children: activityGroups
                 .map(
                   (e) => Row(
                     children: [
@@ -63,13 +63,14 @@ class ActivityWheel extends ConsumerWidget {
                         width: 8,
                         height: 8,
                         decoration: BoxDecoration(
-                          color: AppTheme.colors.activityLevelToColor(e.level),
+                          color:
+                              AppTheme.colors.activityLevelToColor(e.activity),
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
                       AppTheme.spacer,
                       Text(
-                        e.level.name,
+                        e.activity.name,
                         style: AppTheme.labelLarge,
                       ),
                     ],
@@ -111,9 +112,10 @@ class ActivityWheel extends ConsumerWidget {
 }
 
 class AnimatedWheel extends HookWidget {
-  final List<Activity> levels;
+  final List<ActivityGroup> activityGroups;
 
-  const AnimatedWheel({Key? key, required this.levels}) : super(key: key);
+  const AnimatedWheel({Key? key, required this.activityGroups})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -134,7 +136,7 @@ class AnimatedWheel extends HookWidget {
           Column(
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.center,
-            children: levels
+            children: activityGroups
                 .map(
                   (e) => Row(
                     mainAxisSize: MainAxisSize.max,
@@ -145,13 +147,15 @@ class AnimatedWheel extends HookWidget {
                       Text(
                         e.value.toStringAsFixed(0),
                         style: AppTheme.headLine2.copyWith(
-                          color: AppTheme.colors.activityLevelToColor(e.level),
+                          color:
+                              AppTheme.colors.activityLevelToColor(e.activity),
                         ),
                       ),
                       Text(
                         'kcal',
                         style: AppTheme.labelTiny.copyWith(
-                          color: AppTheme.colors.activityLevelToColor(e.level),
+                          color:
+                              AppTheme.colors.activityLevelToColor(e.activity),
                         ),
                       )
                     ],
@@ -164,13 +168,13 @@ class AnimatedWheel extends HookWidget {
             builder: (_, __) => CustomPaint(
               painter: CirclePainter(
                 chartRadius: 100,
-                items: levels
+                items: activityGroups
                     .map(
                       (e) => CircleChartItem(
                         value: e.count.toDouble(),
-                        color: AppTheme.colors.activityLevelToColor(e.level),
+                        color: AppTheme.colors.activityLevelToColor(e.activity),
                         animationValue: CurvedAnimation(
-                                curve: _intervalForMovementLevel(e.level),
+                                curve: _intervalForActivity(e.activity),
                                 parent: controller)
                             .value,
                       ),
@@ -187,13 +191,13 @@ class AnimatedWheel extends HookWidget {
     );
   }
 
-  Interval _intervalForMovementLevel(MovementLevel level) {
-    switch (level) {
-      case MovementLevel.sedentary:
+  Interval _intervalForActivity(Activity activity) {
+    switch (activity) {
+      case Activity.sedentary:
         return const Interval(0, 0.3, curve: Curves.easeInCubic);
-      case MovementLevel.moving:
+      case Activity.moving:
         return const Interval(0.4, 0.6, curve: Curves.easeInCubic);
-      case MovementLevel.active:
+      case Activity.active:
         return const Interval(0.7, 1, curve: Curves.easeInCubic);
     }
   }

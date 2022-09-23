@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:scimovement/api.dart';
-import 'package:scimovement/models/energy.dart';
+import 'package:scimovement/models/bouts.dart';
 import 'package:scimovement/models/config.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'dart:math';
@@ -21,7 +21,7 @@ class ActivityLineChart extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ref.watch(energyProvider(pagination)).when(
+    return ref.watch(boutsProvider(pagination)).when(
           data: (values) => ChartWrapper(
             isCard: isCard,
             child: _energyChart(values),
@@ -31,23 +31,24 @@ class ActivityLineChart extends ConsumerWidget {
         );
   }
 
-  double _valueForMovementLevel(Energy e) {
-    switch (e.movementLevel) {
-      case MovementLevel.sedentary:
+  double _valueForActivity(Activity activity) {
+    switch (activity) {
+      case Activity.sedentary:
         return 0;
-      case MovementLevel.moving:
+      case Activity.moving:
         return 1;
-      case MovementLevel.active:
+      case Activity.active:
         return 2;
     }
   }
 
-  Widget _energyChart(List<Energy> energy) {
-    if (energy.isEmpty) return Container();
+  Widget _energyChart(List<Bout> bouts) {
+    if (bouts.isEmpty) return Container();
 
-    DateTime energyDate = energy.first.time;
-    DateTime day = DateTime(energyDate.year, energyDate.month, energyDate.day);
-    List<double> values = energy.map(_valueForMovementLevel).toList();
+    DateTime date = bouts.first.time;
+    DateTime day = DateTime(date.year, date.month, date.day);
+    List<double> values =
+        bouts.map((e) => _valueForActivity(e.activity)).toList();
 
     double maxValue = values.isNotEmpty ? values.reduce(max) : 0;
     double minX = DateTime(day.year, day.month, day.day, 5)
@@ -95,11 +96,11 @@ class ActivityLineChart extends ConsumerWidget {
         backgroundColor: Colors.transparent,
         lineBarsData: [
           LineChartBarData(
-            spots: energy
+            spots: bouts
                 .map(
                   (e) => FlSpot(
                     e.time.millisecondsSinceEpoch.toDouble(),
-                    values[energy.indexOf(e)],
+                    values[bouts.indexOf(e)],
                   ),
                 )
                 .toList(),
