@@ -1,4 +1,5 @@
 import { DataTypes, Sequelize, ModelStatic } from 'sequelize'
+import { Condition, Gender } from '../../constants'
 import { User } from '../classes'
 
 let UserModel: ModelStatic<User>
@@ -35,9 +36,22 @@ export default {
       onDelete: 'cascade',
     })
   },
-  save: ({ weight }: { weight: number }) =>
+  save: ({
+    weight,
+    condition,
+    gender,
+    injuryLevel,
+  }: {
+    weight: number
+    condition?: Condition
+    gender?: Gender
+    injuryLevel?: number
+  }) =>
     UserModel.create({
       weight,
+      condition,
+      gender,
+      injuryLevel,
     }),
   get: (id: string) => UserModel.findOne({ where: { id } }),
   getAll: () => UserModel.findAll(),

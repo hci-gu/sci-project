@@ -1,3 +1,4 @@
+import moment from 'moment'
 import { DataTypes, Op, Sequelize, ModelStatic } from 'sequelize'
 import { activityForAccAndCondition } from '../../adapters/energy'
 import { Activity } from '../../constants'
@@ -38,19 +39,15 @@ const Model = {
     })
   },
   save: (
-    data: { t: Date; minutes: number; activity: Activity }[],
+    data: { t: Date; minutes: number; activity: Activity },
     userId: string
   ) =>
-    Promise.all(
-      data.map((d) =>
-        BoutModel.create({
-          t: d.t,
-          minutes: d.minutes,
-          activity: d.activity,
-          UserId: userId,
-        })
-      )
-    ),
+    BoutModel.create({
+      t: data.t,
+      minutes: data.minutes,
+      activity: data.activity,
+      UserId: userId,
+    }),
   find: ({
     userId,
     from,
@@ -115,18 +112,46 @@ const Model = {
 
 export default Model
 
-export const createBoutFromCount = async (user: User, count: AccelCount) => {
-  if (!count.UserId) return
-  const activity = activityForAccAndCondition(count.a, user.condition)
+export const createBoutFromCounts = async (
+  user: User,
+  counts: AccelCount[]
+) => {
+  // get average acc for counts
+  const avgAcc = counts.reduce((acc, c) => acc + c.a, 0) / counts.length
 
-  await Model.save(
-    [
+  // get the activity level from average acc
+  const activity = activityForAccAndCondition(avgAcc, user.condition)
+
+  // lookup last bout
+  const lastBout = await BoutModel.findOne({
+    attributes: ['id', 't', 'activity', 'minutes'],
+    where: {
+      UserId: user.id,
+    },
+    order: [['t', 'DESC']],
+  })
+
+  // if it doesn't exist or is more than 5 minutes ago, create a new one
+  const fiveMinAgo = moment().subtract(5, 'minutes')
+  const doesntExistOrIsOld =
+    !lastBout ||
+    moment(lastBout.t).add(lastBout.minutes, 'minutes').isBefore(fiveMinAgo)
+
+  // if activity is different from current bout or there is no bout, create a new bout
+  if (doesntExistOrIsOld || lastBout.activity !== activity) {
+    const bout = await Model.save(
       {
-        t: count.t,
-        activity,
+        t: counts[counts.length - 1].t,
         minutes: 1,
+        activity,
       },
-    ],
-    count.UserId
-  )
+      user.id
+    )
+    return bout
+  }
+
+  // if activity is same as current bout, update number of minutes to it
+  lastBout.minutes += 1
+  await lastBout.save()
+  return lastBout
 }
