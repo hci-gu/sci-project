@@ -8,7 +8,7 @@ import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/activity_wheel/activity_wheel.dart';
 import 'package:scimovement/widgets/date_select.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends HookConsumerWidget {
   HomeScreen({Key? key}) : super(key: key);
   final RefreshController _refreshController = RefreshController();
 
