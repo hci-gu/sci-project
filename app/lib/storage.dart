@@ -32,8 +32,8 @@ class Storage {
     prefs.setBool('onboardingDone', done);
   }
 
-  static Future getOnboardingDone() async {
+  static Future<bool> getOnboardingDone() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getBool('onboardingDone');
+    return prefs.getBool('onboardingDone') == true;
   }
 }

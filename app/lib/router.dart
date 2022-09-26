@@ -40,9 +40,6 @@ class RouterNotifier extends ChangeNotifier {
   RouterNotifier(this._ref, this._onboardingDone) {
     _ref.listen<bool>(onboardingDoneProvider, (_, done) {
       _onboardingDone = done;
-      if (_onboardingDone) {
-        Storage.storeOnboardingDone(true);
-      }
       notifyListeners();
     });
 
@@ -55,10 +52,19 @@ class RouterNotifier extends ChangeNotifier {
   String? _redirectLogic(GoRouterState state) {
     bool loggedIn = _ref.read(userProvider) != null;
 
+    // handle logging in
+    if (!loggedIn && state.subloc == '/loading') {
+      return null;
+    } else if (loggedIn && state.subloc == '/loading') {
+      return '/';
+    }
+
+    // redirect form onboarding to home when done
     if (state.subloc == '/onboarding' && _onboardingDone) {
       return '/';
     }
 
+    // redirect from login screen to home or onboarding after login
     if (loggedIn && _isLoginRoute(state.subloc)) {
       if (_onboardingDone) {
         return '/';
@@ -66,6 +72,8 @@ class RouterNotifier extends ChangeNotifier {
         return '/onboarding';
       }
     }
+
+    // kick out user from home if not logged in
     if (!loggedIn && !_isLoginRoute(state.subloc)) {
       return '/introduction';
     }
@@ -77,12 +85,24 @@ class RouterNotifier extends ChangeNotifier {
   }
 }
 
-final routerProvider = Provider<GoRouter>((ref) {
-  final routerNotifier = RouterNotifier(ref, false);
+class RouterProps {
+  final String? userId;
+  final bool onboardingDone;
+
+  RouterProps({this.userId, this.onboardingDone = false});
+}
+
+final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
+  final routerNotifier = RouterNotifier(ref, props.onboardingDone);
 
   return GoRouter(
-    initialLocation: '/introduction',
+    initialLocation: props.userId != null ? '/loading' : '/introduction',
     routes: [
+      GoRoute(
+        name: 'loading',
+        path: '/loading',
+        builder: (context, state) => const LoadingScreen(),
+      ),
       GoRoute(
         name: 'introduction',
         path: '/introduction',
@@ -128,3 +148,16 @@ final routerProvider = Provider<GoRouter>((ref) {
     refreshListenable: routerNotifier,
   );
 });
+
+class LoadingScreen extends StatelessWidget {
+  const LoadingScreen({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+  }
+}
