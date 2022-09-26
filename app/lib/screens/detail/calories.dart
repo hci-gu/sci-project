@@ -7,6 +7,7 @@ import 'package:scimovement/screens/detail/screen.dart';
 import 'package:scimovement/widgets/charts/bar_chart.dart';
 import 'package:scimovement/widgets/charts/chart_wrapper.dart';
 import 'package:scimovement/widgets/charts/energy_line_chart.dart';
+import 'package:scimovement/widgets/info_box.dart';
 import 'package:scimovement/widgets/stat_header.dart';
 import 'package:scimovement/widgets/stat_widget.dart';
 
@@ -30,6 +31,11 @@ class CaloriesScreen extends ConsumerWidget {
               pagination: Pagination(page: page, mode: pagination.mode),
             )
           : EnergyBarChart(Pagination(page: page, mode: pagination.mode)),
+      infoBox: const InfoBox(
+        title: 'Om Kalorier',
+        text:
+            'Kalorierna som visas här är det totala du har bränt idag. Detta är baserat på din aktivitetsnivå tillsammans med din puls. För att läsa mer om hur vi räknar ut kalorier följ länken nedan.',
+      ),
     );
   }
 

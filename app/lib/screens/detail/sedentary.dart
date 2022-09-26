@@ -6,6 +6,7 @@ import 'package:scimovement/models/config.dart';
 import 'package:scimovement/screens/detail/screen.dart';
 import 'package:scimovement/widgets/charts/bar_chart.dart';
 import 'package:scimovement/widgets/charts/chart_wrapper.dart';
+import 'package:scimovement/widgets/info_box.dart';
 import 'package:scimovement/widgets/stat_header.dart';
 import 'package:scimovement/widgets/stat_widget.dart';
 
@@ -25,6 +26,11 @@ class SedentaryScreen extends ConsumerWidget {
       ),
       pageBuilder: (ctx, page) =>
           SedentaryBarChart(Pagination(page: page, mode: pagination.mode)),
+      infoBox: const InfoBox(
+        title: 'Om Stillasittande',
+        text:
+            'Här kan du se hur länge du varit stillasittande idag. Det är viktigt att undvika för långa perioder av stillasittande under dagen. Vill du ha hjälp kan se till att ha på notiser för påminnelse att röra på sig.\n\nVill du veta mer om hur stillasittande påverkar dig kan du följa länken nedan.',
+      ),
     );
   }
 }

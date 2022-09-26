@@ -17,8 +17,21 @@ class ChartData {
 
   ChartData(this.data, this.mode);
 
-  double get max => data.map((e) => e.value).reduce(math.max);
-  double get maxValue => mode == ChartMode.day ? 60 : max + max * 0.2;
+  double get maxValue => data.map((e) => e.value).reduce(math.max);
+  double get maxY => mode == ChartMode.day ? 60 : maxValue + maxValue * 0.2;
+
+  DateTime get day => DateTime(
+        data.first.time.year,
+        data.first.time.month,
+        data.first.time.day,
+      );
+
+  double get minX => DateTime(day.year, day.month, day.day, 5)
+      .millisecondsSinceEpoch
+      .toDouble();
+  double get maxX => DateTime(day.year, day.month, day.day, 23, 59)
+      .millisecondsSinceEpoch
+      .toDouble();
 
   Map<DateTime, List<ChartDataPoint>> get group => {
         ..._emptyMap(data.last.time),

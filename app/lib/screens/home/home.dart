@@ -10,8 +10,7 @@ import 'package:scimovement/widgets/date_select.dart';
 
 class HomeScreen extends ConsumerWidget {
   HomeScreen({Key? key}) : super(key: key);
-  final RefreshController _refreshController =
-      RefreshController(initialRefresh: true);
+  final RefreshController _refreshController = RefreshController();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

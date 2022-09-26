@@ -66,7 +66,7 @@ class UserSettings extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
           children: [
             const Text(
-              'Profile',
+              'Profil',
               style: TextStyle(
                 fontSize: 36,
                 fontWeight: FontWeight.bold,
@@ -81,7 +81,7 @@ class UserSettings extends StatelessWidget {
                           child: FormDropdown(
                             form: form,
                             formKey: 'condition',
-                            title: 'Condition',
+                            title: 'Tillstånd',
                             items: Condition.values
                                 .map((condition) => DropdownMenuItem(
                                       value: condition,
@@ -97,7 +97,7 @@ class UserSettings extends StatelessWidget {
                             child: FormDropdown(
                               form: form,
                               formKey: 'injuryLevel',
-                              title: 'Injury level',
+                              title: 'Skadenivå',
                               items: [5, 6, 7, 8, 9]
                                   .map((value) => DropdownMenuItem(
                                         value: value,
@@ -112,7 +112,7 @@ class UserSettings extends StatelessWidget {
             FormDropdown(
               form: form,
               formKey: 'gender',
-              title: 'Gender',
+              title: 'Kön',
               items: Gender.values
                   .map((gender) => DropdownMenuItem(
                         value: gender,
@@ -132,7 +132,7 @@ class UserSettings extends StatelessWidget {
             _separator(),
             spacer,
             const Text(
-              'App settings',
+              'App inställningar',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
             spacer,
