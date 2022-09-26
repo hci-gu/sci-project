@@ -3,10 +3,12 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import 'package:scimovement/api.dart';
 import 'package:scimovement/models/auth.dart';
+import 'package:scimovement/models/onboarding.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/snackbar_message.dart';
 import 'package:scimovement/widgets/text_field.dart';
+import 'package:go_router/go_router.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -140,6 +142,8 @@ class UserSettings extends StatelessWidget {
             spacer,
             const LogoutButton(),
             spacer,
+            const OnboardingButton(),
+            spacer,
             _separator(),
             spacer,
             const Text(
@@ -210,6 +214,24 @@ class LogoutButton extends ConsumerWidget {
       width: 220,
       secondary: true,
       onPressed: () => ref.read(userProvider.notifier).logout(),
+    );
+  }
+}
+
+class OnboardingButton extends ConsumerWidget {
+  const OnboardingButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Button(
+      title: 'Gör om intro',
+      width: 220,
+      secondary: true,
+      onPressed: () async {
+        ref.read(onboardingStepProvider.notifier).state = 0;
+        await Future.delayed(const Duration(milliseconds: 100));
+        context.goNamed('onboarding');
+      },
     );
   }
 }

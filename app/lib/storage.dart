@@ -26,4 +26,14 @@ class Storage {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getBool('notificationRequest');
   }
+
+  static Future storeOnboardingDone(bool done) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool('onboardingDone', done);
+  }
+
+  static Future getOnboardingDone() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('onboardingDone');
+  }
 }

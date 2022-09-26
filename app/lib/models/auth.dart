@@ -37,6 +37,7 @@ class UserState extends StateNotifier<User?> {
 
   Future<void> logout() async {
     state = null;
+    await Storage.clearUserId();
   }
 
   Future<void> update(Map<String, dynamic> update) async {

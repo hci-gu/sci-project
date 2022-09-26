@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:onboarding_overlay/onboarding_overlay.dart';
 import 'package:scimovement/api.dart';
 import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/models/config.dart';
@@ -12,9 +11,10 @@ import 'package:scimovement/screens/detail/sedentary.dart';
 import 'package:scimovement/screens/introduction.dart';
 import 'package:scimovement/screens/login.dart';
 import 'package:scimovement/screens/main.dart';
+import 'package:scimovement/screens/onboarding/onboarding.dart';
+import 'package:scimovement/storage.dart';
 
 List<String> detailRoutes = ['calories', 'activity', 'sedentary'];
-final GlobalKey<OnboardingState> onboardingKey = GlobalKey<OnboardingState>();
 
 class RouteChangeObserver extends NavigatorObserver {
   final Ref _ref;
@@ -35,21 +35,36 @@ extension on Route<dynamic> {
 
 class RouterNotifier extends ChangeNotifier {
   final Ref _ref;
+  bool _onboardingDone = false;
 
-  /// This implementation exploits `ref.listen()` to add a simple callback that
-  /// calls `notifyListeners()` whenever there's change onto a desider provider.
-  RouterNotifier(this._ref) {
+  RouterNotifier(this._ref, this._onboardingDone) {
+    _ref.listen<bool>(onboardingDoneProvider, (_, done) {
+      _onboardingDone = done;
+      if (_onboardingDone) {
+        Storage.storeOnboardingDone(true);
+      }
+      notifyListeners();
+    });
+
     _ref.listen<User?>(
-      userProvider, // In our case, we're interested in the log in / log out events.
-      (_, __) => notifyListeners(), // Obviously more logic can be added here
+      userProvider,
+      (_, __) => notifyListeners(),
     );
   }
 
   String? _redirectLogic(GoRouterState state) {
     bool loggedIn = _ref.read(userProvider) != null;
 
-    if (loggedIn && _isLoginRoute(state.subloc)) {
+    if (state.subloc == '/onboarding' && _onboardingDone) {
       return '/';
+    }
+
+    if (loggedIn && _isLoginRoute(state.subloc)) {
+      if (_onboardingDone) {
+        return '/';
+      } else {
+        return '/onboarding';
+      }
     }
     if (!loggedIn && !_isLoginRoute(state.subloc)) {
       return '/introduction';
@@ -63,39 +78,7 @@ class RouterNotifier extends ChangeNotifier {
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
-  final routerNotifier = RouterNotifier(ref);
-
-  GoRoute loggedInRoute = GoRoute(
-    name: 'home',
-    path: '/',
-    builder: (_, __) => Onboarding(
-      key: onboardingKey,
-      autoSizeTexts: true,
-      debugBoundaries: true,
-      steps: ref.watch(onboardingStepsProvider),
-      child: const MainScreen(),
-      onChanged: (step) {
-        print('Onboarding changed $step');
-      },
-    ),
-    routes: [
-      GoRoute(
-        name: 'calories',
-        path: 'calories',
-        builder: (_, __) => const CaloriesScreen(),
-      ),
-      GoRoute(
-        name: 'activity',
-        path: 'activity',
-        builder: (_, __) => const ActivityScreen(),
-      ),
-      GoRoute(
-        name: 'sedentary',
-        path: 'sedentary',
-        builder: (_, __) => const SedentaryScreen(),
-      ),
-    ],
-  );
+  final routerNotifier = RouterNotifier(ref, false);
 
   return GoRouter(
     initialLocation: '/introduction',
@@ -112,7 +95,33 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
-      loggedInRoute,
+      GoRoute(
+        name: 'home',
+        path: '/',
+        builder: (_, __) => const MainScreen(),
+        routes: [
+          GoRoute(
+            name: 'calories',
+            path: 'calories',
+            builder: (_, __) => const CaloriesScreen(),
+          ),
+          GoRoute(
+            name: 'activity',
+            path: 'activity',
+            builder: (_, __) => const ActivityScreen(),
+          ),
+          GoRoute(
+            name: 'sedentary',
+            path: 'sedentary',
+            builder: (_, __) => const SedentaryScreen(),
+          ),
+        ],
+      ),
+      GoRoute(
+        name: 'onboarding',
+        path: '/onboarding',
+        builder: (_, __) => const OnboardingScreen(),
+      )
     ],
     observers: [RouteChangeObserver(ref)],
     redirect: routerNotifier._redirectLogic,

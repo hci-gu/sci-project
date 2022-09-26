@@ -146,6 +146,7 @@ class StatWidget extends StatelessWidget {
           width: 1.0,
           color: const Color.fromRGBO(0, 0, 0, 0.1),
         ),
+        color: AppTheme.colors.white,
         borderRadius: BorderRadius.circular(32),
       ),
       child: Padding(

@@ -1,17 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/router.dart';
+import 'package:scimovement/storage.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:timezone/data/latest.dart' as tz;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   tz.initializeTimeZones();
-  runApp(const ProviderScope(child: App()));
+  bool _onboardingDone = await Storage.getOnboardingDone();
+  runApp(ProviderScope(
+    child: App(
+      onboardingDone: _onboardingDone,
+    ),
+  ));
 }
 
 class App extends ConsumerWidget {
-  const App({Key? key}) : super(key: key);
+  final bool onboardingDone;
+
+  const App({
+    Key? key,
+    required this.onboardingDone,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
