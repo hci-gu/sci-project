@@ -180,4 +180,12 @@ class AppTheme {
           color: const Color.fromRGBO(0, 0, 0, 0.1),
         ),
       );
+
+  static BoxDecoration cardDecoration = BoxDecoration(
+    color: Colors.transparent,
+    borderRadius: BorderRadius.circular(16),
+    border: Border.all(
+      color: colors.black.withOpacity(0.1),
+    ),
+  );
 }

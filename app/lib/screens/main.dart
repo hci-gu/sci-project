@@ -42,8 +42,6 @@ class MainScreen extends HookWidget {
         return HomeScreen();
       case 1:
         return const SettingsScreen();
-      default:
-        return HomeScreen();
     }
   }
 }

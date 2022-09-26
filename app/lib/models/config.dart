@@ -7,6 +7,21 @@ enum ChartMode {
   year,
 }
 
+extension ChartModeDisplayName on ChartMode {
+  String get displayName {
+    switch (this) {
+      case ChartMode.day:
+        return 'Dag';
+      case ChartMode.week:
+        return 'Vecka';
+      case ChartMode.month:
+        return 'Månad';
+      case ChartMode.year:
+        return 'År';
+    }
+  }
+}
+
 class Pagination {
   final int page;
   final ChartMode mode;

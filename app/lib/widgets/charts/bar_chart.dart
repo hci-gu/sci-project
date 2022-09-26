@@ -32,7 +32,7 @@ class CustomBarChart extends StatelessWidget {
       isCard: false,
       child: BarChart(
         BarChartData(
-          maxY: chartData.maxValue,
+          maxY: chartData.maxY,
           alignment: BarChartAlignment.spaceEvenly,
           titlesData: FlTitlesData(
             show: true,
@@ -43,7 +43,7 @@ class CustomBarChart extends StatelessWidget {
                 showTitles: true,
                 reservedSize: 40,
                 getTitlesWidget: (double value, _) {
-                  if (value == chartData.maxValue) return Container();
+                  if (value == chartData.maxY) return Container();
                   return Center(
                     child: Text(
                       value.toString(),

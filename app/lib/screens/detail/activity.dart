@@ -7,6 +7,7 @@ import 'package:scimovement/screens/detail/screen.dart';
 import 'package:scimovement/widgets/charts/activity_line_chart.dart';
 import 'package:scimovement/widgets/charts/bar_chart.dart';
 import 'package:scimovement/widgets/charts/chart_wrapper.dart';
+import 'package:scimovement/widgets/info_box.dart';
 import 'package:scimovement/widgets/stat_header.dart';
 import 'package:scimovement/widgets/stat_widget.dart';
 
@@ -30,6 +31,11 @@ class ActivityScreen extends ConsumerWidget {
               pagination: Pagination(page: page, mode: pagination.mode),
             )
           : ActivityBarChart(Pagination(page: page, mode: pagination.mode)),
+      infoBox: const InfoBox(
+        title: 'Om Rörelse',
+        text:
+            'Här kan du se din rörelse över dagen. Utan att ange någon information kan vi kategorisera din rörelse i tre olika nivåer när du har på dig klockan. \n\nTotalen längst upp representerar antalet minuter du rört dig idag.',
+      ),
     );
   }
 

@@ -4,10 +4,11 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:scimovement/api.dart';
 import 'package:scimovement/models/bouts.dart';
+import 'package:scimovement/models/chart.dart';
 import 'package:scimovement/models/config.dart';
 import 'package:scimovement/theme/theme.dart';
-import 'dart:math';
 import 'package:scimovement/widgets/charts/chart_wrapper.dart';
+import 'package:scimovement/widgets/charts/utils/chart_data.dart';
 
 class ActivityLineChart extends ConsumerWidget {
   final bool isCard;
@@ -21,7 +22,7 @@ class ActivityLineChart extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ref.watch(boutsProvider(pagination)).when(
+    return ref.watch(activityLineChartProvider(pagination)).when(
           data: (values) => ChartWrapper(
             isCard: isCard,
             child: _energyChart(values),
@@ -31,32 +32,10 @@ class ActivityLineChart extends ConsumerWidget {
         );
   }
 
-  double _valueForActivity(Activity activity) {
-    switch (activity) {
-      case Activity.sedentary:
-        return 0;
-      case Activity.moving:
-        return 1;
-      case Activity.active:
-        return 2;
-    }
-  }
+  Widget _energyChart(ChartData chartData) {
+    if (chartData.data.isEmpty) return Container();
 
-  Widget _energyChart(List<Bout> bouts) {
-    if (bouts.isEmpty) return Container();
-
-    DateTime date = bouts.first.time;
-    DateTime day = DateTime(date.year, date.month, date.day);
-    List<double> values =
-        bouts.map((e) => _valueForActivity(e.activity)).toList();
-
-    double maxValue = values.isNotEmpty ? values.reduce(max) : 0;
-    double minX = DateTime(day.year, day.month, day.day, 5)
-        .millisecondsSinceEpoch
-        .toDouble();
-    double maxX = DateTime(day.year, day.month, day.day, 23, 59)
-        .millisecondsSinceEpoch
-        .toDouble();
+    List<double> values = chartData.data.map((e) => e.value).toList();
 
     return LineChart(
       LineChartData(
@@ -77,7 +56,9 @@ class ActivityLineChart extends ConsumerWidget {
               interval: 60 * 1000 * 60 * 5,
               reservedSize: 24,
               getTitlesWidget: (value, _) {
-                if (value == minX || value == maxX) return const SizedBox();
+                if (value == chartData.minX || value == chartData.maxX) {
+                  return const SizedBox();
+                }
                 final date = DateTime.fromMillisecondsSinceEpoch(value.toInt());
                 return Center(
                   child: Text(
@@ -89,29 +70,35 @@ class ActivityLineChart extends ConsumerWidget {
             ),
           ),
         ),
-        minX: minX,
-        maxX: maxX,
+        minX: chartData.minX,
+        maxX: chartData.maxX,
         minY: -0.1,
-        maxY: (maxValue + maxValue * 0.2).round().toDouble(),
+        maxY: 2,
         backgroundColor: Colors.transparent,
         lineBarsData: [
           LineChartBarData(
-            spots: bouts
+            spots: chartData.data
                 .map(
                   (e) => FlSpot(
                     e.time.millisecondsSinceEpoch.toDouble(),
-                    values[bouts.indexOf(e)],
+                    values[chartData.data.indexOf(e)],
                   ),
                 )
                 .toList(),
-            barWidth: 2,
+            barWidth: 3,
             color: AppTheme.colors.sedentary,
             gradient: LinearGradient(
-              colors: [
-                AppTheme.colors.sedentary,
-                AppTheme.colors.moving,
-                AppTheme.colors.active,
-              ],
+              colors: chartData.maxValue == 2
+                  ? [
+                      AppTheme.colors.sedentary,
+                      AppTheme.colors.moving,
+                      AppTheme.colors.active,
+                    ]
+                  : [
+                      AppTheme.colors.sedentary,
+                      AppTheme.colors.moving,
+                    ],
+              stops: chartData.maxValue == 2 ? [0, 1, 2] : [0, 1],
               begin: Alignment.bottomCenter,
               end: Alignment.topCenter,
             ),
@@ -119,6 +106,7 @@ class ActivityLineChart extends ConsumerWidget {
               show: false,
             ),
             belowBarData: BarAreaData(show: false),
+            isStepLineChart: true,
           ),
         ],
         lineTouchData: LineTouchData(

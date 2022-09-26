@@ -20,11 +20,9 @@ final averageSedentaryBout =
       .where((e) => e.activity == Activity.sedentary)
       .toList();
 
-  if (bouts.isEmpty) {
-    return 0;
-  }
-
-  return bouts.fold<int>(0, (a, b) => a + b.minutes) / bouts.length;
+  return bouts.isEmpty
+      ? 0
+      : bouts.fold<int>(0, (a, b) => a + b.minutes) / bouts.length;
 });
 
 final totalSedentaryBout =

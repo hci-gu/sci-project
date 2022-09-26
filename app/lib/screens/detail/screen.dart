@@ -1,12 +1,11 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/models/config.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/chart_mode_select.dart';
+import 'package:scimovement/widgets/info_box.dart';
 import 'package:scimovement/widgets/stat_header.dart';
-import 'package:swipe/swipe.dart';
 
 typedef PageBuilder = Widget Function(BuildContext context, int page);
 
@@ -14,12 +13,14 @@ class DetailScreen extends HookConsumerWidget {
   final String title;
   final PageBuilder pageBuilder;
   final StatHeader header;
+  final InfoBox infoBox;
 
   const DetailScreen({
     Key? key,
     required this.title,
     required this.pageBuilder,
     required this.header,
+    required this.infoBox,
   }) : super(key: key);
 
   @override
@@ -52,7 +53,8 @@ class DetailScreen extends HookConsumerWidget {
                 itemBuilder: pageBuilder,
               ),
             ),
-            AppTheme.separator
+            AppTheme.separator,
+            infoBox,
           ],
         ),
       ),
