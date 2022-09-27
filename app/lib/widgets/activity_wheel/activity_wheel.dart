@@ -15,6 +15,7 @@ class ActivityGroup {
   ActivityGroup(this.activity, this.energy);
 
   double get value => energy.fold<double>(0, (a, b) => a + b.value);
+  int get minutes => energy.fold(0, (a, b) => a + b.minutes);
   int get count => energy.length;
 }
 
@@ -147,14 +148,16 @@ class AnimatedWheel extends HookWidget {
                     children: [
                       Text(
                         e.value.toStringAsFixed(0),
-                        style: AppTheme.headLine2.copyWith(
+                        style: TextStyle(
+                          fontSize: 38,
+                          fontWeight: FontWeight.w800,
                           color:
                               AppTheme.colors.activityLevelToColor(e.activity),
                         ),
                       ),
                       Text(
                         'kcal',
-                        style: AppTheme.labelTiny.copyWith(
+                        style: AppTheme.labelMedium.copyWith(
                           color:
                               AppTheme.colors.activityLevelToColor(e.activity),
                         ),
@@ -172,7 +175,7 @@ class AnimatedWheel extends HookWidget {
                 items: activityGroups
                     .map(
                       (e) => CircleChartItem(
-                        value: e.count.toDouble(),
+                        value: e.minutes.toDouble(),
                         color: AppTheme.colors.activityLevelToColor(e.activity),
                         animationValue: CurvedAnimation(
                                 curve: _intervalForActivity(e.activity),

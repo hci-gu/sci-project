@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:scimovement/screens/home/home.dart';
-import 'package:scimovement/screens/settings.dart';
+import 'package:scimovement/screens/settings/settings.dart';
 import 'package:scimovement/theme/theme.dart';
 
 class MainScreen extends HookWidget {
@@ -16,7 +16,8 @@ class MainScreen extends HookWidget {
         child: _page(screen.value),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        elevation: 1,
+        elevation: 2,
+        backgroundColor: AppTheme.colors.white,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),

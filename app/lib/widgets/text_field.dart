@@ -44,6 +44,7 @@ class StyledTextField extends StatelessWidget {
             suffixIcon: canClear ? _clearButton() : null,
             labelText: placeholder,
             border: const OutlineInputBorder(),
+            isDense: true,
           ),
           minLines: minLines,
           maxLines: maxLines,
