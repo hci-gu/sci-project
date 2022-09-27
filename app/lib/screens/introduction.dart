@@ -11,30 +11,21 @@ class IntroductionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: AppTheme.screenPadding,
+      body: SafeArea(
         child: ListView(
-          shrinkWrap: true,
+          padding: AppTheme.screenPadding,
           children: [
-            const SizedBox(height: 100),
-            _header(),
-            const SizedBox(height: 16.0),
-            Button(
-              title: 'Starta Fitbit',
-              width: 180,
-              onPressed: () async {
-                await _launchFitbitGallery();
-              },
+            const SizedBox(height: 60),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _header(),
+                AppTheme.spacer2x,
+                _actions(context),
+                Image.asset('assets/png/ryggmarg_logo.png', width: 200),
+              ],
             ),
-            const SizedBox(height: 16.0),
-            Button(
-              title: 'Logga in',
-              width: 180,
-              secondary: true,
-              onPressed: () => context.goNamed('login'),
-            ),
-            const SizedBox(height: 32.0),
-            Image.asset('assets/png/ryggmarg_logo.png', width: 200),
           ],
         ),
       ),
@@ -51,7 +42,7 @@ class IntroductionScreen extends StatelessWidget {
               AppTheme.headLine3Light.copyWith(color: AppTheme.colors.primary),
         ),
         const SizedBox(height: 32),
-        SvgPicture.asset('assets/svg/person.svg', width: 100),
+        SvgPicture.asset('assets/svg/person.svg', width: 80),
         const SizedBox(height: 16),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -60,6 +51,27 @@ class IntroductionScreen extends StatelessWidget {
             textAlign: TextAlign.center,
             style: AppTheme.paragraphMedium,
           ),
+        ),
+      ],
+    );
+  }
+
+  Widget _actions(BuildContext context) {
+    return Column(
+      children: [
+        Button(
+          title: 'Starta Fitbit',
+          width: 180,
+          onPressed: () async {
+            await _launchFitbitGallery();
+          },
+        ),
+        const SizedBox(height: 16.0),
+        Button(
+          title: 'Logga in',
+          width: 180,
+          secondary: true,
+          onPressed: () => context.goNamed('login'),
         ),
       ],
     );

@@ -30,9 +30,9 @@ class HomeScreen extends HookConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const EnergyWidget(),
-              AppTheme.spacer,
-              const SedentaryWidget(),
+              const Expanded(child: EnergyWidget()),
+              AppTheme.spacer2x,
+              const Expanded(child: SedentaryWidget()),
             ],
           ),
         ],

@@ -138,20 +138,21 @@ class StatWidget extends StatelessWidget {
   }
 
   static Widget _container(Widget child) {
-    return Container(
-      width: 170,
-      height: 170,
-      decoration: BoxDecoration(
-        border: Border.all(
-          width: 1.0,
-          color: const Color.fromRGBO(0, 0, 0, 0.1),
+    return FittedBox(
+      fit: BoxFit.contain,
+      child: Container(
+        decoration: BoxDecoration(
+          border: Border.all(
+            width: 1.0,
+            color: const Color.fromRGBO(0, 0, 0, 0.1),
+          ),
+          color: AppTheme.colors.white,
+          borderRadius: BorderRadius.circular(32),
         ),
-        color: AppTheme.colors.white,
-        borderRadius: BorderRadius.circular(32),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12.0),
-        child: child,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12.0),
+          child: child,
+        ),
       ),
     );
   }

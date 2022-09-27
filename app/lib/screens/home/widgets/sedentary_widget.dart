@@ -19,17 +19,17 @@ class SedentaryWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     String asset = 'assets/svg/wheelchair.svg';
-    return ref.watch(sedentaryWidgetProvider).when(
-          data: (WidgetValues values) => GestureDetector(
-            onTap: () => context.goNamed('sedentary'),
-            child: StatWidget(
+    return GestureDetector(
+      onTap: () => context.goNamed('sedentary'),
+      child: ref.watch(sedentaryWidgetProvider).when(
+            data: (WidgetValues values) => StatWidget(
               values: values,
               unit: Unit.time,
               asset: asset,
             ),
+            error: (_, __) => StatWidget.error(asset),
+            loading: () => StatWidget.loading(asset),
           ),
-          error: (_, __) => StatWidget.error(asset),
-          loading: () => StatWidget.loading(asset),
-        );
+    );
   }
 }

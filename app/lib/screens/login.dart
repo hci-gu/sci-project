@@ -1,14 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:reactive_forms/reactive_forms.dart';
 import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
+import 'package:scimovement/widgets/text_field.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class LoginScreen extends HookConsumerWidget {
   const LoginScreen({Key? key}) : super(key: key);
+
+  FormGroup buildForm() => fb.group({
+        'userId': FormControl<String>(
+          value: '',
+          validators: [
+            Validators.required,
+          ],
+        ),
+      });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -19,31 +29,33 @@ class LoginScreen extends HookConsumerWidget {
       body: Padding(
         padding: AppTheme.screenPadding,
         child: ListView(
-          shrinkWrap: true,
           children: [
             const SizedBox(height: 100),
             _header(),
             const SizedBox(height: 16.0),
-            TextField(
-              controller: _userIdController,
-              decoration: const InputDecoration(
-                labelText: 'User ID',
-              ),
-            ),
-            const SizedBox(height: 16.0),
-            Button(
-              title: 'Logga in',
-              icon: Icons.login,
-              secondary: true,
-              width: 180,
-              onPressed: () async {
-                ref.read(userProvider.notifier).login(_userIdController.text);
-              },
-            ),
+            _form(ref),
           ],
         ),
       ),
     );
+  }
+
+  Widget _form(WidgetRef ref) {
+    return ReactiveFormBuilder(
+        form: buildForm,
+        builder: (context, form, _) {
+          return Column(
+            children: [
+              const StyledTextField(
+                formControlName: 'userId',
+                placeholder: 'UserId',
+                keyboardType: TextInputType.emailAddress,
+              ),
+              AppTheme.spacer2x,
+              _loginButton(ref),
+            ],
+          );
+        });
   }
 
   Widget _header() {
@@ -56,6 +68,26 @@ class LoginScreen extends HookConsumerWidget {
               AppTheme.headLine3Light.copyWith(color: AppTheme.colors.primary),
         ),
       ],
+    );
+  }
+
+  Widget _loginButton(WidgetRef ref) {
+    return ReactiveFormConsumer(
+      builder: ((context, form, child) => Button(
+            title: 'Logga in',
+            width: 130,
+            disabled: form.pristine || !form.valid,
+            onPressed: () async {
+              FocusManager.instance.primaryFocus?.unfocus();
+              try {
+                ref
+                    .read(userProvider.notifier)
+                    .login(form.value['userId'] as String);
+              } catch (e) {
+                return;
+              }
+            },
+          )),
     );
   }
 

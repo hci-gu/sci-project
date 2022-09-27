@@ -25,7 +25,6 @@ class SnackbarMessage extends SnackBar {
                   color: AppTheme.colors.white),
               AppTheme.spacer,
               SizedBox(
-                // dynamic width
                 width: MediaQuery.of(context).size.width * 0.6,
                 child: Text(
                   message,
