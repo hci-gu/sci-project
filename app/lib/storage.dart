@@ -1,20 +1,35 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
+class Credentials {
+  final String email;
+  final String password;
+
+  Credentials(this.email, this.password);
+}
+
 class Storage {
-  static Future<String?> getUserId() async {
+  static Future<Credentials?> getCredentials() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String? userId = prefs.getString('userId');
-    return userId;
+    final String? email = prefs.getString('email');
+    final String? password = prefs.getString('password');
+
+    if (email != null && password != null) {
+      return Credentials(email, password);
+    }
+
+    return null;
   }
 
-  static Future storeUserId(String userId) async {
+  static Future storeCredentails(Credentials credentials) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString('userId', userId);
+    await prefs.setString('email', credentials.email);
+    await prefs.setString('password', credentials.password);
   }
 
-  static Future clearUserId() async {
+  static Future clearCredentials() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.remove('userId');
+    prefs.remove('email');
+    prefs.remove('password');
   }
 
   static Future storeNotificationRequest(bool enabled) async {

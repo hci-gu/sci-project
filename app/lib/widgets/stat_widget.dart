@@ -52,7 +52,7 @@ class StatWidget extends StatelessWidget {
     return _container(
       Column(
         children: [
-          SvgPicture.asset(asset),
+          SvgPicture.asset(asset, height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -97,10 +97,16 @@ class StatWidget extends StatelessWidget {
             textBaseline: TextBaseline.alphabetic,
             children: [
               iconForChange(values.percentChange),
-              Text(
-                '${values.percentChange.toStringAsFixed(1)}%',
-                style: AppTheme.labelTiny.copyWith(
-                  color: colorForChange(values.percentChange),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 30),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    '${values.percentChange.toStringAsFixed(1)}%',
+                    style: AppTheme.labelTiny.copyWith(
+                      color: colorForChange(values.percentChange),
+                    ),
+                  ),
                 ),
               ),
               Text(

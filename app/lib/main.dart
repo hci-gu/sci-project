@@ -10,36 +10,36 @@ import 'package:timezone/data/latest.dart' as tz;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   tz.initializeTimeZones();
-  bool _onboardingDone = await Storage.getOnboardingDone();
-  String? _userId = await Storage.getUserId();
+  bool onboardingDone = await Storage.getOnboardingDone();
+  Credentials? credentials = await Storage.getCredentials();
   runApp(ProviderScope(
     overrides: [
       userProvider.overrideWithValue(
-        _userId != null ? UserState(_userId) : UserState(),
+        credentials != null ? UserState(credentials) : UserState(),
       ),
     ],
     child: App(
-      onboardingDone: _onboardingDone,
-      userId: _userId,
+      onboardingDone: onboardingDone,
+      loggedIn: credentials != null && credentials.email.isNotEmpty,
     ),
   ));
 }
 
 class App extends ConsumerWidget {
   final bool onboardingDone;
-  final String? userId;
+  final bool loggedIn;
 
   const App({
     Key? key,
     required this.onboardingDone,
-    this.userId,
+    required this.loggedIn,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider(RouterProps(
       onboardingDone: onboardingDone,
-      userId: userId,
+      loggedIn: loggedIn,
     )));
 
     return MaterialApp.router(

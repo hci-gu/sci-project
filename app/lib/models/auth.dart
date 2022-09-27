@@ -5,15 +5,15 @@ import 'package:scimovement/api.dart';
 import 'package:scimovement/storage.dart';
 
 class UserState extends StateNotifier<User?> {
-  UserState([String? userId]) : super(null) {
-    init(userId);
+  UserState([Credentials? credentials]) : super(null) {
+    init(credentials);
   }
 
   bool _shouldAskForNotifications = false;
 
-  Future<void> init(String? userId) async {
-    if (userId != null) {
-      await login(userId);
+  Future<void> init(Credentials? credentials) async {
+    if (credentials != null) {
+      await login(credentials.email, credentials.password);
     }
 
     _shouldAskForNotifications = await Storage.getNotificationRequest() == null;
@@ -26,16 +26,20 @@ class UserState extends StateNotifier<User?> {
     }
   }
 
-  Future<void> login(String userId) async {
-    state = await Api().getUser(userId);
-    if (state != null) {
-      await Storage.storeUserId(userId);
+  Future<void> login(String email, String password) async {
+    try {
+      state = await Api().login(email, password);
+      if (state != null) {
+        await Storage.storeCredentails(Credentials(email, password));
+      }
+    } catch (e) {
+      rethrow;
     }
   }
 
   Future<void> logout() async {
     state = null;
-    await Storage.clearUserId();
+    await Storage.clearCredentials();
   }
 
   Future<void> update(Map<String, dynamic> update) async {
@@ -66,7 +70,5 @@ class UserState extends StateNotifier<User?> {
   }
 }
 
-final userProvider = StateNotifierProvider<UserState, User?>((ref) {
-  UserState state = UserState();
-  return state;
-});
+final userProvider =
+    StateNotifierProvider<UserState, User?>((ref) => UserState());

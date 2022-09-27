@@ -51,6 +51,11 @@ class StyledTextField extends StatelessWidget {
           obscureText: obscureText,
           readOnly: disabled || !canEdit,
           onTap: () => onTap(),
+          validationMessages: (control) => {
+            ValidationMessage.required: 'Fältet är obligatoriskt',
+            ValidationMessage.email: 'Måste vara en giltig e-postadress',
+            ValidationMessage.minLength: 'Måste vara minst 8 tecken',
+          },
         ),
       ),
     );

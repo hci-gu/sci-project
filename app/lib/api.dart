@@ -41,6 +41,7 @@ Condition conditionFromString(String condition) {
 
 class User {
   final String id;
+  final String? email;
   final double? weight;
   final Gender? gender;
   final Condition? condition;
@@ -48,6 +49,7 @@ class User {
 
   User({
     required this.id,
+    this.email,
     this.weight,
     this.gender,
     this.condition,
@@ -57,6 +59,7 @@ class User {
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id'],
+      email: json['email'],
       weight: json['weight'] != null ? json['weight'].toDouble() : 0,
       gender: json['gender'] != null ? genderFromString(json['gender']) : null,
       condition: json['condition'] != null
@@ -151,20 +154,26 @@ class Api {
     _userId = '';
   }
 
+  Future<User?> login(String email, String password) async {
+    var response = await dio.post('/users/login', data: {
+      'email': email,
+      'password': password,
+    });
+    User user = User.fromJson(response.data);
+    _userId = user.id;
+
+    return user;
+  }
+
   Future<User?> getUser(String id) async {
-    var url = Uri.parse('$apiUrl/users/$id');
-    var response = await http.get(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    );
+    var response = await dio.get('/users/$id');
 
-    if (response.statusCode == 404) return null;
+    if (response.statusCode != 200) return null;
 
-    _userId = id;
+    User user = User.fromJson(json.decode(response.data));
+    _userId = user.id;
 
-    return User.fromJson(json.decode(response.body));
+    return user;
   }
 
   Future<List<Energy>> getEnergy(
