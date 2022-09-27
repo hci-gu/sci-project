@@ -86,17 +86,17 @@ class RouterNotifier extends ChangeNotifier {
 }
 
 class RouterProps {
-  final String? userId;
+  final bool loggedIn;
   final bool onboardingDone;
 
-  RouterProps({this.userId, this.onboardingDone = false});
+  RouterProps({this.loggedIn = false, this.onboardingDone = false});
 }
 
 final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
   final routerNotifier = RouterNotifier(ref, props.onboardingDone);
 
   return GoRouter(
-    initialLocation: props.userId != null ? '/loading' : '/introduction',
+    initialLocation: props.loggedIn ? '/loading' : '/introduction',
     routes: [
       GoRoute(
         name: 'loading',

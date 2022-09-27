@@ -5,25 +5,29 @@ import 'package:reactive_forms/reactive_forms.dart';
 import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
+import 'package:scimovement/widgets/snackbar_message.dart';
 import 'package:scimovement/widgets/text_field.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class LoginScreen extends HookConsumerWidget {
+class LoginScreen extends ConsumerWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
   FormGroup buildForm() => fb.group({
-        'userId': FormControl<String>(
+        'email': FormControl<String>(
+          value: '',
+          validators: [Validators.required, Validators.email],
+        ),
+        'password': FormControl<String>(
           value: '',
           validators: [
             Validators.required,
+            Validators.minLength(8),
           ],
         ),
       });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final _userIdController = useTextEditingController();
-
     return Scaffold(
       appBar: AppTheme.appBar('Logga in'),
       body: Padding(
@@ -47,9 +51,16 @@ class LoginScreen extends HookConsumerWidget {
           return Column(
             children: [
               const StyledTextField(
-                formControlName: 'userId',
-                placeholder: 'UserId',
+                formControlName: 'email',
+                placeholder: 'Email',
                 keyboardType: TextInputType.emailAddress,
+              ),
+              AppTheme.spacer2x,
+              const StyledTextField(
+                formControlName: 'password',
+                placeholder: 'Lösenord',
+                keyboardType: TextInputType.visiblePassword,
+                obscureText: true,
               ),
               AppTheme.spacer2x,
               _loginButton(ref),
@@ -79,13 +90,20 @@ class LoginScreen extends HookConsumerWidget {
             disabled: form.pristine || !form.valid,
             onPressed: () async {
               FocusManager.instance.primaryFocus?.unfocus();
-              try {
-                ref
-                    .read(userProvider.notifier)
-                    .login(form.value['userId'] as String);
-              } catch (e) {
-                return;
-              }
+              String email = form.value['email'] as String;
+              String password = form.value['password'] as String;
+              ref
+                  .read(userProvider.notifier)
+                  .login(email, password)
+                  .catchError((_) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackbarMessage(
+                    context: context,
+                    message: 'Något gick fel',
+                    type: SnackbarType.error,
+                  ),
+                );
+              });
             },
           )),
     );

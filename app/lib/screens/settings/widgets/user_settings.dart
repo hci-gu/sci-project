@@ -19,9 +19,15 @@ class UserSettings extends HookWidget {
   FormGroup buildForm() => fb.group(
         {
           'email': FormControl<String>(
-            value: 'test@email.com',
+            value: user.email ?? '',
             validators: [
               Validators.email,
+            ],
+          ),
+          'password': FormControl<String>(
+            value: '',
+            validators: [
+              Validators.minLength(8),
             ],
           ),
           'weight': FormControl<int>(
@@ -51,6 +57,13 @@ class UserSettings extends HookWidget {
   Widget build(BuildContext context) {
     ValueNotifier<bool> editing = useState(false);
 
+    // useEffect(() {
+    //   if (!editing.value) {
+    //     buildForm().reset();
+    //   }
+    //   return () => {};
+    // }, [editing.value]);
+
     return ReactiveFormBuilder(
       form: buildForm,
       builder: (context, form, _) {
@@ -60,6 +73,15 @@ class UserSettings extends HookWidget {
               formControlName: 'email',
               placeholder: 'Email',
               keyboardType: TextInputType.emailAddress,
+              canEdit: editing.value,
+              disabled: !editing.value,
+            ),
+            AppTheme.spacer,
+            StyledTextField(
+              formControlName: 'password',
+              placeholder: 'Lösenord',
+              keyboardType: TextInputType.visiblePassword,
+              obscureText: true,
               canEdit: editing.value,
               disabled: !editing.value,
             ),
@@ -98,7 +120,11 @@ class UserSettings extends HookWidget {
                         title: 'Avbryt',
                         width: 120,
                         secondary: true,
-                        onPressed: () => editing.value = !editing.value,
+                        onPressed: () {
+                          editing.value = !editing.value;
+                          form.unfocus();
+                          form.reset(value: buildForm().value);
+                        },
                       ),
                       AppTheme.spacer2x,
                       const SubmitButton(),

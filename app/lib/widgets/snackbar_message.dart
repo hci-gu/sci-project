@@ -30,7 +30,9 @@ class SnackbarMessage extends SnackBar {
                   message,
                   textAlign: TextAlign.center,
                   maxLines: 3,
-                  style: AppTheme.labelLarge,
+                  style: AppTheme.labelLarge.copyWith(
+                    color: AppTheme.colors.white,
+                  ),
                 ),
               ),
             ],

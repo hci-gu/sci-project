@@ -15,24 +15,34 @@ class MainScreen extends HookWidget {
       body: SafeArea(
         child: _page(screen.value),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        elevation: 2,
-        backgroundColor: AppTheme.colors.white,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            label: 'Hem',
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          border: Border(
+            top: BorderSide(
+              color: AppTheme.colors.black.withOpacity(0.1),
+              width: 1,
+            ),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings_outlined),
-            label: 'Inställningar',
-          ),
-        ],
-        currentIndex: screen.value,
-        selectedItemColor: AppTheme.colors.primary,
-        onTap: (index) {
-          screen.value = index;
-        },
+        ),
+        child: BottomNavigationBar(
+          elevation: 0,
+          backgroundColor: AppTheme.colors.white,
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home_outlined),
+              label: 'Hem',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.settings_outlined),
+              label: 'Inställningar',
+            ),
+          ],
+          currentIndex: screen.value,
+          selectedItemColor: AppTheme.colors.primary,
+          onTap: (index) {
+            screen.value = index;
+          },
+        ),
       ),
     );
   }
