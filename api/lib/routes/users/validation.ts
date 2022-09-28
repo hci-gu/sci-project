@@ -32,6 +32,8 @@ export interface UserBodySchema extends ValidatedRequestSchema {
     condition: Condition
     injuryLevel: number
     deviceId: string
+    email: string
+    password: string
   }
 }
 export const userBody = validator.body(user)

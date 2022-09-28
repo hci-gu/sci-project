@@ -6,7 +6,7 @@ import { User } from '../classes'
 export class NotFoundError extends Error {}
 export class ForbiddenError extends Error {}
 
-const hasPassword = async (password: string) => {
+export const hashPassword = async (password: string) => {
   const salt = await bcrypt.genSalt(10)
   return bcrypt.hash(password, salt)
 }
@@ -37,12 +37,7 @@ export default {
         hooks: {
           beforeCreate: async (user: User) => {
             if (user.password) {
-              user.password = await hasPassword(user.password)
-            }
-          },
-          beforeUpdate: async (user: User) => {
-            if (user.password) {
-              user.password = await hasPassword(user.password)
+              user.password = await hashPassword(user.password)
             }
           },
         },
