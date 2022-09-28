@@ -13,7 +13,11 @@ import {
   userBody,
   UserBodySchema,
 } from './validation'
-import UserModel, { ForbiddenError, NotFoundError } from '../../db/models/User'
+import UserModel, {
+  ForbiddenError,
+  hashPassword,
+  NotFoundError,
+} from '../../db/models/User'
 import { User } from '../../db/classes'
 
 const stripSensitive = (user: User) => {
@@ -64,7 +68,12 @@ router.patch(
 
       let property: keyof typeof req.body
       for (property in req.body) {
-        user.set(property, req.body[property])
+        if (property === 'password') {
+          const pw = await hashPassword(req.body[property])
+          user.set(property, pw)
+        } else {
+          user.set(property, req.body[property])
+        }
       }
 
       await user.save()
