@@ -1,6 +1,15 @@
 import { DataTypes, Sequelize, ModelStatic } from 'sequelize'
+import bcrypt from 'bcrypt'
 import { Condition, Gender } from '../../constants'
 import { User } from '../classes'
+
+export class NotFoundError extends Error {}
+export class ForbiddenError extends Error {}
+
+const hasPassword = async (password: string) => {
+  const salt = await bcrypt.genSalt(10)
+  return bcrypt.hash(password, salt)
+}
 
 let UserModel: ModelStatic<User>
 export default {
@@ -20,12 +29,25 @@ export default {
         injuryLevel: DataTypes.INTEGER,
         deviceId: DataTypes.STRING,
         createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+        email: DataTypes.STRING,
+        password: DataTypes.STRING,
       },
       {
         timestamps: false,
+        hooks: {
+          beforeCreate: async (user: User) => {
+            if (user.password) {
+              user.password = await hasPassword(user.password)
+            }
+          },
+          beforeUpdate: async (user: User) => {
+            if (user.password) {
+              user.password = await hasPassword(user.password)
+            }
+          },
+        },
       }
     )
-
     return User
   },
   associate: (sequelize: Sequelize) => {
@@ -55,4 +77,16 @@ export default {
     }),
   get: (id: string) => UserModel.findOne({ where: { id } }),
   getAll: () => UserModel.findAll(),
+  login: async (email: string, password: string) => {
+    const user = await UserModel.findOne({ where: { email } })
+    if (!user) {
+      throw new NotFoundError('User not found')
+    }
+
+    const success = await bcrypt.compare(password, user.password)
+    if (!success) {
+      throw new ForbiddenError('Invalid password')
+    }
+    return user
+  },
 }
