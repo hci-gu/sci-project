@@ -6,7 +6,7 @@ import moment from 'moment'
 import { createBoutFromCounts } from './Bout'
 
 const afterCreate = async (count: AccelCount) => {
-  if (!count.UserId) return
+  if (!count.UserId || !(count.hr > 0)) return
   const user = await UserModel.get(count.UserId)
 
   if (!user) return

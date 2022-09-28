@@ -13,11 +13,17 @@ import {
   userBody,
   UserBodySchema,
 } from './validation'
-import UserModel from '../../db/models/User'
+import UserModel, { ForbiddenError, NotFoundError } from '../../db/models/User'
+import { User } from '../../db/classes'
+
+const stripSensitive = (user: User) => {
+  const { password, ...rest } = user.toJSON()
+  return rest
+}
 
 router.post('/', userBody, async (req, res) => {
   const result = await UserModel.save(req.body)
-  res.send(result)
+  res.send(stripSensitive(result))
 })
 
 router.get('/register', async (req, res) => {
@@ -37,7 +43,7 @@ router.get('/:id', async (req, res) => {
     if (!result) {
       return res.sendStatus(404)
     }
-    return res.send(result)
+    return res.send(stripSensitive(result))
   } catch (e) {
     return res.sendStatus(500)
   }
@@ -63,7 +69,7 @@ router.patch(
 
       await user.save()
 
-      return res.send(user)
+      return res.send(stripSensitive(user))
     } catch (e) {
       return res.sendStatus(500)
     }
@@ -84,6 +90,24 @@ router.post('/:id/data', async (req, res) => {
   }
 
   res.sendStatus(200)
+})
+
+router.post('/login', async (req, res) => {
+  const { email, password } = req.body
+
+  try {
+    const user = await UserModel.login(email, password)
+    return res.send(stripSensitive(user))
+  } catch (e) {
+    console.log(e)
+    if (e instanceof NotFoundError) {
+      return res.sendStatus(404)
+    }
+    if (e instanceof ForbiddenError) {
+      return res.sendStatus(403)
+    }
+    return res.sendStatus(500)
+  }
 })
 
 // remove this later

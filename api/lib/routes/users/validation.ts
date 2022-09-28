@@ -18,6 +18,8 @@ const user = Joi.object({
     .optional(),
   injuryLevel: Joi.number().integer().min(1).max(10).optional(),
   deviceId: Joi.string().optional(),
+  email: Joi.string().email().optional(),
+  password: Joi.string().optional(),
 })
 
 export interface UserBodySchema extends ValidatedRequestSchema {

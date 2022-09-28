@@ -19,6 +19,8 @@ export class User extends Model<
   declare injuryLevel: CreationOptional<number>
   declare deviceId: CreationOptional<string>
   declare createdAt: CreationOptional<Date>
+  declare email: CreationOptional<string>
+  declare password: CreationOptional<string>
 }
 
 export class AccelCount extends Model<
