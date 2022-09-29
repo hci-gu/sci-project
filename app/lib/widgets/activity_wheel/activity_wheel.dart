@@ -82,7 +82,7 @@ class ActivityWheel extends ConsumerWidget {
                       ),
                       AppTheme.spacer,
                       Text(
-                        e.activity.name,
+                        e.activity.displayString(),
                         style: AppTheme.labelLarge,
                       ),
                     ],

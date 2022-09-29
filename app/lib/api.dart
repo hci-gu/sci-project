@@ -19,13 +19,13 @@ Gender genderFromString(String gender) {
 
 enum Condition { paraplegic, tetraplegic }
 
-extension ParseToString on Condition {
+extension ConditionDisplayAsString on Condition {
   String displayString() {
     switch (this) {
       case Condition.paraplegic:
-        return 'Paraplegic';
+        return 'Paraplegi';
       case Condition.tetraplegic:
-        return 'Tetraplegic';
+        return 'Tetraplegi';
       default:
         return toString();
     }
@@ -84,6 +84,21 @@ enum Activity {
   sedentary,
   moving,
   active,
+}
+
+extension ActivityDisplayString on Activity {
+  String displayString() {
+    switch (this) {
+      case Activity.sedentary:
+        return 'Stillasittande';
+      case Activity.moving:
+        return 'Rörelse';
+      case Activity.active:
+        return 'Aktiv';
+      default:
+        return toString();
+    }
+  }
 }
 
 Activity activityFromString(string) {

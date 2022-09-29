@@ -17,15 +17,18 @@ class CaloriesScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     Pagination pagination = ref.watch(paginationProvider);
+    bool isDay = pagination.mode == ChartMode.day;
 
     return DetailScreen(
       title: 'Kalorier',
       header: StatHeader(
         unit: Unit.calories,
-        averageProvider: averageEnergyProvider(pagination),
-        totalProvider: totalEnergyProvider(pagination),
+        isAverage: !isDay,
+        provider: isDay
+            ? totalEnergyProvider(pagination)
+            : averageEnergyProvider(pagination),
       ),
-      pageBuilder: (ctx, page) => _isDay(ref)
+      pageBuilder: (ctx, page) => isDay
           ? EnergyLineChart(
               isCard: false,
               pagination: Pagination(page: page, mode: pagination.mode),
@@ -37,10 +40,6 @@ class CaloriesScreen extends ConsumerWidget {
             'Kalorierna som visas här är det totala du har bränt idag. Detta är baserat på din aktivitetsnivå tillsammans med din puls. För att läsa mer om hur vi räknar ut kalorier följ länken nedan.',
       ),
     );
-  }
-
-  bool _isDay(WidgetRef ref) {
-    return ref.watch(paginationProvider).mode == ChartMode.day;
   }
 }
 

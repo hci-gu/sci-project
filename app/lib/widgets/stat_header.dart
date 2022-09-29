@@ -8,14 +8,14 @@ import 'package:scimovement/widgets/stat_widget.dart';
 
 class StatHeader extends ConsumerWidget {
   final Unit unit;
-  final FutureProvider<double> averageProvider;
-  final FutureProvider<int> totalProvider;
+  final bool isAverage;
+  final FutureProvider<num> provider;
 
   const StatHeader({
     Key? key,
     required this.unit,
-    required this.averageProvider,
-    required this.totalProvider,
+    required this.provider,
+    this.isAverage = true,
   }) : super(key: key);
 
   @override
@@ -23,25 +23,20 @@ class StatHeader extends ConsumerWidget {
     DateTime date = ref.watch(dateProvider);
     String dateText = ref.watch(dateDisplayProvider);
     Pagination page = ref.watch(paginationProvider);
-    bool showAverage = page.mode == ChartMode.day ? false : true;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          showAverage ? 'Genomsnitt' : 'Totalt',
+          isAverage ? 'Genomsnitt' : 'Totalt',
           style: AppTheme.labelLarge.copyWith(color: AppTheme.colors.gray),
         ),
         Row(
           crossAxisAlignment: CrossAxisAlignment.baseline,
           textBaseline: TextBaseline.alphabetic,
           children: [
-            ref
-                .watch(
-                  showAverage ? averageProvider : totalProvider,
-                )
-                .when(
+            ref.watch(provider).when(
                   data: (data) => AnimatedDigitWidget(
                     value: data.toInt(),
                     duration: const Duration(milliseconds: 250),
@@ -59,7 +54,7 @@ class StatHeader extends ConsumerWidget {
           ],
         ),
         Text(
-          showAverage ? _displayDateRange(page, date) : dateText,
+          page.mode == ChartMode.day ? dateText : _displayDateRange(page, date),
           style: AppTheme.labelLarge.copyWith(color: AppTheme.colors.gray),
         ),
       ],

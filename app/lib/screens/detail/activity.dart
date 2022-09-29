@@ -6,7 +6,6 @@ import 'package:scimovement/models/config.dart';
 import 'package:scimovement/models/energy.dart';
 import 'package:scimovement/screens/detail/screen.dart';
 import 'package:scimovement/widgets/activity_arc/activity_arc.dart';
-import 'package:scimovement/widgets/charts/activity_line_chart.dart';
 import 'package:scimovement/widgets/charts/bar_chart.dart';
 import 'package:scimovement/widgets/charts/chart_wrapper.dart';
 import 'package:scimovement/widgets/info_box.dart';
@@ -19,22 +18,21 @@ class ActivityScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     Pagination pagination = ref.watch(paginationProvider);
+    bool isDay = pagination.mode == ChartMode.day;
 
     return DetailScreen(
       title: 'Rörelse',
       header: StatHeader(
         unit: Unit.time,
-        averageProvider: averageMovementMinutesProvider(pagination),
-        totalProvider: totalMovementMinutesProvider(pagination),
+        isAverage: !isDay,
+        provider: isDay
+            ? totalMovementMinutesProvider(pagination)
+            : averageMovementMinutesProvider(pagination),
       ),
       height: pagination.mode == ChartMode.day ? 150 : 200,
-      pageBuilder: (ctx, page) => _isDay(ref)
-          ? ref.watch(boutsProvider(pagination)).when(
-                data: (data) => ActivityArc(bouts: data),
-                error: (_, __) => Container(),
-                loading: () => Container(),
-              )
-          : ActivityBarChart(Pagination(page: page, mode: pagination.mode)),
+      pageBuilder: (ctx, page) => isDay
+          ? AllActivitiesArc(Pagination(mode: pagination.mode, page: page))
+          : ActivityBarChart(Pagination(mode: pagination.mode, page: page)),
       infoBox: const InfoBox(
         title: 'Om Rörelse',
         text:
@@ -42,9 +40,20 @@ class ActivityScreen extends ConsumerWidget {
       ),
     );
   }
+}
 
-  bool _isDay(WidgetRef ref) {
-    return ref.watch(paginationProvider).mode == ChartMode.day;
+class AllActivitiesArc extends ConsumerWidget {
+  final Pagination pagination;
+
+  const AllActivitiesArc(this.pagination, {Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ref.watch(boutsProvider(pagination)).when(
+          data: (data) => ActivityArc(bouts: data),
+          error: (e, stacktrace) => ChartWrapper.error(e.toString()),
+          loading: () => ChartWrapper.loading(),
+        );
   }
 }
 
@@ -59,6 +68,7 @@ class ActivityBarChart extends ConsumerWidget {
           data: (values) => CustomBarChart(
             chartData: values,
             displayMode: BarChartDisplayMode.activity,
+            unit: Unit.time,
           ),
           error: (e, stacktrace) => ChartWrapper.error(e.toString()),
           loading: () => ChartWrapper.loading(),
