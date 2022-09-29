@@ -60,10 +60,16 @@ class OnboardingStepWidget extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Hoppa över',
-                style: AppTheme.labelLarge.copyWith(
-                  decoration: TextDecoration.underline,
+              GestureDetector(
+                onTap: () {
+                  ref.read(onboardingStepProvider.notifier).state =
+                      ONBOARDING_STEP_COUNT;
+                },
+                child: Text(
+                  'Hoppa över',
+                  style: AppTheme.labelLarge.copyWith(
+                    decoration: TextDecoration.underline,
+                  ),
                 ),
               ),
               Button(

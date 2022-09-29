@@ -71,7 +71,7 @@ class ChartData {
         };
       case ChartMode.week:
         return {
-          for (int i = 0; i < 6; i++)
+          for (int i = 0; i < 7; i++)
             DateTime(
               base.subtract(Duration(days: i)).year,
               base.subtract(Duration(days: i)).month,

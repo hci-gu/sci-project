@@ -30,7 +30,7 @@ class StatHeader extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          showAverage ? 'genomsnitt' : 'Totalt',
+          showAverage ? 'Genomsnitt' : 'Totalt',
           style: AppTheme.labelLarge.copyWith(color: AppTheme.colors.gray),
         ),
         Row(

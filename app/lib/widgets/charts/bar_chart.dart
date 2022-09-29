@@ -27,6 +27,8 @@ class CustomBarChart extends StatelessWidget {
     }
     // get max value from energy
     double width = chartData.mode == ChartMode.week ? 32 : 6;
+    List<MapEntry<DateTime, List<ChartDataPoint>>> groups =
+        chartData.group.entries.sorted((a, b) => a.key.compareTo(b.key));
 
     return ChartWrapper(
       isCard: false,
@@ -34,6 +36,24 @@ class CustomBarChart extends StatelessWidget {
         BarChartData(
           maxY: chartData.maxY,
           alignment: BarChartAlignment.spaceEvenly,
+          barTouchData: BarTouchData(
+            touchTooltipData: BarTouchTooltipData(
+              tooltipBgColor: AppTheme.colors.white,
+              tooltipBorder: BorderSide(
+                color: AppTheme.colors.black,
+                width: 1,
+              ),
+              getTooltipItem: (_, groupIndex, rod, rodIndex) {
+                var group = groups[groupIndex];
+                var value =
+                    group.value.fold<double>(0, (a, b) => a + b.value).toInt();
+                return BarTooltipItem(
+                  '${displayDate(group.key)}\n$value kcal',
+                  AppTheme.labelMedium,
+                );
+              },
+            ),
+          ),
           titlesData: FlTitlesData(
             show: true,
             topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
@@ -71,8 +91,7 @@ class CustomBarChart extends StatelessWidget {
           ),
           borderData: FlBorderData(show: false),
           gridData: FlGridData(show: false),
-          barGroups: chartData.group.entries
-              .sorted((a, b) => a.key.compareTo(b.key))
+          barGroups: groups
               .map((timestamp) => BarChartGroupData(
                     x: timestamp.key.millisecondsSinceEpoch,
                     groupVertically: true,

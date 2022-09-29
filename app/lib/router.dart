@@ -12,7 +12,6 @@ import 'package:scimovement/screens/introduction.dart';
 import 'package:scimovement/screens/login.dart';
 import 'package:scimovement/screens/main.dart';
 import 'package:scimovement/screens/onboarding/onboarding.dart';
-import 'package:scimovement/storage.dart';
 
 List<String> detailRoutes = ['calories', 'activity', 'sedentary'];
 

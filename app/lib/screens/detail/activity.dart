@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:scimovement/models/bouts.dart';
 import 'package:scimovement/models/chart.dart';
 import 'package:scimovement/models/config.dart';
 import 'package:scimovement/models/energy.dart';
 import 'package:scimovement/screens/detail/screen.dart';
+import 'package:scimovement/widgets/activity_arc/activity_arc.dart';
 import 'package:scimovement/widgets/charts/activity_line_chart.dart';
 import 'package:scimovement/widgets/charts/bar_chart.dart';
 import 'package:scimovement/widgets/charts/chart_wrapper.dart';
@@ -25,11 +27,13 @@ class ActivityScreen extends ConsumerWidget {
         averageProvider: averageMovementMinutesProvider(pagination),
         totalProvider: totalMovementMinutesProvider(pagination),
       ),
+      height: pagination.mode == ChartMode.day ? 150 : 200,
       pageBuilder: (ctx, page) => _isDay(ref)
-          ? ActivityLineChart(
-              isCard: false,
-              pagination: Pagination(page: page, mode: pagination.mode),
-            )
+          ? ref.watch(boutsProvider(pagination)).when(
+                data: (data) => ActivityArc(bouts: data),
+                error: (_, __) => Container(),
+                loading: () => Container(),
+              )
           : ActivityBarChart(Pagination(page: page, mode: pagination.mode)),
       infoBox: const InfoBox(
         title: 'Om Rörelse',

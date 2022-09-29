@@ -163,29 +163,29 @@ class StatWidget extends StatelessWidget {
     );
   }
 
-  static Widget error(String asset) => _container(
+  static Widget _emptyContainer(List<Widget> children) => _container(
         Center(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SvgPicture.asset(asset),
-              const SizedBox(height: 16),
-              const Text('error'),
-            ],
+          child: SizedBox(
+            width: 128,
+            height: 128,
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: children),
           ),
         ),
       );
 
-  static Widget loading(String asset) => _container(
-        Center(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SvgPicture.asset(asset),
-              const SizedBox(height: 16),
-              const CircularProgressIndicator(),
-            ],
-          ),
-        ),
+  static Widget error(String asset) => _emptyContainer([
+        SvgPicture.asset(asset),
+        const SizedBox(height: 16),
+        const Text('error'),
+      ]);
+
+  static Widget loading(String asset) => _emptyContainer(
+        [
+          SvgPicture.asset(asset),
+          const SizedBox(height: 32),
+          const CircularProgressIndicator(),
+        ],
       );
 }

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:scimovement/api.dart';
 import 'package:scimovement/models/bouts.dart';
 import 'package:scimovement/models/chart.dart';
 import 'package:scimovement/models/config.dart';
 import 'package:scimovement/screens/detail/screen.dart';
+import 'package:scimovement/widgets/activity_arc/activity_arc.dart';
 import 'package:scimovement/widgets/charts/bar_chart.dart';
 import 'package:scimovement/widgets/charts/chart_wrapper.dart';
 import 'package:scimovement/widgets/info_box.dart';
@@ -24,8 +26,19 @@ class SedentaryScreen extends ConsumerWidget {
         averageProvider: averageSedentaryBout(pagination),
         totalProvider: totalSedentaryBout(pagination),
       ),
-      pageBuilder: (ctx, page) =>
-          SedentaryBarChart(Pagination(page: page, mode: pagination.mode)),
+      height: pagination.mode == ChartMode.day ? 150 : 200,
+      pageBuilder: (ctx, page) => ref.watch(boutsProvider(pagination)).when(
+            data: (data) => pagination.mode == ChartMode.day
+                ? ActivityArc(
+                    bouts: data
+                        .where((e) => e.activity == Activity.sedentary)
+                        .toList(),
+                    activities: const [Activity.sedentary],
+                  )
+                : SedentaryBarChart(pagination),
+            error: (_, __) => Container(),
+            loading: () => Container(),
+          ),
       infoBox: const InfoBox(
         title: 'Om Stillasittande',
         text:
