@@ -19,6 +19,14 @@ class ActivityGroup {
   int get count => energy.length;
 }
 
+List<ActivityGroup> emptyActivityGroups() {
+  return [
+    ActivityGroup(Activity.sedentary, [Energy(time: DateTime.now(), value: 0)]),
+    ActivityGroup(Activity.moving, []),
+    ActivityGroup(Activity.active, []),
+  ];
+}
+
 final activityProvider = FutureProvider<List<ActivityGroup>>((ref) async {
   List<Energy> energy =
       await ref.watch(energyProvider(const Pagination()).future);
@@ -49,10 +57,13 @@ class ActivityWheel extends ConsumerWidget {
   }
 
   Widget _body(List<ActivityGroup> activityGroups) {
+    bool allEmpty = activityGroups.every((e) => e.energy.isEmpty);
     return _container(
       Column(
         children: [
-          AnimatedWheel(activityGroups: activityGroups),
+          AnimatedWheel(
+            activityGroups: allEmpty ? emptyActivityGroups() : activityGroups,
+          ),
           AppTheme.spacer2x,
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -125,7 +136,7 @@ class AnimatedWheel extends HookWidget {
         useAnimationController(duration: const Duration(milliseconds: 800));
 
     useEffect(() {
-      controller.forward(from: 0.1);
+      controller.forward(from: 0);
       return () => controller.reset();
     }, []);
 
@@ -198,11 +209,11 @@ class AnimatedWheel extends HookWidget {
   Interval _intervalForActivity(Activity activity) {
     switch (activity) {
       case Activity.sedentary:
-        return const Interval(0, 0.3, curve: Curves.easeInCubic);
+        return const Interval(0, 0.3, curve: Curves.easeInOut);
       case Activity.moving:
-        return const Interval(0.4, 0.6, curve: Curves.easeInCubic);
+        return const Interval(0.4, 0.6, curve: Curves.easeInOut);
       case Activity.active:
-        return const Interval(0.7, 1, curve: Curves.easeInCubic);
+        return const Interval(0.7, 1, curve: Curves.easeInOut);
     }
   }
 }

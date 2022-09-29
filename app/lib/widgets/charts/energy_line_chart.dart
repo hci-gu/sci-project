@@ -54,19 +54,57 @@ class EnergyLineChart extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return ref.watch(energyChartProvider(pagination)).when(
-          data: (values) => ChartWrapper(
-            isCard: isCard,
-            child: _energyChart(values.current, values.previous),
-          ),
+          data: (values) => Stack(children: [
+            _legend(ref),
+            ChartWrapper(
+              isCard: isCard,
+              child: _energyChart(values.current, values.previous),
+              aspectRatio: 1.4,
+            )
+          ]),
           error: (e, stacktrace) => ChartWrapper.error(e.toString()),
           loading: () => ChartWrapper.loading(),
         );
+  }
+
+  TextStyle _styleForText(String text) {
+    if (text.length >= 10) {
+      return AppTheme.labelTiny;
+    }
+    return AppTheme.labelMedium;
+  }
+
+  Widget _legend(WidgetRef ref) {
+    String current = ref.watch(dateDisplayProvider);
+    String previous = ref.watch(previousDateDisplayProvider);
+
+    return Positioned(
+      top: 0,
+      right: 0,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text(
+            current,
+            style:
+                _styleForText(current).copyWith(color: AppTheme.colors.orange),
+          ),
+          Text(
+            previous,
+            style:
+                _styleForText(previous).copyWith(color: AppTheme.colors.gray),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _energyChart(List<Energy> energy, List<Energy> prevEnergy) {
     if (energy.isEmpty) return Container();
 
     DateTime energyDate = energy.first.time;
+    DateTime now = DateTime.now();
+    DateTime today = DateTime(now.year, now.month, now.day);
     DateTime day = DateTime(energyDate.year, energyDate.month, energyDate.day);
     List<double> values = energy.map((e) => e.value).toList();
     List<double> prevValues = prevEnergy.map((e) => e.value).toList();
@@ -127,7 +165,7 @@ class EnergyLineChart extends ConsumerWidget {
                 )
                 .toList(),
             preventCurveOverShooting: true,
-            barWidth: 3,
+            barWidth: 2,
             isCurved: true,
             color: AppTheme.colors.gray,
             dotData: FlDotData(
@@ -149,7 +187,7 @@ class EnergyLineChart extends ConsumerWidget {
             isCurved: true,
             color: AppTheme.colors.orange,
             dotData: FlDotData(
-              show: true,
+              show: day == today,
               checkToShowDot: (spot, data) => spot.x == data.spots.last.x,
             ),
             belowBarData: BarAreaData(show: false),

@@ -14,6 +14,7 @@ class DetailScreen extends HookConsumerWidget {
   final PageBuilder pageBuilder;
   final StatHeader header;
   final InfoBox infoBox;
+  final double height;
 
   const DetailScreen({
     Key? key,
@@ -21,6 +22,7 @@ class DetailScreen extends HookConsumerWidget {
     required this.pageBuilder,
     required this.header,
     required this.infoBox,
+    this.height = 200,
   }) : super(key: key);
 
   @override
@@ -29,18 +31,20 @@ class DetailScreen extends HookConsumerWidget {
 
     return Scaffold(
       appBar: AppTheme.appBar(title),
-      body: Padding(
+      body: ListView(
         padding: AppTheme.screenPadding,
-        child: Column(
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [header, const ChartModeSelect()],
-            ),
-            AppTheme.separator,
-            SizedBox(
-              height: 200,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [header, const ChartModeSelect()],
+          ),
+          AppTheme.separator,
+          AnimatedSize(
+            duration: const Duration(milliseconds: 400),
+            curve: Curves.easeOutCubic,
+            child: SizedBox(
+              height: height,
               child: PageView.builder(
                 controller: _pageController,
                 reverse: true,
@@ -53,10 +57,10 @@ class DetailScreen extends HookConsumerWidget {
                 itemBuilder: pageBuilder,
               ),
             ),
-            AppTheme.separator,
-            infoBox,
-          ],
-        ),
+          ),
+          AppTheme.separator,
+          infoBox,
+        ],
       ),
     );
   }

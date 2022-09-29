@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
-import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:scimovement/models/config.dart';
+import 'package:timezone/standalone.dart' as tz;
 
 const String apiUrl = 'https://sci-api.prod.appadem.in';
 // const String apiUrl = 'http://192.168.0.33:4000';
@@ -115,10 +115,9 @@ class Energy {
   factory Energy.fromJson(Map<String, dynamic> json) {
     double value = json['kcal'] != null ? json['kcal'].toDouble() : 0.0;
     Activity activity = activityFromString(json['activity']);
-
     String minutesString = json['minutes']?.toString() ?? '1';
     return Energy(
-      time: DateTime.parse(json['t']),
+      time: tz.TZDateTime.parse(tz.getLocation(Api().tz), json['t']),
       value: value,
       activity: activity,
       minutes: int.parse(minutesString),
@@ -134,9 +133,11 @@ class Bout {
   Bout({required this.time, required this.minutes, required this.activity});
 
   factory Bout.fromJson(Map<String, dynamic> json) {
+    String minutesString = json['minutes'].toString();
+
     return Bout(
-      time: DateTime.parse(json['t']),
-      minutes: json['minutes'],
+      time: tz.TZDateTime.parse(tz.getLocation(Api().tz), json['t']),
+      minutes: double.parse(minutesString).toInt(),
       activity: activityFromString(json['activity']),
     );
   }
@@ -144,6 +145,7 @@ class Bout {
 
 class Api {
   String _userId = '';
+  String tz = 'Europe/Stockholm';
   Dio dio = Dio(BaseOptions(
     baseUrl: apiUrl,
     connectTimeout: 30000,
@@ -182,8 +184,8 @@ class Api {
     ChartMode mode,
   ) async {
     Map<String, String> params = {
-      'from': DateFormat('yyyy-MM-dd HH:mm').format(from),
-      'to': DateFormat('yyyy-MM-dd HH:mm').format(to),
+      'from': from.toIso8601String().substring(0, 16),
+      'to': to.toIso8601String().substring(0, 16),
     };
     if (mode != ChartMode.day) {
       params['group'] = chartModeToGroup(mode);
@@ -200,8 +202,8 @@ class Api {
   Future<List<Bout>> getBouts(
       DateTime from, DateTime to, ChartMode mode) async {
     Map<String, String> params = {
-      'from': DateFormat('yyyy-MM-dd HH:mm').format(from),
-      'to': DateFormat('yyyy-MM-dd HH:mm').format(to),
+      'from': from.toIso8601String().substring(0, 16),
+      'to': to.toIso8601String().substring(0, 16),
     };
     if (mode != ChartMode.day) {
       params['group'] = chartModeToGroup(mode);
@@ -217,8 +219,8 @@ class Api {
 
   Future<int> getActivity(DateTime from, DateTime to) async {
     var response = await dio.get('/sedentary/$_userId', queryParameters: {
-      'from': DateFormat('yyyy-MM-dd HH:mm').format(from),
-      'to': DateFormat('yyyy-MM-dd HH:mm').format(to),
+      'from': from.toIso8601String().substring(0, 16),
+      'to': to.toIso8601String().substring(0, 16),
     });
 
     if (response.statusCode == 200) {

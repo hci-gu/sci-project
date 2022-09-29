@@ -22,7 +22,7 @@ class OnboardingScreen extends ConsumerWidget {
           ),
           if (ref.watch(onboardingStepProvider) == 0)
             const Positioned(
-              top: 460,
+              top: 416,
               left: 16,
               child: OnboardingStepMessage(
                 title: 'Rörelse',
@@ -32,7 +32,7 @@ class OnboardingScreen extends ConsumerWidget {
             ),
           if (ref.watch(onboardingStepProvider) == 1)
             const Positioned(
-              top: 300,
+              top: 250,
               left: 16,
               child: OnboardingStepMessage(
                 title: 'Kalorier',
@@ -42,7 +42,7 @@ class OnboardingScreen extends ConsumerWidget {
             ),
           if (ref.watch(onboardingStepProvider) == 2)
             const Positioned(
-              top: 300,
+              top: 250,
               right: 16,
               child: OnboardingStepMessage(
                 title: 'Stillasittande',

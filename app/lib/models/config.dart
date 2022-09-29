@@ -66,10 +66,7 @@ final dateProvider = StateProvider<DateTime>((ref) => DateTime.now());
 final paginationProvider =
     StateProvider<Pagination>((ref) => const Pagination());
 
-final dateDisplayProvider = Provider<String>((ref) {
-  Pagination pagination = ref.watch(paginationProvider);
-  DateTime date =
-      ref.watch(dateProvider).subtract(pagination.duration * pagination.page);
+String displayDate(DateTime date) {
   DateTime now = DateTime.now();
   DateTime today = DateTime(now.year, now.month, now.day);
   DateTime yesterday = today.subtract(const Duration(days: 1));
@@ -81,4 +78,18 @@ final dateDisplayProvider = Provider<String>((ref) {
   }
 
   return date.toString().substring(0, 10);
+}
+
+final dateDisplayProvider = Provider<String>((ref) {
+  Pagination pagination = ref.watch(paginationProvider);
+  DateTime date =
+      ref.watch(dateProvider).subtract(pagination.duration * pagination.page);
+  return displayDate(date);
+});
+final previousDateDisplayProvider = Provider<String>((ref) {
+  Pagination pagination = ref.watch(paginationProvider);
+  DateTime date = ref
+      .watch(dateProvider)
+      .subtract(pagination.duration * (pagination.page + 1));
+  return displayDate(date);
 });

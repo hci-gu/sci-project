@@ -25,6 +25,7 @@ final averageEnergyProvider =
   List<Energy> energy = (await ref.watch(energyProvider(pagination).future))
       .where((e) => e.value > 0)
       .toList();
+
   if (energy.isEmpty) {
     return 0;
   }
