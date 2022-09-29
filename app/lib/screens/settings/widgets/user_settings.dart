@@ -4,7 +4,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import 'package:scimovement/api.dart';
 import 'package:scimovement/models/auth.dart';
-import 'package:scimovement/screens/settings/settings.dart';
 import 'package:scimovement/screens/settings/widgets/form_dropdown.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
@@ -25,16 +24,14 @@ class UserSettings extends HookWidget {
             ],
           ),
           'password': FormControl<String>(
-            value: '',
+            value: null,
             validators: [
               Validators.minLength(8),
             ],
           ),
           'weight': FormControl<int>(
             value: user.weight != null ? user.weight!.toInt() : 0,
-            validators: [
-              Validators.required,
-            ],
+            validators: [],
           ),
           'injuryLevel': FormControl<int>(
             value: user.injuryLevel ?? 0,

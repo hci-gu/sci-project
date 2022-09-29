@@ -7,16 +7,19 @@ import 'package:scimovement/models/config.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/charts/chart_wrapper.dart';
 import 'package:scimovement/widgets/charts/utils/chart_data.dart';
+import 'package:scimovement/widgets/stat_widget.dart';
 
 enum BarChartDisplayMode { energy, activity, sedentary }
 
 class CustomBarChart extends StatelessWidget {
   final ChartData chartData;
+  final Unit unit;
   final BarChartDisplayMode displayMode;
 
   const CustomBarChart({
     required this.chartData,
     required this.displayMode,
+    this.unit = Unit.calories,
     Key? key,
   }) : super(key: key);
 
@@ -48,7 +51,7 @@ class CustomBarChart extends StatelessWidget {
                 var value =
                     group.value.fold<double>(0, (a, b) => a + b.value).toInt();
                 return BarTooltipItem(
-                  '${displayDate(group.key)}\n$value kcal',
+                  '${displayDate(group.key)}\n$value ${unit.displayString()}',
                   AppTheme.labelMedium,
                 );
               },

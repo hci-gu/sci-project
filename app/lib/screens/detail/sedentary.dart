@@ -23,28 +23,36 @@ class SedentaryScreen extends ConsumerWidget {
       title: 'Stillasittande',
       header: StatHeader(
         unit: Unit.time,
-        averageProvider: averageSedentaryBout(pagination),
-        totalProvider: totalSedentaryBout(pagination),
+        provider: averageSedentaryBout(pagination),
       ),
       height: pagination.mode == ChartMode.day ? 150 : 200,
-      pageBuilder: (ctx, page) => ref.watch(boutsProvider(pagination)).when(
-            data: (data) => pagination.mode == ChartMode.day
-                ? ActivityArc(
-                    bouts: data
-                        .where((e) => e.activity == Activity.sedentary)
-                        .toList(),
-                    activities: const [Activity.sedentary],
-                  )
-                : SedentaryBarChart(pagination),
-            error: (_, __) => Container(),
-            loading: () => Container(),
-          ),
+      pageBuilder: (ctx, page) => pagination.mode == ChartMode.day
+          ? SedentaryArc(Pagination(mode: pagination.mode, page: page))
+          : SedentaryBarChart(Pagination(mode: pagination.mode, page: page)),
       infoBox: const InfoBox(
         title: 'Om Stillasittande',
         text:
             'Här kan du se hur länge du varit stillasittande idag. Det är viktigt att undvika för långa perioder av stillasittande under dagen. Vill du ha hjälp kan se till att ha på notiser för påminnelse att röra på sig.\n\nVill du veta mer om hur stillasittande påverkar dig kan du följa länken nedan.',
       ),
     );
+  }
+}
+
+class SedentaryArc extends ConsumerWidget {
+  final Pagination pagination;
+
+  const SedentaryArc(this.pagination, {Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return ref.watch(boutsProvider(pagination)).when(
+          data: (data) => ActivityArc(
+            bouts: data.where((e) => e.activity == Activity.sedentary).toList(),
+            activities: const [Activity.sedentary],
+          ),
+          error: (e, stacktrace) => ChartWrapper.error(e.toString()),
+          loading: () => ChartWrapper.loading(),
+        );
   }
 }
 
@@ -59,6 +67,7 @@ class SedentaryBarChart extends ConsumerWidget {
           data: (values) => CustomBarChart(
             chartData: values,
             displayMode: BarChartDisplayMode.sedentary,
+            unit: Unit.time,
           ),
           error: (e, stacktrace) => ChartWrapper.error(e.toString()),
           loading: () => ChartWrapper.loading(),
