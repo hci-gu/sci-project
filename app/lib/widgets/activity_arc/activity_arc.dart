@@ -90,7 +90,7 @@ class ArcPainter extends CustomPainter {
       canvas.drawArc(
         rect,
         offset + start - 0.003,
-        bout.minutes * pi / 2 / 1440 + 0.006,
+        (bout.minutes - 1) * pi / 2 / 1440 + 0.006,
         false,
         Paint()
           ..color = AppTheme.colors.black
@@ -100,7 +100,7 @@ class ArcPainter extends CustomPainter {
       canvas.drawArc(
         rect,
         offset + start,
-        bout.minutes * pi / 2 / 1440,
+        (bout.minutes - 1) * pi / 2 / 1440,
         false,
         Paint()
           ..color = AppTheme.colors.activityLevelToColor(bout.activity)
