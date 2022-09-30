@@ -85,7 +85,7 @@ class OnboardingButton extends ConsumerWidget {
       width: 220,
       secondary: true,
       onPressed: () async {
-        ref.read(onboardingStepProvider.notifier).state = 3;
+        ref.read(onboardingStepProvider.notifier).state = ONBOARDING_STEP_COUNT;
         await Future.delayed(const Duration(milliseconds: 100));
         ref.read(onboardingStepProvider.notifier).state = 0;
         await Future.delayed(const Duration(milliseconds: 100));

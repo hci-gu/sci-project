@@ -74,7 +74,10 @@ class OnboardingStepWidget extends ConsumerWidget {
               ),
               Button(
                 width: 100,
-                title: 'Nästa',
+                title: ref.watch(onboardingStepProvider) ==
+                        ONBOARDING_STEP_COUNT - 1
+                    ? 'Avsluta'
+                    : 'Nästa',
                 onPressed: () =>
                     ref.read(onboardingStepProvider.notifier).state++,
               )

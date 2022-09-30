@@ -33,8 +33,8 @@ class MainScreen extends HookWidget {
               label: 'Hem',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.settings_outlined),
-              label: 'Inställningar',
+              icon: Icon(Icons.person_outline),
+              label: 'Profil',
             ),
           ],
           currentIndex: screen.value,

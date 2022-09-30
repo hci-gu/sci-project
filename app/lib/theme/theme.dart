@@ -17,8 +17,8 @@ class AppColors {
   final orange = HexColor('#E36A3D');
   final yellow = HexColor('#FFA845');
 
-  final moving = HexColor('#87BCDE');
-  final active = HexColor('#44BD7A');
+  final moving = HexColor('#748DD9');
+  final active = HexColor('#40a740');
   final sedentary = HexColor('#C82D38');
 
   Color activityLevelToColor(Activity activity) {
