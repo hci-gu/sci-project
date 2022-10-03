@@ -9,17 +9,19 @@ class UserState extends StateNotifier<User?> {
     init(credentials);
   }
 
-  bool _shouldAskForNotifications = false;
+  bool _hasPermission = false;
+  bool get hasPermission => _hasPermission;
 
   Future<void> init(Credentials? credentials) async {
-    if (credentials != null) {
-      await login(credentials.email, credentials.password);
-    }
+    if (credentials == null) return;
+    await login(credentials.email, credentials.password);
 
-    _shouldAskForNotifications = await Storage.getNotificationRequest() == null;
+    if (state == null) return;
+    if (state!.deviceId == null || state!.deviceId!.isEmpty) return;
 
     String? deviceToken = await token;
     if (deviceToken != null && deviceToken.isNotEmpty) {
+      _hasPermission = true;
       await Api().updateUser({
         'deviceId': deviceToken,
       });
@@ -49,26 +51,39 @@ class UserState extends StateNotifier<User?> {
   Future<String?> get token =>
       kIsWeb ? Future.value(null) : Push.instance.token;
 
-  Future<String> requestPermission() async {
+  Future<String> requestNotificationPermission() async {
     if (kIsWeb) {
       return 'denied';
     }
-    bool hasPermission = await Push.instance.requestPermission(
+    _hasPermission = await Push.instance.requestPermission(
       sound: true,
       alert: true,
       badge: true,
     );
-    String? deviceToken = await token;
-    if (deviceToken != null) {
-      await update({
-        'deviceId': deviceToken,
-      });
+    if (_hasPermission) {
+      String? deviceToken = await token;
+      if (deviceToken != null) {
+        await update({
+          'deviceId': deviceToken,
+        });
+      }
     }
-    await Storage.storeNotificationRequest(hasPermission);
+    await Storage.storeNotificationRequest(_hasPermission);
 
-    return hasPermission ? 'granted' : 'denied';
+    return _hasPermission ? 'granted' : 'denied';
+  }
+
+  Future turnOffNotifications() async {
+    await update({
+      'deviceId': '',
+    });
   }
 }
 
 final userProvider =
     StateNotifierProvider<UserState, User?>((ref) => UserState());
+
+final notificationsEnabledProvider = Provider<bool>((ref) {
+  User? user = ref.watch(userProvider);
+  return user != null && user.deviceId != null && user.deviceId!.isNotEmpty;
+});

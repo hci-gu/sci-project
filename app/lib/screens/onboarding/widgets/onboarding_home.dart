@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api.dart';
+import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/models/onboarding.dart';
 import 'package:scimovement/screens/home/widgets/energy_widget.dart';
 import 'package:scimovement/screens/home/widgets/sedentary_widget.dart';
@@ -8,6 +9,7 @@ import 'package:scimovement/screens/onboarding/onboarding.dart';
 import 'package:scimovement/screens/onboarding/widgets/onboarding_step.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/activity_wheel/activity_wheel.dart';
+import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/date_select.dart';
 import 'package:scimovement/widgets/stat_widget.dart';
 
@@ -46,10 +48,24 @@ class OnboardingHomeScreen extends ConsumerWidget {
               message: Positioned(
                 left: MediaQuery.of(context).size.width / 2 - 140 - 16,
                 bottom: 24,
-                child: const OnboardingStepMessage(
+                child: OnboardingStepMessage(
                   title: 'Intro',
                   text:
-                      'Hej och välkommen till RullaPå, den här guiden kommer att visa vad det är du ser på skärmen.\n\nTrycka på "Nästa" för att gå vidare.',
+                      'Hej och välkommen till RullaPå, den här guiden kommer att visa vad det är du ser på skärmen.\n\nInnan vi sätter igång behöver appen tillåtelse att skicka ut notiser. Tryck sedan på "Nästa" för att gå vidare.',
+                  action: Padding(
+                    padding: const EdgeInsets.only(top: 16),
+                    child: Center(
+                      child: ref.watch(notificationsEnabledProvider)
+                          ? Text('Notiser på', style: AppTheme.labelMedium)
+                          : Button(
+                              width: 140,
+                              title: 'Slå på notiser',
+                              onPressed: () => ref
+                                  .read(userProvider.notifier)
+                                  .requestNotificationPermission(),
+                            ),
+                    ),
+                  ),
                 ),
               ),
             ),

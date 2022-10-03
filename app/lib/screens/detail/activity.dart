@@ -36,7 +36,7 @@ class ActivityScreen extends ConsumerWidget {
       infoBox: const InfoBox(
         title: 'Om Rörelse',
         text:
-            'Här kan du se din rörelse över dagen. Utan att ange någon information kan vi kategorisera din rörelse i tre olika nivåer när du har på dig klockan. \n\nTotalen längst upp representerar antalet minuter du rört dig idag.',
+            'Här visas en uppskattning av din dagliga aktivitet. Rörelse (lågintensiv aktivitet, blå). Består av aktiviteter som upplevs som lätt ansträngning och kan beskrivas som 20 - 45% av en individs maximal kapacitet.\nAktivitet (Medel till hög intensiv aktivitet, grön). Består av aktiviteter som upplevs som något ansträngande till ansträngande och mycket ansträngande. Dessa kan beskrivas som medel 46 - 63% och hög 54 - 90% av maximal intensitet.\n\nAktivitetsnivån är baserad på procent (%) av maximal kapacitet (relativ intensitet), detta gör att samma aktivitet kan uppfattas olika anstränga hos olika individer.',
       ),
     );
   }

@@ -93,14 +93,18 @@ class OnboardingStepWidget extends ConsumerWidget {
   }
 }
 
+const defaultContainer = SizedBox();
+
 class OnboardingStepMessage extends StatelessWidget {
   final String title;
   final String text;
+  final Widget action;
 
   const OnboardingStepMessage({
     Key? key,
     required this.title,
     required this.text,
+    this.action = defaultContainer,
   }) : super(key: key);
 
   @override
@@ -126,7 +130,8 @@ class OnboardingStepMessage extends StatelessWidget {
           Text(
             text,
             style: AppTheme.paragraphMedium,
-          )
+          ),
+          action,
         ],
       ),
     );

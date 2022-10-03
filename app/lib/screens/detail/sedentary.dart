@@ -32,7 +32,7 @@ class SedentaryScreen extends ConsumerWidget {
       infoBox: const InfoBox(
         title: 'Om Stillasittande',
         text:
-            'Här kan du se hur länge du varit stillasittande idag. Det är viktigt att undvika för långa perioder av stillasittande under dagen. Vill du ha hjälp kan se till att ha på notiser för påminnelse att röra på sig.\n\nVill du veta mer om hur stillasittande påverkar dig kan du följa länken nedan.',
+            'Här visas en uppskattning av den totala tid - fördelat över dagen - du sitter still och arbetar, tittar på TV, läser eller äter.',
       ),
     );
   }
