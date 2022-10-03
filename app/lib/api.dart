@@ -45,6 +45,7 @@ class User {
   final Gender? gender;
   final Condition? condition;
   final int? injuryLevel;
+  final String? deviceId;
 
   User({
     required this.id,
@@ -53,6 +54,7 @@ class User {
     this.gender,
     this.condition,
     this.injuryLevel,
+    this.deviceId,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -65,6 +67,7 @@ class User {
           ? conditionFromString(json['condition'])
           : null,
       injuryLevel: json['injuryLevel'] ?? 0,
+      deviceId: json['deviceId'] ?? '',
     );
   }
 
@@ -186,7 +189,7 @@ class Api {
 
     if (response.statusCode != 200) return null;
 
-    User user = User.fromJson(json.decode(response.data));
+    User user = User.fromJson(response.data);
     _userId = user.id;
 
     return user;

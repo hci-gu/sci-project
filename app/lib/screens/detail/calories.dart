@@ -37,7 +37,7 @@ class CaloriesScreen extends ConsumerWidget {
       infoBox: const InfoBox(
         title: 'Om Kalorier',
         text:
-            'Kalorierna som visas här är det totala du har bränt idag. Detta är baserat på din aktivitetsnivå tillsammans med din puls. För att läsa mer om hur vi räknar ut kalorier följ länken nedan.',
+            'Här visas en uppskattningen av din dagliga energiförbrukning (kalorier) vilket sker genom att aktivitetsarmbandet (klockan) registrerar rörelsen från accelerometern och hjärtfrekvensen kontinuerligt. Informationen från aktivitetsarmbandet samt information om skadenivå, kön och kroppsvikt används för att beräkna energiförbrukning samt aktivitetsnivå (intensitet). ',
       ),
     );
   }
