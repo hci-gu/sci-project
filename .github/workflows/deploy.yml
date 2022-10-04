@@ -18,7 +18,6 @@ jobs:
       - run: |
           cd app
           flutter pub get
-          flutter pub run build_runner build
           flutter build web --profile --web-renderer html
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4.2.3
