@@ -1,0 +1,26 @@
+name: Flutter build and deploy to GH Pages
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+      - run: |
+          cd app
+          flutter pub get
+          flutter pub run build_runner build
+          flutter build web --profile --base-href /app/ --web-renderer html
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@v4.2.3
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: gh-pages
+          FOLDER: app/build/web
