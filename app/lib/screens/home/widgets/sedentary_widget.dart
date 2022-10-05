@@ -20,7 +20,7 @@ class SedentaryWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     String asset = 'assets/svg/wheelchair.svg';
     return GestureDetector(
-      onTap: () => context.goNamed('sedentary'),
+      onTap: () => context.go('${GoRouter.of(context).location}/sedentary'),
       child: ref.watch(sedentaryWidgetProvider).when(
             data: (WidgetValues values) => StatWidget(
               values: values,
