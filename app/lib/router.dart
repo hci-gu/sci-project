@@ -5,6 +5,7 @@ import 'package:scimovement/api.dart';
 import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/models/config.dart';
 import 'package:scimovement/models/onboarding.dart';
+import 'package:scimovement/screens/demo/demo.dart';
 import 'package:scimovement/screens/detail/activity.dart';
 import 'package:scimovement/screens/detail/calories.dart';
 import 'package:scimovement/screens/detail/sedentary.dart';
@@ -50,6 +51,9 @@ class RouterNotifier extends ChangeNotifier {
 
   String? _redirectLogic(GoRouterState state) {
     bool loggedIn = _ref.read(userProvider) != null;
+    if (state.subloc == '/demo') {
+      return null;
+    }
 
     // handle logging in
     if (!loggedIn && state.subloc == '/loading') {
@@ -140,7 +144,12 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
         name: 'onboarding',
         path: '/onboarding',
         builder: (_, __) => const OnboardingScreen(),
-      )
+      ),
+      GoRoute(
+        name: 'demo',
+        path: '/demo',
+        builder: (context, state) => const DemoScreen(),
+      ),
     ],
     observers: [RouteChangeObserver(ref)],
     redirect: routerNotifier._redirectLogic,
