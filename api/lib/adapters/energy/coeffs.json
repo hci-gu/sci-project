@@ -8,6 +8,14 @@
       "acc": 0.000035
     }
   },
+  "sedentary": {
+    "constant": 0.004957,
+    "values": {
+      "hr": 0.00004,
+      "acc": 0.0000006813,
+      "age": -0.000047
+    }
+  },
   "zeroCoeff": {
     "constant": 0,
     "values": {}

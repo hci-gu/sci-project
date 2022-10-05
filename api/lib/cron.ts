@@ -17,7 +17,7 @@ const checkActivityAndSendMessage = async (user: User) => {
 
   const cacheKey = `${user.id}-activity-notification`
   const notification = await redis.get(cacheKey)
-  if (activity.minutesInactive >= 60 && !notification) {
+  if (activity.minutesInactive >= 55 && !notification) {
     const message: push.PushMessage = {
       title: 'Dags att rulla',
       body: `Du har varit inaktiv i ${activity.minutesInactive} minuter, dags att rulla lite.`,

@@ -17,7 +17,7 @@ const user = Joi.object({
     .valid(...Object.values(Condition))
     .optional(),
   injuryLevel: Joi.number().integer().min(1).max(10).optional(),
-  deviceId: Joi.string().optional(),
+  deviceId: Joi.string().allow(null, '').optional(),
   email: Joi.string().email().optional(),
   password: Joi.string().optional(),
 })

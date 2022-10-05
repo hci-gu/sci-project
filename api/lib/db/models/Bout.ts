@@ -1,7 +1,7 @@
 import moment from 'moment'
 import { DataTypes, Op, Sequelize, ModelStatic } from 'sequelize'
 import { activityForAccAndCondition } from '../../adapters/energy'
-import { Activity } from '../../constants'
+import { Activity, MINUTES_FOR_SLEEP } from '../../constants'
 import { AccelCount, Bout, User } from '../classes'
 
 let sequelizeInstance: Sequelize
@@ -20,6 +20,10 @@ const Model = {
         t: DataTypes.DATE,
         minutes: DataTypes.INTEGER,
         activity: DataTypes.ENUM(...Object.values(Activity)),
+        isSleeping: {
+          type: DataTypes.BOOLEAN,
+          defaultValue: false,
+        },
       },
       {
         timestamps: false,
@@ -47,6 +51,7 @@ const Model = {
       minutes: data.minutes,
       activity: data.activity,
       UserId: userId,
+      isSleeping: false,
     }),
   find: ({
     userId,
@@ -60,6 +65,7 @@ const Model = {
     BoutModel.findAll({
       where: {
         UserId: userId,
+        isSleeping: false,
         t: {
           [Op.between]: [from, to],
         },
@@ -80,6 +86,7 @@ const Model = {
     BoutModel.findAll({
       where: {
         UserId: userId,
+        isSleeping: false,
         t: {
           [Op.between]: [from, to],
         },
@@ -116,11 +123,24 @@ export const createBoutFromCounts = async (
   user: User,
   counts: AccelCount[]
 ) => {
+  const activities = counts.map((count) =>
+    activityForAccAndCondition(count.a, user.condition)
+  )
+
+  // get majority activity from activities
+  const activity = activities
+    .sort(
+      (a, b) =>
+        activities.filter((v) => v === a).length -
+        activities.filter((v) => v === b).length
+    )
+    .pop()
+
   // get average acc for counts
-  const avgAcc = counts.reduce((acc, c) => acc + c.a, 0) / counts.length
+  //const avgAcc = counts.reduce((acc, c) => acc + c.a, 0) / counts.length
 
   // get the activity level from average acc
-  const activity = activityForAccAndCondition(avgAcc, user.condition)
+  // const activity = activityForAccAndCondition(avgAcc, user.condition)
 
   // lookup last bout
   const lastBout = await BoutModel.findOne({
@@ -131,19 +151,29 @@ export const createBoutFromCounts = async (
     order: [['t', 'DESC']],
   })
 
-  // if it doesn't exist or is more than 5 minutes ago, create a new one
-  const fiveMinAgo = moment().subtract(5, 'minutes')
-  const doesntExistOrIsOld =
-    !lastBout ||
-    moment(lastBout.t).add(lastBout.minutes, 'minutes').isBefore(fiveMinAgo)
-
-  // if activity is different from current bout or there is no bout, create a new bout
-  if (doesntExistOrIsOld || lastBout.activity !== activity) {
+  // if it doesn't exist
+  if (!lastBout) {
     const bout = await Model.save(
       {
         t: counts[counts.length - 1].t,
         minutes: 1,
-        activity,
+        activity: activity ?? Activity.sedentary,
+      },
+      user.id
+    )
+    return bout
+  }
+
+  const fiveMinAgo = moment().subtract(5, 'minutes')
+  const boutEnd = moment(lastBout.t).add(lastBout.minutes, 'minutes')
+
+  // if activity is different from current bout, create a new bout
+  if (boutEnd.isBefore(fiveMinAgo) || lastBout.activity !== activity) {
+    const bout = await Model.save(
+      {
+        t: counts[counts.length - 1].t,
+        minutes: 1,
+        activity: activity ?? Activity.sedentary,
       },
       user.id
     )
@@ -152,6 +182,15 @@ export const createBoutFromCounts = async (
 
   // if activity is same as current bout, update number of minutes to it
   lastBout.minutes += 1
+
+  const middleOfTheNight = moment().set('hour', 4)
+  if (
+    lastBout.minutes > MINUTES_FOR_SLEEP &&
+    middleOfTheNight.isBetween(lastBout.t, boutEnd)
+  ) {
+    lastBout.isSleeping = true
+  }
+
   await lastBout.save()
   return lastBout
 }
