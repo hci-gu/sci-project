@@ -47,7 +47,7 @@ class IntroductionScreen extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
-            'För att komma igång öppna länken nedan för att installera klockappen på din Fitbit.',
+            'Välkommen till appen RullaPå!\nVälj ett alternativ nedan för att komma igång.',
             textAlign: TextAlign.center,
             style: AppTheme.paragraphMedium,
           ),
@@ -60,18 +60,16 @@ class IntroductionScreen extends StatelessWidget {
     return Column(
       children: [
         Button(
-          title: 'Starta Fitbit',
+          title: 'Logga in',
           width: 180,
-          onPressed: () async {
-            await _launchFitbitGallery();
-          },
+          onPressed: () => context.goNamed('login'),
         ),
         const SizedBox(height: 16.0),
         Button(
-          title: 'Logga in',
+          title: 'Registrera',
           width: 180,
           secondary: true,
-          onPressed: () => context.goNamed('login'),
+          onPressed: () => context.goNamed('register'),
         ),
       ],
     );

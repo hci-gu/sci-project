@@ -7,6 +7,7 @@ class FormDropdown extends StatelessWidget {
   final String title;
   final FormGroup form;
   final List<DropdownMenuItem> items;
+  final String hint;
   final bool readOnly;
 
   const FormDropdown({
@@ -14,6 +15,7 @@ class FormDropdown extends StatelessWidget {
     required this.formKey,
     required this.title,
     required this.form,
+    this.hint = 'Välj typ',
     this.readOnly = false,
     this.items = const [],
   }) : super(key: key);
@@ -22,7 +24,7 @@ class FormDropdown extends StatelessWidget {
   Widget build(BuildContext context) {
     return ReactiveDropdownField<dynamic>(
       formControlName: formKey,
-      hint: const Text('Välj typ'),
+      hint: Text(hint),
       icon: const Icon(Icons.keyboard_arrow_down),
       iconSize: 24,
       isDense: false,

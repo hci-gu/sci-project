@@ -41,6 +41,8 @@ class SettingsScreen extends ConsumerWidget {
         const LogoutButton(),
         AppTheme.spacer2x,
         const OnboardingButton(),
+        AppTheme.spacer2x,
+        const DeleteAccountButton(),
         AppTheme.separator,
         Column(
           children: [
@@ -90,6 +92,24 @@ class OnboardingButton extends ConsumerWidget {
         ref.read(onboardingStepProvider.notifier).state = 0;
         await Future.delayed(const Duration(milliseconds: 100));
         context.goNamed('onboarding');
+      },
+    );
+  }
+}
+
+class DeleteAccountButton extends ConsumerWidget {
+  const DeleteAccountButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Button(
+      title: 'Radera konto',
+      width: 220,
+      secondary: true,
+      color: AppTheme.colors.error,
+      icon: Icons.delete_forever_outlined,
+      onPressed: () async {
+        ref.read(userProvider.notifier).deleteAccount();
       },
     );
   }

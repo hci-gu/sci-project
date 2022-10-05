@@ -34,7 +34,7 @@ class UserSettings extends HookWidget {
             validators: [],
           ),
           'injuryLevel': FormControl<int>(
-            value: user.injuryLevel ?? 0,
+            value: user.injuryLevel,
             validators: [
               Validators.number,
             ],
@@ -53,14 +53,6 @@ class UserSettings extends HookWidget {
   @override
   Widget build(BuildContext context) {
     ValueNotifier<bool> editing = useState(false);
-
-    // useEffect(() {
-    //   if (!editing.value) {
-    //     buildForm().reset();
-    //   }
-    //   return () => {};
-    // }, [editing.value]);
-
     return ReactiveFormBuilder(
       form: buildForm,
       builder: (context, form, _) {
@@ -162,6 +154,7 @@ class ConditionDropDown extends StatelessWidget {
                   form: form,
                   formKey: 'condition',
                   title: 'Tillstånd',
+                  hint: 'Välj tillstånd',
                   items: Condition.values
                       .map((condition) => DropdownMenuItem(
                             value: condition,
@@ -179,6 +172,7 @@ class ConditionDropDown extends StatelessWidget {
                     form: form,
                     formKey: 'injuryLevel',
                     title: 'Skadenivå',
+                    hint: 'Välj skadenivå',
                     items: [5, 6, 7, 8, 9]
                         .map((value) => DropdownMenuItem(
                               value: value,
