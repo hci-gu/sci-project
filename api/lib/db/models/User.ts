@@ -72,7 +72,7 @@ export default {
     injuryLevel?: number
   }) => {
     return UserModel.create({
-      email,
+      email: email?.toLowerCase(),
       password,
       weight,
       condition,
@@ -88,7 +88,9 @@ export default {
   get: (id: string) => UserModel.findOne({ where: { id } }),
   getAll: () => UserModel.findAll(),
   login: async (email: string, password: string) => {
-    const user = await UserModel.findOne({ where: { email } })
+    const user = await UserModel.findOne({
+      where: { email: email.toLowerCase() },
+    })
     if (!user) {
       throw new NotFoundError('User not found')
     }
@@ -99,4 +101,5 @@ export default {
     }
     return user
   },
+  delete: (id: string) => UserModel.destroy({ where: { id } }),
 }

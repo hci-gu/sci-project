@@ -37,14 +37,6 @@ router.post('/', userBody, async (req, res) => {
   }
 })
 
-router.get('/register', async (req, res) => {
-  const { redirect_uri, state } = req.query
-
-  const user = await UserModel.save(req.body)
-
-  res.redirect(`${redirect_uri}?state=${state}&userId=${user.id}`)
-})
-
 router.get('/:id', async (req, res) => {
   const { id } = req.params
 
@@ -75,11 +67,17 @@ router.patch(
 
       let property: keyof typeof req.body
       for (property in req.body) {
+        const value = req.body[property]
+        if (value == null) continue
         if (property === 'password') {
-          const pw = await hashPassword(req.body[property])
+          const pw = await hashPassword(value as string)
           user.set(property, pw)
+        } else if (property == 'injuryLevel') {
+          if (value > 0) {
+            user.set(property, value as number)
+          }
         } else {
-          user.set(property, req.body[property])
+          user.set(property, value)
         }
       }
 
@@ -108,21 +106,34 @@ router.post('/:id/data', async (req, res) => {
   res.sendStatus(200)
 })
 
-router.post('/login', async (req, res) => {
-  const { email, password } = req.body
+router.post(
+  '/login',
+  userBody,
+  async (req: ValidatedRequest<UserBodySchema>, res) => {
+    const { email, password } = req.body
 
+    try {
+      const user = await UserModel.login(email, password)
+      return res.send(stripSensitive(user))
+    } catch (e) {
+      console.log(e)
+      if (e instanceof NotFoundError) {
+        return res.sendStatus(404)
+      }
+      if (e instanceof ForbiddenError) {
+        return res.sendStatus(403)
+      }
+      return res.sendStatus(500)
+    }
+  }
+)
+
+router.delete('/:id', async (req, res) => {
   try {
-    const user = await UserModel.login(email, password)
-    return res.send(stripSensitive(user))
+    await UserModel.delete(req.params.id)
+    res.sendStatus(200)
   } catch (e) {
-    console.log(e)
-    if (e instanceof NotFoundError) {
-      return res.sendStatus(404)
-    }
-    if (e instanceof ForbiddenError) {
-      return res.sendStatus(403)
-    }
-    return res.sendStatus(500)
+    res.sendStatus(500)
   }
 })
 
