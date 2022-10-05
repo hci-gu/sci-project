@@ -26,8 +26,15 @@ const stripSensitive = (user: User) => {
 }
 
 router.post('/', userBody, async (req, res) => {
-  const result = await UserModel.save(req.body)
-  res.send(stripSensitive(result))
+  try {
+    const result = await UserModel.save(req.body)
+    res.send(stripSensitive(result))
+  } catch (e) {
+    if (e instanceof ForbiddenError) {
+      return res.sendStatus(403)
+    }
+    res.sendStatus(500)
+  }
 })
 
 router.get('/register', async (req, res) => {
