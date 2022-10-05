@@ -24,10 +24,8 @@ export interface GetQuerySchema extends ValidatedRequestSchema {
 
 export const getQuery = validator.query(
   Joi.object({
-    from: Joi.date()
-      .optional()
-      .default(moment().subtract(1, 'day').endOf('day').toDate()),
-    to: Joi.date().optional().default(new Date()),
+    from: Joi.date().optional().default(moment().startOf('day').toDate()),
+    to: Joi.date().optional().default(moment().endOf('day').toDate()),
     group: Joi.string()
       .valid('hour', 'day', 'week', 'month', 'year')
       .optional(),

@@ -22,3 +22,4 @@ export enum Condition {
 export const SEDENTARY_THRESHOLD = 2700
 export const MOVING_THRESHOLD_PARA = 9515
 export const MOVING_THRESHOLD_TETRA = 4887
+export const MINUTES_FOR_SLEEP = 240
