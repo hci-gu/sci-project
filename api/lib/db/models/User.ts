@@ -29,7 +29,10 @@ export default {
         injuryLevel: DataTypes.INTEGER,
         deviceId: DataTypes.STRING,
         createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
-        email: DataTypes.STRING,
+        email: {
+          type: DataTypes.STRING,
+          unique: true,
+        },
         password: DataTypes.STRING,
       },
       {
@@ -54,22 +57,34 @@ export default {
     })
   },
   save: ({
+    email,
+    password,
     weight,
     condition,
     gender,
     injuryLevel,
   }: {
+    email: string
+    password: string
     weight: number
     condition?: Condition
     gender?: Gender
     injuryLevel?: number
-  }) =>
-    UserModel.create({
+  }) => {
+    return UserModel.create({
+      email,
+      password,
       weight,
       condition,
       gender,
       injuryLevel,
-    }),
+    }).catch((e) => {
+      if (e.name === 'SequelizeUniqueConstraintError') {
+        throw new ForbiddenError('Email already exists')
+      }
+      throw e
+    })
+  },
   get: (id: string) => UserModel.findOne({ where: { id } }),
   getAll: () => UserModel.findAll(),
   login: async (email: string, password: string) => {
