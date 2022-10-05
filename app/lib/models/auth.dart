@@ -39,6 +39,25 @@ class UserState extends StateNotifier<User?> {
     }
   }
 
+  Future<void> register(String email, String password,
+      [Map<dynamic, dynamic> values = emptyBody]) async {
+    try {
+      state = await Api().register(email, password, values);
+      if (state != null) {
+        await Storage.storeCredentails(Credentials(email, password));
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> deleteAccount() async {
+    try {
+      await Api().deleteAccount();
+      logout();
+    } catch (e) {}
+  }
+
   Future<void> logout() async {
     state = null;
     await Storage.clearCredentials();

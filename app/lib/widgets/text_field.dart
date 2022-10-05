@@ -56,6 +56,7 @@ class StyledTextField extends StatelessWidget {
             ValidationMessage.required: 'Fältet är obligatoriskt',
             ValidationMessage.email: 'Måste vara en giltig e-postadress',
             ValidationMessage.minLength: 'Måste vara minst 8 tecken',
+            ValidationMessage.mustMatch: 'Lösenorden måste matcha',
           },
         ),
       ),

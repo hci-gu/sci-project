@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api.dart';
-import 'package:scimovement/screens/home/home.dart';
+import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/screens/home/widgets/energy_widget.dart';
 import 'package:scimovement/screens/home/widgets/sedentary_widget.dart';
+import 'package:scimovement/screens/main.dart';
 import 'package:scimovement/widgets/activity_wheel/activity_wheel.dart';
 import 'package:scimovement/widgets/stat_widget.dart';
 
@@ -15,6 +15,7 @@ class DemoScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return ProviderScope(
       overrides: [
+        userProvider.overrideWithValue(UserState()),
         energyWidgetProvider.overrideWithValue(
           const AsyncValue.data(WidgetValues(400, 380)),
         ),
@@ -34,7 +35,7 @@ class DemoScreen extends ConsumerWidget {
         ])),
       ],
       child: Scaffold(
-        body: HomeScreen(),
+        body: MainScreen(),
       ),
     );
   }

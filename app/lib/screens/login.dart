@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import 'package:scimovement/models/auth.dart';
@@ -7,7 +6,6 @@ import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/snackbar_message.dart';
 import 'package:scimovement/widgets/text_field.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class LoginScreen extends ConsumerWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -107,17 +105,5 @@ class LoginScreen extends ConsumerWidget {
             },
           )),
     );
-  }
-
-  Future<void> _launchFitbitGallery() async {
-    if (!await launchUrl(
-      Uri.https(
-        'gallery.fitbit.com',
-        'details/1c0a1dfd-e31d-4ed7-bb74-b653337a9e8d/openapp',
-      ),
-      mode: LaunchMode.externalApplication,
-    )) {
-      throw 'Could not launch';
-    }
   }
 }

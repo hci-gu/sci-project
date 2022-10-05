@@ -13,6 +13,7 @@ import 'package:scimovement/screens/introduction.dart';
 import 'package:scimovement/screens/login.dart';
 import 'package:scimovement/screens/main.dart';
 import 'package:scimovement/screens/onboarding/onboarding.dart';
+import 'package:scimovement/screens/register.dart';
 
 List<String> detailRoutes = ['calories', 'activity', 'sedentary'];
 
@@ -84,7 +85,9 @@ class RouterNotifier extends ChangeNotifier {
   }
 
   bool _isLoginRoute(String route) {
-    return route == '/introduction' || route == '/introduction/login';
+    return route == '/introduction' ||
+        route == '/introduction/login' ||
+        route == '/introduction/register';
   }
 }
 
@@ -115,6 +118,11 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
             name: 'login',
             path: 'login',
             builder: (_, state) => const LoginScreen(),
+          ),
+          GoRoute(
+            name: 'register',
+            path: 'register',
+            builder: (_, state) => const RegisterScreen(),
           ),
         ],
       ),

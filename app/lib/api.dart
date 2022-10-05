@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:scimovement/models/config.dart';
 import 'package:timezone/standalone.dart' as tz;
@@ -8,6 +7,8 @@ const String apiUrl = 'https://sci-api.prod.appadem.in';
 // const String apiUrl = 'http://localhost:4000';
 
 enum Gender { male, female }
+
+const emptyBody = {};
 
 Gender genderFromString(String gender) {
   if (gender == 'female') {
@@ -184,6 +185,22 @@ class Api {
     return user;
   }
 
+  Future<User?> register(String email, String password,
+      [Map<dynamic, dynamic> values = emptyBody]) async {
+    Map<dynamic, dynamic> body = {
+      'email': email,
+      'password': password,
+      ...values,
+    };
+    var response = await dio.post('/users', data: body);
+    User user = User.fromJson(response.data);
+    _userId = user.id;
+
+    return user;
+  }
+
+  Future deleteAccount() => dio.delete('/users/$_userId');
+
   Future<User?> getUser(String id) async {
     var response = await dio.get('/users/$id');
 
@@ -253,6 +270,7 @@ class Api {
   }
 
   Future<User?> updateUser(Map<String, dynamic> userdata) async {
+    userdata.removeWhere((key, value) => value == null);
     try {
       await dio.patch(
         '/users/$_userId',
