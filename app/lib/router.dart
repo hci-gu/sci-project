@@ -52,7 +52,7 @@ class RouterNotifier extends ChangeNotifier {
 
   String? _redirectLogic(GoRouterState state) {
     bool loggedIn = _ref.read(userProvider) != null;
-    if (state.subloc == '/demo') {
+    if (state.subloc.contains('/demo')) {
       return null;
     }
 
@@ -156,7 +156,32 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
       GoRoute(
         name: 'demo',
         path: '/demo',
-        builder: (context, state) => const DemoScreen(),
+        builder: (context, state) => const DemoWrapper(
+          child: MainScreen(),
+        ),
+        routes: [
+          GoRoute(
+            name: 'demo-calories',
+            path: 'calories',
+            builder: (_, __) => const DemoWrapper(
+              child: CaloriesScreen(),
+            ),
+          ),
+          GoRoute(
+            name: 'demo-activity',
+            path: 'activity',
+            builder: (_, __) => const DemoWrapper(
+              child: ActivityScreen(),
+            ),
+          ),
+          GoRoute(
+            name: 'demo-sedentary',
+            path: 'sedentary',
+            builder: (_, __) => const DemoWrapper(
+              child: SedentaryScreen(),
+            ),
+          ),
+        ],
       ),
     ],
     observers: [RouteChangeObserver(ref)],

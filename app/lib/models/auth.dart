@@ -97,6 +97,12 @@ class UserState extends StateNotifier<User?> {
       'deviceId': '',
     });
   }
+
+  factory UserState.fromMockUser(User user) {
+    UserState userState = UserState();
+    userState.state = user;
+    return userState;
+  }
 }
 
 final userProvider =
