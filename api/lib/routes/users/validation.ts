@@ -9,17 +9,19 @@ import { Condition, Gender } from '../../constants'
 const validator = createValidator({})
 
 const user = Joi.object({
-  weight: Joi.number().integer().min(1).max(1000).optional(),
+  weight: Joi.number().integer().min(1).max(1000).optional().allow(null),
   gender: Joi.string()
     .valid(...Object.values(Gender))
-    .optional(),
+    .optional()
+    .allow(null),
   condition: Joi.string()
     .valid(...Object.values(Condition))
-    .optional(),
-  injuryLevel: Joi.number().integer().min(1).max(10).optional(),
-  deviceId: Joi.string().allow(null, '').optional(),
-  email: Joi.string().email().optional(),
-  password: Joi.string().optional(),
+    .optional()
+    .allow(null),
+  injuryLevel: Joi.number().integer().optional().allow(null),
+  deviceId: Joi.string().allow(null, '').optional().allow(null),
+  email: Joi.string().email().optional().allow(null),
+  password: Joi.string().optional().allow(null),
 })
 
 export interface UserBodySchema extends ValidatedRequestSchema {

@@ -34,6 +34,5 @@ export const boutsForPeriod = async ({
     from,
     to,
   })
-  console.log('bouts', bouts)
   return bouts
 }
