@@ -4,9 +4,9 @@ const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 const RESOURCES = {
   "favicon.png": "5dcef449791fa27946b3d35ad8803796",
-"main.dart.js": "7920e27dc8b804d86079d6885e70f5f6",
-"index.html": "3ed74b502bd7ae89d2c5fecbede4e380",
-"/": "3ed74b502bd7ae89d2c5fecbede4e380",
+"main.dart.js": "e289a44ae6d522361357ce8f7b483348",
+"index.html": "a5d2108fca92481e7a59b82a01198b0e",
+"/": "a5d2108fca92481e7a59b82a01198b0e",
 "flutter.js": "f85e6fb278b0fd20c349186fb46ae36d",
 "manifest.json": "60cf0e8a29d91fc890f252903819f5ae",
 "canvaskit/canvaskit.js": "2bc454a691c631b07a9307ac4ca47797",
@@ -30,7 +30,7 @@ const RESOURCES = {
 "assets/assets/fonts/Manrope-ExtraLight.ttf": "fc80ad19afcbea34e8dbdedb9e60bd45",
 "assets/fonts/MaterialIcons-Regular.otf": "95db9098c58fd6db106f1116bae85a0b",
 "assets/NOTICES": "243e4533bb98fc000227e4e7ee9d23f0",
-"version.json": "f9d9edd27f736b322f03428f0511d06b",
+"version.json": "f5561657ec02d8bfddee7f7eb8510a71",
 "icons/Icon-512.png": "96e752610906ba2a93c65f8abe1645f1",
 "icons/Icon-192.png": "ac9a721a12bbc803b44f645561ecb1e1",
 "icons/Icon-maskable-192.png": "c457ef57daa1d16f64b27b786ec2ea3c",
