@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api.dart';
 import 'package:scimovement/models/auth.dart';
@@ -8,6 +9,8 @@ import 'package:scimovement/screens/settings/widgets/user_settings.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
 import 'package:go_router/go_router.dart';
+import 'package:scimovement/widgets/confirm_dialog.dart';
+import 'package:scimovement/widgets/snackbar_message.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -44,17 +47,26 @@ class SettingsScreen extends ConsumerWidget {
         AppTheme.spacer2x,
         const DeleteAccountButton(),
         AppTheme.separator,
-        Column(
-          children: [
-            Text(
-              'AnvändarID:',
-              style: AppTheme.labelMedium,
-            ),
-            Text(
-              user.id,
-              style: AppTheme.paragraphSmall,
-            ),
-          ],
+        GestureDetector(
+          onTap: () async {
+            await Clipboard.setData(ClipboardData(text: user.id));
+            ScaffoldMessenger.of(context).showSnackBar(SnackbarMessage(
+              context: context,
+              message: 'Användar-ID kopierat till urklipp',
+            ));
+          },
+          child: Column(
+            children: [
+              Text(
+                'AnvändarID:',
+                style: AppTheme.labelMedium,
+              ),
+              Text(
+                user.id,
+                style: AppTheme.paragraphSmall,
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -109,7 +121,15 @@ class DeleteAccountButton extends ConsumerWidget {
       color: AppTheme.colors.error,
       icon: Icons.delete_forever_outlined,
       onPressed: () async {
-        ref.read(userProvider.notifier).deleteAccount();
+        bool? confirmed = await confirmDialog(
+          context,
+          title: 'Radera konto',
+          message:
+              'Är du säker att du vill radera ditt konto? Du kan inte ångra dig och din data försvinner efter du har raderat ditt konto.',
+        );
+        if (confirmed == true) {
+          ref.read(userProvider.notifier).deleteAccount();
+        }
       },
     );
   }
