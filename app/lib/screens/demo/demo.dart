@@ -12,11 +12,9 @@ import 'package:scimovement/screens/home/widgets/energy_widget.dart';
 import 'package:scimovement/screens/home/widgets/sedentary_widget.dart';
 import 'package:scimovement/widgets/activity_wheel/activity_wheel.dart';
 import 'package:scimovement/widgets/charts/energy_line_chart.dart';
-import 'package:scimovement/widgets/stat_widget.dart';
 
-final _random = new Random();
-
-double randVal() => _random.nextDouble() * 3;
+final _random = Random();
+double randVal() => _random.nextDouble() * 2.5;
 List<Energy> mockEnergyFrom(DateTime time, int count, Activity activity) {
   return List.generate(
     count,
@@ -37,51 +35,43 @@ List<Energy> mockEnergyFromBouts(List<Bout> bouts) {
   return energy;
 }
 
+int durationForActivity(Activity activity) {
+  if (activity == Activity.sedentary) {
+    return 10 + _random.nextInt(240);
+  }
+  return 10 + _random.nextInt(60);
+}
+
+Map<int, List<Bout>> boutCache = {};
 List<Bout> mockBoutsForPagination(Pagination pagination) {
   DateTime day = pagination.from(DateTime.now());
-
-  return [
-    Bout(
-      activity: Activity.moving,
-      time: day.add(const Duration(hours: 6, minutes: 30)),
-      minutes: 15,
-    ),
-    Bout(
-      activity: Activity.sedentary,
-      time: day.add(const Duration(hours: 6, minutes: 45)),
-      minutes: 20,
-    ),
-    Bout(
-      activity: Activity.moving,
-      time: day.add(const Duration(hours: 7, minutes: 5)),
-      minutes: 45,
-    ),
-    Bout(
-      activity: Activity.sedentary,
-      time: day.add(const Duration(hours: 7, minutes: 50)),
-      minutes: 120,
-    ),
-    Bout(
-      activity: Activity.moving,
-      time: day.add(const Duration(hours: 9, minutes: 50)),
-      minutes: 10,
-    ),
-    Bout(
-      activity: Activity.sedentary,
-      time: day.add(const Duration(hours: 10, minutes: 0)),
-      minutes: 120,
-    ),
-    Bout(
-      activity: Activity.active,
-      time: day.add(const Duration(hours: 12, minutes: 0)),
-      minutes: 60,
-    ),
-    Bout(
-      activity: Activity.sedentary,
-      time: day.add(const Duration(hours: 13, minutes: 0)),
-      minutes: 60 * 4,
-    ),
+  List<Activity> activities = [
+    Activity.moving,
+    Activity.sedentary,
+    Activity.moving,
+    Activity.sedentary,
+    Activity.moving,
+    Activity.sedentary,
+    _random.nextBool() ? Activity.active : Activity.moving,
+    Activity.sedentary,
+    Activity.moving,
+    Activity.sedentary,
   ];
+  List<Bout> bouts = [];
+  int start = 60 * 6 + 30;
+  for (Activity activity in activities) {
+    int minutes = durationForActivity(activity);
+
+    bouts.add(Bout(
+      time: day.add(Duration(minutes: start)),
+      minutes: minutes,
+      activity: activity,
+    ));
+    start += minutes;
+  }
+  // boutCache[pagination.page] = bouts;
+
+  return bouts;
 }
 
 class DemoWrapper extends ConsumerWidget {
