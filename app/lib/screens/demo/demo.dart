@@ -44,30 +44,32 @@ int durationForActivity(Activity activity) {
 
 Map<int, List<Bout>> boutCache = {};
 List<Bout> mockBoutsForPagination(Pagination pagination) {
-  DateTime day = pagination.from(DateTime.now());
-  List<Activity> activities = [
-    Activity.moving,
-    Activity.sedentary,
-    Activity.moving,
-    Activity.sedentary,
-    Activity.moving,
-    Activity.sedentary,
-    _random.nextBool() ? Activity.active : Activity.moving,
-    Activity.sedentary,
-    Activity.moving,
-    Activity.sedentary,
-  ];
   List<Bout> bouts = [];
-  int start = 60 * 6 + 30;
-  for (Activity activity in activities) {
-    int minutes = durationForActivity(activity);
+  if (pagination.mode == ChartMode.day) {
+    DateTime day = pagination.from(DateTime.now());
+    List<Activity> activities = [
+      Activity.moving,
+      Activity.sedentary,
+      Activity.moving,
+      Activity.sedentary,
+      Activity.moving,
+      Activity.sedentary,
+      _random.nextBool() ? Activity.active : Activity.moving,
+      Activity.sedentary,
+      Activity.moving,
+      Activity.sedentary,
+    ];
+    int start = 60 * 6 + 30;
+    for (Activity activity in activities) {
+      int minutes = durationForActivity(activity);
 
-    bouts.add(Bout(
-      time: day.add(Duration(minutes: start)),
-      minutes: minutes,
-      activity: activity,
-    ));
-    start += minutes;
+      bouts.add(Bout(
+        time: day.add(Duration(minutes: start)),
+        minutes: minutes,
+        activity: activity,
+      ));
+      start += minutes;
+    }
   }
   // boutCache[pagination.page] = bouts;
 
