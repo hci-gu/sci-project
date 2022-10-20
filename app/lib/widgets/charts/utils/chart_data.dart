@@ -18,7 +18,7 @@ class ChartData {
   ChartData(this.data, this.mode);
 
   double get maxValue => data.map((e) => e.value).reduce(math.max);
-  double get maxY => mode == ChartMode.day ? 60 : maxValue + maxValue * 0.2;
+  double get maxY => mode == ChartMode.day ? 60 : maxValue * 1.25;
 
   DateTime get day => DateTime(
         data.first.time.year,
