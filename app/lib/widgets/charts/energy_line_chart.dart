@@ -152,7 +152,7 @@ class EnergyLineChart extends ConsumerWidget {
         minX: minX,
         maxX: maxX,
         minY: -0.1,
-        maxY: (maxValue + maxValue * 0.2).round().toDouble(),
+        maxY: (maxValue * 1.25).round().toDouble(),
         backgroundColor: Colors.transparent,
         lineBarsData: [
           LineChartBarData(
