@@ -14,7 +14,7 @@ import 'package:scimovement/widgets/activity_wheel/activity_wheel.dart';
 import 'package:scimovement/widgets/charts/energy_line_chart.dart';
 
 final _random = Random();
-double randVal() => _random.nextDouble() * 2.5;
+double randVal() => _random.nextDouble() * 2;
 List<Energy> mockEnergyFrom(DateTime time, int count, Activity activity) {
   return List.generate(
     count,
@@ -68,7 +68,7 @@ List<Bout> mockBoutsForPagination(Pagination pagination) {
         Activity.sedentary,
         Activity.moving,
         Activity.sedentary,
-        _random.nextBool() ? Activity.active : Activity.moving,
+        Activity.active,
         Activity.sedentary,
         Activity.moving,
         Activity.sedentary,
