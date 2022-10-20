@@ -20,7 +20,10 @@ class EnergyWidget extends ConsumerWidget {
     String asset = 'assets/svg/flame.svg';
 
     return GestureDetector(
-      onTap: () => context.go('${GoRouter.of(context).location}/calories'),
+      onTap: () {
+        String path = GoRouter.of(context).location;
+        context.go('$path${path.length > 1 ? '/' : ''}calories');
+      },
       child: ref.watch(energyWidgetProvider).when(
             data: (WidgetValues values) => StatWidget(
               values: values,
