@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api.dart';
 import 'package:scimovement/models/auth.dart';
-import 'package:scimovement/models/config.dart';
+import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/models/onboarding.dart';
 import 'package:scimovement/screens/demo/demo.dart';
 import 'package:scimovement/screens/detail/activity.dart';
@@ -107,22 +107,22 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
       GoRoute(
         name: 'loading',
         path: '/loading',
-        builder: (context, state) => const LoadingScreen(),
+        builder: (_, __) => const LoadingScreen(),
       ),
       GoRoute(
         name: 'introduction',
         path: '/introduction',
-        builder: (_, state) => const IntroductionScreen(),
+        builder: (_, __) => const IntroductionScreen(),
         routes: [
           GoRoute(
             name: 'login',
             path: 'login',
-            builder: (_, state) => const LoginScreen(),
+            builder: (_, __) => const LoginScreen(),
           ),
           GoRoute(
             name: 'register',
             path: 'register',
-            builder: (_, state) => const RegisterScreen(),
+            builder: (_, __) => const RegisterScreen(),
           ),
         ],
       ),

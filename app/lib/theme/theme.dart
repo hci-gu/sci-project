@@ -111,9 +111,13 @@ class AppTheme {
   static Widget spacer = SizedBox(width: basePadding, height: basePadding);
   static Widget spacer2x =
       SizedBox(width: basePadding * 2, height: basePadding * 2);
+  static Widget spacer4x =
+      SizedBox(width: basePadding * 4, height: basePadding * 4);
 
   static EdgeInsetsGeometry screenPadding = EdgeInsets.symmetric(
-      horizontal: basePadding * 3, vertical: basePadding * 2);
+    horizontal: basePadding * 2,
+    vertical: basePadding * 3,
+  );
   static EdgeInsetsGeometry elementPadding = EdgeInsets.symmetric(
     horizontal: basePadding * 2,
     vertical: basePadding * 1.5,
@@ -182,10 +186,18 @@ class AppTheme {
       );
 
   static BoxDecoration cardDecoration = BoxDecoration(
-    color: Colors.transparent,
+    color: colors.white,
     borderRadius: BorderRadius.circular(16),
     border: Border.all(
       color: colors.black.withOpacity(0.1),
     ),
+  );
+  static BoxDecoration widgetDecoration = BoxDecoration(
+    border: Border.all(
+      width: 1.0,
+      color: const Color.fromRGBO(0, 0, 0, 0.1),
+    ),
+    color: AppTheme.colors.white,
+    borderRadius: BorderRadius.circular(32),
   );
 }

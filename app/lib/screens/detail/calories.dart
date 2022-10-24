@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/models/chart.dart';
 import 'package:scimovement/models/energy.dart';
-import 'package:scimovement/models/config.dart';
+import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/screens/detail/screen.dart';
 import 'package:scimovement/widgets/charts/bar_chart.dart';
 import 'package:scimovement/widgets/charts/chart_wrapper.dart';

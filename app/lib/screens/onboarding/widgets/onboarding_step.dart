@@ -17,7 +17,7 @@ class StepIndicator extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(
-        ONBOARDING_STEP_COUNT,
+        onboardingStepCount,
         (i) => Padding(
           padding: const EdgeInsets.only(left: 8),
           child: Container(
@@ -63,7 +63,7 @@ class OnboardingStepWidget extends ConsumerWidget {
               GestureDetector(
                 onTap: () {
                   ref.read(onboardingStepProvider.notifier).state =
-                      ONBOARDING_STEP_COUNT;
+                      onboardingStepCount;
                 },
                 child: Text(
                   'Hoppa över',
@@ -74,10 +74,10 @@ class OnboardingStepWidget extends ConsumerWidget {
               ),
               Button(
                 width: 100,
-                title: ref.watch(onboardingStepProvider) ==
-                        ONBOARDING_STEP_COUNT - 1
-                    ? 'Avsluta'
-                    : 'Nästa',
+                title:
+                    ref.watch(onboardingStepProvider) == onboardingStepCount - 1
+                        ? 'Avsluta'
+                        : 'Nästa',
                 onPressed: () =>
                     ref.read(onboardingStepProvider.notifier).state++,
               )
@@ -110,15 +110,9 @@ class OnboardingStepMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 280,
-      decoration: BoxDecoration(
-        color: AppTheme.colors.white,
-        borderRadius: BorderRadius.circular(24),
-      ),
-      padding: const EdgeInsets.symmetric(
-        horizontal: 16.0,
-        vertical: 16.0,
-      ),
+      width: MediaQuery.of(context).size.width - 64,
+      decoration: AppTheme.cardDecoration,
+      padding: AppTheme.elementPadding,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,

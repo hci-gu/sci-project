@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:scimovement/models/config.dart';
+import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/screens/home/widgets/energy_widget.dart';
 import 'package:scimovement/screens/home/widgets/sedentary_widget.dart';
 import 'package:scimovement/theme/theme.dart';
@@ -21,12 +21,12 @@ class HomeScreen extends HookConsumerWidget {
         _refreshController.refreshCompleted();
       },
       child: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+        padding: AppTheme.screenPadding,
         children: [
           const DateSelect(),
-          const SizedBox(height: 32),
+          AppTheme.spacer4x,
           const ActivityWheel(),
-          const SizedBox(height: 16),
+          AppTheme.spacer2x,
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
