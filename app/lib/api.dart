@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:scimovement/models/config.dart';
+import 'package:scimovement/models/pagination.dart';
 import 'package:timezone/standalone.dart' as tz;
 
 const String apiUrl = 'https://sci-api.prod.appadem.in';

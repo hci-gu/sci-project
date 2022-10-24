@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 import 'package:scimovement/api.dart';
-import 'package:scimovement/models/config.dart';
+import 'package:scimovement/models/pagination.dart';
 import 'package:collection/collection.dart';
 
 class ChartDataPoint {
