@@ -147,14 +147,7 @@ class StatWidget extends StatelessWidget {
     return FittedBox(
       fit: BoxFit.contain,
       child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(
-            width: 1.0,
-            color: const Color.fromRGBO(0, 0, 0, 0.1),
-          ),
-          color: AppTheme.colors.white,
-          borderRadius: BorderRadius.circular(32),
-        ),
+        decoration: AppTheme.widgetDecoration,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12.0),
           child: child,
@@ -177,14 +170,14 @@ class StatWidget extends StatelessWidget {
 
   static Widget error(String asset) => _emptyContainer([
         SvgPicture.asset(asset),
-        const SizedBox(height: 16),
+        AppTheme.spacer2x,
         const Text('error'),
       ]);
 
   static Widget loading(String asset) => _emptyContainer(
         [
           SvgPicture.asset(asset),
-          const SizedBox(height: 32),
+          AppTheme.spacer4x,
           const CircularProgressIndicator(),
         ],
       );

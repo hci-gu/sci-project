@@ -69,7 +69,7 @@ class OnboardingHomeScreen extends ConsumerWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 32),
+            AppTheme.spacer4x,
             Discovery(
               visible: ref.watch(onboardingStepProvider) == 1,
               child: const ActivityWheel(),
@@ -82,7 +82,7 @@ class OnboardingHomeScreen extends ConsumerWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            AppTheme.spacer2x,
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [

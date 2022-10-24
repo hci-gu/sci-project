@@ -100,15 +100,7 @@ class ActivityWheel extends ConsumerWidget {
 
   Widget _container(Widget child) {
     return Container(
-      height: 300,
-      decoration: BoxDecoration(
-        color: AppTheme.colors.white,
-        borderRadius: BorderRadius.circular(32),
-        border: Border.all(
-          color: const Color.fromRGBO(0, 0, 0, 0.1),
-          width: 1,
-        ),
-      ),
+      decoration: AppTheme.widgetDecoration,
       padding: const EdgeInsets.only(left: 8, right: 24, top: 24, bottom: 24),
       child: child,
     );

@@ -164,7 +164,7 @@ class ConditionDropDown extends StatelessWidget {
                 ),
               ),
               if (form.value['condition'] == Condition.tetraplegic)
-                const SizedBox(width: 16),
+                AppTheme.spacer2x,
               if (form.value['condition'] == Condition.tetraplegic)
                 Flexible(
                   child: FormDropdown(

@@ -12,17 +12,19 @@ void main() async {
   tz.initializeTimeZones();
   bool onboardingDone = await Storage.getOnboardingDone();
   Credentials? credentials = await Storage.getCredentials();
-  runApp(ProviderScope(
-    overrides: [
-      userProvider.overrideWithValue(
-        credentials != null ? UserState(credentials) : UserState(),
+  runApp(
+    ProviderScope(
+      overrides: [
+        userProvider.overrideWithValue(
+          credentials != null ? UserState(credentials) : UserState(),
+        ),
+      ],
+      child: App(
+        onboardingDone: onboardingDone,
+        loggedIn: credentials != null && credentials.email.isNotEmpty,
       ),
-    ],
-    child: App(
-      onboardingDone: onboardingDone,
-      loggedIn: credentials != null && credentials.email.isNotEmpty,
     ),
-  ));
+  );
 }
 
 class App extends ConsumerWidget {
@@ -37,10 +39,14 @@ class App extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final router = ref.watch(routerProvider(RouterProps(
-      onboardingDone: onboardingDone,
-      loggedIn: loggedIn,
-    )));
+    final router = ref.watch(
+      routerProvider(
+        RouterProps(
+          onboardingDone: onboardingDone,
+          loggedIn: loggedIn,
+        ),
+      ),
+    );
 
     return MaterialApp.router(
       title: 'RullaPå',

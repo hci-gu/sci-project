@@ -32,9 +32,9 @@ class LoginScreen extends ConsumerWidget {
         padding: AppTheme.screenPadding,
         child: ListView(
           children: [
-            const SizedBox(height: 100),
+            const SizedBox(height: 64),
             _header(),
-            const SizedBox(height: 16.0),
+            AppTheme.spacer2x,
             _form(ref),
           ],
         ),
@@ -73,8 +73,9 @@ class LoginScreen extends ConsumerWidget {
         Text('RullaPå', style: AppTheme.headLine1.copyWith(height: 0.5)),
         Text(
           'spåra din rörelse',
-          style:
-              AppTheme.headLine3Light.copyWith(color: AppTheme.colors.primary),
+          style: AppTheme.headLine3Light.copyWith(
+            color: AppTheme.colors.primary,
+          ),
         ),
       ],
     );

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:go_router/go_router.dart';
 
 class IntroductionScreen extends StatelessWidget {
@@ -15,7 +14,7 @@ class IntroductionScreen extends StatelessWidget {
         child: ListView(
           padding: AppTheme.screenPadding,
           children: [
-            const SizedBox(height: 60),
+            const SizedBox(height: 64),
             Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -41,11 +40,11 @@ class IntroductionScreen extends StatelessWidget {
           style:
               AppTheme.headLine3Light.copyWith(color: AppTheme.colors.primary),
         ),
-        const SizedBox(height: 32),
+        AppTheme.spacer4x,
         SvgPicture.asset('assets/svg/person.svg', width: 80),
-        const SizedBox(height: 16),
+        AppTheme.spacer2x,
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: AppTheme.elementPadding,
           child: Text(
             'Välkommen till appen RullaPå!\nVälj ett alternativ nedan för att komma igång.',
             textAlign: TextAlign.center,
@@ -64,7 +63,7 @@ class IntroductionScreen extends StatelessWidget {
           width: 180,
           onPressed: () => context.goNamed('login'),
         ),
-        const SizedBox(height: 16.0),
+        AppTheme.spacer2x,
         Button(
           title: 'Registrera',
           width: 180,
@@ -73,17 +72,5 @@ class IntroductionScreen extends StatelessWidget {
         ),
       ],
     );
-  }
-
-  Future<void> _launchFitbitGallery() async {
-    if (!await launchUrl(
-      Uri.https(
-        'gallery.fitbit.com',
-        'details/1c0a1dfd-e31d-4ed7-bb74-b653337a9e8d/openapp',
-      ),
-      mode: LaunchMode.externalApplication,
-    )) {
-      throw 'Could not launch';
-    }
   }
 }
