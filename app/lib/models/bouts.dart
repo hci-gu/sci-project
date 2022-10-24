@@ -1,6 +1,6 @@
 import 'package:scimovement/api.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:scimovement/models/config.dart';
+import 'package:scimovement/models/pagination.dart';
 
 final boutsProvider =
     FutureProvider.family<List<Bout>, Pagination>((ref, pagination) async {

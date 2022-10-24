@@ -3,7 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api.dart';
 import 'package:scimovement/models/bouts.dart';
 import 'package:scimovement/models/chart.dart';
-import 'package:scimovement/models/config.dart';
+import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/screens/detail/screen.dart';
 import 'package:scimovement/widgets/activity_arc/activity_arc.dart';
 import 'package:scimovement/widgets/charts/bar_chart.dart';

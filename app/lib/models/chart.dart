@@ -1,7 +1,7 @@
 import 'package:scimovement/api.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/models/bouts.dart';
-import 'package:scimovement/models/config.dart';
+import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/models/energy.dart';
 import 'package:scimovement/widgets/charts/utils/chart_data.dart';
 
