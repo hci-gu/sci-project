@@ -33,6 +33,10 @@ class MainScreen extends HookWidget {
               label: 'Hem',
             ),
             BottomNavigationBarItem(
+              icon: Icon(Icons.menu_book_sharp),
+              label: 'Journal',
+            ),
+            BottomNavigationBarItem(
               icon: Icon(Icons.person_outline),
               label: 'Profil',
             ),
@@ -52,6 +56,8 @@ class MainScreen extends HookWidget {
       case 0:
         return HomeScreen();
       case 1:
+        return Container();
+      case 2:
         return const SettingsScreen();
     }
   }

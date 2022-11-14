@@ -1,7 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:push/push.dart';
-import 'package:scimovement/api.dart';
+import 'package:scimovement/api/api.dart';
+import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/storage.dart';
 
 class UserState extends StateNotifier<User?> {
