@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:timezone/standalone.dart' as tz;
 
@@ -281,6 +282,17 @@ class Api {
     }
 
     return getUser(_userId);
+  }
+
+  Future sendPosition(Position position) async {
+    try {
+      await dio.post(
+        '/positions/$_userId',
+        data: position.toJson(),
+      );
+    } catch (e) {
+      print(e);
+    }
   }
 
   String chartModeToGroup(ChartMode mode) {

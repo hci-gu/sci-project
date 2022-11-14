@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:scimovement/api.dart';
 import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/router.dart';
 import 'package:scimovement/storage.dart';
