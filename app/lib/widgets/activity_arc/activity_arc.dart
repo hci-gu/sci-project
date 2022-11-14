@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:scimovement/api.dart';
+import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/theme/theme.dart';
 
 class ActivityArc extends ConsumerWidget {

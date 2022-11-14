@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
-import 'package:scimovement/api.dart';
+import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/theme/utils.dart';
 
 class AppColors {

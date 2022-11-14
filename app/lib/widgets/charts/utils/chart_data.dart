@@ -1,5 +1,5 @@
 import 'dart:math' as math;
-import 'package:scimovement/api.dart';
+import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:collection/collection.dart';
 
