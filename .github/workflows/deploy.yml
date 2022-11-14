@@ -18,7 +18,7 @@ jobs:
       - run: |
           cd app
           flutter pub get
-          flutter build web --profile --base-href /sci-project/
+          flutter build web --release --base-href /sci-project/
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4.2.3
         with:
