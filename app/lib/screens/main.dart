@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:scimovement/screens/home/home.dart';
+import 'package:scimovement/screens/journal/journal.dart';
 import 'package:scimovement/screens/settings/settings.dart';
 import 'package:scimovement/theme/theme.dart';
 
@@ -9,7 +10,7 @@ class MainScreen extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    ValueNotifier<int> screen = useState(0);
+    ValueNotifier<int> screen = useState(1);
 
     return Scaffold(
       body: SafeArea(
@@ -56,7 +57,7 @@ class MainScreen extends HookWidget {
       case 0:
         return HomeScreen();
       case 1:
-        return Container();
+        return const JournalScreen();
       case 2:
         return const SettingsScreen();
     }

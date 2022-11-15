@@ -153,3 +153,41 @@ class Bout {
     );
   }
 }
+
+enum JournalType {
+  pain,
+  bladder,
+}
+
+JournalType journalTypeFromString(String type) {
+  if (type == 'pain') {
+    return JournalType.pain;
+  }
+  return JournalType.pain;
+}
+
+class JournalEntry {
+  final int id;
+  final DateTime time;
+  final JournalType type;
+  final String comment;
+  final int painLevel;
+
+  JournalEntry({
+    required this.id,
+    required this.time,
+    required this.type,
+    required this.comment,
+    required this.painLevel,
+  });
+
+  factory JournalEntry.fromJson(Map<String, dynamic> json) {
+    return JournalEntry(
+      id: json['id'],
+      time: tz.TZDateTime.parse(tz.getLocation(Api().tz), json['t']),
+      type: journalTypeFromString(json['type']),
+      comment: json['comment'],
+      painLevel: json['painLevel'],
+    );
+  }
+}
