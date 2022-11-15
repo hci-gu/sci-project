@@ -5,6 +5,8 @@ import userRouter from './users'
 import energyRouter from './energy'
 import sedentaryRouter from './sedentary'
 import boutsRouter from './bouts'
+import positionsRouter from './positions'
+import journalRouter from './journal'
 
 router.get('/ping', (_, res) => res.send('pong'))
 
@@ -12,5 +14,7 @@ router.use('/users', userRouter)
 router.use('/energy', energyRouter)
 router.use('/sedentary', sedentaryRouter)
 router.use('/bouts', boutsRouter)
+router.use('/positions', positionsRouter)
+router.use('/journal', journalRouter)
 
 export default router

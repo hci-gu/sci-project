@@ -4,9 +4,8 @@ import {
   InferCreationAttributes,
   CreationOptional,
   ForeignKey,
-  VirtualDataType,
 } from 'sequelize'
-import { Activity, Condition, Gender } from '../constants'
+import { Activity, Condition, Gender, JournalType } from '../constants'
 
 export class User extends Model<
   InferAttributes<User>,
@@ -80,6 +79,37 @@ export class HeartRate extends Model<
   declare id: CreationOptional<number>
   declare t: Date
   declare hr: number
+
+  declare UserId?: ForeignKey<User['id']>
+}
+
+export class Journal extends Model<
+  InferAttributes<Journal>,
+  InferCreationAttributes<Journal>
+> {
+  declare id: CreationOptional<number>
+  declare t: Date
+  declare type: JournalType
+  declare comment: string
+
+  declare UserId?: ForeignKey<User['id']>
+  declare painLevel: CreationOptional<number>
+}
+
+export class Position extends Model<
+  InferAttributes<Position>,
+  InferCreationAttributes<Position>
+> {
+  declare id: CreationOptional<number>
+  declare t: Date
+  declare longitude: number
+  declare latitude: number
+  declare accuracy: number
+  declare altitude: number
+  declare floor: number
+  declare speed: number
+  declare heading: number
+  declare speed_accuracy: number
 
   declare UserId?: ForeignKey<User['id']>
 }
