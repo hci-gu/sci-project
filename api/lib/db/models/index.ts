@@ -5,6 +5,8 @@ import Bout from './Bout'
 import Energy from './Energy'
 import HeartRate from './HeartRate'
 import User from './User'
+import Position from './Position'
+import Journal from './Journal'
 
 export async function init(sequelize: Sequelize) {
   await Promise.all([
@@ -14,6 +16,8 @@ export async function init(sequelize: Sequelize) {
     HeartRate.init(sequelize),
     Energy.init(sequelize),
     User.init(sequelize),
+    Position.init(sequelize),
+    Journal.init(sequelize),
   ])
 
   User.associate(sequelize)
@@ -22,4 +26,6 @@ export async function init(sequelize: Sequelize) {
   Bout.associate(sequelize)
   Energy.associate(sequelize)
   HeartRate.associate(sequelize)
+  Position.associate(sequelize)
+  Journal.associate(sequelize)
 }
