@@ -2,8 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/models/pagination.dart';
 
-// const String apiUrl = 'https://sci-api.prod.appadem.in';
-const String apiUrl = 'http://192.168.0.33:4000';
+const String apiUrl = 'https://sci-api.prod.appadem.in';
+// const String apiUrl = 'http://192.168.10.104:4000';
 // const String apiUrl = 'http://localhost:4000';
 const emptyBody = {};
 
@@ -127,6 +127,29 @@ class Api {
     }
 
     return getUser(_userId);
+  }
+
+  Future<List<JournalEntry>> getJournal() async {
+    try {
+      var response = await dio.get('/journal/$_userId');
+      if (response.statusCode == 200) {
+        List<dynamic> data = response.data;
+        return data.map((json) => JournalEntry.fromJson(json)).toList();
+      }
+    } catch (e) {}
+    return [];
+  }
+
+  Future createJournalEntry(String comment, int painLevel) async {
+    await dio.post('/journal/$_userId', data: {
+      'type': JournalType.pain.name,
+      'comment': comment,
+      'painLevel': painLevel,
+    });
+  }
+
+  Future deleteJournalEntry(int id) async {
+    await dio.delete('/journal/$_userId/$id');
   }
 
   String chartModeToGroup(ChartMode mode) {

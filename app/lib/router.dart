@@ -44,8 +44,8 @@ class RouterNotifier extends ChangeNotifier {
       notifyListeners();
     });
 
-    _ref.listen<User?>(
-      userProvider,
+    _ref.listen<String?>(
+      userProvider.select((value) => value?.id),
       (_, __) => notifyListeners(),
     );
   }
