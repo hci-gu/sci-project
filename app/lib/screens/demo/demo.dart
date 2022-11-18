@@ -147,6 +147,7 @@ class DemoWrapper extends ConsumerWidget {
           User(
             id: 'abc-123',
             email: 'demo@email.com',
+            notificationSettings: NotificationSettings(),
           ),
         )),
         energyProvider.overrideWithProvider(

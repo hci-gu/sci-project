@@ -68,6 +68,12 @@ class UserState extends StateNotifier<User?> {
     state = await Api().updateUser(update);
   }
 
+  Future updateNotificationSettings(NotificationSettings settings) async {
+    state = await Api().updateUser({
+      'notificationSettings': settings.toJson(),
+    });
+  }
+
   Future<String?> get token =>
       kIsWeb ? Future.value(null) : Push.instance.token;
 

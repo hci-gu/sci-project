@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/models/onboarding.dart';
@@ -10,8 +9,10 @@ import 'package:scimovement/screens/detail/activity.dart';
 import 'package:scimovement/screens/detail/calories.dart';
 import 'package:scimovement/screens/detail/sedentary.dart';
 import 'package:scimovement/screens/introduction.dart';
+import 'package:scimovement/screens/journal/create_entry.dart';
+import 'package:scimovement/screens/journal/update_entry.dart';
 import 'package:scimovement/screens/login.dart';
-import 'package:scimovement/screens/main.dart';
+import 'package:scimovement/screens/tab.dart';
 import 'package:scimovement/screens/onboarding/onboarding.dart';
 import 'package:scimovement/screens/register.dart';
 
@@ -60,7 +61,7 @@ class RouterNotifier extends ChangeNotifier {
     if (!loggedIn && state.subloc == '/loading') {
       return null;
     } else if (loggedIn && state.subloc == '/loading') {
-      return '/';
+      return '/journal/create';
     }
 
     // redirect form onboarding to home when done
@@ -129,7 +130,9 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
       GoRoute(
         name: 'home',
         path: '/',
-        builder: (_, __) => const MainScreen(),
+        pageBuilder: (context, state) => const NoTransitionPage(
+          child: TabScreen(),
+        ),
         routes: [
           GoRoute(
             name: 'calories',
@@ -149,6 +152,34 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
         ],
       ),
       GoRoute(
+        name: 'profile',
+        path: '/profile',
+        pageBuilder: (context, state) => const NoTransitionPage(
+          child: TabScreen(),
+        ),
+      ),
+      GoRoute(
+          name: 'journal',
+          path: '/journal',
+          pageBuilder: (context, state) => const NoTransitionPage(
+                child: TabScreen(),
+              ),
+          routes: [
+            GoRoute(
+              name: 'create-journal',
+              path: 'create',
+              builder: (_, state) => CreateJournalEntryScreen(
+                bodyPart: (state.extra as Map?)?['bodyPart'],
+                arm: (state.extra as Map?)?['arm'],
+              ),
+            ),
+            GoRoute(
+              name: 'update-journal',
+              path: 'update',
+              builder: (_, __) => const UpdateJournalEntryScreen(),
+            ),
+          ]),
+      GoRoute(
         name: 'onboarding',
         path: '/onboarding',
         builder: (_, __) => const OnboardingScreen(),
@@ -157,7 +188,7 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
         name: 'demo',
         path: '/demo',
         builder: (context, state) => const DemoWrapper(
-          child: MainScreen(),
+          child: TabScreen(),
         ),
         routes: [
           GoRoute(
