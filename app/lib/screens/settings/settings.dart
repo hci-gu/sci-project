@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/models/onboarding.dart';
@@ -68,7 +69,62 @@ class SettingsScreen extends ConsumerWidget {
             ],
           ),
         ),
+        AppTheme.spacer2x,
+        const AboutInfo(),
       ],
+    );
+  }
+}
+
+class AboutInfo extends StatelessWidget {
+  const AboutInfo({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<PackageInfo>(
+      future: PackageInfo.fromPlatform(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          return _body(context, snapshot.data);
+        }
+        return const SizedBox();
+      },
+    );
+  }
+
+  Widget _body(BuildContext context, PackageInfo? info) {
+    return GestureDetector(
+      onTap: () => showLicensePage(
+        context: context,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const Icon(Icons.info_outline),
+              AppTheme.spacer,
+              Text(
+                info?.appName ?? '',
+                style: AppTheme.labelMedium,
+              ),
+              AppTheme.spacer,
+              Text(
+                '${info?.version} (${info?.buildNumber})',
+                style: AppTheme.paragraphSmall,
+              ),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 32),
+            child: Text(
+              'Visa licenser',
+              style: AppTheme.paragraphSmall,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -1,16 +1,17 @@
-import 'dart:html';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/models/journal.dart';
+import 'package:scimovement/screens/journal/widgets/body_part_icon.dart';
 import 'package:scimovement/screens/journal/widgets/pain_slider.dart';
 import 'package:scimovement/screens/settings/widgets/form_dropdown.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/text_field.dart';
+import 'dart:math' as math;
 
 class CreateJournalEntryScreen extends ConsumerWidget {
   final BodyPart? bodyPart;
@@ -25,7 +26,7 @@ class CreateJournalEntryScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: AppTheme.appBar('title'),
+      appBar: AppTheme.appBar('Spåra smärta'),
       body: ListView(
         padding: AppTheme.screenPadding,
         children: [
@@ -71,15 +72,19 @@ class CreateJournal extends ConsumerWidget {
       form: buildForm,
       builder: (context, form, _) {
         return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             BodyPartSelect(form: form),
             AppTheme.spacer2x,
             const StyledTextField(
               formControlName: 'comment',
-              placeholder: 'comment',
+              placeholder: 'Kommentar',
             ),
             AppTheme.spacer2x,
+            Text('Smärtnivå', style: AppTheme.labelLarge),
+            AppTheme.spacer,
             PainSlider(formKey: 'painLevel'),
+            AppTheme.spacer2x,
             Button(
               width: 160,
               onPressed: () async {
@@ -89,7 +94,7 @@ class CreateJournal extends ConsumerWidget {
                 form.reset();
                 GoRouter.of(context).pop();
               },
-              title: 'Create entry',
+              title: 'Spara',
             ),
           ],
         );
@@ -119,7 +124,21 @@ class BodyPartSelect extends StatelessWidget {
                   items: BodyPart.values
                       .map((bodyPart) => DropdownMenuItem(
                             value: bodyPart,
-                            child: Text(bodyPart.displayString()),
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: Row(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(4.0),
+                                    child: BodyPartIcon(
+                                        bodyPart: bodyPart,
+                                        arm: form.value['arm'] as Arm),
+                                  ),
+                                  AppTheme.spacer,
+                                  Text(bodyPart.displayString())
+                                ],
+                              ),
+                            ),
                           ))
                       .toList(),
                 ),
@@ -133,9 +152,9 @@ class BodyPartSelect extends StatelessWidget {
                   flex: 1,
                   child: FormDropdown(
                     formKey: 'arm',
-                    title: 'Arm',
+                    title: 'Sida',
                     form: form,
-                    hint: 'Välj arm',
+                    hint: 'Välj sida',
                     items: Arm.values
                         .map((arm) => DropdownMenuItem(
                               value: arm,

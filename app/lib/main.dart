@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/router.dart';
@@ -11,6 +13,12 @@ void main() async {
   tz.initializeTimeZones();
   bool onboardingDone = await Storage.getOnboardingDone();
   Credentials? credentials = await Storage.getCredentials();
+  LicenseRegistry.addLicense(() async* {
+    final license =
+        await rootBundle.loadString('assets/licenses/icon_license.txt');
+    yield LicenseEntryWithLineBreaks(['thenounproject'], license);
+  });
+
   runApp(
     ProviderScope(
       overrides: [

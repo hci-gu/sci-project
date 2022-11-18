@@ -2,14 +2,12 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:intl/intl.dart';
-import 'package:reactive_forms/reactive_forms.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/models/journal.dart';
+import 'package:scimovement/screens/journal/widgets/body_part_icon.dart';
+import 'package:scimovement/screens/journal/widgets/journal_chart.dart';
 import 'package:scimovement/theme/theme.dart';
-import 'package:scimovement/widgets/button.dart';
-import 'package:scimovement/screens/journal/widgets/pain_slider.dart';
-import 'package:scimovement/widgets/text_field.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 class JournalScreen extends ConsumerWidget {
   const JournalScreen({Key? key}) : super(key: key);
@@ -19,14 +17,15 @@ class JournalScreen extends ConsumerWidget {
     return ListView(
       padding: AppTheme.screenPadding,
       children: [
-        AppTheme.separator,
         const JournalChart(),
         AppTheme.separator,
+        Text('Spåra smärta', style: AppTheme.headLine3),
+        Text(
+          'Här kan du se de kroppsdelar du spårar samt lägga till nya',
+          style: AppTheme.paragraphMedium,
+        ),
+        AppTheme.spacer2x,
         const JournalList(),
-        AppTheme.separator,
-        Button(
-            title: 'Create',
-            onPressed: () => GoRouter.of(context).goNamed('create-journal'))
       ],
     );
   }
@@ -46,107 +45,65 @@ class JournalList extends ConsumerWidget {
 
   Widget _buildList(
       BuildContext context, List<JournalEntry> data, WidgetRef ref) {
-    return ListView(
+    return GridView.count(
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: 3,
+      crossAxisSpacing: AppTheme.basePadding,
+      mainAxisSpacing: AppTheme.basePadding,
       shrinkWrap: true,
-      children: data
-          .map(
-            (e) => GestureDetector(
-              onTap: () => GoRouter.of(context).goNamed(
-                'create-journal',
-                extra: {
-                  'bodyPart': e.bodyPart,
-                  'arm': e.arm,
-                },
+      children: [
+        ...data
+            .map(
+              (e) => GestureDetector(
+                onTap: () => GoRouter.of(context).goNamed(
+                  'create-journal',
+                  extra: {
+                    'bodyPart': e.bodyPart,
+                    'arm': e.arm,
+                  },
+                ),
+                child: _listItem(e),
               ),
-              child: ListTile(
-                title: Text(
-                    '${e.arm != null ? '${e.arm!.displayString()} ' : ''}${e.bodyPart.displayString()}'),
-                subtitle: Text(e.time.toIso8601String()),
+            )
+            .toList(),
+        GestureDetector(
+          onTap: () => GoRouter.of(context).goNamed('create-journal'),
+          child: Container(
+            decoration: AppTheme.widgetDecoration,
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 12.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.add),
+                  Text('Lägg till', style: AppTheme.labelMedium),
+                ],
               ),
             ),
-          )
-          .toList(),
+          ),
+        ),
+      ],
     );
   }
-}
 
-class JournalChart extends ConsumerWidget {
-  const JournalChart({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return ref.watch(journalProvider).when(
-          data: (data) => _buildChart(data),
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, s) => Text(e.toString()),
-        );
-  }
-
-  Widget _buildChart(List<JournalEntry> data) {
-    if (data.isEmpty) {
-      return Container();
-    }
-
-    double minX = data.first.time.millisecondsSinceEpoch.toDouble();
-    double maxX = data.last.time.millisecondsSinceEpoch.toDouble();
-
-    return SizedBox(
-      height: 200,
-      child: LineChart(
-        LineChartData(
-          borderData: FlBorderData(
-            show: false,
-          ),
-          gridData: FlGridData(
-            show: false,
-          ),
-          minX: minX,
-          maxX: maxX,
-          minY: 0,
-          maxY: 10,
-          lineBarsData: [
-            LineChartBarData(
-              spots: data
-                  .map(
-                    (e) => FlSpot(
-                      e.time.millisecondsSinceEpoch.toDouble(),
-                      e.painLevel.toDouble(),
-                    ),
-                  )
-                  .toList(),
-              preventCurveOverShooting: true,
-              barWidth: 2,
-              isCurved: false,
-              color: AppTheme.colors.primary,
-              dotData: FlDotData(
-                show: false,
-              ),
-              belowBarData: BarAreaData(show: false),
+  Widget _listItem(JournalEntry entry) {
+    return Container(
+      decoration: AppTheme.widgetDecoration,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            BodyPartIcon(bodyPart: entry.bodyPart, arm: entry.arm, size: 32),
+            Text(
+              '${entry.arm != null ? '${entry.arm!.displayString()} ' : ''}${entry.bodyPart.displayString()}',
+              style: AppTheme.labelMedium,
+              textAlign: TextAlign.center,
             ),
+            Text(timeago.format(entry.time, locale: 'sv'),
+                style: AppTheme.paragraphSmall),
           ],
-          titlesData: FlTitlesData(
-            show: true,
-            topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-            rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: true)),
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                reservedSize: 24,
-                getTitlesWidget: (value, _) {
-                  if (value == minX || value == maxX) return const SizedBox();
-                  final date =
-                      DateTime.fromMillisecondsSinceEpoch(value.toInt());
-                  return Center(
-                    child: Text(
-                      DateFormat('HH:mm').format(date),
-                      style: AppTheme.labelTiny,
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
         ),
       ),
     );

@@ -61,7 +61,7 @@ class RouterNotifier extends ChangeNotifier {
     if (!loggedIn && state.subloc == '/loading') {
       return null;
     } else if (loggedIn && state.subloc == '/loading') {
-      return '/journal/create';
+      return '/journal';
     }
 
     // redirect form onboarding to home when done
@@ -159,26 +159,27 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
         ),
       ),
       GoRoute(
-          name: 'journal',
-          path: '/journal',
-          pageBuilder: (context, state) => const NoTransitionPage(
-                child: TabScreen(),
-              ),
-          routes: [
-            GoRoute(
-              name: 'create-journal',
-              path: 'create',
-              builder: (_, state) => CreateJournalEntryScreen(
-                bodyPart: (state.extra as Map?)?['bodyPart'],
-                arm: (state.extra as Map?)?['arm'],
-              ),
+        name: 'journal',
+        path: '/journal',
+        pageBuilder: (context, state) => const NoTransitionPage(
+          child: TabScreen(),
+        ),
+        routes: [
+          GoRoute(
+            name: 'create-journal',
+            path: 'create',
+            builder: (_, state) => CreateJournalEntryScreen(
+              bodyPart: (state.extra as Map?)?['bodyPart'],
+              arm: (state.extra as Map?)?['arm'],
             ),
-            GoRoute(
-              name: 'update-journal',
-              path: 'update',
-              builder: (_, __) => const UpdateJournalEntryScreen(),
-            ),
-          ]),
+          ),
+          GoRoute(
+            name: 'update-journal',
+            path: 'update',
+            builder: (_, __) => const UpdateJournalEntryScreen(),
+          ),
+        ],
+      ),
       GoRoute(
         name: 'onboarding',
         path: '/onboarding',
@@ -188,7 +189,13 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
         name: 'demo',
         path: '/demo',
         builder: (context, state) => const DemoWrapper(
-          child: TabScreen(),
+          child: TabScreen(
+            routes: [
+              '/demo',
+              '/demo/journal',
+              '/demo/profile',
+            ],
+          ),
         ),
         routes: [
           GoRoute(
@@ -213,6 +220,33 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
             ),
           ),
         ],
+      ),
+      GoRoute(
+        name: 'demo-profile',
+        path: '/demo/profile',
+        pageBuilder: (context, state) => const NoTransitionPage(
+          child: TabScreen(
+            routes: [
+              '/demo',
+              '/demo/journal',
+              '/demo/profile',
+            ],
+          ),
+        ),
+      ),
+      GoRoute(
+        name: 'demo-journal',
+        path: '/demo/journal',
+        pageBuilder: (context, state) => const NoTransitionPage(
+          child: TabScreen(
+            routes: [
+              '/demo',
+              '/demo/journal',
+              '/demo/profile',
+            ],
+          ),
+        ),
+        routes: [],
       ),
     ],
     observers: [RouteChangeObserver(ref)],

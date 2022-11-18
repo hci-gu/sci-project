@@ -33,6 +33,23 @@ class AppColors {
         return black;
     }
   }
+
+  Color bodyPartToColor(BodyPart bodyPart) {
+    switch (bodyPart) {
+      case BodyPart.elbow:
+        return HexColor('#F2C94C');
+      case BodyPart.hand:
+        return HexColor('#F2994A');
+      case BodyPart.scapula:
+        return HexColor('#EB5757');
+      case BodyPart.shoulderJoint:
+        return HexColor('#6FCF97');
+      case BodyPart.neck:
+        return HexColor('#2D9CDB');
+      default:
+        return Colors.black;
+    }
+  }
 }
 
 class AppTheme {

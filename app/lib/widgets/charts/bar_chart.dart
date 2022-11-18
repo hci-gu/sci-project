@@ -41,6 +41,8 @@ class CustomBarChart extends StatelessWidget {
           alignment: BarChartAlignment.spaceEvenly,
           barTouchData: BarTouchData(
             touchTooltipData: BarTouchTooltipData(
+              fitInsideVertically: true,
+              fitInsideHorizontally: true,
               tooltipBgColor: AppTheme.colors.white,
               tooltipBorder: BorderSide(
                 color: AppTheme.colors.black,
