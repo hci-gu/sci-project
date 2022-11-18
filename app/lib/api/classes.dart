@@ -3,6 +3,68 @@ import 'package:timezone/standalone.dart' as tz;
 
 enum Gender { male, female }
 
+enum BodyPart { neck, scapula, shoulderJoint, elbow, hand }
+
+enum Arm { left, right }
+
+extension ArmDisplayAsString on Arm {
+  String displayString() {
+    switch (this) {
+      case Arm.left:
+        return 'Vänster';
+      case Arm.right:
+        return 'Höger';
+    }
+  }
+}
+
+Arm? armFromString(String arm) {
+  switch (arm) {
+    case 'left':
+      return Arm.left;
+    case 'right':
+      return Arm.right;
+    default:
+      return null;
+  }
+}
+
+extension BodyPartDisplayAsString on BodyPart {
+  String displayString() {
+    switch (this) {
+      case BodyPart.neck:
+        return 'Nacke';
+      case BodyPart.scapula:
+        return 'Skulderblad';
+      case BodyPart.shoulderJoint:
+        return 'Axelled';
+      case BodyPart.elbow:
+        return 'Armbåge';
+      case BodyPart.hand:
+        return 'Hand';
+      default:
+        return toString();
+    }
+  }
+}
+
+BodyPart? bodyPartFromString(String bodyPartString) {
+  switch (bodyPartString) {
+    case 'neck':
+      return BodyPart.neck;
+    case 'scapula':
+      return BodyPart.scapula;
+    case 'shoulderJoint':
+      return BodyPart.shoulderJoint;
+    case 'elbow':
+      return BodyPart.elbow;
+    case 'hand':
+      return BodyPart.hand;
+    default:
+      return null;
+  }
+}
+
 Gender genderFromString(String gender) {
   if (gender == 'female') {
     return Gender.female;
@@ -32,6 +94,34 @@ Condition conditionFromString(String condition) {
   return Condition.paraplegic;
 }
 
+class NotificationSettings {
+  final bool activity;
+  final bool data;
+  final bool journal;
+
+  NotificationSettings({
+    this.activity = false,
+    this.data = false,
+    this.journal = false,
+  });
+
+  factory NotificationSettings.fromJson(Map<String, dynamic> json) {
+    return NotificationSettings(
+      activity: json['activity'] ?? false,
+      data: json['data'] ?? false,
+      journal: json['journal'] ?? false,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'activity': activity,
+      'data': data,
+      'journal': journal,
+    };
+  }
+}
+
 class User {
   final String id;
   final String? email;
@@ -40,14 +130,18 @@ class User {
   final Condition? condition;
   final int? injuryLevel;
   final String? deviceId;
+  final bool hasData;
+  final NotificationSettings notificationSettings;
 
   User({
     required this.id,
+    required this.notificationSettings,
     this.email,
     this.weight,
     this.gender,
     this.condition,
     this.injuryLevel,
+    this.hasData = false,
     this.deviceId,
   });
 
@@ -62,6 +156,10 @@ class User {
           : null,
       injuryLevel: json['injuryLevel'] ?? 0,
       deviceId: json['deviceId'] ?? '',
+      hasData: json['hasData'] ?? false,
+      notificationSettings: json['notificationSettings'] != null
+          ? NotificationSettings.fromJson(json['notificationSettings'])
+          : NotificationSettings(),
     );
   }
 
@@ -156,7 +254,6 @@ class Bout {
 
 enum JournalType {
   pain,
-  bladder,
 }
 
 JournalType journalTypeFromString(String type) {
@@ -172,6 +269,8 @@ class JournalEntry {
   final JournalType type;
   final String comment;
   final int painLevel;
+  final BodyPart bodyPart;
+  final Arm? arm;
 
   JournalEntry({
     required this.id,
@@ -179,15 +278,24 @@ class JournalEntry {
     required this.type,
     required this.comment,
     required this.painLevel,
+    required this.bodyPart,
+    this.arm,
   });
 
   factory JournalEntry.fromJson(Map<String, dynamic> json) {
+    String bodyPartString = json['bodyPart'];
+    final parts = bodyPartString.split('-');
+    BodyPart bodyPart = bodyPartFromString(parts.first) ?? BodyPart.neck;
+    Arm? arm = armFromString(parts.last);
+
     return JournalEntry(
       id: json['id'],
       time: tz.TZDateTime.parse(tz.getLocation(Api().tz), json['t']),
       type: journalTypeFromString(json['type']),
       comment: json['comment'],
       painLevel: json['painLevel'],
+      bodyPart: bodyPart,
+      arm: arm,
     );
   }
 }

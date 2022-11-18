@@ -9,11 +9,32 @@ final journalProvider = FutureProvider<List<JournalEntry>>((ref) async {
   return journal;
 });
 
+final uniqueEntriesProvider = FutureProvider<List<JournalEntry>>((ref) async {
+  List<JournalEntry> journal = await ref.watch(journalProvider.future);
+
+  // filter out all unique journal entries based on bodyPart
+  List<JournalEntry> uniqueEntries = [];
+  for (JournalEntry entry in journal.reversed) {
+    if (!uniqueEntries.any((e) => e.bodyPart == entry.bodyPart)) {
+      uniqueEntries.add(entry);
+    }
+  }
+
+  return uniqueEntries;
+});
+
 class JournalState extends StateNotifier<DateTime> {
   JournalState() : super(DateTime.now());
 
-  Future createJournalEntry(String comment, int painLevel) async {
-    await Api().createJournalEntry(comment, painLevel);
+  Future createJournalEntry(Map<String, dynamic> values) async {
+    String comment = values['comment'] as String;
+    int painLevel = values['painLevel'] as int;
+    BodyPart bodyPart = values['bodyPart'] as BodyPart;
+    Arm? arm = values['arm'] as Arm?;
+
+    String bodyPartString =
+        '${bodyPart.name}${bodyPart != BodyPart.neck ? '-${arm?.name}' : ''}';
+    await Api().createJournalEntry(comment, painLevel, bodyPartString);
     state = DateTime.now();
   }
 

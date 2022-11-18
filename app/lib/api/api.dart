@@ -3,7 +3,7 @@ import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/models/pagination.dart';
 
 const String apiUrl = 'https://sci-api.prod.appadem.in';
-// const String apiUrl = 'http://192.168.10.104:4000';
+// const String apiUrl = 'http://192.168.0.33:4000';
 // const String apiUrl = 'http://localhost:4000';
 const emptyBody = {};
 
@@ -140,11 +140,13 @@ class Api {
     return [];
   }
 
-  Future createJournalEntry(String comment, int painLevel) async {
+  Future createJournalEntry(
+      String comment, int painLevel, String bodyPart) async {
     await dio.post('/journal/$_userId', data: {
       'type': JournalType.pain.name,
       'comment': comment,
       'painLevel': painLevel,
+      'bodyPart': bodyPart,
     });
   }
 
