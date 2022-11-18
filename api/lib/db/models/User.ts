@@ -1,7 +1,8 @@
-import { DataTypes, Sequelize, ModelStatic } from 'sequelize'
+import { DataTypes, Sequelize, ModelStatic, JSONB } from 'sequelize'
 import bcrypt from 'bcrypt'
 import { Condition, Gender } from '../../constants'
 import { User } from '../classes'
+import { Json } from 'sequelize/types/utils'
 
 export class NotFoundError extends Error {}
 export class ForbiddenError extends Error {}
@@ -28,6 +29,8 @@ export default {
         condition: DataTypes.ENUM('paraplegic', 'tetraplegic', 'none'),
         injuryLevel: DataTypes.INTEGER,
         deviceId: DataTypes.STRING,
+        timezone: DataTypes.STRING,
+        notificationSettings: DataTypes.JSONB,
         createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
         email: {
           type: DataTypes.STRING,
@@ -55,6 +58,9 @@ export default {
     UserModel.hasMany(sequelize.models.Accel, {
       onDelete: 'cascade',
     })
+    UserModel.hasMany(sequelize.models.Journal, {
+      onDelete: 'cascade',
+    })
   },
   save: ({
     email,
@@ -78,6 +84,11 @@ export default {
       condition,
       gender,
       injuryLevel,
+      notificationSettings: {
+        activity: true,
+        data: true,
+        journal: false,
+      },
     }).catch((e) => {
       if (e.name === 'SequelizeUniqueConstraintError') {
         throw new ForbiddenError('Email already exists')

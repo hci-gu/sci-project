@@ -46,13 +46,10 @@ router.get(
   getQuery,
   async (req: ValidatedRequest<GetQuerySchema>, res) => {
     const { id } = req.params
-    const { from, to } = req.query
 
     try {
       const response = await Journal.find({
         userId: id,
-        from,
-        to,
       })
       res.json(response)
     } catch (e) {

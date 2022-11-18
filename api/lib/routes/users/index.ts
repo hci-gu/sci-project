@@ -25,10 +25,18 @@ const stripSensitive = (user: User) => {
   return rest
 }
 
+const returnUser = async (user: User) => {
+  const hasData = await HeartRateModel.hasData(user.id)
+  return {
+    ...stripSensitive(user),
+    hasData,
+  }
+}
+
 router.post('/', userBody, async (req, res) => {
   try {
     const result = await UserModel.save(req.body)
-    res.send(stripSensitive(result))
+    res.send(await returnUser(result))
   } catch (e) {
     if (e instanceof ForbiddenError) {
       return res.sendStatus(403)
@@ -46,7 +54,7 @@ router.get('/:id', async (req, res) => {
     if (!result) {
       return res.sendStatus(404)
     }
-    return res.send(stripSensitive(result))
+    return res.send(await returnUser(result))
   } catch (e) {
     return res.sendStatus(500)
   }
@@ -83,7 +91,7 @@ router.patch(
 
       await user.save()
 
-      return res.send(stripSensitive(user))
+      return res.send(await returnUser(user))
     } catch (e) {
       return res.sendStatus(500)
     }

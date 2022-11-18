@@ -22,6 +22,14 @@ const user = Joi.object({
   deviceId: Joi.string().allow(null, '').optional().allow(null),
   email: Joi.string().email().optional().allow(null),
   password: Joi.string().optional().allow(null),
+  timezone: Joi.string().optional().allow(null),
+  notificationSettings: Joi.object({
+    activity: Joi.boolean().optional().allow(null),
+    data: Joi.boolean().optional().allow(null),
+    journal: Joi.boolean().optional().allow(null),
+  })
+    .optional()
+    .allow(null),
 })
 
 export interface UserBodySchema extends ValidatedRequestSchema {

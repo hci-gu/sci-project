@@ -7,6 +7,12 @@ import {
 } from 'sequelize'
 import { Activity, Condition, Gender, JournalType } from '../constants'
 
+export type NotificationSettings = {
+  activity: boolean
+  data: boolean
+  journal: boolean
+}
+
 export class User extends Model<
   InferAttributes<User>,
   InferCreationAttributes<User>
@@ -17,6 +23,8 @@ export class User extends Model<
   declare condition: CreationOptional<Condition>
   declare injuryLevel: CreationOptional<number>
   declare deviceId: CreationOptional<string>
+  declare timezone: CreationOptional<string>
+  declare notificationSettings: CreationOptional<NotificationSettings>
   declare createdAt: CreationOptional<Date>
   declare email: CreationOptional<string>
   declare password: CreationOptional<string>
@@ -94,6 +102,7 @@ export class Journal extends Model<
 
   declare UserId?: ForeignKey<User['id']>
   declare painLevel: CreationOptional<number>
+  declare bodyPart: CreationOptional<string>
 }
 
 export class Position extends Model<
