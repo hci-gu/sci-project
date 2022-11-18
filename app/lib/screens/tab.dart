@@ -6,9 +6,10 @@ import 'package:scimovement/screens/settings/settings.dart';
 import 'package:scimovement/theme/theme.dart';
 
 class TabScreen extends StatelessWidget {
-  static List<String> routes = ['/', '/journal', '/profile'];
+  final List<String> routes;
 
-  const TabScreen({Key? key}) : super(key: key);
+  const TabScreen({Key? key, this.routes = const ['/', '/journal', '/profile']})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {

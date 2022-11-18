@@ -195,6 +195,8 @@ class EnergyLineChart extends ConsumerWidget {
         ],
         lineTouchData: LineTouchData(
           touchTooltipData: LineTouchTooltipData(
+            fitInsideVertically: true,
+            fitInsideHorizontally: true,
             tooltipBgColor: Colors.white,
             getTooltipItems: (List<LineBarSpot> spots) {
               return spots
