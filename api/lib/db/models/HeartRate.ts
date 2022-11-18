@@ -93,4 +93,10 @@ export default {
         hr: d.hr,
       }))
     ),
+  hasData: (userId: string) =>
+    HeartRateModel.findOne({
+      where: {
+        UserId: userId,
+      },
+    }).then((doc) => !!doc),
 }

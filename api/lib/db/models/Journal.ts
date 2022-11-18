@@ -16,6 +16,7 @@ export default {
         type: DataTypes.STRING,
         comment: DataTypes.STRING,
         painLevel: DataTypes.INTEGER,
+        bodyPart: DataTypes.STRING,
       },
       {
         timestamps: false,
@@ -40,16 +41,22 @@ export default {
       ...data,
       UserId: userId,
     }),
-  find: ({ userId, from, to }: { userId: string; from: Date; to: Date }) => {
+  find: ({ userId }: { userId: string }) => {
     return JournalModel.findAll({
-      attributes: ['id', 't', 'type', 'comment', 'painLevel'],
+      attributes: ['id', 't', 'type', 'comment', 'painLevel', 'bodyPart'],
       where: {
         UserId: userId,
-        t: {
-          [Op.between]: [from, to],
-        },
       },
       order: [['t', 'ASC']],
+    })
+  },
+  getLastEntry: (userId: string) => {
+    return JournalModel.findOne({
+      attributes: ['id', 't', 'type', 'comment', 'painLevel', 'bodyPart'],
+      where: {
+        UserId: userId,
+      },
+      order: [['t', 'DESC']],
     })
   },
   delete: (id: string) => JournalModel.destroy({ where: { id } }),
