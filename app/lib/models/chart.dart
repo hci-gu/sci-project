@@ -27,6 +27,19 @@ final activityBarChartProvider =
   );
 });
 
+final movementBarChartProvider =
+    FutureProvider.family<ChartData, Pagination>((ref, pagination) async {
+  List<Energy> energy = await ref.watch(energyProvider(pagination).future);
+
+  return ChartData(
+    energy
+        .where((e) => e.activity != Activity.sedentary)
+        .map((e) => ChartDataPoint(e.time, e.minutes.toDouble(), e.activity))
+        .toList(),
+    pagination.mode,
+  );
+});
+
 final sedentaryBarChartProvider =
     FutureProvider.family<ChartData, Pagination>((ref, pagination) async {
   List<Bout> bouts = await ref.watch(boutsProvider(pagination).future);

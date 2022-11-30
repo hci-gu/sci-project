@@ -3,44 +3,81 @@ import 'package:timezone/standalone.dart' as tz;
 
 enum Gender { male, female }
 
-enum BodyPart { neck, scapula, shoulderJoint, elbow, hand }
+enum BodyPartType { neck, scapula, shoulderJoint, elbow, hand }
 
-enum Arm { left, right }
+enum Side { left, right }
 
-extension ArmDisplayAsString on Arm {
+class BodyPart {
+  BodyPartType type;
+  Side? side;
+
+  BodyPart(this.type, this.side);
+
+  factory BodyPart.fromString(String bodyPartString) {
+    final parts = bodyPartString.split('-');
+    BodyPartType type =
+        bodyPartTypeFromString(parts.first) ?? BodyPartType.neck;
+    Side? side = sideFromString(parts.last);
+    return BodyPart(type, side);
+  }
+
+  @override
+  String toString() {
+    if (type == BodyPartType.neck) {
+      return type.name;
+    }
+    return '${type.name}${side != null ? '-${side!.name}' : ''}';
+  }
+
+  String displayString() {
+    if (type == BodyPartType.neck) {
+      return type.displayString();
+    }
+    return '${side != null ? '${side!.displayString()} ' : ''}${type.displayString()}';
+  }
+
+  @override
+  int get hashCode => type.hashCode ^ side.hashCode;
+
+  @override
+  bool operator ==(other) =>
+      other is BodyPart && other.type == type && other.side == side;
+}
+
+extension SideDisplayAsString on Side {
   String displayString() {
     switch (this) {
-      case Arm.left:
+      case Side.left:
         return 'Vänster';
-      case Arm.right:
+      case Side.right:
         return 'Höger';
     }
   }
 }
 
-Arm? armFromString(String arm) {
-  switch (arm) {
+Side? sideFromString(String side) {
+  switch (side) {
     case 'left':
-      return Arm.left;
+      return Side.left;
     case 'right':
-      return Arm.right;
+      return Side.right;
     default:
       return null;
   }
 }
 
-extension BodyPartDisplayAsString on BodyPart {
+extension BodyPartTypeDisplayAsString on BodyPartType {
   String displayString() {
     switch (this) {
-      case BodyPart.neck:
+      case BodyPartType.neck:
         return 'Nacke';
-      case BodyPart.scapula:
+      case BodyPartType.scapula:
         return 'Skulderblad';
-      case BodyPart.shoulderJoint:
+      case BodyPartType.shoulderJoint:
         return 'Axelled';
-      case BodyPart.elbow:
+      case BodyPartType.elbow:
         return 'Armbåge';
-      case BodyPart.hand:
+      case BodyPartType.hand:
         return 'Hand';
       default:
         return toString();
@@ -48,18 +85,18 @@ extension BodyPartDisplayAsString on BodyPart {
   }
 }
 
-BodyPart? bodyPartFromString(String bodyPartString) {
+BodyPartType? bodyPartTypeFromString(String bodyPartString) {
   switch (bodyPartString) {
     case 'neck':
-      return BodyPart.neck;
+      return BodyPartType.neck;
     case 'scapula':
-      return BodyPart.scapula;
+      return BodyPartType.scapula;
     case 'shoulderJoint':
-      return BodyPart.shoulderJoint;
+      return BodyPartType.shoulderJoint;
     case 'elbow':
-      return BodyPart.elbow;
+      return BodyPartType.elbow;
     case 'hand':
-      return BodyPart.hand;
+      return BodyPartType.hand;
     default:
       return null;
   }
@@ -270,7 +307,6 @@ class JournalEntry {
   final String comment;
   final int painLevel;
   final BodyPart bodyPart;
-  final Arm? arm;
 
   JournalEntry({
     required this.id,
@@ -279,23 +315,27 @@ class JournalEntry {
     required this.comment,
     required this.painLevel,
     required this.bodyPart,
-    this.arm,
   });
 
   factory JournalEntry.fromJson(Map<String, dynamic> json) {
-    String bodyPartString = json['bodyPart'];
-    final parts = bodyPartString.split('-');
-    BodyPart bodyPart = bodyPartFromString(parts.first) ?? BodyPart.neck;
-    Arm? arm = armFromString(parts.last);
-
     return JournalEntry(
       id: json['id'],
       time: tz.TZDateTime.parse(tz.getLocation(Api().tz), json['t']),
       type: journalTypeFromString(json['type']),
       comment: json['comment'],
       painLevel: json['painLevel'],
-      bodyPart: bodyPart,
-      arm: arm,
+      bodyPart: BodyPart.fromString(json['bodyPart']),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      't': time.toIso8601String(),
+      'type': type.name,
+      'comment': comment,
+      'painLevel': painLevel,
+      'bodyPart': bodyPart.toString(),
+    };
   }
 }

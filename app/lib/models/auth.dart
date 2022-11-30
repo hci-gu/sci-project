@@ -115,6 +115,11 @@ class UserState extends StateNotifier<User?> {
 final userProvider =
     StateNotifierProvider<UserState, User?>((ref) => UserState());
 
+final userHasDataProvider = Provider<bool>((ref) {
+  User? user = ref.watch(userProvider);
+  return user != null && user.hasData;
+});
+
 final notificationsEnabledProvider = Provider<bool>((ref) {
   User? user = ref.watch(userProvider);
   return user != null && user.deviceId != null && user.deviceId!.isNotEmpty;

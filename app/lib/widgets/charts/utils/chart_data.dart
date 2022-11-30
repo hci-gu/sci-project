@@ -32,6 +32,9 @@ class ChartData {
   double get maxX => DateTime(day.year, day.month, day.day, 23, 59)
       .millisecondsSinceEpoch
       .toDouble();
+  int get minDate => data.last.time.millisecondsSinceEpoch;
+  int get maxDate => data.first.time.millisecondsSinceEpoch;
+  int get days => (minDate - maxDate) ~/ (1000 * 60 * 60 * 24);
 
   Map<DateTime, List<ChartDataPoint>> get group => {
         ..._emptyMap(data.last.time),

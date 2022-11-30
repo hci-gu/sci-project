@@ -5,6 +5,7 @@ import 'package:scimovement/theme/theme.dart';
 class StyledTextField extends StatelessWidget {
   final String formControlName;
   final String placeholder;
+  final String? helperText;
   final bool obscureText;
   final bool disabled;
   final int? minLines;
@@ -19,6 +20,7 @@ class StyledTextField extends StatelessWidget {
     Key? key,
     required this.formControlName,
     required this.placeholder,
+    this.helperText,
     this.obscureText = false,
     this.disabled = false,
     this.minLines,
@@ -44,6 +46,8 @@ class StyledTextField extends StatelessWidget {
             prefixIcon: icon,
             suffixIcon: canClear ? _clearButton() : null,
             labelText: placeholder,
+            helperText: helperText,
+            helperMaxLines: maxLines,
             border: const OutlineInputBorder(),
             isDense: true,
           ),

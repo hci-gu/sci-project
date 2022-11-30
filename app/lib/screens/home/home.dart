@@ -16,8 +16,7 @@ class HomeScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    bool showDataWidgets =
-        ref.watch(userProvider.select((user) => user != null && !user.hasData));
+    bool showDataWidgets = ref.watch(userHasDataProvider);
 
     return SmartRefresher(
       controller: _refreshController,
@@ -28,7 +27,7 @@ class HomeScreen extends HookConsumerWidget {
       child: ListView(
         padding: AppTheme.screenPadding,
         children: [
-          const DateSelect(),
+          if (showDataWidgets) const DateSelect(),
           AppTheme.spacer4x,
           if (showDataWidgets) const ActivityWheel(),
           AppTheme.spacer2x,
