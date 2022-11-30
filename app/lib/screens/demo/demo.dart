@@ -179,6 +179,7 @@ class DemoWrapper extends ConsumerWidget {
         dailyEnergyChartProvider,
         totalMovementMinutesProvider,
         averageMovementMinutesProvider,
+        userHasDataProvider.overrideWithValue(true),
       ],
       child: Scaffold(
         body: child,
