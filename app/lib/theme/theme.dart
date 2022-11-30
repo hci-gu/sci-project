@@ -35,17 +35,18 @@ class AppColors {
   }
 
   Color bodyPartToColor(BodyPart bodyPart) {
-    switch (bodyPart) {
-      case BodyPart.elbow:
-        return HexColor('#F2C94C');
-      case BodyPart.hand:
-        return HexColor('#F2994A');
-      case BodyPart.scapula:
-        return HexColor('#EB5757');
-      case BodyPart.shoulderJoint:
-        return HexColor('#6FCF97');
-      case BodyPart.neck:
-        return HexColor('#2D9CDB');
+    bool right = bodyPart.side == Side.right;
+    switch (bodyPart.type) {
+      case BodyPartType.elbow:
+        return right ? HexColor('#fd7f6f') : HexColor('#7eb0d5');
+      case BodyPartType.hand:
+        return right ? HexColor('#b2e061') : HexColor('#bd7ebe');
+      case BodyPartType.scapula:
+        return right ? HexColor('#ffb55a') : HexColor('#ffee65');
+      case BodyPartType.shoulderJoint:
+        return right ? HexColor('#beb9db') : HexColor('#fdcce5');
+      case BodyPartType.neck:
+        return HexColor('#8bd3c7');
       default:
         return Colors.black;
     }
@@ -91,6 +92,11 @@ class AppTheme {
   static TextStyle paragraphMedium = TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.w300,
+    color: colors.black,
+  );
+  static TextStyle paragraph = TextStyle(
+    fontSize: 14,
+    fontWeight: FontWeight.w400,
     color: colors.black,
   );
   static TextStyle paragraphSmall = TextStyle(

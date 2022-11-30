@@ -1,0 +1,81 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/src/widgets/framework.dart';
+import 'package:go_router/go_router.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart';
+import 'package:scimovement/api/classes.dart';
+import 'package:scimovement/models/journal.dart';
+import 'package:scimovement/screens/journal/widgets/body_part_icon.dart';
+import 'package:scimovement/theme/theme.dart';
+
+class JournalListScreen extends ConsumerWidget {
+  const JournalListScreen({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Smärta'),
+      ),
+      body: ref.watch(journalProvider).when(
+            data: (data) => _buildList(context, data.reversed.toList(), ref),
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (e, s) => Text(e.toString()),
+          ),
+    );
+  }
+
+  Widget _buildList(
+      BuildContext context, List<JournalEntry> data, WidgetRef ref) {
+    return ListView.builder(
+      itemCount: data.length,
+      itemBuilder: (context, index) {
+        return _listItem(context, data[index], ref);
+      },
+    );
+  }
+
+  Widget _listItem(BuildContext context, JournalEntry entry, WidgetRef ref) {
+    return Dismissible(
+      key: Key(entry.id.toString()),
+      onDismissed: (direction) {
+        ref.read(updateJournalProvider.notifier).deleteJournalEntry(entry.id);
+      },
+      confirmDismiss: (direction) => showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Ta bort'),
+          content: const Text('Är du säker på att du vill ta bort detta?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Avbryt'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Ta bort'),
+            ),
+          ],
+        ),
+      ),
+      background: Container(
+        color: AppTheme.colors.error,
+        child: const Icon(Icons.delete, color: Colors.white),
+      ),
+      child: ListTile(
+        leading: BodyPartIcon(bodyPart: entry.bodyPart, size: 24),
+        trailing: entry.comment.isNotEmpty ? const Icon(Icons.comment) : null,
+        title: Text(
+            '${entry.painLevel.toString()} - ${entry.bodyPart.displayString()}'),
+        subtitle: Text(
+          DateFormat(DateFormat.YEAR_MONTH_WEEKDAY_DAY).format(entry.time),
+        ),
+        onTap: () => GoRouter.of(context).goNamed('update-journal', params: {
+          'id': entry.id.toString(),
+        }, extra: {
+          'entry': entry,
+        }),
+      ),
+    );
+  }
+}

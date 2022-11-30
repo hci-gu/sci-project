@@ -25,13 +25,18 @@ extension ChartModeDisplayName on ChartMode {
 class Pagination {
   final int page;
   final ChartMode mode;
+  final Duration? overrideDuration;
 
   const Pagination({
     this.page = 0,
     this.mode = ChartMode.day,
+    this.overrideDuration,
   });
 
   Duration get duration {
+    if (overrideDuration != null) {
+      return overrideDuration!;
+    }
     switch (mode) {
       case ChartMode.day:
         return const Duration(days: 1);

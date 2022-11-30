@@ -9,7 +9,8 @@ import 'package:scimovement/screens/detail/activity.dart';
 import 'package:scimovement/screens/detail/calories.dart';
 import 'package:scimovement/screens/detail/sedentary.dart';
 import 'package:scimovement/screens/introduction.dart';
-import 'package:scimovement/screens/journal/create_entry.dart';
+import 'package:scimovement/screens/journal/edit_entry.dart';
+import 'package:scimovement/screens/journal/journal_list.dart';
 import 'package:scimovement/screens/journal/update_entry.dart';
 import 'package:scimovement/screens/login.dart';
 import 'package:scimovement/screens/tab.dart';
@@ -61,7 +62,7 @@ class RouterNotifier extends ChangeNotifier {
     if (!loggedIn && state.subloc == '/loading') {
       return null;
     } else if (loggedIn && state.subloc == '/loading') {
-      return '/journal';
+      return '/';
     }
 
     // redirect form onboarding to home when done
@@ -98,6 +99,9 @@ class RouterProps {
 
   RouterProps({this.loggedIn = false, this.onboardingDone = false});
 }
+
+final profileKey = UniqueKey();
+final journalKey = UniqueKey();
 
 final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
   final routerNotifier = RouterNotifier(ref, props.onboardingDone);
@@ -154,30 +158,39 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
       GoRoute(
         name: 'profile',
         path: '/profile',
-        pageBuilder: (context, state) => const NoTransitionPage(
-          child: TabScreen(),
+        pageBuilder: (context, _) => NoTransitionPage(
+          key: profileKey,
+          child: const TabScreen(),
         ),
       ),
       GoRoute(
         name: 'journal',
         path: '/journal',
-        pageBuilder: (context, state) => const NoTransitionPage(
-          child: TabScreen(),
+        pageBuilder: (context, _) => NoTransitionPage(
+          key: journalKey,
+          child: const TabScreen(),
         ),
         routes: [
           GoRoute(
             name: 'create-journal',
             path: 'create',
-            builder: (_, state) => CreateJournalEntryScreen(
+            builder: (_, state) => EditJournalEntryScreen(
               bodyPart: (state.extra as Map?)?['bodyPart'],
-              arm: (state.extra as Map?)?['arm'],
             ),
           ),
           GoRoute(
-            name: 'update-journal',
-            path: 'update',
-            builder: (_, __) => const UpdateJournalEntryScreen(),
-          ),
+              name: 'journal-list',
+              path: 'list',
+              builder: (_, state) => const JournalListScreen(),
+              routes: [
+                GoRoute(
+                  name: 'update-journal',
+                  path: ':id',
+                  builder: (_, state) => EditJournalEntryScreen(
+                    entry: (state.extra as Map?)?['entry'],
+                  ),
+                ),
+              ]),
         ],
       ),
       GoRoute(

@@ -3,7 +3,7 @@ import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/models/pagination.dart';
 
 const String apiUrl = 'https://sci-api.prod.appadem.in';
-// const String apiUrl = 'http://192.168.0.33:4000';
+// const String apiUrl = 'http://192.168.10.104:4000';
 // const String apiUrl = 'http://localhost:4000';
 const emptyBody = {};
 
@@ -148,6 +148,10 @@ class Api {
       'painLevel': painLevel,
       'bodyPart': bodyPart,
     });
+  }
+
+  Future updateJournalEntry(JournalEntry entry) async {
+    await dio.patch('/journal/$_userId/${entry.id}', data: entry.toJson());
   }
 
   Future deleteJournalEntry(int id) async {

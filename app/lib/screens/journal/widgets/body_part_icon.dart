@@ -5,11 +5,9 @@ import 'dart:math' as math;
 
 class BodyPartIcon extends StatelessWidget {
   final BodyPart bodyPart;
-  final Arm? arm;
   final double size;
 
-  const BodyPartIcon(
-      {Key? key, required this.bodyPart, this.arm, this.size = 64})
+  const BodyPartIcon({Key? key, required this.bodyPart, this.size = 64})
       : super(key: key);
 
   @override
@@ -17,12 +15,12 @@ class BodyPartIcon extends StatelessWidget {
     return Transform(
       alignment: Alignment.center,
       transform: Matrix4.rotationY(
-        arm == Arm.left ? math.pi : 0,
+        bodyPart.side == Side.left ? math.pi : 0,
       ),
       child: SizedBox(
         width: size,
         height: size,
-        child: SvgPicture.asset('assets/svg/${bodyPart.name}.svg'),
+        child: SvgPicture.asset('assets/svg/${bodyPart.type.name}.svg'),
       ),
     );
   }

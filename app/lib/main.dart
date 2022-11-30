@@ -7,12 +7,14 @@ import 'package:scimovement/router.dart';
 import 'package:scimovement/storage.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:timezone/data/latest.dart' as tz;
+import 'package:timeago/timeago.dart' as timeago;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   tz.initializeTimeZones();
   bool onboardingDone = await Storage.getOnboardingDone();
   Credentials? credentials = await Storage.getCredentials();
+  timeago.setLocaleMessages('sv', timeago.SvMessages());
   LicenseRegistry.addLicense(() async* {
     final license =
         await rootBundle.loadString('assets/licenses/icon_license.txt');
@@ -61,6 +63,7 @@ class App extends ConsumerWidget {
       routeInformationParser: router.routeInformationParser,
       routerDelegate: router.routerDelegate,
       debugShowCheckedModeBanner: false,
+      locale: const Locale('sv', 'SE'),
     );
   }
 }

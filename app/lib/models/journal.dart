@@ -29,12 +29,30 @@ class JournalState extends StateNotifier<DateTime> {
   Future createJournalEntry(Map<String, dynamic> values) async {
     String comment = values['comment'] as String;
     int painLevel = values['painLevel'] as int;
-    BodyPart bodyPart = values['bodyPart'] as BodyPart;
-    Arm? arm = values['arm'] as Arm?;
+    BodyPart bodyPart = BodyPart(
+        values['bodyPartType'] as BodyPartType, values['side'] as Side?);
 
-    String bodyPartString =
-        '${bodyPart.name}${bodyPart != BodyPart.neck ? '-${arm?.name}' : ''}';
-    await Api().createJournalEntry(comment, painLevel, bodyPartString);
+    await Api().createJournalEntry(comment, painLevel, bodyPart.toString());
+    state = DateTime.now();
+  }
+
+  Future updateJournalEntry(
+      JournalEntry entry, Map<String, dynamic> values) async {
+    String comment = values['comment'] as String;
+    int painLevel = values['painLevel'] as int;
+    BodyPart bodyPart = BodyPart(
+        values['bodyPartType'] as BodyPartType, values['side'] as Side?);
+
+    await Api().updateJournalEntry(
+      JournalEntry(
+        type: entry.type,
+        id: entry.id,
+        comment: comment,
+        painLevel: painLevel,
+        bodyPart: bodyPart,
+        time: entry.time,
+      ),
+    );
     state = DateTime.now();
   }
 
