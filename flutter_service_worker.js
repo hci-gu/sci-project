@@ -33,15 +33,15 @@ const RESOURCES = {
 "canvaskit/profiling/canvaskit.wasm": "95a45378b69e77af5ed2bc72b2209b94",
 "canvaskit/canvaskit.js": "2bc454a691c631b07a9307ac4ca47797",
 "canvaskit/canvaskit.wasm": "bf50631470eb967688cca13ee181af62",
-"index.html": "a707ee343db16b98d91cb5eb267e39c0",
-"/": "a707ee343db16b98d91cb5eb267e39c0",
+"index.html": "f7cb688860dbd815f56126ff830369d3",
+"/": "f7cb688860dbd815f56126ff830369d3",
 "version.json": "e9a71a10722f7b6b7238ca8fdb139f93",
 "manifest.json": "60cf0e8a29d91fc890f252903819f5ae",
 "icons/Icon-maskable-512.png": "301a7604d45b3e739efc881eb04896ea",
 "icons/Icon-512.png": "96e752610906ba2a93c65f8abe1645f1",
 "icons/Icon-maskable-192.png": "c457ef57daa1d16f64b27b786ec2ea3c",
 "icons/Icon-192.png": "ac9a721a12bbc803b44f645561ecb1e1",
-"main.dart.js": "c9f0530403997034f1a81f929f0a470c"
+"main.dart.js": "04cf6e21d4f5f62bfced58f5d6c93c9f"
 };
 
 // The application shell files that are downloaded before a service worker can
