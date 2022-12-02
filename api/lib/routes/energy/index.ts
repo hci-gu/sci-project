@@ -30,6 +30,10 @@ router.get(
   }
 )
 
+router.get('/:id/stats', async (req, res) => {
+  const { id } = req.params
+})
+
 router.get(
   '/:id/fill',
   getQuery,

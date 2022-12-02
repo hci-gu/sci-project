@@ -1,0 +1,41 @@
+import express from 'express'
+import { ValidatedRequest } from 'express-joi-validation'
+import { getQuery, GetQuerySchema } from '../validation'
+import AccelCountModel from '../../db/models/AccelCount'
+
+const router = express.Router()
+
+router.get(
+  '/:id',
+  getQuery,
+  async (req: ValidatedRequest<GetQuerySchema>, res) => {
+    const { id } = req.params
+    const { from, to, group } = req.query
+
+    try {
+      if (group) {
+        const counts = await AccelCountModel.group({
+          userId: id,
+          from,
+          to,
+          unit: group,
+        })
+
+        return res.json(counts)
+      }
+
+      const counts = await AccelCountModel.find({
+        userId: id,
+        from,
+        to,
+      })
+
+      return res.json(counts)
+    } catch (e) {
+      console.log('GET /counts/:id', e)
+      return res.sendStatus(500)
+    }
+  }
+)
+
+export default router
