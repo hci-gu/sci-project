@@ -74,6 +74,7 @@ const sendMessages = async (user: User) => {
 
 // run every other minute during the day
 const job = new CronJob('0 */2 8-19 * * *', async () => {
+  if (!UserModel) return
   const users = await UserModel.getAll()
 
   await Promise.all(users.filter((u) => u.deviceId).map(sendMessages))
@@ -91,7 +92,7 @@ const sendJournalMessages = async (user: User) => {
   const lastEntry = await JournalModel.getLastEntry(user.id)
   const tz: string = 'Europe/Stockholm'
 
-  if (!lastEntry || moment.tz(lastEntry.t, tz).isSame(moment(), 'day')) {
+  if (lastEntry && moment.tz(lastEntry.t, tz).isSame(moment(), 'day')) {
     // no need to send a message
     return
   }
@@ -100,8 +101,8 @@ const sendJournalMessages = async (user: User) => {
   if (lastEntry) {
     const timeWhenLastAnswered = moment.tz(lastEntry.t, tz)
 
-    // if todays hour is after the last answered hour
-    if (timeWhenLastAnswered.hour() < moment().hour()) {
+    // if current hour is same ast last answered hour
+    if (timeWhenLastAnswered.hour() === moment().hour()) {
       sendPush = true
     }
   } else if (moment().hour() === 12) {
@@ -122,8 +123,8 @@ const sendJournalMessages = async (user: User) => {
   }
 }
 
-// run every hour
-const journalJob = new CronJob('* * * * * *', async () => {
+const journalJob = new CronJob('0 0 * * * *', async () => {
+  if (!UserModel) return
   const users = await UserModel.getAll()
 
   await Promise.all(

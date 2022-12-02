@@ -122,7 +122,7 @@ router.post(
 
     try {
       const user = await UserModel.login(email, password)
-      return res.send(stripSensitive(user))
+      return res.send(await returnUser(user))
     } catch (e) {
       console.log(e)
       if (e instanceof NotFoundError) {
@@ -144,38 +144,5 @@ router.delete('/:id', async (req, res) => {
     res.sendStatus(500)
   }
 })
-
-// remove this later
-router.get(
-  '/:id/data/:type',
-  getQuery,
-  async (req: ValidatedRequest<GetQuerySchema>, res) => {
-    const { id, type } = req.params
-    let { from, to, group } = req.query
-
-    const model = type === 'accel' ? AccelModel : HeartRateModel
-    let dataPoints = []
-    try {
-      if (!group) {
-        dataPoints = await model.find({
-          userId: id,
-          from,
-          to,
-        })
-      } else {
-        dataPoints = await model.group({
-          userId: id,
-          from,
-          to,
-          unit: group,
-        })
-      }
-    } catch (e) {
-      return res.sendStatus(500)
-    }
-
-    res.json(dataPoints)
-  }
-)
 
 export default router

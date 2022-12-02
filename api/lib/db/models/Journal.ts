@@ -1,9 +1,11 @@
 import { DataTypes, Op, Sequelize, ModelStatic } from 'sequelize'
 import { Journal } from '../classes'
 
+let sequelizeInstance: Sequelize
 let JournalModel: ModelStatic<Journal>
 export default {
   init: (sequelize: Sequelize) => {
+    sequelizeInstance = sequelize
     JournalModel = sequelize.define<Journal>(
       'Journal',
       {
@@ -49,6 +51,31 @@ export default {
       },
       order: [['t', 'ASC']],
     })
+  },
+  group: ({ userId }: { userId: string }) => {
+    return JournalModel.findAll({
+      where: {
+        UserId: userId,
+      },
+      attributes: [
+        [
+          sequelizeInstance.fn('date_trunc', 'day', sequelizeInstance.col('t')),
+          'agg_t',
+        ],
+        [
+          sequelizeInstance.fn('avg', sequelizeInstance.col('painLevel')),
+          'painLevel',
+        ],
+      ],
+      group: ['agg_t'],
+      order: [[sequelizeInstance.col('agg_t'), 'ASC']],
+    }).then((docs) =>
+      docs.map((d) => ({
+        // @ts-ignore
+        t: d.get({ plain: true }).agg_t,
+        painLevel: d.painLevel,
+      }))
+    )
   },
   getLastEntry: (userId: string) => {
     return JournalModel.findOne({

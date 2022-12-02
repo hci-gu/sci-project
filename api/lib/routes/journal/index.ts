@@ -1,7 +1,9 @@
 import express from 'express'
 import { ValidatedRequest } from 'express-joi-validation'
+import moment from 'moment'
 import Journal from '../../db/models/Journal'
 import { getQuery, GetQuerySchema } from '../validation'
+import { createNoise2D } from 'simplex-noise'
 
 const router = express.Router()
 
@@ -41,6 +43,31 @@ router.patch('/:userId/:id', async (req, res) => {
   }
 })
 
+const mockBodyPart = (bodyPart: string) => {
+  const noise2D = createNoise2D()
+  const data = []
+  for (let i = 0; i < 100; i++) {
+    const value = noise2D(i / 10, 0)
+    const normalized = (value + 1) / 2
+    data.push({
+      id: i,
+      t: moment().subtract(i, 'days').toDate(),
+      type: 'pain',
+      comment: Math.random() <= 0.05 ? 'some comment' : '',
+      painLevel: Math.floor(normalized * 10),
+      bodyPart,
+    })
+  }
+  return data
+}
+
+const mockedData = () => {
+  return [
+    ...mockBodyPart('scapula-right'),
+    ...mockBodyPart('shoulderJoint-right'),
+  ]
+}
+
 router.get(
   '/:id',
   getQuery,
@@ -51,6 +78,7 @@ router.get(
       const response = await Journal.find({
         userId: id,
       })
+      // res.json(mockedData())
       res.json(response)
     } catch (e) {
       console.log('GET /journal/:id', e)
