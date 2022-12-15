@@ -27,7 +27,7 @@ class PainSlider extends StatelessWidget {
                 width: 34,
                 icon: Icons.remove,
                 onPressed: () {
-                  if (fg.value != null && fg.value! > 0) {
+                  if (fg.value != null && fg.value! > 1) {
                     fg.updateValue(fg.value != null ? fg.value! - 1 : 0);
                   }
                 },
@@ -35,7 +35,7 @@ class PainSlider extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               const Text(
-                '0',
+                '1',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
               ),
               Expanded(
@@ -48,7 +48,7 @@ class PainSlider extends StatelessWidget {
                     child: ReactiveSlider(
                       key: _key,
                       formControlName: formKey,
-                      min: 0,
+                      min: 1,
                       max: 10,
                     ),
                   ),
@@ -103,12 +103,12 @@ class PositionedSliderLabel extends HookWidget {
 
     return Positioned(
       top: -8,
-      left: 18 + _getValuePosition(value?.toDouble() ?? 0),
+      left: _getValuePosition(value?.toDouble() ?? 0),
       child: value != null
           ? SizedBox(
               width: 30,
               child: Text(
-                value?.toString() ?? '0',
+                value?.toString() ?? '1',
                 style:
                     const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
@@ -119,11 +119,11 @@ class PositionedSliderLabel extends HookWidget {
 
   double _getValuePosition(double value) {
     if (positionKey.currentContext == null) {
-      return 0;
+      return 1;
     }
     RenderBox box = positionKey.currentContext!.findRenderObject() as RenderBox;
 
-    var valueRangeSize = 10;
+    var valueRangeSize = 9;
     var valuePercent = value / valueRangeSize;
     var offset = (box.size.width - 50) * valuePercent;
 

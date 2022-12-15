@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -41,40 +40,60 @@ class JournalListScreen extends ConsumerWidget {
       onDismissed: (direction) {
         ref.read(updateJournalProvider.notifier).deleteJournalEntry(entry.id);
       },
-      confirmDismiss: (direction) => showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Ta bort'),
-          content: const Text('Är du säker på att du vill ta bort detta?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Avbryt'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Ta bort'),
-            ),
-          ],
-        ),
-      ),
+      direction: DismissDirection.endToStart,
+      confirmDismiss: (direction) => _showDeleteDialog(context),
       background: Container(
         color: AppTheme.colors.error,
-        child: const Icon(Icons.delete, color: Colors.white),
+        child: const Align(
+          alignment: Alignment.centerRight,
+          child: Padding(
+            padding: EdgeInsets.only(right: 16),
+            child: Icon(
+              Icons.delete,
+              color: Colors.white,
+            ),
+          ),
+        ),
       ),
       child: ListTile(
         leading: BodyPartIcon(bodyPart: entry.bodyPart, size: 24),
         trailing: entry.comment.isNotEmpty ? const Icon(Icons.comment) : null,
         title: Text(
             '${entry.painLevel.toString()} - ${entry.bodyPart.displayString()}'),
-        subtitle: Text(
-          DateFormat(DateFormat.YEAR_MONTH_WEEKDAY_DAY).format(entry.time),
+        subtitle: Text(_displayTime(entry.time)),
+        onTap: () => GoRouter.of(context).goNamed(
+          'update-journal',
+          params: {
+            'id': entry.id.toString(),
+          },
+          extra: {
+            'entry': entry,
+          },
         ),
-        onTap: () => GoRouter.of(context).goNamed('update-journal', params: {
-          'id': entry.id.toString(),
-        }, extra: {
-          'entry': entry,
-        }),
+      ),
+    );
+  }
+
+  String _displayTime(DateTime time) {
+    return '${DateFormat(DateFormat.HOUR24_MINUTE).format(time)}, ${DateFormat(DateFormat.YEAR_ABBR_MONTH_DAY).format(time)}';
+  }
+
+  Future<bool?> _showDeleteDialog(BuildContext context) {
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Ta bort'),
+        content: const Text('Är du säker på att du vill ta bort detta?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Avbryt'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Ta bort'),
+          ),
+        ],
       ),
     );
   }
