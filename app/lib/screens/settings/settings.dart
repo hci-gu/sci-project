@@ -23,55 +23,60 @@ class SettingsScreen extends ConsumerWidget {
     if (user == null) {
       return const Center(child: CircularProgressIndicator());
     }
-    return ListView(
-      padding: const EdgeInsets.only(left: 16, right: 16, top: 32, bottom: 16),
-      children: [
-        const Text(
-          'Profil',
-          style: TextStyle(
-            fontSize: 36,
-            fontWeight: FontWeight.bold,
+    return Scrollbar(
+      thumbVisibility: true,
+      child: ListView(
+        primary: true,
+        padding:
+            const EdgeInsets.only(left: 16, right: 16, top: 32, bottom: 16),
+        children: [
+          const Text(
+            'Profil',
+            style: TextStyle(
+              fontSize: 36,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-        AppTheme.spacer2x,
-        UserSettings(user: user),
-        AppTheme.separator,
-        Text(
-          'Appinställningar',
-          style: AppTheme.labelXLarge,
-        ),
-        const AppSettings(),
-        AppTheme.separator,
-        const LogoutButton(),
-        AppTheme.spacer2x,
-        const OnboardingButton(),
-        AppTheme.spacer2x,
-        const DeleteAccountButton(),
-        AppTheme.separator,
-        GestureDetector(
-          onTap: () async {
-            await Clipboard.setData(ClipboardData(text: user.id));
-            ScaffoldMessenger.of(context).showSnackBar(SnackbarMessage(
-              context: context,
-              message: 'Användar-ID kopierat till urklipp',
-            ));
-          },
-          child: Column(
-            children: [
-              Text(
-                'AnvändarID:',
-                style: AppTheme.labelMedium,
-              ),
-              Text(
-                user.id,
-                style: AppTheme.paragraphSmall,
-              ),
-            ],
+          AppTheme.spacer2x,
+          UserSettings(user: user),
+          AppTheme.separator,
+          Text(
+            'Appinställningar',
+            style: AppTheme.labelXLarge,
           ),
-        ),
-        AppTheme.spacer2x,
-        const AboutInfo(),
-      ],
+          const AppSettings(),
+          AppTheme.separator,
+          const LogoutButton(),
+          AppTheme.spacer2x,
+          const OnboardingButton(),
+          AppTheme.spacer2x,
+          const DeleteAccountButton(),
+          AppTheme.separator,
+          GestureDetector(
+            onTap: () async {
+              await Clipboard.setData(ClipboardData(text: user.id));
+              ScaffoldMessenger.of(context).showSnackBar(SnackbarMessage(
+                context: context,
+                message: 'Användar-ID kopierat till urklipp',
+              ));
+            },
+            child: Column(
+              children: [
+                Text(
+                  'AnvändarID:',
+                  style: AppTheme.labelMedium,
+                ),
+                Text(
+                  user.id,
+                  style: AppTheme.paragraphSmall,
+                ),
+              ],
+            ),
+          ),
+          AppTheme.spacer2x,
+          const AboutInfo(),
+        ],
+      ),
     );
   }
 }

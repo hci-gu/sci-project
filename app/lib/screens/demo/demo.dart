@@ -6,6 +6,7 @@ import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/models/bouts.dart';
 import 'package:scimovement/models/chart.dart';
+import 'package:scimovement/models/journal.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/models/energy.dart';
 import 'package:scimovement/screens/home/widgets/energy_widget.dart';
@@ -165,7 +166,15 @@ class DemoWrapper extends ConsumerWidget {
             },
           ),
         ),
+        journalProvider.overrideWithProvider(
+          FutureProvider<List<JournalEntry>>(
+            (ref) async {
+              return [];
+            },
+          ),
+        ),
         notificationsEnabledProvider.overrideWithValue(false),
+        userHasDataProvider.overrideWithValue(true),
         averageSedentaryBout,
         totalEnergyProvider,
         averageEnergyProvider,
@@ -179,7 +188,8 @@ class DemoWrapper extends ConsumerWidget {
         dailyEnergyChartProvider,
         totalMovementMinutesProvider,
         averageMovementMinutesProvider,
-        userHasDataProvider.overrideWithValue(true),
+        uniqueEntriesProvider,
+        updateJournalProvider
       ],
       child: Scaffold(
         body: child,

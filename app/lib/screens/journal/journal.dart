@@ -40,11 +40,16 @@ class JournalScreen extends ConsumerWidget {
 
   Widget _header(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: AppTheme.basePadding * 2,
-      ),
-      child: Text('Smärta', style: AppTheme.headLine2),
-    );
+        padding: EdgeInsets.symmetric(
+          horizontal: AppTheme.basePadding * 2,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Smärta', style: AppTheme.headLine2),
+            Text('Från muskler och leder', style: AppTheme.paragraphMedium),
+          ],
+        ));
   }
 
   Widget _seeAll(BuildContext context) {

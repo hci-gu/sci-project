@@ -23,14 +23,15 @@ class EditJournalEntryScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    BodyPart? initialBodyPart = entry != null ? entry!.bodyPart : bodyPart;
     return Scaffold(
-      appBar:
-          AppTheme.appBar(bodyPart?.displayString() ?? 'Lägg till kroppsdel'),
+      appBar: AppTheme.appBar(
+          initialBodyPart?.displayString() ?? 'Lägg till kroppsdel'),
       body: ListView(
         padding: AppTheme.screenPadding,
         children: [
           EditJournalEntry(
-            initialBodyPart: entry != null ? entry!.bodyPart : bodyPart,
+            initialBodyPart: initialBodyPart,
             existingEntry: entry,
           ),
         ],
@@ -59,10 +60,10 @@ class EditJournalEntry extends ConsumerWidget {
           validators: [Validators.required],
         ),
         'painLevel': FormControl<int>(
-          value: existingEntry?.painLevel ?? 0,
+          value: existingEntry?.painLevel ?? 1,
           validators: [
             Validators.required,
-            Validators.min(0),
+            Validators.min(1),
             Validators.max(10)
           ],
         ),

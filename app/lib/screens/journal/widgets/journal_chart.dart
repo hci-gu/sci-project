@@ -14,7 +14,7 @@ import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/charts/chart_wrapper.dart';
 import 'package:scimovement/widgets/charts/movement_bar_chart.dart';
 
-double chartHeight = 240;
+double chartHeight = 280;
 
 class JournalChartValue {
   final DateTime time;
@@ -135,26 +135,30 @@ class JournalChart extends HookConsumerWidget {
     }, [controlled, follow]);
 
     return Stack(children: [
+      if (!data.isEmpty) _legend(data, ref),
       ListView(
         controller: follow,
         scrollDirection: Axis.horizontal,
         shrinkWrap: true,
         reverse: true,
-        padding: const EdgeInsets.only(right: 32),
+        padding: const EdgeInsets.only(right: 32, bottom: 12),
         physics: const NeverScrollableScrollPhysics(),
         children: const [
           MovementDisplay(),
         ],
       ),
-      ListView(
+      Scrollbar(
         controller: controlled,
-        scrollDirection: Axis.horizontal,
-        shrinkWrap: true,
-        reverse: true,
-        padding: const EdgeInsets.only(right: 32),
-        children: [_buildChart(data)],
+        thumbVisibility: true,
+        child: ListView(
+          controller: controlled,
+          scrollDirection: Axis.horizontal,
+          shrinkWrap: true,
+          reverse: true,
+          padding: const EdgeInsets.only(right: 32, bottom: 16),
+          children: [_buildChart(data)],
+        ),
       ),
-      if (!data.isEmpty) _legend(data, ref),
       Positioned(
         right: AppTheme.basePadding,
         child: _yAxis(),
@@ -173,7 +177,7 @@ class JournalChart extends HookConsumerWidget {
             bodyPart.displayString(),
             AppTheme.colors.bodyPartToColor(bodyPart),
           ),
-        if (showMovement)
+        if (showMovement || true)
           _legendRow(
             'Rörelse',
             AppTheme.colors.lightGray,
@@ -211,7 +215,9 @@ class JournalChart extends HookConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text('10', style: AppTheme.paragraphMedium),
+          Text('7.5', style: AppTheme.paragraphSmall),
           Text('5', style: AppTheme.paragraphMedium),
+          Text('2.5', style: AppTheme.paragraphSmall),
           Text('1', style: AppTheme.paragraphMedium),
         ],
       ),
@@ -238,7 +244,7 @@ class JournalChart extends HookConsumerWidget {
           ),
           minX: minX,
           maxX: maxX,
-          minY: 0,
+          minY: 1,
           maxY: 10,
           lineTouchData: LineTouchData(
             touchTooltipData: LineTouchTooltipData(
