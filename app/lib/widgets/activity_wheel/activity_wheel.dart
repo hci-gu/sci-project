@@ -21,9 +21,10 @@ class ActivityGroup {
 
 List<ActivityGroup> emptyActivityGroups() {
   return [
-    ActivityGroup(Activity.sedentary, [Energy(time: DateTime.now(), value: 0)]),
-    ActivityGroup(Activity.moving, []),
-    ActivityGroup(Activity.active, []),
+    ActivityGroup(
+        Activity.sedentary, [Energy(time: DateTime.now(), value: 100)]),
+    ActivityGroup(Activity.moving, [Energy(time: DateTime.now(), value: 100)]),
+    ActivityGroup(Activity.active, [Energy(time: DateTime.now(), value: 100)]),
   ];
 }
 
@@ -68,30 +69,34 @@ class ActivityWheel extends ConsumerWidget {
             activityGroups: allEmpty ? emptyActivityGroups() : activityGroups,
           ),
           AppTheme.spacer2x,
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: activityGroups
-                .map(
-                  (e) => Row(
-                    children: [
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color:
-                              AppTheme.colors.activityLevelToColor(e.activity),
-                          borderRadius: BorderRadius.circular(8),
+          FittedBox(
+            fit: BoxFit.contain,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: activityGroups
+                  .map(
+                    (e) => Row(
+                      children: [
+                        AppTheme.spacer,
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: AppTheme.colors
+                                .activityLevelToColor(e.activity),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
-                      ),
-                      AppTheme.spacer,
-                      Text(
-                        e.activity.displayString(),
-                        style: AppTheme.labelLarge,
-                      ),
-                    ],
-                  ),
-                )
-                .toList(),
+                        AppTheme.spacer,
+                        Text(
+                          e.activity.displayString(),
+                          style: AppTheme.labelLarge,
+                        ),
+                      ],
+                    ),
+                  )
+                  .toList(),
+            ),
           )
         ],
       ),
@@ -141,37 +146,42 @@ class AnimatedWheel extends HookWidget {
       child: Stack(
         alignment: AlignmentDirectional.center,
         children: [
-          Column(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: activityGroups
-                .map(
-                  (e) => Row(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
-                    children: [
-                      Text(
-                        e.value.toStringAsFixed(0),
-                        style: TextStyle(
-                          fontSize: 38,
-                          fontWeight: FontWeight.w800,
-                          color:
-                              AppTheme.colors.activityLevelToColor(e.activity),
+          FittedBox(
+            fit: BoxFit.contain,
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: activityGroups
+                  .map(
+                    (e) => Row(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        Text(
+                          e.value.toStringAsFixed(0),
+                          style: TextStyle(
+                            fontSize:
+                                38 / MediaQuery.of(context).textScaleFactor,
+                            fontWeight: FontWeight.w800,
+                            color: AppTheme.colors
+                                .activityLevelToColor(e.activity),
+                          ),
                         ),
-                      ),
-                      Text(
-                        'kcal',
-                        style: AppTheme.labelMedium.copyWith(
-                          color:
-                              AppTheme.colors.activityLevelToColor(e.activity),
-                        ),
-                      )
-                    ],
-                  ),
-                )
-                .toList(),
+                        Text(
+                          'kcal',
+                          style: AppTheme.labelMedium.copyWith(
+                              color: AppTheme.colors
+                                  .activityLevelToColor(e.activity),
+                              fontSize:
+                                  14 / MediaQuery.of(context).textScaleFactor),
+                        )
+                      ],
+                    ),
+                  )
+                  .toList(),
+            ),
           ),
           AnimatedBuilder(
             animation: controller,

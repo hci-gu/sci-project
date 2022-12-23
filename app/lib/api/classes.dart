@@ -3,7 +3,7 @@ import 'package:timezone/standalone.dart' as tz;
 
 enum Gender { male, female }
 
-enum BodyPartType { neck, scapula, shoulderJoint, elbow, hand }
+enum BodyPartType { neck, back, scapula, shoulderJoint, elbow, hand }
 
 enum Side { left, right }
 
@@ -23,14 +23,14 @@ class BodyPart {
 
   @override
   String toString() {
-    if (type == BodyPartType.neck) {
+    if (type == BodyPartType.neck || type == BodyPartType.back) {
       return type.name;
     }
     return '${type.name}${side != null ? '-${side!.name}' : ''}';
   }
 
   String displayString() {
-    if (type == BodyPartType.neck) {
+    if (type == BodyPartType.neck || type == BodyPartType.back) {
       return type.displayString();
     }
     return '${side != null ? '${side!.displayString()} ' : ''}${type.displayString()}';
@@ -71,6 +71,8 @@ extension BodyPartTypeDisplayAsString on BodyPartType {
     switch (this) {
       case BodyPartType.neck:
         return 'Nacke';
+      case BodyPartType.back:
+        return 'Rygg';
       case BodyPartType.scapula:
         return 'Skulderblad';
       case BodyPartType.shoulderJoint:
@@ -89,6 +91,8 @@ BodyPartType? bodyPartTypeFromString(String bodyPartString) {
   switch (bodyPartString) {
     case 'neck':
       return BodyPartType.neck;
+    case 'back':
+      return BodyPartType.back;
     case 'scapula':
       return BodyPartType.scapula;
     case 'shoulderJoint':

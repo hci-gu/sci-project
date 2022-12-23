@@ -56,14 +56,22 @@ class Button extends StatelessWidget {
       style: AppTheme.buttonTextStyle(secondary, color, small),
     );
     if (subtitle != null) {
-      _text = Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          _text,
-          Text(subtitle ?? '',
-              style: AppTheme.buttonTextStyle(secondary, color, true)),
-        ],
+      _text = FittedBox(
+        fit: BoxFit.contain,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _text,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Text(
+                subtitle ?? '',
+                style: AppTheme.buttonTextStyle(secondary, color, true),
+              ),
+            ),
+          ],
+        ),
       );
     }
 

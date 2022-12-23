@@ -9,6 +9,18 @@ final journalProvider = FutureProvider<List<JournalEntry>>((ref) async {
   return journal;
 });
 
+final filteredJournalProvider = FutureProvider<List<JournalEntry>>((ref) async {
+  List<JournalEntry> journal = await ref.watch(journalProvider.future);
+  BodyPart? bodyPart = ref.watch(bodyPartFilterProvider);
+
+  if (bodyPart == null) {
+    return journal;
+  }
+
+  return journal.where((e) => e.bodyPart == bodyPart).toList();
+});
+final bodyPartFilterProvider = StateProvider<BodyPart?>((ref) => null);
+
 final uniqueEntriesProvider = FutureProvider<List<JournalEntry>>((ref) async {
   List<JournalEntry> journal = await ref.watch(journalProvider.future);
 

@@ -102,15 +102,18 @@ class PositionedSliderLabel extends HookWidget {
     }, []);
 
     return Positioned(
-      top: -8,
+      top: -12,
       left: _getValuePosition(value?.toDouble() ?? 0),
       child: value != null
-          ? SizedBox(
-              width: 30,
-              child: Text(
-                value?.toString() ?? '1',
-                style:
-                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ? FittedBox(
+              fit: BoxFit.contain,
+              child: SizedBox(
+                width: 30,
+                child: Text(
+                  value?.toString() ?? '1',
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 16),
+                ),
               ),
             )
           : Container(),
