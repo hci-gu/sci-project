@@ -13,7 +13,9 @@ class TabScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    int index = routes.indexOf(GoRouter.of(context).location);
+    int index = routes.contains(GoRouter.of(context).location)
+        ? routes.indexOf(GoRouter.of(context).location)
+        : 0;
 
     return Scaffold(
       body: SafeArea(
@@ -63,6 +65,8 @@ class TabScreen extends StatelessWidget {
         return const JournalScreen();
       case 2:
         return const SettingsScreen();
+      default:
+        return HomeScreen();
     }
   }
 }

@@ -21,10 +21,9 @@ class ActivityGroup {
 
 List<ActivityGroup> emptyActivityGroups() {
   return [
-    ActivityGroup(
-        Activity.sedentary, [Energy(time: DateTime.now(), value: 100)]),
-    ActivityGroup(Activity.moving, [Energy(time: DateTime.now(), value: 100)]),
-    ActivityGroup(Activity.active, [Energy(time: DateTime.now(), value: 100)]),
+    ActivityGroup(Activity.sedentary, [Energy(time: DateTime.now(), value: 0)]),
+    ActivityGroup(Activity.moving, []),
+    ActivityGroup(Activity.active, []),
   ];
 }
 
