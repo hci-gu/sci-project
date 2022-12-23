@@ -15,13 +15,43 @@ class JournalListScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Smärta'),
+        actions: [
+          _bodyPartFilter(ref),
+        ],
       ),
-      body: ref.watch(journalProvider).when(
+      body: ref.watch(filteredJournalProvider).when(
             data: (data) => _buildList(context, data.reversed.toList(), ref),
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, s) => Text(e.toString()),
           ),
     );
+  }
+
+  Widget _bodyPartFilter(WidgetRef ref) {
+    return ref.watch(uniqueEntriesProvider).when(
+          data: (data) => PopupMenuButton<BodyPart>(
+            icon: const Icon(Icons.filter_list),
+            onSelected: (filter) {
+              ref.read(bodyPartFilterProvider.notifier).state = filter;
+            },
+            onCanceled: () {
+              ref.read(bodyPartFilterProvider.notifier).state = null;
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(child: Text('Alla'), value: null),
+              ...data.map(
+                (e) => PopupMenuItem(
+                  child: Text(e.bodyPart.displayString()),
+                  value: e.bodyPart,
+                ),
+              ),
+            ],
+          ),
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, s) => Text(
+            e.toString(),
+          ),
+        );
   }
 
   Widget _buildList(
@@ -75,6 +105,7 @@ class JournalListScreen extends ConsumerWidget {
   }
 
   String _displayTime(DateTime time) {
+    time = DateTime.parse('2022-05-13T12:00:00.000Z');
     return '${DateFormat(DateFormat.HOUR24_MINUTE).format(time)}, ${DateFormat(DateFormat.YEAR_ABBR_MONTH_DAY).format(time)}';
   }
 

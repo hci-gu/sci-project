@@ -11,13 +11,13 @@ import 'package:scimovement/screens/detail/sedentary.dart';
 import 'package:scimovement/screens/introduction.dart';
 import 'package:scimovement/screens/journal/edit_entry.dart';
 import 'package:scimovement/screens/journal/journal_list.dart';
-import 'package:scimovement/screens/journal/update_entry.dart';
 import 'package:scimovement/screens/login.dart';
 import 'package:scimovement/screens/tab.dart';
 import 'package:scimovement/screens/onboarding/onboarding.dart';
 import 'package:scimovement/screens/register.dart';
 
 List<String> detailRoutes = ['calories', 'activity', 'sedentary'];
+String landingRoute = '/';
 
 class RouteChangeObserver extends NavigatorObserver {
   final Ref _ref;
@@ -62,18 +62,18 @@ class RouterNotifier extends ChangeNotifier {
     if (!loggedIn && state.subloc == '/loading') {
       return null;
     } else if (loggedIn && state.subloc == '/loading') {
-      return '/';
+      return landingRoute;
     }
 
     // redirect form onboarding to home when done
     if (state.subloc == '/onboarding' && _onboardingDone) {
-      return '/';
+      return landingRoute;
     }
 
     // redirect from login screen to home or onboarding after login
     if (loggedIn && _isLoginRoute(state.subloc)) {
       if (_onboardingDone) {
-        return '/';
+        return landingRoute;
       } else {
         return '/onboarding';
       }
