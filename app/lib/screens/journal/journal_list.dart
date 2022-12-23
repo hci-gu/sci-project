@@ -105,7 +105,6 @@ class JournalListScreen extends ConsumerWidget {
   }
 
   String _displayTime(DateTime time) {
-    time = DateTime.parse('2022-05-13T12:00:00.000Z');
     return '${DateFormat(DateFormat.HOUR24_MINUTE).format(time)}, ${DateFormat(DateFormat.YEAR_ABBR_MONTH_DAY).format(time)}';
   }
 
