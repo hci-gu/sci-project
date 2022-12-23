@@ -3,7 +3,7 @@ const MANIFEST = 'flutter-app-manifest';
 const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 const RESOURCES = {
-  "main.dart.js": "bf8c176a45ea0e3bd8b7c6950c34537e",
+  "main.dart.js": "a5464a7bc3522b19a67145ff58c6b737",
 "canvaskit/canvaskit.wasm": "bf50631470eb967688cca13ee181af62",
 "canvaskit/profiling/canvaskit.wasm": "95a45378b69e77af5ed2bc72b2209b94",
 "canvaskit/profiling/canvaskit.js": "38164e5a72bdad0faa4ce740c9b8e564",
@@ -39,8 +39,8 @@ const RESOURCES = {
 "assets/assets/fonts/Manrope-Regular.ttf": "d132ed5224d61c7c2c71e44cd2750999",
 "assets/assets/fonts/Manrope-Light.ttf": "d0704eb4a339c1895bf5d7a153a25c84",
 "assets/NOTICES": "d63551b5514d419e14eeac407b37a366",
-"index.html": "62c54957ad13d0b8c2ec377d46989cf3",
-"/": "62c54957ad13d0b8c2ec377d46989cf3",
+"index.html": "90ead40514b300e48914d5a6ebd0961e",
+"/": "90ead40514b300e48914d5a6ebd0961e",
 "favicon.png": "5dcef449791fa27946b3d35ad8803796",
 "version.json": "e9a71a10722f7b6b7238ca8fdb139f93"
 };
