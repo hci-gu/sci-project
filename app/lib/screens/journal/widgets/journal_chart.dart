@@ -11,7 +11,6 @@ import 'package:scimovement/models/chart.dart';
 import 'package:scimovement/models/journal.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/theme/theme.dart';
-import 'package:scimovement/widgets/charts/chart_wrapper.dart';
 import 'package:scimovement/widgets/charts/movement_bar_chart.dart';
 
 double chartHeight = 280;

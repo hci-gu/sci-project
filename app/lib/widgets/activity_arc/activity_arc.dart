@@ -1,11 +1,11 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/theme/theme.dart';
 
-class ActivityArc extends ConsumerWidget {
+class ActivityArc extends HookWidget {
   final List<Bout> bouts;
   final List<Activity> activities;
 
@@ -16,7 +16,17 @@ class ActivityArc extends ConsumerWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    final offsetAnimation = useAnimationController(
+      duration: const Duration(milliseconds: 400),
+      initialValue: _offsetForCurrentTime(width),
+      lowerBound: 0,
+      upperBound: width,
+    );
+
+    double offset = useAnimation(offsetAnimation);
+
     return ShaderMask(
       shaderCallback: (Rect rect) {
         return const LinearGradient(
@@ -28,7 +38,7 @@ class ActivityArc extends ConsumerWidget {
             Colors.transparent,
             Colors.purple
           ],
-          stops: [0.0, 0.04, 0.96, 1.0],
+          stops: [0.0, 0.02, 0.98, 1.0],
         ).createShader(rect);
       },
       blendMode: BlendMode.dstOut,
@@ -41,24 +51,64 @@ class ActivityArc extends ConsumerWidget {
           children: [
             CustomPaint(
               painter: ArcPainter(
+                deviceWidth: width,
                 bouts: bouts,
                 activities: activities,
+                dragOffset: offset,
               ),
             ),
+            CustomPaint(
+              size: const Size(1, 0),
+              painter: ClockPainter(offset),
+            ),
+            Positioned(
+              bottom: 0,
+              child: GestureDetector(
+                onHorizontalDragUpdate: (details) {
+                  offsetAnimation.value = details.globalPosition.dx;
+                },
+                onHorizontalDragEnd: (_) {
+                  offsetAnimation.animateTo(_offsetForCurrentTime(width));
+                },
+                child: Container(
+                  color: Colors.transparent,
+                  width: MediaQuery.of(context).size.width,
+                  height: 44,
+                ),
+              ),
+            )
           ],
         ),
       ),
     );
+  }
+
+  double _offsetForCurrentTime(double width) {
+    final now = DateTime.now();
+    final midnight = DateTime(now.year, now.month, now.day);
+    final minutesSinceMidnight = now.difference(midnight).inMinutes;
+
+    return width * minutesSinceMidnight / 1440;
   }
 }
 
 class ArcPainter extends CustomPainter {
   final List<Bout> bouts;
   final List<Activity> activities;
+  final double dragOffset;
+  final double deviceWidth;
 
-  ArcPainter({required this.bouts, this.activities = Activity.values});
+  ArcPainter({
+    required this.bouts,
+    required this.deviceWidth,
+    this.activities = Activity.values,
+    this.dragOffset = 0.0,
+  });
 
-  final _textPainter = TextPainter(textDirection: TextDirection.ltr);
+  final _textPainter = TextPainter(
+    textDirection: TextDirection.ltr,
+    textAlign: TextAlign.center,
+  );
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -108,9 +158,15 @@ class ArcPainter extends CustomPainter {
           ..style = PaintingStyle.stroke,
       );
     }
-    _paintText(canvas, size, '06:00', _timeOffset(6 * 60, size.width));
+    _paintText(canvas, size, '04:00', _timeOffset(4 * 60, size.width));
+    _paintText(canvas, size, '08:00', _timeOffset(8 * 60, size.width));
     _paintText(canvas, size, '12:00', _timeOffset(12 * 60, size.width));
-    _paintText(canvas, size, '18:00', _timeOffset(18 * 60, size.width));
+    _paintText(canvas, size, '16:00', _timeOffset(16 * 60, size.width));
+    _paintText(canvas, size, '20:00', _timeOffset(20 * 60, size.width));
+
+    if (dragOffset > 0) {
+      _painCenterText(canvas, size, _timeAtOffset(dragOffset));
+    }
   }
 
   Rect _rectForActivity(Activity activity, Rect rect) {
@@ -133,8 +189,16 @@ class ArcPainter extends CustomPainter {
     return 16 + minutes * width / 1440;
   }
 
+  String _timeAtOffset(double offset) {
+    DateTime timestamp = DateTime(2021, 1, 1, 0, offset * 1440 ~/ deviceWidth);
+    return '${timestamp.hour.toString().padLeft(2, '0')}:${timestamp.minute.toString().padLeft(2, '0')}';
+  }
+
   _paintText(Canvas canvas, Size size, String text, double offset) {
-    _textPainter.text = TextSpan(text: text, style: AppTheme.paragraphSmall);
+    _textPainter.text = TextSpan(
+      text: text,
+      style: AppTheme.paragraphSmall,
+    );
     _textPainter.layout(
       minWidth: 0,
       maxWidth: double.maxFinite,
@@ -143,8 +207,58 @@ class ArcPainter extends CustomPainter {
         Offset(offset - _textPainter.width, size.height - _textPainter.height));
   }
 
+  _painCenterText(Canvas canvas, Size size, String text) {
+    _textPainter.text = TextSpan(
+      text: text,
+      style: AppTheme.labelXLarge,
+    );
+    _textPainter.layout(
+      minWidth: 0,
+      maxWidth: double.maxFinite,
+    );
+    _textPainter.paint(
+        canvas,
+        Offset(
+          size.width / 2 - _textPainter.width / 2,
+          size.height - _textPainter.height - 32,
+        ));
+  }
+
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
     return true;
   }
+}
+
+class ClockPainter extends CustomPainter {
+  final double offset;
+
+  ClockPainter(this.offset);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    Rect drawRect = Rect.fromLTRB(
+        -size.width / 4, 10, size.width * 1.25, size.width * 2 + 10);
+    double circleOffset = -pi + pi / 4;
+
+    double start = _offsetToMinutes(offset, size.width) * pi / 2 / 1440;
+
+    canvas.drawArc(
+      drawRect,
+      circleOffset + start,
+      (pi * 3) / 1440,
+      false,
+      Paint()
+        ..color = AppTheme.colors.black
+        ..strokeWidth = 160
+        ..style = PaintingStyle.stroke,
+    );
+  }
+
+  double _offsetToMinutes(double offset, double width) {
+    return (offset - 16) * 1440 / width;
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
