@@ -1,29 +1,29 @@
-import { me as companion } from "companion";
-import * as messaging from "messaging";
-import { settingsStorage } from "settings";
+import { me as companion } from 'companion'
+import * as messaging from 'messaging'
+import { settingsStorage } from 'settings'
 
 // const API_URL = 'https://sci-api.prod.appadem.in'
 const API_URL = 'http://192.168.0.33:4000'
 let userId
 let lastSync
 
-if (!companion.permissions.granted("run_background")) {
-  console.warn("We're not allowed to access to run in the background!");
+if (!companion.permissions.granted('run_background')) {
+  console.warn("We're not allowed to access to run in the background!")
 }
 
 // Messaging
 function sendVal(data) {
-  switch(data.key) {
+  switch (data.key) {
     case 'userId':
       if (data.newValue) {
         try {
           userId = JSON.parse(data.newValue).name
-        } catch(e) {
+        } catch (e) {
           userId = data.newValue
         }
         console.log('set userId to', `"${userId}"`)
       }
-     break
+      break
     case 'weight':
       if (data.newValue) {
         const weight = JSON.parse(data.newValue).name
@@ -37,7 +37,7 @@ function sendVal(data) {
     case 'text':
     case 'background':
       if (messaging.peerSocket.readyState === messaging.peerSocket.OPEN) {
-        messaging.peerSocket.send(data);
+        messaging.peerSocket.send(data)
       }
       break
     default:
@@ -50,36 +50,37 @@ function postData(data, retries = 1) {
   fetch(`${API_URL}/users/${userId}/data`, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     },
     body: body,
-  }).then((res) => {
-    if (res.status === 200) {
-      lastSync = new Date()
-      sendVal({
-        key: 'lastSync',
-        newValue: `${lastSync.toLocaleDateString()} ${lastSync.toLocaleTimeString()}`
-      })
-    } else {
+  })
+    .then((res) => {
+      if (res.status === 200) {
+        lastSync = new Date()
+        sendVal({
+          key: 'lastSync',
+          newValue: `${lastSync.toLocaleDateString()} ${lastSync.toLocaleTimeString()}`,
+        })
+      } else {
+        setTimeout(() => {
+          if (retries > 0) postData(data, retries - 1)
+        }, 1000)
+        sendVal({
+          key: 'error',
+          newValue: 'error, statusCode: ' + res.status,
+        })
+      }
+    })
+    .catch((e) => {
       setTimeout(() => {
         if (retries > 0) postData(data, retries - 1)
       }, 1000)
       sendVal({
         key: 'error',
-        newValue: 'error, statusCode: ' + res.status
+        newValue: e.message,
       })
-    }
-  })
-  .catch((e) => {
-    setTimeout(() => {
-      if (retries > 0) postData(data, retries - 1)
-    }, 1000)
-    sendVal({
-      key: 'error',
-      newValue: e.message
+      setSettings('error', e.toString())
     })
-    setSettings('error', e.toString())
-  })
 }
 
 function patchUser(data) {
@@ -87,28 +88,29 @@ function patchUser(data) {
   fetch(`${API_URL}/users/${userId}`, {
     method: 'PATCH',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     },
     body: body,
-  }).then((res) => {
-    if (res.status === 200) {
-      console.log('patch weight success')
-    }
   })
-  .catch((e) => {
-    console.log('patch weight error', e)
-    setSettings('error', e.toString())
-  })
+    .then((res) => {
+      if (res.status === 200) {
+        console.log('patch weight success')
+      }
+    })
+    .catch((e) => {
+      console.log('patch weight error', e)
+      setSettings('error', e.toString())
+    })
 }
 
-messaging.peerSocket.addEventListener("open", (evt) => {
+messaging.peerSocket.addEventListener('open', (evt) => {
   console.log('companion messaging ready')
   restoreSettings()
 })
 
 let hrBatches = []
 let accelBatches = []
-messaging.peerSocket.addEventListener("message", (evt) => {
+messaging.peerSocket.addEventListener('message', (evt) => {
   if (!userId) {
     return
   }
@@ -121,30 +123,30 @@ messaging.peerSocket.addEventListener("message", (evt) => {
 
   if (accelBatches.length >= 30) {
     postData([...accelBatches, ...hrBatches])
- 
+
     accelBatches = []
     hrBatches = []
   }
 })
 
 // Settings
-settingsStorage.onchange = evt => {
+settingsStorage.onchange = (evt) => {
   console.log('settings.onchange', evt.key, evt.newValue)
   let data = {
     key: evt.key,
-    newValue: evt.newValue
-  };
+    newValue: evt.newValue,
+  }
   sendVal(data)
 }
 
 function restoreSettings() {
   for (let index = 0; index < settingsStorage.length; index++) {
-    let key = settingsStorage.key(index);
+    let key = settingsStorage.key(index)
     if (key) {
       let data = {
         key: key,
-        newValue: settingsStorage.getItem(key)
-      };
+        newValue: settingsStorage.getItem(key),
+      }
       sendVal(data)
     }
   }
