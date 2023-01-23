@@ -1,0 +1,28 @@
+{
+  "devDependencies": {
+    "@fitbit/sdk": "~6.1.0"
+  },
+  "fitbit": {
+    "appUUID": "1c0a1dfd-e31d-4ed7-bb74-b653337a9e8d",
+    "appType": "app",
+    "appDisplayName": "RullaPå",
+    "iconFile": "resources/icon.png",
+    "wipeColor": "#f44336",
+    "requestedPermissions": [
+      "access_heart_rate",
+      "access_activity",
+      "run_background",
+      "access_internet"
+    ],
+    "buildTargets": [
+      "vulcan",
+      "atlas"
+    ],
+    "i18n": {
+      "en-US": {
+        "name": "RullaPå"
+      }
+    },
+    "defaultLanguage": "en-US"
+  }
+}
