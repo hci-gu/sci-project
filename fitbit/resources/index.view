@@ -1,0 +1,5 @@
+<svg>
+  <rect id="background" />
+  <text id="text">00:00</text>
+  <text id="status">2000-01-01T00:00</text>
+</svg>
