@@ -1,30 +1,19 @@
 import clock from 'clock'
 import { me } from 'appbit'
-import { Accelerometer } from 'accelerometer'
-import { display } from 'display'
 import * as document from 'document'
-import * as messaging from 'messaging'
-import { outbox } from 'file-transfer'
+import { peerSocket } from 'messaging'
 import { HeartRateSensor } from 'heart-rate'
+import { Accelerometer } from 'accelerometer'
+import { memory } from 'system'
 
-const accelLabel = document.getElementById('accel-label')
-const accelData = document.getElementById('accel-data')
-
-const hrmLabel = document.getElementById('hrm-label')
-const hrmData = document.getElementById('hrm-data')
-
-const ACCEL_FREQUENCY = 30
-const ACCEL_BATCH = 10
-const HRM_FREQUENCY = 1
-const HRM_BATCH = HRM_FREQUENCY * 10
-
+const initialDate = Date.now()
 clock.granularity = 'minutes'
 me.appTimeoutEnabled = false // Disable timeout this keeps the app alive always.
 
-messaging.peerSocket.addEventListener('open', (evt) => {
+peerSocket.addEventListener('open', (evt) => {
   console.log('Ready to send or receive messages')
 })
-messaging.peerSocket.onmessage = (evt) => {
+peerSocket.onmessage = (evt) => {
   switch (evt.data.key) {
     case 'text':
     case 'background':
@@ -38,78 +27,35 @@ messaging.peerSocket.onmessage = (evt) => {
       break
   }
 }
-const initialDate = Date.now()
-let initialReadingOffset
 
-console.log('STARTING', new Date(initialDate))
-var time = new Date(),
-  secondsRemaining = (60 - time.getSeconds()) * 1000
+let backlog = []
+const sendData = async (payload) => {
+  try {
+    if (backlog.length > 0) {
+      console.log('Sending backlog', backlog)
+      backlog.forEach((b) => {
+        peerSocket.send(JSON.stringify(b))
+      })
+      backlog = []
+    }
+    peerSocket.send(JSON.stringify(payload))
+  } catch (e) {
+    console.log('Error sending data', e)
+    backlog.push(payload)
+  }
+}
 
-let accel
-let hrm
+let time = new Date()
+let secondsRemaining = (60 - time.getSeconds()) * 1000
+
 setTimeout(() => {
   console.log('START COLLECTION', new Date())
   accel.start()
   hrm.start()
 }, secondsRemaining)
 
-const sendData = async (payload) => {
-  messaging.peerSocket.send(JSON.stringify(payload))
-}
-
-if (Accelerometer) {
-  accel = new Accelerometer({ frequency: ACCEL_FREQUENCY, batch: ACCEL_BATCH })
-  accel.addEventListener('reading', () => {
-    if (!initialReadingOffset)
-      initialReadingOffset = accel.readings.timestamp[0]
-    let accelData = []
-    let start =
-      initialDate + (accel.readings.timestamp[0] - initialReadingOffset)
-
-    for (let index = 0; index < accel.readings.timestamp.length; index++) {
-      let t =
-        initialDate + (accel.readings.timestamp[index] - initialReadingOffset)
-      accelData.push([
-        t,
-        accel.readings.x[index],
-        accel.readings.y[index],
-        accel.readings.z[index],
-      ])
-    }
-    sendData({
-      type: 'accel',
-      data: accelData,
-    })
-  })
-} else {
-  accelLabel.style.display = 'none'
-  accelData.style.display = 'none'
-}
-
-if (HeartRateSensor) {
-  hrm = new HeartRateSensor({ frequency: HRM_FREQUENCY, batch: HRM_BATCH })
-  hrm.addEventListener('reading', () => {
-    if (!initialReadingOffset)
-      initialReadingOffset = accel.readings.timestamp[0]
-
-    let hrmData = []
-    for (let index = 0; index < hrm.readings.timestamp.length; index++) {
-      let t =
-        initialDate + (hrm.readings.timestamp[index] - initialReadingOffset)
-      hrmData.push([t, hrm.readings.heartRate[index]])
-    }
-    sendData({
-      type: 'heartRate',
-      data: hrmData,
-    })
-  })
-} else {
-  hrmLabel.style.display = 'none'
-  hrmData.style.display = 'none'
-}
-
 /*
-Clock
+  Clock
 */
 let background = document.getElementById('background')
 let label = document.getElementById('text')
@@ -150,3 +96,85 @@ function updateClockSettings({ key, newValue }) {
 }
 
 clock.ontick = () => updateClock()
+
+/*
+  Accel
+*/
+const ACCEL_FREQUENCY = 30
+let initialAccReading
+let accTimestamp
+let accelData = []
+
+const accel = new Accelerometer({
+  frequency: ACCEL_FREQUENCY,
+  batch: ACCEL_FREQUENCY,
+})
+accel.addEventListener('reading', () => {
+  if (!initialAccReading) {
+    initialAccReading = accel.readings.timestamp[0]
+    accTimestamp =
+      initialDate + (accel.readings.timestamp[0] - initialAccReading)
+  }
+
+  // we have a full minute of data, calculate counts and clear array
+  if (accelData.length >= 5400) {
+    const acc = calculateCounts(accelData)
+    sendData({
+      type: 'acc',
+      timestamp: accTimestamp,
+      value: acc,
+    })
+    accelData = []
+    accTimestamp =
+      initialDate + (accel.readings.timestamp[0] - initialAccReading)
+  }
+
+  for (let index = 0; index < accel.readings.timestamp.length; index++) {
+    accelData.push(accel.readings.x[index])
+    accelData.push(accel.readings.y[index])
+    accelData.push(accel.readings.z[index])
+  }
+})
+
+/*
+  Counts
+*/
+const getCounts = (values) => {
+  return values
+}
+
+const calculateCounts = (acc) => {
+  const x = acc.reduce((a, b, i) => a + (i % 3 === 0 ? b : 0))
+  const y = acc.reduce((a, b, i) => a + (i % 3 === 1 ? b : 0))
+  const z = acc.reduce((a, b, i) => a + (i % 3 === 2 ? b : 0))
+  const accVM = Math.sqrt(x * x + y * y + z * z)
+
+  return accVM
+}
+
+/*
+  HR 
+*/
+
+const HRM_FREQUENCY = 1
+const HRM_BATCH = HRM_FREQUENCY * 60
+let initialHrReading
+
+const hrm = new HeartRateSensor({
+  frequency: HRM_FREQUENCY,
+  batch: HRM_BATCH,
+})
+hrm.addEventListener('reading', () => {
+  if (!initialHrReading) initialHrReading = hrm.readings.timestamp[0]
+
+  let timestamp = initialDate + (hrm.readings.timestamp[0] - initialHrReading)
+  const heartrate =
+    hrm.readings.heartRate.reduce((acc, curr) => acc + curr, 0) /
+    hrm.readings.heartRate.length
+
+  sendData({
+    type: 'hr',
+    timestamp,
+    value: heartrate,
+  })
+})

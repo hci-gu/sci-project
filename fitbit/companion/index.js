@@ -45,42 +45,53 @@ function sendVal(data) {
   }
 }
 
-function postData(data, retries = 1) {
-  const body = JSON.stringify(data)
-  fetch(`${API_URL}/users/${userId}/data`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: body,
-  })
-    .then((res) => {
-      if (res.status === 200) {
-        lastSync = new Date()
-        sendVal({
-          key: 'lastSync',
-          newValue: `${lastSync.toLocaleDateString()} ${lastSync.toLocaleTimeString()}`,
-        })
-      } else {
-        setTimeout(() => {
-          if (retries > 0) postData(data, retries - 1)
-        }, 1000)
-        sendVal({
-          key: 'error',
-          newValue: 'error, statusCode: ' + res.status,
-        })
-      }
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
+const postRequestWithRetries = async (data, retries = 1) => {
+  try {
+    const body = JSON.stringify(data)
+    const res = await fetch(`${API_URL}/users/${userId}/data`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: body,
     })
-    .catch((e) => {
-      setTimeout(() => {
-        if (retries > 0) postData(data, retries - 1)
-      }, 1000)
-      sendVal({
-        key: 'error',
-        newValue: e.message,
-      })
-      setSettings('error', e.toString())
+    if (res.status !== 200) {
+      await wait(1000)
+      if (retries > 0) return postData(data, retries - 1)
+      throw new Error(`Error posting data: ${res.status}`)
+    }
+    // all good
+    lastSync = new Date()
+    sendVal({
+      key: 'lastSync',
+      newValue: `${lastSync.toLocaleDateString()} ${lastSync.toLocaleTimeString()}`,
     })
+  } catch (e) {
+    await wait(1000)
+    if (retries > 0) return postData(data, retries - 1)
+    throw e
+  }
+}
+
+let backlog = []
+async function postData(data) {
+  // if we have something in the backlog try it first
+  if (backlog.length > 0) {
+    console.log('Sending backlog', backlog)
+  }
+
+  try {
+    await postRequestWithRetries(data)
+  } catch (e) {
+    sendVal({
+      key: 'error',
+      newValue: e.message,
+    })
+    setSettings('error', e.toString())
+    backlog.push(data)
+  }
 }
 
 function patchUser(data) {
@@ -108,24 +119,25 @@ messaging.peerSocket.addEventListener('open', (evt) => {
   restoreSettings()
 })
 
-let hrBatches = []
-let accelBatches = []
+let cache = {}
 messaging.peerSocket.addEventListener('message', (evt) => {
-  if (!userId) {
-    return
-  }
+  // if (!userId) {
+  //   return
+  // }
   const event = JSON.parse(evt.data)
-  if (event.type === 'accel') {
-    accelBatches.push(event)
-  } else if (event.type === 'heartRate') {
-    hrBatches.push(event)
+  const minute = Math.round(event.timestamp / 60000) * 60000
+  if (!cache[minute]) {
+    cache[minute] = {}
   }
+  cache[minute][event.type] = event.value
 
-  if (accelBatches.length >= 30) {
-    postData([...accelBatches, ...hrBatches])
-
-    accelBatches = []
-    hrBatches = []
+  if (cache[minute].acc && cache[minute].hr) {
+    postData({
+      t: minute,
+      a: cache[minute].acc,
+      hr: cache[minute].hr,
+    })
+    delete cache[minute]
   }
 })
 
