@@ -4,9 +4,9 @@ const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 const RESOURCES = {
   "flutter.js": "1cfe996e845b3a8a33f57607e8b09ee4",
-"index.html": "878d3366ef16d23e0607af807a065fbd",
-"/": "878d3366ef16d23e0607af807a065fbd",
-"main.dart.js": "b6f83256a239f5d1b7d7aaa372c3afd2",
+"index.html": "638eb68c17490270ce929cf764a12989",
+"/": "638eb68c17490270ce929cf764a12989",
+"main.dart.js": "973fc9ab8a14d3c0844fc4e0fbc55246",
 "manifest.json": "60cf0e8a29d91fc890f252903819f5ae",
 "favicon.png": "5dcef449791fa27946b3d35ad8803796",
 "icons/Icon-512.png": "96e752610906ba2a93c65f8abe1645f1",
@@ -14,7 +14,7 @@ const RESOURCES = {
 "icons/Icon-maskable-192.png": "c457ef57daa1d16f64b27b786ec2ea3c",
 "icons/Icon-192.png": "ac9a721a12bbc803b44f645561ecb1e1",
 "assets/FontManifest.json": "eda3f246271a3a4de7fa1c70eb5fc7a7",
-"assets/NOTICES": "09eb20734c8ff626c60d0aa940ea0531",
+"assets/NOTICES": "d88fe75a4295cea1b8bf629812e31884",
 "assets/fonts/MaterialIcons-Regular.otf": "e7069dfd19b331be16bed984668fe080",
 "assets/assets/fonts/Manrope-Bold.ttf": "2af19b388ce4f0e3617fed61faea284e",
 "assets/assets/fonts/Manrope-Medium.ttf": "36bd05140475db525b9617f601c201a6",
