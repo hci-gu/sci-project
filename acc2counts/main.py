@@ -5,7 +5,42 @@ import json
 
 from scipy import signal
 
-import resampy
+def custom_filter(b, a, x, zi):
+    filter_order = max(len(a), len(b))
+    y = []
+    # make copy of zi into zi
+    zi = np.copy(zi)
+    # add a 0 to end of zi
+    zi = np.append(zi, 0)
+    for i in range(len(x)):
+        order = filter_order - 1
+        while order > 0:
+            if (i >= order):
+                zi[order - 1] = b[order] * x[i - order] - a[order] * y[i - order] + zi[order]
+            order -= 1
+        y.append(b[0] * x[i] + zi[0])
+    return y
+
+def custom_filtfilt(b, a, x, zi):
+    # Apply 'odd' padding to input signal
+    padding_length = 3 * max(len(a), len(b))  # the scipy.signal.filtfilt default
+    x_forward = np.concatenate((
+        [2 * x[0] - xi for xi in x[padding_length:0:-1]],
+        x,
+        [2 * x[-1] - xi for xi in x[-2:-padding_length-2:-1]]))
+
+    # Filter forward
+    y_forward = custom_filter(b, a, x_forward, zi * x_forward[0])
+
+    # Filter backward
+    x_backward = y_forward[::-1]  # reverse
+    y_backward = custom_filter(b, a, x_backward, zi * x_backward[0])
+
+    # Remove padding and reverse
+    return y_backward[-padding_length-1:padding_length-1:-1]
+
+
+# import resampy
 
 A_coeff = np.array(
     [1, -4.1637, 7.5712,-7.9805, 5.385, -2.4636, 0.89238, 0.06361, -1.3481, 2.4734, -2.9257, 2.9298, -2.7816, 2.4777,
@@ -80,11 +115,20 @@ def counts(data, filesf, B=B_coeff, A=A_coeff):
     integN = 10
     gain = 0.965
 
-    if filesf>sf:
-        data = resampy.resample(np.asarray(data), filesf, sf)
+    # if filesf>sf:
+    #     data = resampy.resample(np.asarray(data), filesf, sf)
 
     B2, A2 = signal.butter(4, np.array([0.01, 7])/(sf/2), btype='bandpass')
-    dataf = signal.filtfilt(B2, A2, data)
+
+    # zi = signal.lfilter_zi(B2, A2)
+    # print(json.dumps(zi.tolist()))
+    zi = [-0.07532883864659122, -0.0753546620840857, 0.22603070565973946, 0.22598432569253424, -0.22599275859607648, -0.22600915159543014, 0.07533559105142006, 0.07533478851866574]
+    zi = np.asarray(zi)
+
+    # dataf = signal.filtfilt(B2, A2, data)
+    dataf = custom_filtfilt(B2, A2, data, zi)
+
+    # return dataf[:10]
 
     B = B * gain
 
@@ -106,4 +150,5 @@ data = json.load(f)
 # print(data)
 cs = counts(data, int(freq))
 
+# print(len(cs))
 print(json.dumps(cs.tolist()))
