@@ -4,7 +4,7 @@ import { settingsStorage } from 'settings'
 
 // const API_URL = 'https://sci-api.prod.appadem.in'
 const API_URL = 'http://192.168.0.33:4000'
-let userId
+let userId = 'e27b1eb1-015d-45e9-8ef1-18c842a676fd'
 let lastSync
 
 if (!companion.permissions.granted('run_background')) {
@@ -45,53 +45,49 @@ function sendVal(data) {
   }
 }
 
-const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
-
-const postRequestWithRetries = async (data, retries = 1) => {
-  try {
-    const body = JSON.stringify(data)
-    const res = await fetch(`${API_URL}/users/${userId}/data`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: body,
-    })
-    if (res.status !== 200) {
-      await wait(1000)
-      if (retries > 0) return postData(data, retries - 1)
-      throw new Error(`Error posting data: ${res.status}`)
-    }
-    // all good
-    lastSync = new Date()
-    sendVal({
-      key: 'lastSync',
-      newValue: `${lastSync.toLocaleDateString()} ${lastSync.toLocaleTimeString()}`,
-    })
-  } catch (e) {
-    await wait(1000)
-    if (retries > 0) return postData(data, retries - 1)
-    throw e
-  }
-}
-
 let backlog = []
-async function postData(data) {
-  // if we have something in the backlog try it first
-  if (backlog.length > 0) {
-    console.log('Sending backlog', backlog)
+function postData(data, retries = 1) {
+  if (retries <= 0) {
+    backlog.push(data)
+    return
   }
 
-  try {
-    await postRequestWithRetries(data)
-  } catch (e) {
-    sendVal({
-      key: 'error',
-      newValue: e.message,
+  const body = JSON.stringify([...backlog, data])
+  fetch(`${API_URL}/counts/${userId}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: body,
+  })
+    .then((res) => {
+      if (res.status === 200) {
+        backlog = []
+        lastSync = new Date()
+        sendVal({
+          key: 'lastSync',
+          newValue: `${lastSync.toLocaleDateString()} ${lastSync.toLocaleTimeString()}`,
+        })
+      } else {
+        setTimeout(() => {
+          postData(data, retries - 1)
+        }, 1000)
+        sendVal({
+          key: 'error',
+          newValue: 'error, statusCode: ' + res.status,
+        })
+      }
     })
-    setSettings('error', e.toString())
-    backlog.push(data)
-  }
+    .catch((e) => {
+      setTimeout(() => {
+        postData(data, retries - 1)
+      }, 1000)
+      sendVal({
+        key: 'error',
+        newValue: e.message,
+      })
+      setSettings('error', e.toString())
+    })
 }
 
 function patchUser(data) {
@@ -121,23 +117,25 @@ messaging.peerSocket.addEventListener('open', (evt) => {
 
 let cache = {}
 messaging.peerSocket.addEventListener('message', (evt) => {
-  // if (!userId) {
-  //   return
-  // }
-  const event = JSON.parse(evt.data)
-  const minute = Math.round(event.timestamp / 60000) * 60000
-  if (!cache[minute]) {
-    cache[minute] = {}
+  if (!userId) {
+    return
   }
-  cache[minute][event.type] = event.value
+  const event = JSON.parse(evt.data)
+  const key = Math.round(event.timestamp / 60000) * 60000
+  if (!cache[key]) {
+    cache[key] = {
+      t: key,
+    }
+  }
+  cache[key][event.type] = event.value
 
-  if (cache[minute].acc && cache[minute].hr) {
+  if (cache[key].hr && cache[key].acc) {
     postData({
-      t: minute,
-      a: cache[minute].acc,
-      hr: cache[minute].hr,
+      t: cache[key].t,
+      hr: cache[key].hr,
+      a: cache[key].acc,
     })
-    delete cache[minute]
+    delete cache[key]
   }
 })
 
