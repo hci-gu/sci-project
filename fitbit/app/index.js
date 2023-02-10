@@ -5,6 +5,7 @@ import { peerSocket } from 'messaging'
 import { HeartRateSensor } from 'heart-rate'
 import { Accelerometer } from 'accelerometer'
 import { memory } from 'system'
+import calculateCounts from './counts'
 
 const initialDate = Date.now()
 clock.granularity = 'minutes'
@@ -30,6 +31,8 @@ peerSocket.onmessage = (evt) => {
 
 let backlog = []
 const sendData = async (payload) => {
+  console.log(JSON.stringify(payload, null, 2))
+  return
   try {
     if (backlog.length > 0) {
       console.log('Sending backlog', backlog)
@@ -52,7 +55,7 @@ setTimeout(() => {
   console.log('START COLLECTION', new Date())
   accel.start()
   hrm.start()
-}, secondsRemaining)
+}, 0)
 
 /*
   Clock
@@ -101,15 +104,19 @@ clock.ontick = () => updateClock()
   Accel
 */
 const ACCEL_FREQUENCY = 30
+const ACCEL_LENGTH = 600
 let initialAccReading
 let accTimestamp
-let accelData = []
+let accelDataX = new Float32Array(ACCEL_LENGTH)
+let accelDataY = new Float32Array(ACCEL_LENGTH)
+let accelDataZ = new Float32Array(ACCEL_LENGTH)
+let accelIndex = 0
 
 const accel = new Accelerometer({
   frequency: ACCEL_FREQUENCY,
   batch: ACCEL_FREQUENCY,
 })
-accel.addEventListener('reading', () => {
+accel.addEventListener('reading', async () => {
   if (!initialAccReading) {
     initialAccReading = accel.readings.timestamp[0]
     accTimestamp =
@@ -117,22 +124,38 @@ accel.addEventListener('reading', () => {
   }
 
   // we have a full minute of data, calculate counts and clear array
-  if (accelData.length >= 5400) {
-    const acc = calculateCounts(accelData)
+  console.log(
+    'JS memory: ' +
+      memory.js.used +
+      '/' +
+      memory.js.total +
+      ', index:' +
+      accelIndex
+  )
+  //  if (accelData.length >= 5400) {
+  if (accelIndex >= ACCEL_LENGTH) {
+    console.log(new Date())
+    const acc = calculateCounts(accelDataX, accelDataY, accelDataZ)
+    console.log(new Date())
     sendData({
       type: 'acc',
       timestamp: accTimestamp,
       value: acc,
     })
-    accelData = []
+    accelIndex = 0
+    accelDataX = new Float32Array(ACCEL_LENGTH)
+    accelDataY = new Float32Array(ACCEL_LENGTH)
+    accelDataZ = new Float32Array(ACCEL_LENGTH)
+
     accTimestamp =
       initialDate + (accel.readings.timestamp[0] - initialAccReading)
   }
 
   for (let index = 0; index < accel.readings.timestamp.length; index++) {
-    accelData.push(accel.readings.x[index])
-    accelData.push(accel.readings.y[index])
-    accelData.push(accel.readings.z[index])
+    accelDataX[accelIndex] = accel.readings.x[index] / 9.82
+    accelDataY[accelIndex] = accel.readings.y[index] / 9.82
+    accelDataZ[accelIndex] = accel.readings.z[index] / 9.82
+    accelIndex++
   }
 })
 
@@ -141,15 +164,6 @@ accel.addEventListener('reading', () => {
 */
 const getCounts = (values) => {
   return values
-}
-
-const calculateCounts = (acc) => {
-  const x = acc.reduce((a, b, i) => a + (i % 3 === 0 ? b : 0))
-  const y = acc.reduce((a, b, i) => a + (i % 3 === 1 ? b : 0))
-  const z = acc.reduce((a, b, i) => a + (i % 3 === 2 ? b : 0))
-  const accVM = Math.sqrt(x * x + y * y + z * z)
-
-  return accVM
 }
 
 /*
