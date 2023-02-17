@@ -11,7 +11,7 @@ const runsum = (data, length, threshold) => {
   const cnt = Math.ceil(N / length)
 
   // create rs with cnt zeroes, oneliner
-  const rs = []
+  const rs = new Float32Array(cnt)
   for (var i = 0; i < cnt; i++) {
     rs[i] = 0
   }
@@ -44,24 +44,28 @@ const odd_ext = (x, n) => {
 const filterAB2 = (x, z = zi) => {
   const y = x
   z = z.map((d) => d * x[0])
-  for (var i = 0; i < 8; i++) {
+  const x0 = new Float32Array(9)
+  for (let i = 0; i < x0.length; i++) {
+    x0[i] = x[i]
+  }
+  for (var i = 0; i < 9; i++) {
     if (i >= 8)
       z[7] =
-        0.0753349039750657 * x[i - 8] - 0.019035473586069288 * y[i - 8] + z[8]
+        0.0753349039750657 * x0[i - 8] - 0.019035473586069288 * y[i - 8] + z[8]
     if (i >= 7) z[6] = -(-0.1323148049950936) * y[i - 7] + z[7]
     if (i >= 6)
       z[5] =
-        -0.3013396159002628 * x[i - 6] - 0.8452545660100996 * y[i - 6] + z[6]
+        -0.3013396159002628 * x0[i - 6] - 0.8452545660100996 * y[i - 6] + z[6]
     if (i >= 5) z[4] = -(-2.7027389238066353) * y[i - 5] + z[5]
     if (i >= 4)
-      z[3] = 0.4520094238503942 * x[i - 4] - 5.33187310787808 * y[i - 4] + z[4]
+      z[3] = 0.4520094238503942 * x0[i - 4] - 5.33187310787808 * y[i - 4] + z[4]
     if (i >= 3) z[2] = -(-7.64673626503976) * y[i - 3] + z[3]
     if (i >= 2)
       z[1] =
-        -0.3013396159002628 * x[i - 2] - 7.543176557521139 * y[i - 2] + z[2]
+        -0.3013396159002628 * x0[i - 2] - 7.543176557521139 * y[i - 2] + z[2]
     if (i >= 1) z[0] = -(-4.2575497111306) * y[i - 1] + z[1]
 
-    y[i] = 0.0753349039750657 * x[i] + z[0]
+    y[i] = x[i] = 0.0753349039750657 * x[i] + z[0]
   }
   let yi8 = y[0],
     yi7 = y[1],
@@ -71,15 +75,15 @@ const filterAB2 = (x, z = zi) => {
     yi3 = y[5],
     yi2 = y[6],
     yi1 = y[7]
-  let xi8 = x[0],
-    xi7 = x[1],
-    xi6 = x[2],
-    xi5 = x[3],
-    xi4 = x[4],
-    xi3 = x[5],
-    xi2 = x[6],
-    xi1 = x[7]
-  for (var i = 8; i < x.length; i++) {
+  let xi8 = x0[0],
+    xi7 = x0[1],
+    xi6 = x0[2],
+    xi5 = x0[3],
+    xi4 = x0[4],
+    xi3 = x0[5],
+    xi2 = x0[6],
+    xi1 = x0[7]
+  for (var i = 9; i < x.length; i++) {
     let za = z[8]
     za = 0.0753349039750657 * xi8 - 0.019035473586069288 * yi8 + za
     za = -(-0.1323148049950936) * yi7 + za
@@ -89,7 +93,6 @@ const filterAB2 = (x, z = zi) => {
     za = -(-7.64673626503976) * yi3 + za
     za = -0.3013396159002628 * xi2 - 7.543176557521139 * yi2 + za
     za = -(-4.2575497111306) * yi1 + za
-    y[i] = 0.0753349039750657 * x[i] + za
     yi8 = yi7
     yi7 = yi6
     yi6 = yi5
@@ -97,7 +100,7 @@ const filterAB2 = (x, z = zi) => {
     yi4 = yi3
     yi3 = yi2
     yi2 = yi1
-    yi1 = y[i]
+    yi1 = 0.0753349039750657 * x[i] + za
     xi8 = xi7
     xi7 = xi6
     xi6 = xi5
@@ -106,6 +109,7 @@ const filterAB2 = (x, z = zi) => {
     xi3 = xi2
     xi2 = xi1
     xi1 = x[i]
+    y[i] = x[i] = yi1
   }
   return y
 }
@@ -113,52 +117,57 @@ const filterAB2 = (x, z = zi) => {
 const filterAB2Reverse = (x, z = zi) => {
   const y = x
   z = z.map((d) => d * x[x.length - 1])
-  for (var i = 0; i < 8; i++) {
+  const x0 = new Float32Array(9)
+  for (let i = 0; i < x0.length; i++) {
+    x0[i] = x[x.length - 9 + i]
+  }
+  for (var i = 0; i < 9; i++) {
     if (i >= 8)
       z[7] =
-        0.0753349039750657 * x[x.length - 1 - i + 8] -
-        0.019035473586069288 * y[i - 8] +
+        0.0753349039750657 * x0[x0.length - 1 - i + 8] -
+        0.019035473586069288 * y[x.length - 1 - i + 8] +
         z[8]
-    if (i >= 7) z[6] = -(-0.1323148049950936) * y[i - 7] + z[7]
+    if (i >= 7) z[6] = -(-0.1323148049950936) * y[x.length - 1 - i + 7] + z[7]
     if (i >= 6)
       z[5] =
-        -0.3013396159002628 * x[x.length - 1 - i + 6] -
-        0.8452545660100996 * y[i - 6] +
+        -0.3013396159002628 * x0[x0.length - 1 - i + 6] -
+        0.8452545660100996 * y[x.length - 1 - i + 6] +
         z[6]
-    if (i >= 5) z[4] = -(-2.7027389238066353) * y[i - 5] + z[5]
+    if (i >= 5) z[4] = -(-2.7027389238066353) * y[x.length - 1 - i + 5] + z[5]
     if (i >= 4)
       z[3] =
-        0.4520094238503942 * x[x.length - 1 - i + 4] -
-        5.33187310787808 * y[i - 4] +
+        0.4520094238503942 * x0[x0.length - 1 - i + 4] -
+        5.33187310787808 * y[x.length - 1 - i + 4] +
         z[4]
-    if (i >= 3) z[2] = -(-7.64673626503976) * y[i - 3] + z[3]
+    if (i >= 3) z[2] = -(-7.64673626503976) * y[x.length - 1 - i + 3] + z[3]
     if (i >= 2)
       z[1] =
-        -0.3013396159002628 * x[x.length - 1 - i + 2] -
-        7.543176557521139 * y[i - 2] +
+        -0.3013396159002628 * x0[x0.length - 1 - i + 2] -
+        7.543176557521139 * y[x.length - 1 - i + 2] +
         z[2]
-    if (i >= 1) z[0] = -(-4.2575497111306) * y[i - 1] + z[1]
+    if (i >= 1) z[0] = -(-4.2575497111306) * y[x.length - 1 - i + 1] + z[1]
 
-    y[i] = 0.0753349039750657 * x[x.length - 1 - i] + z[0]
+    y[x.length - 1 - i] = x[x.length - 1 - i] =
+      0.0753349039750657 * x0[x0.length - 1 - i] + z[0]
   }
 
-  let yi8 = y[0],
-    yi7 = y[1],
-    yi6 = y[2],
-    yi5 = y[3],
-    yi4 = y[4],
-    yi3 = y[5],
-    yi2 = y[6],
-    yi1 = y[7]
-  let xi8 = x[x.length - 1],
-    xi7 = x[x.length - 2],
-    xi6 = x[x.length - 3],
-    xi5 = x[x.length - 4],
-    xi4 = x[x.length - 5],
-    xi3 = x[x.length - 6],
-    xi2 = x[x.length - 7],
-    xi1 = x[x.length - 8]
-  for (var i = 8; i < x.length; i++) {
+  let yi8 = y[y.length - 1],
+    yi7 = y[y.length - 2],
+    yi6 = y[y.length - 3],
+    yi5 = y[y.length - 4],
+    yi4 = y[y.length - 5],
+    yi3 = y[y.length - 6],
+    yi2 = y[y.length - 7],
+    yi1 = y[y.length - 8]
+  let xi8 = x0[x0.length - 1],
+    xi7 = x0[x0.length - 2],
+    xi6 = x0[x0.length - 3],
+    xi5 = x0[x0.length - 4],
+    xi4 = x0[x0.length - 5],
+    xi3 = x0[x0.length - 6],
+    xi2 = x0[x0.length - 7],
+    xi1 = x0[x0.length - 8]
+  for (var i = 9; i < x.length; i++) {
     let za = z[8]
     za = 0.0753349039750657 * xi8 - 0.019035473586069288 * yi8 + za
     za = -(-0.1323148049950936) * yi7 + za
@@ -168,7 +177,6 @@ const filterAB2Reverse = (x, z = zi) => {
     za = -(-7.64673626503976) * yi3 + za
     za = -0.3013396159002628 * xi2 - 7.543176557521139 * yi2 + za
     za = -(-4.2575497111306) * yi1 + za
-    y[i] = 0.0753349039750657 * x[x.length - 1 - i] + za
     yi8 = yi7
     yi7 = yi6
     yi6 = yi5
@@ -176,7 +184,7 @@ const filterAB2Reverse = (x, z = zi) => {
     yi4 = yi3
     yi3 = yi2
     yi2 = yi1
-    yi1 = y[i]
+    yi1 = 0.0753349039750657 * x[x.length - 1 - i] + za
     xi8 = xi7
     xi7 = xi6
     xi6 = xi5
@@ -185,44 +193,50 @@ const filterAB2Reverse = (x, z = zi) => {
     xi3 = xi2
     xi2 = xi1
     xi1 = x[x.length - 1 - i]
+    y[x.length - 1 - i] = x[x.length - 1 - i] = yi1
   }
   return y
 }
 
 const filterAB = (x, z) => {
-  const y = new Array(x.length)
+  const y = x
   z = z.map((d) => d * x[0])
-  for (var i = 0; i < 20; i++) {
+  const x0 = new Float32Array(21)
+  for (let i = 0; i < x0.length; i++) {
+    x0[i] = x[i]
+  }
+  for (var i = 0; i < 21; i++) {
     if (i >= 20)
-      z[19] = -0.00018936195 * x[i - 20] - 0.019852 * y[i - 20] + z[20]
+      z[19] = -0.00018936195 * x0[i - 20] - 0.019852 * y[i - 20] + z[20]
     if (i >= 19)
-      z[18] = -0.0007813798 * x[i - 19] - -0.13832 * y[i - 19] + z[19]
-    if (i >= 18) z[17] = 0.0033278025 * x[i - 18] - 0.4162 * y[i - 18] + z[18]
+      z[18] = -0.0007813798 * x0[i - 19] - -0.13832 * y[i - 19] + z[19]
+    if (i >= 18) z[17] = 0.0033278025 * x0[i - 18] - 0.4162 * y[i - 18] + z[18]
     if (i >= 17)
-      z[16] = -0.009048032999999999 * x[i - 17] - -0.67312 * y[i - 17] + z[17]
+      z[16] = -0.009048032999999999 * x0[i - 17] - -0.67312 * y[i - 17] + z[17]
     if (i >= 16)
-      z[15] = 0.012385774999999998 * x[i - 16] - 0.46565 * y[i - 16] + z[16]
+      z[15] = 0.012385774999999998 * x0[i - 16] - 0.46565 * y[i - 16] + z[16]
     if (i >= 15)
-      z[14] = -0.0044642829999999994 * x[i - 15] - 0.46483 * y[i - 15] + z[15]
-    if (i >= 14) z[13] = -0.012522805 * x[i - 14] - -1.6847 * y[i - 14] + z[14]
-    if (i >= 13) z[12] = 0.035013095 * x[i - 13] - 2.4777 * y[i - 13] + z[13]
-    if (i >= 12) z[11] = -0.044404475 * x[i - 12] - -2.7816 * y[i - 12] + z[12]
-    if (i >= 11) z[10] = 0.046172355 * x[i - 11] - 2.9298 * y[i - 11] + z[11]
+      z[14] = -0.0044642829999999994 * x0[i - 15] - 0.46483 * y[i - 15] + z[15]
+    if (i >= 14) z[13] = -0.012522805 * x0[i - 14] - -1.6847 * y[i - 14] + z[14]
+    if (i >= 13) z[12] = 0.035013095 * x0[i - 13] - 2.4777 * y[i - 13] + z[13]
+    if (i >= 12) z[11] = -0.044404475 * x0[i - 12] - -2.7816 * y[i - 12] + z[12]
+    if (i >= 11) z[10] = 0.046172355 * x0[i - 11] - 2.9298 * y[i - 11] + z[11]
     if (i >= 10)
-      z[9] = -0.050736804999999996 * x[i - 10] - -2.9257 * y[i - 10] + z[10]
-    if (i >= 9) z[8] = 0.047021555 * x[i - 9] - 2.4734 * y[i - 9] + z[9]
-    if (i >= 8) z[7] = -0.03681861 * x[i - 8] - -1.3481 * y[i - 8] + z[8]
-    if (i >= 7) z[6] = 0.017865045 * x[i - 7] - 0.06361 * y[i - 7] + z[7]
+      z[9] = -0.050736804999999996 * x0[i - 10] - -2.9257 * y[i - 10] + z[10]
+    if (i >= 9) z[8] = 0.047021555 * x0[i - 9] - 2.4734 * y[i - 9] + z[9]
+    if (i >= 8) z[7] = -0.03681861 * x0[i - 8] - -1.3481 * y[i - 8] + z[8]
+    if (i >= 7) z[6] = 0.017865045 * x0[i - 7] - 0.06361 * y[i - 7] + z[7]
     if (i >= 6)
-      z[5] = 0.0061545770000000005 * x[i - 6] - 0.89238 * y[i - 6] + z[6]
-    if (i >= 5) z[4] = -0.01952195 * x[i - 5] - -2.4636 * y[i - 5] + z[5]
-    if (i >= 4) z[3] = 0.05192086 * x[i - 4] - 5.385 * y[i - 4] + z[4]
+      z[5] = 0.0061545770000000005 * x0[i - 6] - 0.89238 * y[i - 6] + z[6]
+    if (i >= 5) z[4] = -0.01952195 * x0[i - 5] - -2.4636 * y[i - 5] + z[5]
+    if (i >= 4) z[3] = 0.05192086 * x0[i - 4] - 5.385 * y[i - 4] + z[4]
     if (i >= 3)
-      z[2] = -0.10874584999999999 * x[i - 3] - -7.9805 * y[i - 3] + z[3]
-    if (i >= 2) z[1] = 0.13853539999999998 * x[i - 2] - 7.5712 * y[i - 2] + z[2]
-    if (i >= 1) z[0] = -0.1185406 * x[i - 1] - -4.1637 * y[i - 1] + z[1]
+      z[2] = -0.10874584999999999 * x0[i - 3] - -7.9805 * y[i - 3] + z[3]
+    if (i >= 2)
+      z[1] = 0.13853539999999998 * x0[i - 2] - 7.5712 * y[i - 2] + z[2]
+    if (i >= 1) z[0] = -0.1185406 * x0[i - 1] - -4.1637 * y[i - 1] + z[1]
 
-    y[i] = 0.047390185 * x[i] + z[0]
+    y[i] = x[i] = 0.047390185 * x0[i] + z[0]
   }
   let yi20 = y[0],
     yi19 = y[1],
@@ -245,27 +259,27 @@ const filterAB = (x, z) => {
     yi2 = y[18],
     yi1 = y[19]
 
-  let xi20 = x[0],
-    xi19 = x[1],
-    xi18 = x[2],
-    xi17 = x[3],
-    xi16 = x[4],
-    xi15 = x[5],
-    xi14 = x[6],
-    xi13 = x[7],
-    xi12 = x[8],
-    xi11 = x[9],
-    xi10 = x[10],
-    xi9 = x[11],
-    xi8 = x[12],
-    xi7 = x[13],
-    xi6 = x[14],
-    xi5 = x[15],
-    xi4 = x[16],
-    xi3 = x[17],
-    xi2 = x[18],
-    xi1 = x[19]
-  for (var i = 20; i < x.length; i++) {
+  let xi20 = x0[0],
+    xi19 = x0[1],
+    xi18 = x0[2],
+    xi17 = x0[3],
+    xi16 = x0[4],
+    xi15 = x0[5],
+    xi14 = x0[6],
+    xi13 = x0[7],
+    xi12 = x0[8],
+    xi11 = x0[9],
+    xi10 = x0[10],
+    xi9 = x0[11],
+    xi8 = x0[12],
+    xi7 = x0[13],
+    xi6 = x0[14],
+    xi5 = x0[15],
+    xi4 = x0[16],
+    xi3 = x0[17],
+    xi2 = x0[18],
+    xi1 = x0[19]
+  for (var i = 21; i < x.length; i++) {
     let za = z[20]
 
     za = -0.00018936195 * xi20 - 0.019852 * yi20 + za
@@ -289,7 +303,6 @@ const filterAB = (x, z) => {
     za = 0.13853539999999998 * xi2 - 7.5712 * yi2 + za
     za = -0.1185406 * xi1 - -4.1637 * yi1 + za
 
-    y[i] = 0.047390185 * x[i] + za
     yi20 = yi19
     yi19 = yi18
     yi18 = yi17
@@ -309,7 +322,7 @@ const filterAB = (x, z) => {
     yi4 = yi3
     yi3 = yi2
     yi2 = yi1
-    yi1 = y[i]
+    yi1 = 0.047390185 * x[i] + za
     xi20 = xi19
     xi19 = xi18
     xi18 = xi17
@@ -330,6 +343,7 @@ const filterAB = (x, z) => {
     xi3 = xi2
     xi2 = xi1
     xi1 = x[i]
+    y[i] = x[i] = yi1
   }
   return y
 }
@@ -337,11 +351,9 @@ const filterAB = (x, z) => {
 const filtfilt = (x) => {
   const edge = 27
   const data = odd_ext(x, edge)
-  // const y = filter(b, a, data)
-  // console.log(y)
   const y = filterAB2(data)
   const y2 = filterAB2Reverse(y)
-  return y2.slice(edge, -edge)
+  return y2.subarray(edge, -edge)
 }
 
 const getCounts = (values) => {
@@ -365,12 +377,39 @@ const getCounts = (values) => {
       ),
     integN,
     0
-  ).reduce((a, b) => a + b)
+  ).reduce((a, b) => a + b, 0)
+  // const filtered = filtfilt(values)
+  // const fx8up = filterAB(filtered, zi_zeros)
+  // const fx8 = fx8up
+  //   .filter((_, i) => i % 3 === 0)
+  //   .map((d) =>
+  //     d < -peakThreshold
+  //       ? -peakThreshold
+  //       : d > peakThreshold
+  //       ? peakThreshold
+  //       : d
+  //   )
+  // const truncated = fx8.map((d) =>
+  //   Math.abs(d) < deadband ? 0 : Math.floor(Math.abs(d) / adcResolution)
+  // )
+  // return runsum(truncated, integN, 0).reduce((a, b) => a + b, 0)
 }
 
 export default (accX, accY, accZ) => {
   const [x, y, z] = [getCounts(accX), getCounts(accY), getCounts(accZ)]
-  const accVM = Math.sqrt(x * x + y * y + z * z)
+  return Math.sqrt(x * x + y * y + z * z)
 
-  return accVM
+  // return new Promise((resolve) => {
+  //   setTimeout(() => {
+  //     const x = getCounts(accX)
+  //     setTimeout(() => {
+  //       const y = getCounts(accY)
+  //       setTimeout(() => {
+  //         const z = getCounts(accZ)
+  //         const accVM = Math.sqrt(x * x + y * y + z * z)
+  //         resolve(accVM)
+  //       }, 1)
+  //     }, 1)
+  //   }, 1)
+  // })
 }
