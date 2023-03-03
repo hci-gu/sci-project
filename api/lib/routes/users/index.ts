@@ -1,5 +1,6 @@
 import express from 'express'
 import { ValidatedRequest } from 'express-joi-validation'
+import AccelCountModel from '../../db/models/AccelCount'
 import AccelModel from '../../db/models/Accel'
 import HeartRateModel from '../../db/models/HeartRate'
 
@@ -26,7 +27,7 @@ const stripSensitive = (user: User) => {
 }
 
 const returnUser = async (user: User) => {
-  const hasData = await HeartRateModel.hasData(user.id)
+  const hasData = await AccelCountModel.hasData(user.id)
   return {
     ...stripSensitive(user),
     hasData,
