@@ -5,6 +5,7 @@ import { peerSocket } from 'messaging'
 import { HeartRateSensor } from 'heart-rate'
 import { Accelerometer } from 'accelerometer'
 import { memory } from 'system'
+import calculateCounts from './counts'
 
 const initialDate = Date.now()
 clock.granularity = 'minutes'
@@ -58,7 +59,8 @@ setTimeout(() => {
   Clock
 */
 let background = document.getElementById('background')
-let label = document.getElementById('text')
+let timeLabel = document.getElementById('time')
+let dateLabel = document.getElementById('date')
 let statusLabel = document.getElementById('status')
 function zeroPad(i) {
   if (i < 10) {
@@ -66,12 +68,32 @@ function zeroPad(i) {
   }
   return i
 }
+const weekDays = ['Sön', 'Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör']
+const monthNames = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'Maj',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Okt',
+  'Nov',
+  'Dec',
+]
 function updateClock() {
   let today = new Date()
   let hours = today.getHours()
   let mins = zeroPad(today.getMinutes())
 
-  label.text = `${hours}:${mins}`
+  timeLabel.text = `${hours}:${mins}`
+
+  let day = today.getDate()
+  let month = today.getMonth() + 1
+  let weekDay = today.getDay()
+  dateLabel.text = `${weekDays[weekDay]} ${day} ${monthNames[month - 1]}`
 }
 
 function updateClockSettings({ key, newValue }) {
@@ -101,80 +123,72 @@ clock.ontick = () => updateClock()
   Accel
 */
 const ACCEL_FREQUENCY = 30
+const ACCEL_LENGTH = 1800
 let initialAccReading
 let accTimestamp
-let accelData = []
-
+let accelDataX = new Float32Array(ACCEL_LENGTH)
+let accelDataY = new Float32Array(ACCEL_LENGTH)
+let accelDataZ = new Float32Array(ACCEL_LENGTH)
+let accelIndex = 0
 const accel = new Accelerometer({
   frequency: ACCEL_FREQUENCY,
-  batch: ACCEL_FREQUENCY,
+  batch: ACCEL_FREQUENCY * 20,
 })
-accel.addEventListener('reading', () => {
+accel.addEventListener('reading', async () => {
   if (!initialAccReading) {
     initialAccReading = accel.readings.timestamp[0]
-    accTimestamp =
-      initialDate + (accel.readings.timestamp[0] - initialAccReading)
   }
-
-  // we have a full minute of data, calculate counts and clear array
-  if (accelData.length >= 5400) {
-    const acc = calculateCounts(accelData)
-    sendData({
-      type: 'acc',
-      timestamp: accTimestamp,
-      value: acc,
-    })
-    accelData = []
+  if (accelIndex === 0) {
     accTimestamp =
       initialDate + (accel.readings.timestamp[0] - initialAccReading)
   }
 
   for (let index = 0; index < accel.readings.timestamp.length; index++) {
-    accelData.push(accel.readings.x[index])
-    accelData.push(accel.readings.y[index])
-    accelData.push(accel.readings.z[index])
+    accelDataX[accelIndex] = accel.readings.x[index] / 9.82
+    accelDataY[accelIndex] = accel.readings.y[index] / 9.82
+    accelDataZ[accelIndex] = accel.readings.z[index] / 9.82
+    accelIndex++
+  }
+  if (accelIndex >= ACCEL_LENGTH) {
+    const acc = calculateCounts(accelDataX, accelDataY, accelDataZ).then(
+      (acc) => {
+        if (avgHr == 0) return
+        sendData({
+          type: 'count',
+          timestamp: accTimestamp,
+          acc: acc,
+          hr: avgHr,
+        })
+        accelIndex = 0
+        accelDataX = new Float32Array(ACCEL_LENGTH)
+        accelDataY = new Float32Array(ACCEL_LENGTH)
+        accelDataZ = new Float32Array(ACCEL_LENGTH)
+      }
+    )
   }
 })
 
 /*
-  Counts
-*/
-const getCounts = (values) => {
-  return values
-}
-
-const calculateCounts = (acc) => {
-  const x = acc.reduce((a, b, i) => a + (i % 3 === 0 ? b : 0))
-  const y = acc.reduce((a, b, i) => a + (i % 3 === 1 ? b : 0))
-  const z = acc.reduce((a, b, i) => a + (i % 3 === 2 ? b : 0))
-  const accVM = Math.sqrt(x * x + y * y + z * z)
-
-  return accVM
-}
-
-/*
   HR 
 */
-
 const HRM_FREQUENCY = 1
-const HRM_BATCH = HRM_FREQUENCY * 60
-let initialHrReading
+const HRM_BATCH = HRM_FREQUENCY * 5
+let accumHr = 0
+let avgHr = 0
+let hrReadings = 0
 
 const hrm = new HeartRateSensor({
   frequency: HRM_FREQUENCY,
   batch: HRM_BATCH,
 })
 hrm.addEventListener('reading', () => {
-  if (!initialHrReading) initialHrReading = hrm.readings.timestamp[0]
-
-  let timestamp = initialDate + (hrm.readings.timestamp[0] - initialHrReading)
-  const heartrate =
-    hrm.readings.heartRate.reduce((acc, curr) => acc + curr, 0) /
-    hrm.readings.heartRate.length
-
-  sendData({
-    type: 'hr',
-    timestamp,
-    value: heartrate,
-  })
+  for (let i = 0; i < hrm.readings.timestamp.length; i++) {
+    accumHr += hrm.readings.heartRate[i]
+    hrReadings++
+  }
+  if (hrReadings >= 60) {
+    avgHr = accumHr / hrReadings
+    accumHr = 0
+    hrReadings = 0
+  }
 })
