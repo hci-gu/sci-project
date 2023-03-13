@@ -12,14 +12,12 @@ spec:
       labels:
         app: python-counts
     spec:
-      nodeSelector:
-        type: worker
       containers:
         - name: python-counts
-          image: 'appademin/sci-python-counts'
+          image: 'appademin/sci-python-counts:1.0.0'
           imagePullPolicy: Always
           ports:
-            - containerPort: 80
+            - containerPort: 8080
               name: web
               protocol: TCP
           env:
@@ -37,4 +35,4 @@ spec:
     app: python-counts
   ports:
     - protocol: TCP
-      port: 80
+      port: 8080

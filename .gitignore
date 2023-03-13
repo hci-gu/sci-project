@@ -1,3 +1,6 @@
 data/postgres
+data_old
 .DS_Store
 .npm
+
+deploy/secrets.yaml

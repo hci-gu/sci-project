@@ -12,8 +12,6 @@ spec:
       labels:
         app: adminer
     spec:
-      nodeSelector:
-        type: worker
       containers:
         - name: adminer
           image: 'adminer:latest'
@@ -34,14 +32,20 @@ spec:
     - protocol: TCP
       port: 8080
 ---
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
+kind: Route
+apiVersion: route.openshift.io/v1
 metadata:
-  name: sci-adminer-ingress
+  name: appademin-sci-adminer
+  namespace: appademin-ryggmargsskadecentrum
 spec:
-  routes:
-  - match: Host(`sci-db.appadem.in`) && PathPrefix(`/`)
-    kind: Rule
-    services:
-    - name: adminer-service
-      port: 8080
+  host: a.apps.k8s.gu.se
+  to:
+    kind: Service
+    name: adminer-service
+    weight: 100
+  port:
+    targetPort: 8080
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None
