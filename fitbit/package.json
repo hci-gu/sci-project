@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "bench": "node ./test/runBench.js"
   },
   "devDependencies": {
     "@fitbit/sdk": "~6.1.0",
@@ -29,5 +30,8 @@
     },
     "defaultLanguage": "en-US"
   },
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "@airbnb/node-memwatch": "^2.0.0"
+  }
 }

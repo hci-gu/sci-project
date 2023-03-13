@@ -128,6 +128,12 @@ const Model = {
           } as AccelCount)
       )
     ),
+  hasData: (userId: string) =>
+    AccelCountModel.findOne({
+      where: {
+        UserId: userId,
+      },
+    }).then((doc) => !!doc),
 }
 
 export default Model
