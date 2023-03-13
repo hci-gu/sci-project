@@ -2,18 +2,22 @@ PODS:
   - Flutter (1.0.0)
   - hexcolor (0.0.1):
     - Flutter
+  - package_info_plus (0.4.5):
+    - Flutter
   - push_ios (0.0.1):
     - Flutter
-  - shared_preferences_ios (0.0.1):
+  - shared_preferences_foundation (0.0.1):
     - Flutter
+    - FlutterMacOS
   - url_launcher_ios (0.0.1):
     - Flutter
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
   - hexcolor (from `.symlinks/plugins/hexcolor/ios`)
+  - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - push_ios (from `.symlinks/plugins/push_ios/ios`)
-  - shared_preferences_ios (from `.symlinks/plugins/shared_preferences_ios/ios`)
+  - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/ios`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
 
 EXTERNAL SOURCES:
@@ -21,20 +25,23 @@ EXTERNAL SOURCES:
     :path: Flutter
   hexcolor:
     :path: ".symlinks/plugins/hexcolor/ios"
+  package_info_plus:
+    :path: ".symlinks/plugins/package_info_plus/ios"
   push_ios:
     :path: ".symlinks/plugins/push_ios/ios"
-  shared_preferences_ios:
-    :path: ".symlinks/plugins/shared_preferences_ios/ios"
+  shared_preferences_foundation:
+    :path: ".symlinks/plugins/shared_preferences_foundation/ios"
   url_launcher_ios:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
 
 SPEC CHECKSUMS:
-  Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
+  Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
   hexcolor: fdfb9c4258ad96e949c2dbcdf790a62194b8aa89
+  package_info_plus: 6c92f08e1f853dc01228d6f553146438dafcd14e
   push_ios: 347ca1075a0c296a48544bd1424f401dddb942ee
-  shared_preferences_ios: 548a61f8053b9b8a49ac19c1ffbc8b92c50d68ad
-  url_launcher_ios: 839c58cdb4279282219f5e248c3321761ff3c4de
+  shared_preferences_foundation: 297b3ebca31b34ec92be11acd7fb0ba932c822ca
+  url_launcher_ios: ae1517e5e344f5544fb090b079e11f399dfbe4d2
 
-PODFILE CHECKSUM: fe0e1ee7f3d1f7d00b11b474b62dd62134535aea
+PODFILE CHECKSUM: 7368163408c647b7eb699d0d788ba6718e18fb8d
 
-COCOAPODS: 1.11.2
+COCOAPODS: 1.11.3

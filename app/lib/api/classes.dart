@@ -182,7 +182,7 @@ class User {
     this.gender,
     this.condition,
     this.injuryLevel,
-    this.hasData = false,
+    this.hasData = true,
     this.deviceId,
   });
 
