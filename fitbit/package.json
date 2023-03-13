@@ -30,5 +30,8 @@
     },
     "defaultLanguage": "en-US"
   },
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "@airbnb/node-memwatch": "^2.0.0"
+  }
 }
