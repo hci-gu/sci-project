@@ -2,9 +2,10 @@ import { me as companion } from 'companion'
 import * as messaging from 'messaging'
 import { settingsStorage } from 'settings'
 
-// const API_URL = 'https://sci-api.prod.appadem.in'
-const API_URL = 'http://192.168.0.33:4000'
-let userId = 'e27b1eb1-015d-45e9-8ef1-18c842a676fd'
+const API_URL = 'https://sci-api.prod.appadem.in'
+//const API_URL = 'http://192.168.0.33:4000'
+let userId = 'f312df8a-5408-49c9-a805-a96e5d6b2aa3'
+// let userId = 'e27b1eb1-015d-45e9-8ef1-18c842a676fd'
 let lastSync
 
 if (!companion.permissions.granted('run_background')) {
@@ -115,28 +116,16 @@ messaging.peerSocket.addEventListener('open', (evt) => {
   restoreSettings()
 })
 
-let cache = {}
 messaging.peerSocket.addEventListener('message', (evt) => {
   if (!userId) {
     return
   }
   const event = JSON.parse(evt.data)
-  const key = Math.round(event.timestamp / 60000) * 60000
-  if (!cache[key]) {
-    cache[key] = {
-      t: key,
-    }
-  }
-  cache[key][event.type] = event.value
-
-  if (cache[key].hr && cache[key].acc) {
-    postData({
-      t: cache[key].t,
-      hr: cache[key].hr,
-      a: cache[key].acc,
-    })
-    delete cache[key]
-  }
+  postData({
+    t: event.timestamp,
+    hr: event.hr,
+    a: event.acc,
+  })
 })
 
 // Settings
