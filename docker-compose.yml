@@ -6,8 +6,8 @@ services:
       - 8888:8888
     environment:
       JUPYTER_ENABLE_LAB: 'yes'
-    # volumes:
-    #   - ./jupyter/notebooks:/home/jovyan/work
+    volumes:
+      - ./jupyter/notebooks:/home/jovyan/work
   # api:
   #   build: './api'
   #   depends_on:
@@ -29,12 +29,12 @@ services:
     ports:
       - 5555:80
   postgres:
-    image: postgres:14.1
+    image: appademin/sci-pg:1.0.0
     hostname: postgres
     ports:
       - 5432:5432
-    volumes:
-      - ./data/postgres:/var/lib/postgresql/data
+    # volumes:
+    #   - ./data/postgres:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: password
@@ -45,3 +45,7 @@ services:
     restart: always
     ports:
       - 8080:8080
+  redis:
+    image: redis:7.0.0
+    ports:
+      - 6379:6379
