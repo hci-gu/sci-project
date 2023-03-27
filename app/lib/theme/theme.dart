@@ -20,12 +20,14 @@ class AppColors {
   final moving = HexColor('#748DD9');
   final active = HexColor('#40a740');
   final sedentary = HexColor('#C82D38');
+  final exercise = HexColor('#F7B500');
 
   Color activityLevelToColor(Activity activity) {
     switch (activity) {
       case Activity.moving:
         return moving;
       case Activity.active:
+      case Activity.weights:
         return active;
       case Activity.sedentary:
         return sedentary;

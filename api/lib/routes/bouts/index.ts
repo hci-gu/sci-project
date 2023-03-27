@@ -1,7 +1,8 @@
 import express from 'express'
 import { ValidatedRequest } from 'express-joi-validation'
 import { getQuery, GetQuerySchema } from '../validation'
-import { boutsForPeriod } from './utils'
+import { boutsForPeriod, removeBout, saveBout } from './utils'
+import { boutBody, BoutBodySchema } from './validation'
 
 const router = express.Router()
 
@@ -27,5 +28,30 @@ router.get(
     }
   }
 )
+
+router.post(
+  '/:id',
+  boutBody,
+  async (req: ValidatedRequest<BoutBodySchema>, res) => {
+    try {
+      const bout = await saveBout(req.params.id, req.body)
+      res.send(bout)
+    } catch (e) {
+      console.log('POST /bouts/:id', e)
+      return res.sendStatus(500)
+    }
+  }
+)
+
+router.delete('/:userId/:id', async (req, res) => {
+  const { userId, id } = req.params
+
+  try {
+    await removeBout(userId, id)
+    res.sendStatus(200)
+  } catch (e) {
+    res.sendStatus(500)
+  }
+})
 
 export default router

@@ -139,3 +139,18 @@ export const saveEnergyFromCount = async (user: User, count: AccelCount) => {
     user.id
   )
 }
+
+export const overwriteEnergy = async (userId: string, energy: Energy[]) => {
+  const from = energy[0].t
+  const to = energy[energy.length - 1].t
+  // TODO: >= <= on between?
+  await EnergyModel.destroy({
+    where: {
+      UserId: userId,
+      t: {
+        [Op.between]: [from, to],
+      },
+    },
+  })
+  await Model.save(energy, userId)
+}

@@ -88,8 +88,8 @@ final journalChartProvider = FutureProvider<JournalChartValues>((ref) async {
           .where((e) =>
               e.bodyPart == bodyPart && _getDay(e.time).isAtSameMomentAs(date))
           .toList();
-      double value = entries.isEmpty
-          ? 0.0
+      double? value = entries.isEmpty
+          ? null
           : entries
                   .map((e) => e.painLevel)
                   .reduce((value, element) => value + element) /
@@ -97,7 +97,11 @@ final journalChartProvider = FutureProvider<JournalChartValues>((ref) async {
       String? comment =
           entries.isEmpty ? null : entries.map((e) => e.comment).join('\n');
       return JournalChartValue(
-          time: date, value: value, bodyPart: bodyPart, comment: comment);
+        time: date,
+        value: value,
+        bodyPart: bodyPart,
+        comment: comment,
+      );
     });
   }
 
@@ -259,7 +263,8 @@ class JournalChart extends HookConsumerWidget {
                     DateTime.fromMillisecondsSinceEpoch(spots.first.x.toInt());
                 List<JournalChartValue> entries = data.entries.values
                     .expand((e) => e)
-                    .where((e) => e.time.isAtSameMomentAs(time))
+                    .where(
+                        (e) => e.time.isAtSameMomentAs(time) && e.value != null)
                     .toList();
 
                 return entries.map((entry) {
@@ -289,10 +294,12 @@ class JournalChart extends HookConsumerWidget {
                 .map((e) => LineChartBarData(
                       spots: e.value
                           .map(
-                            (e) => FlSpot(
-                              e.time.millisecondsSinceEpoch.toDouble(),
-                              e.value ?? -1,
-                            ),
+                            (e) => e.value != null
+                                ? FlSpot(
+                                    e.time.millisecondsSinceEpoch.toDouble(),
+                                    e.value!,
+                                  )
+                                : FlSpot.nullSpot,
                           )
                           .toList(),
                       barWidth: 2,

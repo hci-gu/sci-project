@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:scimovement/models/auth.dart';
@@ -8,6 +9,7 @@ import 'package:scimovement/screens/home/widgets/no_data_message.dart';
 import 'package:scimovement/screens/home/widgets/sedentary_widget.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/activity_wheel/activity_wheel.dart';
+import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/date_select.dart';
 
 class HomeScreen extends HookConsumerWidget {
@@ -41,6 +43,13 @@ class HomeScreen extends HookConsumerWidget {
               ],
             ),
           if (!showDataWidgets) const NoDataMessage(),
+          AppTheme.spacer2x,
+          Button(
+            width: 225,
+            onPressed: () => context.goNamed('exercise'),
+            icon: Icons.electric_bolt_outlined,
+            title: 'Träningspass',
+          )
         ],
       ),
     );

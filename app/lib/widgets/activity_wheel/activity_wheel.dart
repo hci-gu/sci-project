@@ -31,11 +31,11 @@ final activityProvider = FutureProvider<List<ActivityGroup>>((ref) async {
   List<Energy> energy =
       await ref.watch(energyProvider(const Pagination()).future);
 
-  return Activity.values
+  return [Activity.active, Activity.moving, Activity.sedentary]
       .map(
         (activity) => ActivityGroup(
           activity,
-          energy.where((e) => e.activity == activity).toList(),
+          energy.where((e) => e.activity.group == activity.group).toList(),
         ),
       )
       .toList();
@@ -217,6 +217,7 @@ class AnimatedWheel extends HookWidget {
       case Activity.moving:
         return const Interval(0.4, 0.6, curve: Curves.easeInOut);
       case Activity.active:
+      case Activity.weights:
         return const Interval(0.7, 1, curve: Curves.easeInOut);
     }
   }

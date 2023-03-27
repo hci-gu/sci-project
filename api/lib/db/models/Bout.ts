@@ -1,6 +1,7 @@
 import moment from 'moment'
 import { DataTypes, Op, Sequelize, ModelStatic } from 'sequelize'
 import { activityForAccAndCondition } from '../../adapters/energy'
+import AccelCountModel from './AccelCount'
 import { Activity, MINUTES_FOR_SLEEP } from '../../constants'
 import { AccelCount, Bout, User } from '../classes'
 
@@ -53,6 +54,8 @@ const Model = {
       UserId: userId,
       isSleeping: false,
     }),
+  get: (id: string) => BoutModel.findOne({ where: { id } }),
+  remove: (id: string) => BoutModel.destroy({ where: { id } }),
   find: ({
     userId,
     from,
@@ -63,6 +66,7 @@ const Model = {
     to: Date
   }): Promise<Bout[]> =>
     BoutModel.findAll({
+      attributes: ['id', 't', 'activity', 'minutes'],
       where: {
         UserId: userId,
         isSleeping: false,
@@ -147,6 +151,9 @@ export const createBoutFromCounts = async (
     attributes: ['id', 't', 'activity', 'minutes'],
     where: {
       UserId: user.id,
+      activity: {
+        [Op.in]: [Activity.sedentary, Activity.moving, Activity.active],
+      },
     },
     order: [['t', 'DESC']],
   })
