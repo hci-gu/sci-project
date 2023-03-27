@@ -215,11 +215,7 @@ class User {
   }
 }
 
-enum Activity {
-  sedentary,
-  moving,
-  active,
-}
+enum Activity { sedentary, moving, active, weights }
 
 extension ActivityDisplayString on Activity {
   String displayString() {
@@ -229,9 +225,26 @@ extension ActivityDisplayString on Activity {
       case Activity.moving:
         return 'Rörelse';
       case Activity.active:
+      case Activity.weights:
         return 'Aktiv';
       default:
         return toString();
+    }
+  }
+}
+
+extension ActivityGroupValue on Activity {
+  int get group {
+    switch (this) {
+      case Activity.sedentary:
+        return 0;
+      case Activity.moving:
+        return 1;
+      case Activity.active:
+      case Activity.weights:
+        return 2;
+      default:
+        return 0;
     }
   }
 }
@@ -244,6 +257,8 @@ Activity activityFromString(string) {
       return Activity.moving;
     case 'active':
       return Activity.active;
+    case 'weights':
+      return Activity.weights;
     default:
       return Activity.moving;
   }
@@ -276,20 +291,33 @@ class Energy {
 }
 
 class Bout {
+  final int id;
   final DateTime time;
   final int minutes;
   final Activity activity;
 
-  Bout({required this.time, required this.minutes, required this.activity});
+  Bout(
+      {required this.id,
+      required this.time,
+      required this.minutes,
+      required this.activity});
 
   factory Bout.fromJson(Map<String, dynamic> json) {
     String minutesString = json['minutes'].toString();
 
     return Bout(
+      id: json['id'] ?? -1,
       time: tz.TZDateTime.parse(tz.getLocation(Api().tz), json['t']),
       minutes: double.parse(minutesString).toInt(),
       activity: activityFromString(json['activity']),
     );
+  }
+
+  String get displayDuration {
+    DateTime from = time;
+    DateTime to = time.add(Duration(minutes: minutes));
+    // HH:mm - HH:mm
+    return '${from.hour.toString().padLeft(2, '0')}:${from.minute.toString().padLeft(2, '0')} - ${to.hour.toString().padLeft(2, '0')}:${to.minute.toString().padLeft(2, '0')}';
   }
 }
 

@@ -72,7 +72,7 @@ class OnboardingHomeScreen extends ConsumerWidget {
             AppTheme.spacer4x,
             Discovery(
               visible: ref.watch(onboardingStepProvider) == 1,
-              child: const ActivityWheel(),
+              child: const SizedBox(height: 300, child: ActivityWheel()),
               message: const Positioned(
                 bottom: -150,
                 child: OnboardingStepMessage(

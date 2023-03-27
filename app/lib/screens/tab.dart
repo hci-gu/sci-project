@@ -40,7 +40,7 @@ class TabScreen extends StatelessWidget {
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.menu_book_sharp),
-              label: 'Journal',
+              label: 'Loggbok',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person_outline),

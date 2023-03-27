@@ -110,9 +110,9 @@ class StatWidget extends StatelessWidget {
                 ),
               ),
               Text(
-                ' from yesterday.',
+                '  från igår.         ',
                 style: AppTheme.labelTiny,
-              )
+              ),
             ],
           )
         ],

@@ -100,7 +100,7 @@ class NotificationToggles extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Journalpåminnelser', style: AppTheme.paragraphMedium),
+              Text('Loggbokspåminnelser', style: AppTheme.paragraphMedium),
               CupertinoSwitch(
                 thumbColor: AppTheme.colors.white,
                 activeColor: AppTheme.colors.primary,

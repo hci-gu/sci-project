@@ -15,6 +15,19 @@ final boutsProvider =
   return bouts;
 });
 
+final excerciseBoutsProvider = FutureProvider<List<Bout>>((ref) async {
+  DateTime date = ref.watch(dateProvider);
+
+  Pagination pagination = const Pagination();
+  List<Bout> bouts = await Api().getBouts(
+    pagination.from(date),
+    pagination.to(date),
+    pagination.mode,
+  );
+
+  return bouts.where((e) => e.activity == Activity.weights).toList();
+});
+
 final averageSedentaryBout =
     FutureProvider.family<double, Pagination>((ref, pagination) async {
   List<Bout> bouts = (await ref.watch(boutsProvider(pagination).future))

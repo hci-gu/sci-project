@@ -2,9 +2,9 @@ import 'package:dio/dio.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/models/pagination.dart';
 
-const String apiUrl = 'https://sci-api.prod.appadem.in';
+// const String apiUrl = 'https://sci-api.prod.appadem.in';
 // const String apiUrl = 'http://192.168.0.33:4000';
-// const String apiUrl = 'http://localhost:4000';
+const String apiUrl = 'http://localhost:4000';
 const emptyBody = {};
 
 class Api {
@@ -12,8 +12,8 @@ class Api {
   String tz = 'Europe/Stockholm';
   Dio dio = Dio(BaseOptions(
     baseUrl: apiUrl,
-    connectTimeout: 30000,
-    receiveTimeout: 45000,
+    // connectTimeout: 30000,
+    // receiveTimeout: 45000,
   ));
 
   void clearUserId() {
@@ -95,6 +95,18 @@ class Api {
       return data.map((json) => Bout.fromJson(json)).toList();
     }
     return [];
+  }
+
+  Future createBout(DateTime time, int minutes, Activity activity) async {
+    var response = await dio.post('/bouts/$_userId', data: {
+      't': time.toIso8601String(),
+      'minutes': minutes,
+      'activity': activity.name,
+    });
+  }
+
+  Future deleteBout(int id) async {
+    await dio.delete('/bouts/$_userId/$id');
   }
 
   Future<int> getActivity(DateTime from, DateTime to) async {
