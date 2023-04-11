@@ -4,8 +4,54 @@
   fill: black;
 }
 
-#text {
-  font-size: 80;
+#hr {
+  width: 40;
+  height: 30;
+  x: 12%;
+  y: 16%;
+}
+#hrIcon {
+  width: 28;
+  height: 28;
+  x: 0;
+  y: -23;
+}
+#hrLabel {
+  text-anchor: start;
+  font-size: 28;
+  font-family: System-Bold;
+  fill: white;
+  x: 36;
+  y: 0;
+  text-length: 5;
+}
+
+#still {
+  width: 40;
+  height: 30;
+  x: 65%;
+  y: 16%;
+}
+#stillIcon {
+  fill: white;
+  opacity: 1;
+  width: 28;
+  height: 28;
+  x: 0;
+  y: -23;
+}
+#stillLabel {
+  text-anchor: start;
+  font-size: 28;
+  font-family: System-Bold;
+  fill: white;
+  x: 36;
+  y: 0;
+  text-length: 5;
+}
+
+#time {
+  font-size: 100;
   font-family: System-Bold;
   text-length: 32;
   text-anchor: middle;
@@ -13,13 +59,31 @@
   y: 50%+20;
   fill: white;
 }
+#date {
+  font-size: 30;
+  font-family: System-Bold;
+  text-length: 32;
+  text-anchor: middle;
+  x: 50%;
+  y: 50%+60;
+  fill: white;
+}
 
 #status {
-  font-size: 15;
+  x: 43%;
+  y: 90%;
+}
+#statusIcon {
+  fill: #FFA845; 
+  x: 0;
+  y: 0;
+}
+#statusLabel {
+  font-size: 16;
   text-anchor: middle;
   font-family: System-Light;
-  text-length: 32;
-  x: 50%;
-  y: 90%;
+  text-length: 24;
+  x: 32;
+  y: 6;
   fill: white;
 }
