@@ -4,8 +4,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/models/journal.dart';
-import 'package:scimovement/screens/journal/widgets/body_part_icon.dart';
-import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/editable_list_item.dart';
 
 class JournalListScreen extends ConsumerWidget {

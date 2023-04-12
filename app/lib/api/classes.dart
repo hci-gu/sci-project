@@ -1,4 +1,5 @@
 import 'package:scimovement/api/api.dart';
+import 'package:intl/intl.dart';
 import 'package:timezone/standalone.dart' as tz;
 
 enum Gender { male, female }
@@ -215,7 +216,7 @@ class User {
   }
 }
 
-enum Activity { sedentary, moving, active, weights }
+enum Activity { sedentary, moving, active, skiErgo, armErgo, weights }
 
 extension ActivityDisplayString on Activity {
   String displayString() {
@@ -225,8 +226,13 @@ extension ActivityDisplayString on Activity {
       case Activity.moving:
         return 'Rörelse';
       case Activity.active:
-      case Activity.weights:
         return 'Aktiv';
+      case Activity.weights:
+        return 'Vikter';
+      case Activity.skiErgo:
+        return 'Ski Ergometer';
+      case Activity.armErgo:
+        return 'Armcykel';
       default:
         return toString();
     }
@@ -242,9 +248,24 @@ extension ActivityGroupValue on Activity {
         return 1;
       case Activity.active:
       case Activity.weights:
+      case Activity.skiErgo:
+      case Activity.armErgo:
         return 2;
       default:
         return 0;
+    }
+  }
+}
+
+extension ActivityIsExercise on Activity {
+  bool get isExercise {
+    switch (this) {
+      case Activity.weights:
+      case Activity.skiErgo:
+      case Activity.armErgo:
+        return true;
+      default:
+        return false;
     }
   }
 }
@@ -259,6 +280,10 @@ Activity activityFromString(string) {
       return Activity.active;
     case 'weights':
       return Activity.weights;
+    case 'skiErgo':
+      return Activity.skiErgo;
+    case 'armErgo':
+      return Activity.armErgo;
     default:
       return Activity.moving;
   }
@@ -317,7 +342,7 @@ class Bout {
     DateTime from = time;
     DateTime to = time.add(Duration(minutes: minutes));
     // HH:mm - HH:mm
-    return '${from.hour.toString().padLeft(2, '0')}:${from.minute.toString().padLeft(2, '0')} - ${to.hour.toString().padLeft(2, '0')}:${to.minute.toString().padLeft(2, '0')}';
+    return '${from.hour.toString().padLeft(2, '0')}:${from.minute.toString().padLeft(2, '0')} - ${to.hour.toString().padLeft(2, '0')}:${to.minute.toString().padLeft(2, '0')}, ${DateFormat(DateFormat.YEAR_ABBR_MONTH_DAY).format(time)}';
   }
 }
 

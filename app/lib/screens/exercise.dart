@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api/api.dart';
 import 'package:scimovement/api/classes.dart';
@@ -12,41 +13,27 @@ import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/editable_list_item.dart';
 
 class ExcerciseScreen extends HookConsumerWidget {
-  const ExcerciseScreen({Key? key}) : super(key: key);
+  final bool startWithAdd;
+
+  const ExcerciseScreen({
+    Key? key,
+    this.startWithAdd = false,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ValueNotifier<bool> isOpened = useState(false);
+    ValueNotifier<bool> isOpened = useState(startWithAdd);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Träning'),
       ),
       floatingActionButton: Builder(builder: (context) {
-        return FloatingActionButton(
-          onPressed: () {
-            if (isOpened.value) {
-              Navigator.pop(context);
-            } else {
-              showBottomSheet(
-                context: context,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
-                ),
-                elevation: 4,
-                clipBehavior: Clip.hardEdge,
-                builder: (context) => AddExcercise(
-                  callback: () {
-                    Navigator.pop(context);
-                    isOpened.value = false;
-                  },
-                ),
-              );
-            }
+        return AddExerciseButton(
+          isOpened: isOpened.value,
+          callback: () {
             isOpened.value = !isOpened.value;
           },
-          child:
-              isOpened.value ? const Icon(Icons.close) : const Icon(Icons.add),
         );
       }),
       body: ref.watch(excerciseBoutsProvider).when(
@@ -65,16 +52,67 @@ class ExcerciseScreen extends HookConsumerWidget {
       itemBuilder: (context, index) {
         return EditableListItem(
           id: bouts[index].time.toString(),
-          title: bouts[index].activity.name,
+          title: bouts[index].activity.displayString(),
           subtitle: bouts[index].displayDuration,
           onDismissed: () async {
             await Api().deleteBout(bouts[index].id);
             ref.refresh(boutsProvider(const Pagination()));
             ref.refresh(energyProvider(const Pagination()));
+            ref.refresh(excerciseBoutsProvider);
           },
           onTap: () {},
         );
       },
+    );
+  }
+}
+
+class AddExerciseButton extends HookWidget {
+  final bool isOpened;
+  final Function callback;
+
+  const AddExerciseButton(
+      {Key? key, required this.isOpened, required this.callback})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    useEffect(() {
+      if (isOpened) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _openBottomSheet(context);
+        });
+      }
+      return () {};
+    });
+
+    return FloatingActionButton(
+      onPressed: () {
+        if (isOpened) {
+          Navigator.pop(context);
+        } else {
+          _openBottomSheet(context);
+        }
+        callback();
+      },
+      child: isOpened ? const Icon(Icons.close) : const Icon(Icons.add),
+    );
+  }
+
+  void _openBottomSheet(BuildContext context) {
+    showBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
+      ),
+      elevation: 4,
+      clipBehavior: Clip.hardEdge,
+      builder: (context) => AddExcercise(
+        callback: () {
+          Navigator.pop(context);
+          callback();
+        },
+      ),
     );
   }
 }
@@ -97,6 +135,7 @@ class AddExcercise extends HookConsumerWidget {
       color: Colors.white,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Text('Registrera Träningspass', style: AppTheme.headLine3),
           AppTheme.spacer2x,
@@ -111,7 +150,7 @@ class AddExcercise extends HookConsumerWidget {
           Button(
             width: 150,
             title: 'Ändra ${time.value.format(context)}',
-            small: true,
+            size: ButtonSize.small,
             onPressed: () async {
               TimeOfDay? selectedTime = await showTimePicker(
                 initialTime: time.value,
@@ -135,7 +174,6 @@ class AddExcercise extends HookConsumerWidget {
             width: 200,
             disabled: activity.value == null,
             onPressed: () async {
-              // DateTime date = time.
               DateTime date = DateTime(
                 DateTime.now().year,
                 DateTime.now().month,
@@ -151,6 +189,7 @@ class AddExcercise extends HookConsumerWidget {
 
               ref.refresh(boutsProvider(const Pagination()));
               ref.refresh(energyProvider(const Pagination()));
+              ref.refresh(excerciseBoutsProvider);
               callback();
             },
             title: 'Lägg till',
@@ -183,7 +222,9 @@ class ActivitySelect extends StatelessWidget {
         child: DropdownButton<Activity>(
           isDense: true,
           items: Activity.values
-              .map((e) => DropdownMenuItem(child: Text(e.name), value: e))
+              .where((e) => e.isExercise)
+              .map((e) =>
+                  DropdownMenuItem(child: Text(e.displayString()), value: e))
               .toList(),
           onChanged: (value) => onChanged(value),
           style: AppTheme.labelLarge.copyWith(color: AppTheme.colors.white),
@@ -249,7 +290,7 @@ class DurationPickerRow extends HookWidget {
                 }
               },
               disabled: readOnly,
-              small: true,
+              size: ButtonSize.small,
             ),
             AppTheme.spacer,
             GestureDetector(
@@ -269,7 +310,7 @@ class DurationPickerRow extends HookWidget {
               onPressed: () {
                 onChange(Duration(minutes: value.inMinutes + 15));
               },
-              small: true,
+              size: ButtonSize.small,
               disabled: readOnly,
             ),
           ],
@@ -326,7 +367,7 @@ class DurationPickerRow extends HookWidget {
                         Navigator.pop(ctx);
                       },
                       width: 100,
-                      small: true,
+                      size: ButtonSize.small,
                     ),
                   ],
                 ),

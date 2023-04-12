@@ -26,6 +26,7 @@ class SedentaryWidget extends ConsumerWidget {
       },
       child: ref.watch(sedentaryWidgetProvider).when(
             data: (WidgetValues values) => StatWidget(
+              title: 'Stillasittande',
               values: values,
               unit: Unit.time,
               asset: asset,
