@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/theme/utils.dart';
+import 'package:scimovement/widgets/button.dart';
 
 class AppColors {
   final primary = HexColor('#d5454f');
@@ -133,6 +134,8 @@ class AppTheme {
     color: colors.gray,
   );
 
+  static Widget spacerHalf =
+      SizedBox(width: basePadding / 2, height: basePadding / 2);
   static Widget spacer = SizedBox(width: basePadding, height: basePadding);
   static Widget spacer2x =
       SizedBox(width: basePadding * 2, height: basePadding * 2);
@@ -149,18 +152,20 @@ class AppTheme {
   );
 
   static TextStyle buttonTextStyle(
-      [bool secondary = false, Color? color, bool small = false]) {
+      [bool secondary = false,
+      Color? color,
+      ButtonSize size = ButtonSize.medium]) {
     return TextStyle(
       color: secondary ? color ?? primarySwatch.shade500 : colors.white,
-      fontSize: small ? 12 : 16,
-      fontWeight: small ? FontWeight.w500 : FontWeight.w800,
+      fontSize: size.fontSize,
+      fontWeight: size.fontWeight,
     );
   }
 
   static ButtonStyle buttonStyle(
       {bool rounded = false,
       bool secondary = false,
-      bool small = false,
+      ButtonSize size = ButtonSize.medium,
       Color? color}) {
     return ButtonStyle(
       shape: MaterialStateProperty.all<RoundedRectangleBorder>(
@@ -223,6 +228,6 @@ class AppTheme {
       color: const Color.fromRGBO(0, 0, 0, 0.1),
     ),
     color: AppTheme.colors.white,
-    borderRadius: BorderRadius.circular(32),
+    borderRadius: BorderRadius.circular(24),
   );
 }

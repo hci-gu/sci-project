@@ -21,7 +21,7 @@ import 'package:scimovement/screens/register.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 List<String> detailRoutes = ['calories', 'activity', 'sedentary'];
-String landingRoute = '/exercise';
+String landingRoute = '/';
 
 class RouteChangeObserver extends NavigatorObserver {
   final Ref _ref;
@@ -160,7 +160,9 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
           GoRoute(
             path: 'exercise',
             name: 'exercise',
-            builder: (_, __) => const ExcerciseScreen(),
+            builder: (_, state) => ExcerciseScreen(
+              startWithAdd: state.extra as bool? ?? false,
+            ),
           ),
         ],
       ),

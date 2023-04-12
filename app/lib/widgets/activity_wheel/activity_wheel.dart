@@ -218,6 +218,8 @@ class AnimatedWheel extends HookWidget {
         return const Interval(0.4, 0.6, curve: Curves.easeInOut);
       case Activity.active:
       case Activity.weights:
+      case Activity.skiErgo:
+      case Activity.armErgo:
         return const Interval(0.7, 1, curve: Curves.easeInOut);
     }
   }

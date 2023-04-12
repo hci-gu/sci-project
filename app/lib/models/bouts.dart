@@ -18,14 +18,16 @@ final boutsProvider =
 final excerciseBoutsProvider = FutureProvider<List<Bout>>((ref) async {
   DateTime date = ref.watch(dateProvider);
 
+  DateTime startOfWeek = date.subtract(Duration(days: date.weekday - 1));
+
   Pagination pagination = const Pagination();
   List<Bout> bouts = await Api().getBouts(
-    pagination.from(date),
+    pagination.from(startOfWeek),
     pagination.to(date),
     pagination.mode,
   );
 
-  return bouts.where((e) => e.activity == Activity.weights).toList();
+  return bouts.where((e) => e.activity.isExercise).toList().reversed.toList();
 });
 
 final averageSedentaryBout =

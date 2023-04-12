@@ -141,7 +141,7 @@ class ArcPainter extends CustomPainter {
 
       Rect rect = _rectForActivity(bout.activity, drawRect);
 
-      if (bout.activity == Activity.weights) {
+      if (bout.activity.isExercise) {
         canvas.drawArc(
           rect,
           offset + start - 0.003,
@@ -202,13 +202,15 @@ class ArcPainter extends CustomPainter {
       return rect;
     }
 
+    if (activity.isExercise) {
+      return rect.inflate(20);
+    }
+
     switch (activity) {
       case Activity.sedentary:
         return rect.deflate(40);
       case Activity.moving:
         return rect.deflate(20);
-      case Activity.weights:
-        return rect.inflate(20);
       case Activity.active:
       default:
         return rect;

@@ -24,7 +24,6 @@ class EditableListItem extends StatelessWidget {
     return Dismissible(
       key: Key(id),
       onDismissed: (direction) {
-        print('dismuess');
         onDismissed();
       },
       direction: DismissDirection.endToStart,
@@ -46,7 +45,7 @@ class EditableListItem extends StatelessWidget {
         title: Text(title),
         leading: icon,
         subtitle: Text(subtitle),
-        onTap: () => onTap(id),
+        onTap: () => onTap(),
       ),
     );
   }

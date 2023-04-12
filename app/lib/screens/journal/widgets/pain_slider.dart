@@ -31,7 +31,7 @@ class PainSlider extends StatelessWidget {
                     fg.updateValue(fg.value != null ? fg.value! - 1 : 0);
                   }
                 },
-                small: true,
+                size: ButtonSize.small,
               ),
               const SizedBox(width: 8),
               const Text(
@@ -61,7 +61,7 @@ class PainSlider extends StatelessWidget {
               const SizedBox(width: 8),
               Button(
                 width: 34,
-                small: true,
+                size: ButtonSize.small,
                 icon: Icons.add,
                 onPressed: () {
                   if (fg.value == null) {
