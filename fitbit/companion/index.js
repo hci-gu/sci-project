@@ -3,9 +3,7 @@ import * as messaging from 'messaging'
 import { settingsStorage } from 'settings'
 
 const API_URL = 'https://sci-api.prod.appadem.in'
-//const API_URL = 'http://192.168.0.33:4000'
-let userId = 'f312df8a-5408-49c9-a805-a96e5d6b2aa3'
-// let userId = 'e27b1eb1-015d-45e9-8ef1-18c842a676fd'
+let userId
 let lastSync
 
 if (!companion.permissions.granted('run_background')) {
@@ -34,11 +32,17 @@ function sendVal(data) {
     // info/error display on watch
     case 'lastSync':
     case 'error':
-    // watch styles
-    case 'text':
-    case 'background':
       if (messaging.peerSocket.readyState === messaging.peerSocket.OPEN) {
         messaging.peerSocket.send(data)
+      }
+      break
+    case 'colorScheme':
+      if (messaging.peerSocket.readyState === messaging.peerSocket.OPEN) {
+        const value = JSON.parse(data.newValue).values[0].name
+        messaging.peerSocket.send({
+          key: 'colorScheme',
+          newValue: value,
+        })
       }
       break
     default:
@@ -49,11 +53,11 @@ function sendVal(data) {
 let backlog = []
 function postData(data, retries = 1) {
   if (retries <= 0) {
-    backlog.push(data)
+    backlog = [...backlog, ...data]
     return
   }
 
-  const body = JSON.stringify([...backlog, data])
+  const body = JSON.stringify([...backlog, ...data])
   fetch(`${API_URL}/counts/${userId}`, {
     method: 'POST',
     headers: {
@@ -67,7 +71,7 @@ function postData(data, retries = 1) {
         lastSync = new Date()
         sendVal({
           key: 'lastSync',
-          newValue: `${lastSync.toLocaleDateString()} ${lastSync.toLocaleTimeString()}`,
+          newValue: `${lastSync.toLocaleTimeString().slice(0, 5)}`,
         })
       } else {
         setTimeout(() => {
@@ -120,12 +124,8 @@ messaging.peerSocket.addEventListener('message', (evt) => {
   if (!userId) {
     return
   }
-  const event = JSON.parse(evt.data)
-  postData({
-    t: event.timestamp,
-    hr: event.hr,
-    a: event.acc,
-  })
+  const events = JSON.parse(evt.data)
+  postData(events)
 })
 
 // Settings
