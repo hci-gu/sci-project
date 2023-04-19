@@ -50,6 +50,7 @@ router.delete('/:userId/:id', async (req, res) => {
     await removeBout(userId, id)
     res.sendStatus(200)
   } catch (e) {
+    console.log('DELETE /bouts/:userId/:id', e)
     res.sendStatus(500)
   }
 })

@@ -67,6 +67,7 @@ export const saveBout = async (
       t,
       minutes,
       activity,
+      data: {},
     },
     userId
   )
@@ -89,13 +90,14 @@ export const saveBout = async (
     } as Energy
   })
 
-  await overwriteEnergy(userId, energy)
+  if (energy.length) {
+    await overwriteEnergy(userId, energy)
+  }
 
   return bout
 }
 
 export const removeBout = async (userId: string, id: string) => {
-  console.log('removeBout', userId, id)
   const user = await UserModel.get(userId)
   if (!user) {
     throw new Error('User not found')
@@ -105,11 +107,6 @@ export const removeBout = async (userId: string, id: string) => {
   if (!bout) {
     throw new Error('Bout not found')
   }
-  console.log('got bout', {
-    userId,
-    from: bout.t,
-    to: new Date(bout.t.getTime() + bout.minutes * 60 * 1000),
-  })
 
   // get all counts for this bout
   const counts = await AccelCountModel.find({
@@ -117,7 +114,6 @@ export const removeBout = async (userId: string, id: string) => {
     from: bout.t,
     to: new Date(bout.t.getTime() + bout.minutes * 60 * 1000),
   })
-  console.log(counts)
 
   const energy = counts.map((count) => {
     const activity = activityForAccAndCondition(count.a, user.condition)
