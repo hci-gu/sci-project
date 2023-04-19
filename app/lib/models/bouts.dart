@@ -15,12 +15,11 @@ final boutsProvider =
   return bouts;
 });
 
-final excerciseBoutsProvider = FutureProvider<List<Bout>>((ref) async {
+final excerciseBoutsProvider =
+    FutureProvider.family<List<Bout>, Pagination>((ref, pagination) async {
   DateTime date = ref.watch(dateProvider);
-
   DateTime startOfWeek = date.subtract(Duration(days: date.weekday - 1));
 
-  Pagination pagination = const Pagination();
   List<Bout> bouts = await Api().getBouts(
     pagination.from(startOfWeek),
     pagination.to(date),
