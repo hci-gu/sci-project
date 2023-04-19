@@ -60,6 +60,9 @@ double _valueForActivity(Activity activity) {
     case Activity.moving:
       return 1;
     case Activity.active:
+    case Activity.weights:
+    case Activity.skiErgo:
+    case Activity.armErgo:
       return 2;
   }
 }

@@ -64,6 +64,7 @@ export class Bout extends Model<
   declare minutes: number
   declare activity: Activity
   declare isSleeping: boolean
+  declare data: object
 
   declare UserId?: ForeignKey<User['id']>
 }

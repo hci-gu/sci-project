@@ -78,6 +78,7 @@ List<Bout> mockBoutsForPagination(Pagination pagination) {
       for (Activity activity in activities) {
         int minutes = durationForActivity(activity);
         bouts.add(Bout(
+          id: -1,
           time: day.add(Duration(minutes: start)),
           minutes: minutes,
           activity: activity,
@@ -96,15 +97,22 @@ List<Bout> mockBoutsForPagination(Pagination pagination) {
 
         bouts.addAll([
           Bout(
+              id: -1,
               activity: Activity.sedentary,
               time: day,
               minutes: 60 * (5 + _random.nextInt(5))),
           Bout(
+              id: -1,
               activity: Activity.moving,
               time: day,
               minutes: 60 * (2 + _random.nextInt(3))),
           if (_random.nextBool())
-            Bout(activity: Activity.active, time: day, minutes: 45),
+            Bout(
+              id: -1,
+              activity: Activity.active,
+              time: day,
+              minutes: 45,
+            ),
         ]);
       }
       break;
@@ -114,17 +122,24 @@ List<Bout> mockBoutsForPagination(Pagination pagination) {
         DateTime day = from.add(Duration(days: i * 30));
         bouts.addAll([
           Bout(
+            id: -1,
             activity: Activity.sedentary,
             time: day,
             minutes: 60 * (5 + _random.nextInt(5)) * 30,
           ),
           Bout(
+            id: -1,
             activity: Activity.moving,
             time: day,
             minutes: 60 * (2 + _random.nextInt(3)) * 30,
           ),
           if (_random.nextBool())
-            Bout(activity: Activity.active, time: day, minutes: 45 * 30),
+            Bout(
+              id: -1,
+              activity: Activity.active,
+              time: day,
+              minutes: 45 * 30,
+            ),
         ]);
       }
       break;

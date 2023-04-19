@@ -46,11 +46,11 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const AppSettings(),
           AppTheme.separator,
-          const LogoutButton(),
+          const Center(child: LogoutButton()),
           AppTheme.spacer2x,
-          const OnboardingButton(),
+          const Center(child: OnboardingButton()),
           AppTheme.spacer2x,
-          const DeleteAccountButton(),
+          const Center(child: DeleteAccountButton()),
           AppTheme.separator,
           GestureDetector(
             onTap: () async {

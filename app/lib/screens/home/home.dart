@@ -4,6 +4,7 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/screens/home/widgets/energy_widget.dart';
+import 'package:scimovement/screens/home/widgets/exercise_widget.dart';
 import 'package:scimovement/screens/home/widgets/no_data_message.dart';
 import 'package:scimovement/screens/home/widgets/sedentary_widget.dart';
 import 'package:scimovement/theme/theme.dart';
@@ -41,6 +42,22 @@ class HomeScreen extends HookConsumerWidget {
               ],
             ),
           if (!showDataWidgets) const NoDataMessage(),
+          AppTheme.spacer2x,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Expanded(child: ExerciseWidget()),
+              AppTheme.spacer2x,
+              Expanded(child: Container()),
+              // const Expanded(child: SedentaryWidget()),
+            ],
+          ),
+          // Button(
+          //   width: 225,
+          //   onPressed: () => context.goNamed('exercise'),
+          //   icon: Icons.electric_bolt_outlined,
+          //   title: 'Träningspass',
+          // )
         ],
       ),
     );

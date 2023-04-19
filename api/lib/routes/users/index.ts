@@ -81,7 +81,7 @@ router.patch(
         if (property === 'password') {
           const pw = await hashPassword(value as string)
           user.set(property, pw)
-        } else if (property == 'injuryLevel') {
+        } else if (property == 'injuryLevel' && typeof value === 'number') {
           if (value > 0) {
             user.set(property, value as number)
           }
