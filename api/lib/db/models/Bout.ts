@@ -25,6 +25,7 @@ const Model = {
           type: DataTypes.BOOLEAN,
           defaultValue: false,
         },
+        data: DataTypes.JSONB,
       },
       {
         timestamps: false,
@@ -44,15 +45,16 @@ const Model = {
     })
   },
   save: (
-    data: { t: Date; minutes: number; activity: Activity },
+    bout: { t: Date; minutes: number; activity: Activity; data: any },
     userId: string
   ) =>
     BoutModel.create({
-      t: data.t,
-      minutes: data.minutes,
-      activity: data.activity,
+      t: bout.t,
+      minutes: bout.minutes,
+      activity: bout.activity,
       UserId: userId,
       isSleeping: false,
+      data: bout.data,
     }),
   get: (id: string) => BoutModel.findOne({ where: { id } }),
   remove: (id: string) => BoutModel.destroy({ where: { id } }),
@@ -165,6 +167,7 @@ export const createBoutFromCounts = async (
         t: counts[counts.length - 1].t,
         minutes: 1,
         activity: activity ?? Activity.sedentary,
+        data: {},
       },
       user.id
     )
@@ -181,6 +184,7 @@ export const createBoutFromCounts = async (
         t: counts[counts.length - 1].t,
         minutes: 1,
         activity: activity ?? Activity.sedentary,
+        data: {},
       },
       user.id
     )
