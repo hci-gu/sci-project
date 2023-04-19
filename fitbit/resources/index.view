@@ -1,5 +1,26 @@
 <svg>
   <rect id="background" />
-  <text id="text">00:00</text>
-  <text id="status">2000-01-01T00:00</text>
+  <text id="time">00:00</text>
+  <text id="date">28 Maj</text>
+  
+  <svg id="status">
+    <text id="statusLabel">00:00</text>
+    <circle id="statusIcon" r="6" fill="#FFA845" />
+  </svg>
+  
+  <svg id="hr">
+    <image href="img/heart.png" id="hrIcon">
+      <animate id="hrIconAnimate" attributeName="opacity" begin="load" from="1" to="1" dur="1" easing="ease" repeatCount="indefinite" />
+    </image>
+    <text id="hrLabel">
+      -
+    </text>
+  </svg>
+  <svg id="still">
+    <image href="img/still.png" id="stillIcon">
+    </image>
+    <text id="stillLabel">
+      - m
+    </text>
+  </svg>
 </svg>
