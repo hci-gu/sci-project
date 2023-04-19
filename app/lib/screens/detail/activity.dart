@@ -29,7 +29,7 @@ class ActivityScreen extends ConsumerWidget {
             ? totalMovementMinutesProvider(pagination)
             : averageMovementMinutesProvider(pagination),
       ),
-      height: pagination.mode == ChartMode.day ? 175 : 200,
+      height: pagination.mode == ChartMode.day ? 180 : 200,
       pageBuilder: (ctx, page) => isDay
           ? AllActivitiesArc(Pagination(mode: pagination.mode, page: page))
           : ActivityBarChart(Pagination(mode: pagination.mode, page: page)),

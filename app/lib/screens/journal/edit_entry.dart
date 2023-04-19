@@ -59,10 +59,10 @@ class EditJournalEntry extends ConsumerWidget {
           validators: [Validators.required],
         ),
         'painLevel': FormControl<int>(
-          value: existingEntry?.painLevel ?? 1,
+          value: existingEntry?.painLevel ?? 0,
           validators: [
             Validators.required,
-            Validators.min(1),
+            Validators.min(0),
             Validators.max(10)
           ],
         ),

@@ -38,7 +38,7 @@ Future<bool?> confirmDialog(
                   },
                   secondary: true,
                   rounded: true,
-                  small: true,
+                  size: ButtonSize.small,
                   title: 'Avbryt',
                 ),
               ),
@@ -49,7 +49,7 @@ Future<bool?> confirmDialog(
                     Navigator.of(ctx).pop(true);
                   },
                   rounded: true,
-                  small: true,
+                  size: ButtonSize.small,
                   color: AppTheme.colors.error,
                   title: 'Ja',
                 ),

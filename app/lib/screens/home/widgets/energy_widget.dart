@@ -26,6 +26,7 @@ class EnergyWidget extends ConsumerWidget {
       },
       child: ref.watch(energyWidgetProvider).when(
             data: (WidgetValues values) => StatWidget(
+              title: 'Kalorier',
               values: values,
               unit: Unit.calories,
               asset: asset,

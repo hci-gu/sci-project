@@ -1,13 +1,65 @@
 import 'package:flutter/material.dart';
 import 'package:scimovement/theme/theme.dart';
 
+enum ButtonSize {
+  tiny,
+  small,
+  medium,
+  large,
+}
+
+extension SizeToFloat on ButtonSize {
+  double get height {
+    switch (this) {
+      case ButtonSize.tiny:
+        return 28;
+      case ButtonSize.small:
+        return 34;
+      case ButtonSize.medium:
+        return 44;
+      case ButtonSize.large:
+        return 48;
+      default:
+        return 44;
+    }
+  }
+
+  double get fontSize {
+    switch (this) {
+      case ButtonSize.tiny:
+      case ButtonSize.small:
+        return 12;
+      case ButtonSize.medium:
+        return 16;
+      case ButtonSize.large:
+        return 18;
+      default:
+        return 16;
+    }
+  }
+
+  FontWeight get fontWeight {
+    switch (this) {
+      case ButtonSize.tiny:
+      case ButtonSize.small:
+        return FontWeight.w500;
+      case ButtonSize.medium:
+        return FontWeight.w800;
+      case ButtonSize.large:
+        return FontWeight.w800;
+      default:
+        return FontWeight.w800;
+    }
+  }
+}
+
 class Button extends StatelessWidget {
   final String? title;
   final String? subtitle;
   final VoidCallback onPressed;
   final IconData? icon;
   final double? width;
-  final bool small;
+  final ButtonSize size;
   final bool rounded;
   final bool secondary;
   final bool flipIcon;
@@ -23,7 +75,7 @@ class Button extends StatelessWidget {
     this.icon,
     this.width,
     this.color,
-    this.small = false,
+    this.size = ButtonSize.medium,
     this.rounded = true,
     this.secondary = false,
     this.flipIcon = false,
@@ -50,10 +102,10 @@ class Button extends StatelessWidget {
     );
 
     ButtonStyle style = AppTheme.buttonStyle(
-        rounded: rounded, secondary: secondary, small: small, color: color);
+        rounded: rounded, secondary: secondary, size: size, color: color);
     Widget _text = Text(
       title ?? '',
-      style: AppTheme.buttonTextStyle(secondary, color, small),
+      style: AppTheme.buttonTextStyle(secondary, color, size),
     );
     if (subtitle != null) {
       _text = FittedBox(
@@ -67,7 +119,7 @@ class Button extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Text(
                 subtitle ?? '',
-                style: AppTheme.buttonTextStyle(secondary, color, true),
+                style: AppTheme.buttonTextStyle(secondary, color, size),
               ),
             ),
           ],
@@ -107,17 +159,15 @@ class Button extends StatelessWidget {
     return AbsorbPointer(
       absorbing: disabled || loading,
       child: width != null
-          ? Center(
-              child: SizedBox(
-                width: width,
-                child: button,
-                height: small ? 34 : 44,
-              ),
+          ? SizedBox(
+              width: width,
+              child: button,
+              height: size.height,
             )
           : SizedBox(
               width: width,
               child: button,
-              height: small ? 34 : 44,
+              height: size.height,
             ),
     );
   }

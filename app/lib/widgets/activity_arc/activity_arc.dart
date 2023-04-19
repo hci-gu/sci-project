@@ -11,7 +11,11 @@ class ActivityArc extends HookWidget {
 
   const ActivityArc({
     required this.bouts,
-    this.activities = Activity.values,
+    this.activities = const [
+      Activity.active,
+      Activity.moving,
+      Activity.sedentary
+    ],
     Key? key,
   }) : super(key: key);
 
@@ -43,7 +47,7 @@ class ActivityArc extends HookWidget {
       },
       blendMode: BlendMode.dstOut,
       child: Container(
-        height: 80,
+        // height: 10,
         clipBehavior: Clip.hardEdge,
         decoration: const BoxDecoration(),
         child: Stack(
@@ -113,7 +117,7 @@ class ArcPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     Rect drawRect = Rect.fromLTRB(
-        -size.width / 4, 10, size.width * 1.25, size.width * 2 + 10);
+        -size.width / 4, 24, size.width * 1.25, size.width * 2 + 10);
     double offset = -pi + pi / 4;
 
     for (Activity activity in activities) {
@@ -136,6 +140,30 @@ class ArcPainter extends CustomPainter {
       double start = minute * pi / 2 / 1440;
 
       Rect rect = _rectForActivity(bout.activity, drawRect);
+
+      if (bout.activity.isExercise) {
+        canvas.drawArc(
+          rect,
+          offset + start - 0.003,
+          (bout.minutes - 1) * pi / 2 / 1440 + 0.006,
+          false,
+          Paint()
+            ..color = AppTheme.colors.black
+            ..strokeWidth = 7
+            ..style = PaintingStyle.stroke,
+        );
+        canvas.drawArc(
+          rect,
+          offset + start,
+          (bout.minutes - 1) * pi / 2 / 1440,
+          false,
+          Paint()
+            ..color = AppTheme.colors.exercise
+            ..strokeWidth = 4
+            ..style = PaintingStyle.stroke,
+        );
+        continue;
+      }
 
       canvas.drawArc(
         rect,
@@ -172,6 +200,10 @@ class ArcPainter extends CustomPainter {
   Rect _rectForActivity(Activity activity, Rect rect) {
     if (activities.length == 1) {
       return rect;
+    }
+
+    if (activity.isExercise) {
+      return rect.inflate(20);
     }
 
     switch (activity) {
@@ -238,7 +270,7 @@ class ClockPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     Rect drawRect = Rect.fromLTRB(
-        -size.width / 4, 10, size.width * 1.25, size.width * 2 + 10);
+        -size.width / 4, 54, size.width * 1.25, size.width * 2 + 10);
     double circleOffset = -pi + pi / 4;
 
     double start = _offsetToMinutes(offset, size.width) * pi / 2 / 1440;
@@ -250,7 +282,7 @@ class ClockPainter extends CustomPainter {
       false,
       Paint()
         ..color = AppTheme.colors.black
-        ..strokeWidth = 160
+        ..strokeWidth = 110
         ..style = PaintingStyle.stroke,
     );
   }

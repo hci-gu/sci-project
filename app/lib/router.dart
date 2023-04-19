@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/models/onboarding.dart';
@@ -8,6 +10,7 @@ import 'package:scimovement/screens/demo/demo.dart';
 import 'package:scimovement/screens/detail/activity.dart';
 import 'package:scimovement/screens/detail/calories.dart';
 import 'package:scimovement/screens/detail/sedentary.dart';
+import 'package:scimovement/screens/exercise/exercise.dart';
 import 'package:scimovement/screens/introduction.dart';
 import 'package:scimovement/screens/journal/edit_entry.dart';
 import 'package:scimovement/screens/journal/journal_list.dart';
@@ -15,6 +18,7 @@ import 'package:scimovement/screens/login.dart';
 import 'package:scimovement/screens/tab.dart';
 import 'package:scimovement/screens/onboarding/onboarding.dart';
 import 'package:scimovement/screens/register.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 List<String> detailRoutes = ['calories', 'activity', 'sedentary'];
 String landingRoute = '/';
@@ -153,6 +157,13 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
             path: 'sedentary',
             builder: (_, __) => const SedentaryScreen(),
           ),
+          GoRoute(
+            path: 'exercise',
+            name: 'exercise',
+            builder: (_, state) => ExcerciseScreen(
+              startWithAdd: state.extra as bool? ?? false,
+            ),
+          ),
         ],
       ),
       GoRoute(
@@ -179,18 +190,19 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
             ),
           ),
           GoRoute(
-              name: 'journal-list',
-              path: 'list',
-              builder: (_, state) => const JournalListScreen(),
-              routes: [
-                GoRoute(
-                  name: 'update-journal',
-                  path: ':id',
-                  builder: (_, state) => EditJournalEntryScreen(
-                    entry: (state.extra as Map?)?['entry'],
-                  ),
+            name: 'journal-list',
+            path: 'list',
+            builder: (_, state) => const JournalListScreen(),
+            routes: [
+              GoRoute(
+                name: 'update-journal',
+                path: ':id',
+                builder: (_, state) => EditJournalEntryScreen(
+                  entry: (state.extra as Map?)?['entry'],
                 ),
-              ]),
+              ),
+            ],
+          ),
         ],
       ),
       GoRoute(
@@ -261,12 +273,51 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
         ),
         routes: [],
       ),
+      GoRoute(
+        name: 'watch-login',
+        path: '/watch-login',
+        builder: (context, state) {
+          return RedirectScreen(
+            redirectUri: state.queryParams['redirect_uri'],
+            state: state.queryParams['state'],
+          );
+        },
+      ),
     ],
     observers: [RouteChangeObserver(ref)],
     redirect: routerNotifier._redirectLogic,
     refreshListenable: routerNotifier,
   );
 });
+
+class RedirectScreen extends HookConsumerWidget {
+  final String? redirectUri;
+  final String? state;
+
+  const RedirectScreen({
+    Key? key,
+    this.redirectUri,
+    this.state,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    User? user = ref.watch(userProvider);
+
+    useEffect(() {
+      if (user != null && redirectUri != null && state != null) {
+        launchUrl(Uri.parse('$redirectUri?state=$state&userId=${user.id}'));
+      }
+      return () => {};
+    }, [user]);
+
+    return const Scaffold(
+      body: Center(
+        child: Text('Redirecting...'),
+      ),
+    );
+  }
+}
 
 class LoadingScreen extends StatelessWidget {
   const LoadingScreen({Key? key}) : super(key: key);

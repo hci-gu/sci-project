@@ -27,15 +27,15 @@ class PainSlider extends StatelessWidget {
                 width: 34,
                 icon: Icons.remove,
                 onPressed: () {
-                  if (fg.value != null && fg.value! > 1) {
+                  if (fg.value != null && fg.value! > 0) {
                     fg.updateValue(fg.value != null ? fg.value! - 1 : 0);
                   }
                 },
-                small: true,
+                size: ButtonSize.small,
               ),
               const SizedBox(width: 8),
               const Text(
-                '1',
+                '0',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
               ),
               Expanded(
@@ -48,7 +48,7 @@ class PainSlider extends StatelessWidget {
                     child: ReactiveSlider(
                       key: _key,
                       formControlName: formKey,
-                      min: 1,
+                      min: 0,
                       max: 10,
                     ),
                   ),
@@ -61,11 +61,11 @@ class PainSlider extends StatelessWidget {
               const SizedBox(width: 8),
               Button(
                 width: 34,
-                small: true,
+                size: ButtonSize.small,
                 icon: Icons.add,
                 onPressed: () {
                   if (fg.value == null) {
-                    fg.updateValue(1);
+                    fg.updateValue(0);
                     return;
                   }
                   if (fg.value! < 10) {
@@ -110,7 +110,7 @@ class PositionedSliderLabel extends HookWidget {
               child: SizedBox(
                 width: 30,
                 child: Text(
-                  value?.toString() ?? '1',
+                  value?.toString() ?? '0',
                   style: const TextStyle(
                       fontWeight: FontWeight.bold, fontSize: 16),
                 ),
@@ -126,9 +126,9 @@ class PositionedSliderLabel extends HookWidget {
     }
     RenderBox box = positionKey.currentContext!.findRenderObject() as RenderBox;
 
-    var valueRangeSize = 9;
-    var valuePercent = value / valueRangeSize;
-    var offset = (box.size.width - 50) * valuePercent;
+    var valueRangeSize = 11;
+    var valuePercent = (value + 1) / valueRangeSize;
+    var offset = (box.size.width - 30) * valuePercent;
 
     return offset;
   }
