@@ -12,6 +12,7 @@ import 'package:scimovement/widgets/button.dart';
 import 'package:go_router/go_router.dart';
 import 'package:scimovement/widgets/confirm_dialog.dart';
 import 'package:scimovement/widgets/snackbar_message.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -30,9 +31,9 @@ class SettingsScreen extends ConsumerWidget {
         padding:
             const EdgeInsets.only(left: 16, right: 16, top: 32, bottom: 16),
         children: [
-          const Text(
-            'Profil',
-            style: TextStyle(
+          Text(
+            AppLocalizations.of(context)!.profile,
+            style: const TextStyle(
               fontSize: 36,
               fontWeight: FontWeight.bold,
             ),
@@ -41,7 +42,7 @@ class SettingsScreen extends ConsumerWidget {
           UserSettings(user: user),
           AppTheme.separator,
           Text(
-            'Appinställningar',
+            AppLocalizations.of(context)!.appSettings,
             style: AppTheme.labelXLarge,
           ),
           const AppSettings(),
@@ -57,13 +58,13 @@ class SettingsScreen extends ConsumerWidget {
               await Clipboard.setData(ClipboardData(text: user.id));
               ScaffoldMessenger.of(context).showSnackBar(SnackbarMessage(
                 context: context,
-                message: 'Användar-ID kopierat till urklipp',
+                message: AppLocalizations.of(context)!.userIdCopyMessage,
               ));
             },
             child: Column(
               children: [
                 Text(
-                  'AnvändarID:',
+                  '${AppLocalizations.of(context)!.userId}:',
                   style: AppTheme.labelMedium,
                 ),
                 Text(
@@ -124,7 +125,7 @@ class AboutInfo extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(left: 32),
             child: Text(
-              'Visa licenser',
+              AppLocalizations.of(context)!.showLicenses,
               style: AppTheme.paragraphSmall,
             ),
           ),
@@ -140,7 +141,7 @@ class LogoutButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Button(
-      title: 'Logga ut',
+      title: AppLocalizations.of(context)!.logout,
       width: 220,
       secondary: true,
       icon: Icons.logout_outlined,
@@ -156,7 +157,7 @@ class OnboardingButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Button(
-      title: 'Gör om intro',
+      title: AppLocalizations.of(context)!.redoIntro,
       width: 220,
       secondary: true,
       onPressed: () async {
@@ -176,7 +177,7 @@ class DeleteAccountButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Button(
-      title: 'Radera konto',
+      title: AppLocalizations.of(context)!.deleteAccount,
       width: 220,
       secondary: true,
       color: AppTheme.colors.error,
@@ -184,9 +185,8 @@ class DeleteAccountButton extends ConsumerWidget {
       onPressed: () async {
         bool? confirmed = await confirmDialog(
           context,
-          title: 'Radera konto',
-          message:
-              'Är du säker att du vill radera ditt konto? Du kan inte ångra dig och din data försvinner efter du har raderat ditt konto.',
+          title: AppLocalizations.of(context)!.deleteAccount,
+          message: AppLocalizations.of(context)!.deleteAccountConfirmation,
         );
         if (confirmed == true) {
           ref.read(userProvider.notifier).deleteAccount();

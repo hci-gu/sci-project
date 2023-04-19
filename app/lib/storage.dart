@@ -8,8 +8,13 @@ class Credentials {
 }
 
 class Storage {
-  static Future<Credentials?> getCredentials() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
+  late SharedPreferences prefs;
+
+  Future reloadPrefs() async {
+    prefs = await SharedPreferences.getInstance();
+  }
+
+  Credentials? getCredentials() {
     final String? email = prefs.getString('email');
     final String? password = prefs.getString('password');
 
@@ -20,35 +25,48 @@ class Storage {
     return null;
   }
 
-  static Future storeCredentails(Credentials credentials) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
+  Future storeCredentails(Credentials credentials) async {
+    await reloadPrefs();
     await prefs.setString('email', credentials.email);
     await prefs.setString('password', credentials.password);
   }
 
-  static Future clearCredentials() async {
+  Future clearCredentials() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.remove('email');
     prefs.remove('password');
   }
 
-  static Future storeNotificationRequest(bool enabled) async {
+  Future storeNotificationRequest(bool enabled) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setBool('notificationRequest', enabled);
   }
 
-  static Future getNotificationRequest() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getBool('notificationRequest');
+  bool getNotificationRequest() {
+    return prefs.getBool('notificationRequest') ?? false;
   }
 
-  static Future storeOnboardingDone(bool done) async {
+  Future storeOnboardingDone(bool done) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setBool('onboardingDone', done);
   }
 
-  static Future<bool> getOnboardingDone() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
+  bool getOnboardingDone() {
     return prefs.getBool('onboardingDone') == true;
   }
+
+  Future storeLanguageCode(String languageCode) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('languageCode', languageCode);
+  }
+
+  String? getLanguageCode() {
+    return prefs.getString('languageCode');
+  }
+
+  static final Storage _instance = Storage._internal();
+  factory Storage() {
+    return _instance;
+  }
+  Storage._internal();
 }

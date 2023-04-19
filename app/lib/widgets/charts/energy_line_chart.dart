@@ -55,7 +55,7 @@ class EnergyLineChart extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return ref.watch(energyChartProvider(pagination)).when(
           data: (values) => Stack(children: [
-            _legend(ref),
+            _legend(context, ref),
             ChartWrapper(
               isCard: isCard,
               child: _energyChart(values.current, values.previous),
@@ -74,9 +74,9 @@ class EnergyLineChart extends ConsumerWidget {
     return AppTheme.labelMedium;
   }
 
-  Widget _legend(WidgetRef ref) {
-    String current = ref.watch(dateDisplayProvider);
-    String previous = ref.watch(previousDateDisplayProvider);
+  Widget _legend(BuildContext context, WidgetRef ref) {
+    String current = ref.watch(dateDisplayProvider(context));
+    String previous = ref.watch(previousDateDisplayProvider(context));
 
     return Positioned(
       top: 0,

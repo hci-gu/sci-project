@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:scimovement/theme/theme.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class EditableListItem extends StatelessWidget {
   final String id;
@@ -54,16 +55,16 @@ class EditableListItem extends StatelessWidget {
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Ta bort'),
-        content: const Text('Är du säker på att du vill ta bort detta?'),
+        title: Text(AppLocalizations.of(context)!.remove),
+        content: Text(AppLocalizations.of(context)!.removeConfirmation),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Avbryt'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Ta bort'),
+            child: Text(AppLocalizations.of(context)!.remove),
           ),
         ],
       ),

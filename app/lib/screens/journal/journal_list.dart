@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/models/journal.dart';
 import 'package:scimovement/widgets/editable_list_item.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class JournalListScreen extends ConsumerWidget {
   const JournalListScreen({Key? key}) : super(key: key);
@@ -13,7 +14,7 @@ class JournalListScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Smärta'),
+        title: Text(AppLocalizations.of(context)!.pain),
         actions: [
           _bodyPartFilter(ref),
         ],
@@ -37,10 +38,11 @@ class JournalListScreen extends ConsumerWidget {
               ref.read(bodyPartFilterProvider.notifier).state = null;
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(child: Text('Alla'), value: null),
+              PopupMenuItem(
+                  child: Text(AppLocalizations.of(context)!.all), value: null),
               ...data.map(
                 (e) => PopupMenuItem(
-                  child: Text(e.bodyPart.displayString()),
+                  child: Text(e.bodyPart.displayString(context)),
                   value: e.bodyPart,
                 ),
               ),
@@ -62,7 +64,7 @@ class JournalListScreen extends ConsumerWidget {
           id: data[index].id.toString(),
           key: Key(data[index].id.toString()),
           title:
-              '${data[index].painLevel.toString()} - ${data[index].bodyPart.displayString()}',
+              '${data[index].painLevel.toString()} - ${data[index].bodyPart.displayString(context)}',
           subtitle: _displayTime(data[index].time),
           onDismissed: () => ref
               .read(updateJournalProvider.notifier)

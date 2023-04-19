@@ -12,6 +12,7 @@ import 'package:scimovement/widgets/activity_wheel/activity_wheel.dart';
 import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/date_select.dart';
 import 'package:scimovement/widgets/stat_widget.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class OnboardingHomeScreen extends ConsumerWidget {
   const OnboardingHomeScreen({Key? key}) : super(key: key);
@@ -20,23 +21,23 @@ class OnboardingHomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return ProviderScope(
       overrides: [
-        energyWidgetProvider.overrideWithValue(
-          const AsyncValue.data(WidgetValues(400, 380)),
+        energyWidgetProvider
+            .overrideWith((ref) => const WidgetValues(400, 380)),
+        sedentaryWidgetProvider
+            .overrideWith((ref) => const WidgetValues(45, 48)),
+        activityProvider.overrideWith(
+          (ref) => [
+            ActivityGroup(Activity.sedentary, [
+              Energy(time: DateTime.now(), value: 25, minutes: 210),
+            ]),
+            ActivityGroup(Activity.moving, [
+              Energy(time: DateTime.now(), value: 270, minutes: 90),
+            ]),
+            ActivityGroup(Activity.active, [
+              Energy(time: DateTime.now(), value: 80, minutes: 25),
+            ]),
+          ],
         ),
-        sedentaryWidgetProvider.overrideWithValue(
-          const AsyncValue.data(WidgetValues(45, 48)),
-        ),
-        activityProvider.overrideWithValue(AsyncValue.data([
-          ActivityGroup(Activity.sedentary, [
-            Energy(time: DateTime.now(), value: 25, minutes: 210),
-          ]),
-          ActivityGroup(Activity.moving, [
-            Energy(time: DateTime.now(), value: 270, minutes: 90),
-          ]),
-          ActivityGroup(Activity.active, [
-            Energy(time: DateTime.now(), value: 80, minutes: 25),
-          ]),
-        ])),
       ],
       child: ListView(
         padding: AppTheme.screenPadding,
@@ -48,17 +49,21 @@ class OnboardingHomeScreen extends ConsumerWidget {
               left: 0,
               bottom: 24,
               child: OnboardingStepMessage(
-                title: 'Intro',
-                text:
-                    'Hej och välkommen till RullaPå, den här guiden kommer att visa vad det är du ser på skärmen.\n\nInnan vi sätter igång behöver appen tillåtelse att skicka ut notiser. Tryck sedan på "Nästa" för att gå vidare.',
+                title: AppLocalizations.of(context)!.intro,
+                text: AppLocalizations.of(context)!.onboardingIntro,
                 action: Padding(
                   padding: const EdgeInsets.only(top: 16),
                   child: Center(
                     child: ref.watch(notificationsEnabledProvider)
-                        ? Text('Notiser på', style: AppTheme.labelMedium)
+                        ? Text(
+                            AppLocalizations.of(context)!
+                                .onboardingNotificationsOn,
+                            style: AppTheme.labelMedium,
+                          )
                         : Button(
                             width: 140,
-                            title: 'Slå på notiser',
+                            title: AppLocalizations.of(context)!
+                                .onboardingTurnOnNotifications,
                             onPressed: () => ref
                                 .read(userProvider.notifier)
                                 .requestNotificationPermission(),
@@ -76,12 +81,11 @@ class OnboardingHomeScreen extends ConsumerWidget {
               child: ActivityWheel(),
               width: 100000,
             ),
-            message: const Positioned(
+            message: Positioned(
               bottom: -150,
               child: OnboardingStepMessage(
-                title: 'Rörelse',
-                text:
-                    'Här visas tiden som du rör dig i låg intensitet, aktiviteter i rörelse som upplevs som lättare ansträngning.',
+                title: AppLocalizations.of(context)!.movement,
+                text: AppLocalizations.of(context)!.onboardingMovement,
               ),
             ),
           ),
@@ -96,12 +100,11 @@ class OnboardingHomeScreen extends ConsumerWidget {
                   width: MediaQuery.of(context).size.width / 2 - 24,
                   child: const EnergyWidget(),
                 ),
-                message: const Positioned(
+                message: Positioned(
                   top: -190,
                   child: OnboardingStepMessage(
-                    title: 'Kalorier',
-                    text:
-                        'Här visas en uppskattning av din dagliga åtgång av kalorier utöver de kalorier din kropp behöver i vila. Här ingår vardagsaktiviteter samt promenad/träning utomhus.',
+                    title: AppLocalizations.of(context)!.calories,
+                    text: AppLocalizations.of(context)!.onboardingCalories,
                   ),
                 ),
               ),
@@ -113,13 +116,12 @@ class OnboardingHomeScreen extends ConsumerWidget {
                     width: MediaQuery.of(context).size.width / 2 - 24,
                     child: const SedentaryWidget(),
                   ),
-                  message: const Positioned(
+                  message: Positioned(
                     top: -168,
                     right: 0,
                     child: OnboardingStepMessage(
-                      title: 'Stillasittande',
-                      text:
-                          'Här visas en uppskattning av genomsnittstiden du är stillasittande innan du börjar röra på dig i minst 5 minuter.',
+                      title: AppLocalizations.of(context)!.sedentary,
+                      text: AppLocalizations.of(context)!.onboardingSedentary,
                     ),
                   ),
                 ),
@@ -129,13 +131,12 @@ class OnboardingHomeScreen extends ConsumerWidget {
           Discovery(
             visible: ref.watch(onboardingStepProvider) == 4,
             child: const SizedBox(width: 1),
-            message: const Positioned(
+            message: Positioned(
               left: -140,
               bottom: 24,
               child: OnboardingStepMessage(
-                title: 'Det var allt!',
-                text:
-                    'Du kan se mer info kring alla delar vi gick igenom genom att trycka på de olika sektionerna. \n\nVill du tillbaka till guiden igen gör du det genom att trycka på "Gör om intro" i profilsidan.',
+                title: AppLocalizations.of(context)!.onboardingDoneTitle,
+                text: AppLocalizations.of(context)!.onboardingDone,
               ),
             ),
           ),

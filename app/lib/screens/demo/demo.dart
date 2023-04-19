@@ -159,13 +159,13 @@ class DemoWrapper extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return ProviderScope(
       overrides: [
-        userProvider.overrideWithValue(UserState.fromMockUser(
-          User(
-            id: 'abc-123',
-            email: 'demo@email.com',
-            notificationSettings: NotificationSettings(),
-          ),
-        )),
+        userProvider.overrideWith((ref) => UserState.fromMockUser(
+              User(
+                id: 'abc-123',
+                email: 'demo@email.com',
+                notificationSettings: NotificationSettings(),
+              ),
+            )),
         energyProvider.overrideWithProvider(
           (argument) => FutureProvider<List<Energy>>(
             (ref) async {

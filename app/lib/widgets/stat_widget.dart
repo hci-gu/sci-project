@@ -2,6 +2,7 @@ import 'package:animated_flip_counter/animated_flip_counter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:scimovement/theme/theme.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 enum Unit {
   calories,
@@ -73,6 +74,7 @@ class StatWidget extends StatelessWidget {
 
     return _container(
       Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Row(
             children: [
@@ -145,8 +147,8 @@ class StatWidget extends StatelessWidget {
               ),
               Text(
                 mode == StatWidgetMode.day
-                    ? '  från igår.         '
-                    : '  från förra veckan. ',
+                    ? '  ${AppLocalizations.of(context)!.from.toLowerCase()} ${AppLocalizations.of(context)!.yesterday.toLowerCase()}.'
+                    : '  ${AppLocalizations.of(context)!.from.toLowerCase()} ${AppLocalizations.of(context)!.last.toLowerCase()} ${AppLocalizations.of(context)!.week.toLowerCase()}.',
                 style: AppTheme.labelTiny,
               ),
             ],
@@ -183,12 +185,13 @@ class StatWidget extends StatelessWidget {
   }
 
   static Widget _container(Widget child) {
-    return FittedBox(
-      fit: BoxFit.contain,
+    return AspectRatio(
+      aspectRatio: 1,
       child: Container(
         decoration: AppTheme.widgetDecoration,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8.0),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        child: FittedBox(
+          fit: BoxFit.contain,
           child: child,
         ),
       ),

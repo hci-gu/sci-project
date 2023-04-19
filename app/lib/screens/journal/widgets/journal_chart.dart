@@ -12,6 +12,7 @@ import 'package:scimovement/models/journal.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/charts/movement_bar_chart.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 double chartHeight = 280;
 
@@ -138,7 +139,7 @@ class JournalChart extends HookConsumerWidget {
     }, [controlled, follow]);
 
     return Stack(children: [
-      if (!data.isEmpty) _legend(data, ref),
+      if (!data.isEmpty) _legend(context, data, ref),
       ListView(
         controller: follow,
         scrollDirection: Axis.horizontal,
@@ -159,7 +160,7 @@ class JournalChart extends HookConsumerWidget {
           shrinkWrap: true,
           reverse: true,
           padding: const EdgeInsets.only(right: 32, bottom: 16),
-          children: [_buildChart(data)],
+          children: [_buildChart(context, data)],
         ),
       ),
       Positioned(
@@ -169,7 +170,7 @@ class JournalChart extends HookConsumerWidget {
     ]);
   }
 
-  Widget _legend(JournalChartValues data, WidgetRef ref) {
+  Widget _legend(BuildContext context, JournalChartValues data, WidgetRef ref) {
     bool showMovement =
         ref.watch(userProvider.select((user) => user != null && user.hasData));
 
@@ -177,12 +178,12 @@ class JournalChart extends HookConsumerWidget {
       children: [
         for (BodyPart bodyPart in data.entries.keys)
           _legendRow(
-            bodyPart.displayString(),
+            bodyPart.displayString(context),
             AppTheme.colors.bodyPartToColor(bodyPart),
           ),
         if (showMovement || true)
           _legendRow(
-            'Rörelse',
+            AppLocalizations.of(context)!.movement,
             AppTheme.colors.lightGray,
           ),
       ],
@@ -227,7 +228,7 @@ class JournalChart extends HookConsumerWidget {
     );
   }
 
-  Widget _buildChart(JournalChartValues data) {
+  Widget _buildChart(BuildContext context, JournalChartValues data) {
     if (data.entries.isEmpty) {
       return Container();
     }
@@ -270,7 +271,7 @@ class JournalChart extends HookConsumerWidget {
                 return entries.map((entry) {
                   int index = entries.indexOf(entry);
                   String displayString =
-                      '${entry.bodyPart?.displayString()}: ${entry.value}';
+                      '${entry.bodyPart?.displayString(context)}: ${entry.value}';
 
                   if (entry.comment != null && entry.comment!.isNotEmpty) {
                     displayString += '\n ${entry.comment}';

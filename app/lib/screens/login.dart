@@ -6,6 +6,7 @@ import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/snackbar_message.dart';
 import 'package:scimovement/widgets/text_field.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class LoginScreen extends ConsumerWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -27,52 +28,52 @@ class LoginScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: AppTheme.appBar('Logga in'),
+      appBar: AppTheme.appBar(AppLocalizations.of(context)!.login),
       body: Padding(
         padding: AppTheme.screenPadding,
         child: ListView(
           children: [
             const SizedBox(height: 64),
-            _header(),
+            _header(context),
             AppTheme.spacer2x,
-            _form(ref),
+            _form(context, ref),
           ],
         ),
       ),
     );
   }
 
-  Widget _form(WidgetRef ref) {
+  Widget _form(BuildContext context, WidgetRef ref) {
     return ReactiveFormBuilder(
         form: buildForm,
         builder: (context, form, _) {
           return Column(
             children: [
-              const StyledTextField(
+              StyledTextField(
                 formControlName: 'email',
-                placeholder: 'Email',
+                placeholder: AppLocalizations.of(context)!.email,
                 keyboardType: TextInputType.emailAddress,
               ),
               AppTheme.spacer2x,
-              const StyledTextField(
+              StyledTextField(
                 formControlName: 'password',
-                placeholder: 'Lösenord',
+                placeholder: AppLocalizations.of(context)!.password,
                 keyboardType: TextInputType.visiblePassword,
                 obscureText: true,
               ),
               AppTheme.spacer2x,
-              _loginButton(ref),
+              _loginButton(context, ref),
             ],
           );
         });
   }
 
-  Widget _header() {
+  Widget _header(BuildContext context) {
     return Column(
       children: [
         Text('RullaPå', style: AppTheme.headLine1.copyWith(height: 0.5)),
         Text(
-          'spåra din rörelse',
+          AppLocalizations.of(context)!.introductionScreenHeader,
           style: AppTheme.headLine3Light.copyWith(
             color: AppTheme.colors.primary,
           ),
@@ -81,10 +82,10 @@ class LoginScreen extends ConsumerWidget {
     );
   }
 
-  Widget _loginButton(WidgetRef ref) {
+  Widget _loginButton(BuildContext context, WidgetRef ref) {
     return ReactiveFormConsumer(
       builder: ((context, form, child) => Button(
-            title: 'Logga in',
+            title: AppLocalizations.of(context)!.login,
             width: 130,
             disabled: form.pristine || !form.valid,
             onPressed: () async {
@@ -98,7 +99,7 @@ class LoginScreen extends ConsumerWidget {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackbarMessage(
                     context: context,
-                    message: 'Något gick fel',
+                    message: AppLocalizations.of(context)!.genericError,
                     type: SnackbarType.error,
                   ),
                 );

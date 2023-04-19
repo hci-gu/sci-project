@@ -4,7 +4,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/theme/theme.dart';
+import 'package:scimovement/widgets/locale_select.dart';
 import 'package:scimovement/widgets/snackbar_message.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AppSettings extends ConsumerWidget {
   const AppSettings({Key? key}) : super(key: key);
@@ -17,7 +19,8 @@ class AppSettings extends ConsumerWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Notifikationer', style: AppTheme.paragraphMedium),
+            Text(AppLocalizations.of(context)!.notifications,
+                style: AppTheme.paragraphMedium),
             CupertinoSwitch(
               thumbColor: AppTheme.colors.white,
               activeColor: AppTheme.colors.primary,
@@ -43,8 +46,11 @@ class AppSettings extends ConsumerWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Språk', style: AppTheme.paragraphMedium),
-            Container(),
+            Text(
+              AppLocalizations.of(context)!.language,
+              style: AppTheme.paragraphMedium,
+            ),
+            LocaleSelect(),
           ],
         ),
         AppTheme.spacer,
@@ -79,7 +85,10 @@ class NotificationToggles extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Rörelsepåminnelser', style: AppTheme.paragraphMedium),
+              Text(
+                AppLocalizations.of(context)!.movementReminders,
+                style: AppTheme.paragraphMedium,
+              ),
               CupertinoSwitch(
                 thumbColor: AppTheme.colors.white,
                 activeColor: AppTheme.colors.primary,
@@ -100,7 +109,10 @@ class NotificationToggles extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Loggbokspåminnelser', style: AppTheme.paragraphMedium),
+              Text(
+                AppLocalizations.of(context)!.logbookReminders,
+                style: AppTheme.paragraphMedium,
+              ),
               CupertinoSwitch(
                 thumbColor: AppTheme.colors.white,
                 activeColor: AppTheme.colors.primary,
@@ -121,7 +133,10 @@ class NotificationToggles extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Ingen data varning', style: AppTheme.paragraphMedium),
+              Text(
+                AppLocalizations.of(context)!.noDataWarning,
+                style: AppTheme.paragraphMedium,
+              ),
               CupertinoSwitch(
                 thumbColor: AppTheme.colors.white,
                 activeColor: AppTheme.colors.primary,

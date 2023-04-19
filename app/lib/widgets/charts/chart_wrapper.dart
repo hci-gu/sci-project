@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ChartWrapper extends StatelessWidget {
   final Widget child;
@@ -48,10 +49,10 @@ class ChartWrapper extends StatelessWidget {
           child: Text(err),
         ),
       );
-  static ChartWrapper empty() => const ChartWrapper(
+  static ChartWrapper empty(BuildContext context) => ChartWrapper(
         isCard: false,
         child: Center(
-          child: Text('Ingen data'),
+          child: Text(AppLocalizations.of(context)!.noData),
         ),
       );
 }

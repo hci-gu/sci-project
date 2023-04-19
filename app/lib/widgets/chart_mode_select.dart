@@ -18,8 +18,8 @@ class ChartModeSelect extends ConsumerWidget {
         child: DropdownButton<ChartMode>(
           isDense: true,
           items: ChartMode.values
-              .map(
-                  (e) => DropdownMenuItem(child: Text(e.displayName), value: e))
+              .map((e) => DropdownMenuItem(
+                  child: Text(e.displayName(context)), value: e))
               .toList(),
           onChanged: (value) {
             if (value != null) {

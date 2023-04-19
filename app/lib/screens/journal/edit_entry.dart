@@ -9,6 +9,7 @@ import 'package:scimovement/screens/journal/widgets/pain_slider.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/text_field.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class EditJournalEntryScreen extends ConsumerWidget {
   final BodyPart? bodyPart;
@@ -24,8 +25,8 @@ class EditJournalEntryScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     BodyPart? initialBodyPart = entry != null ? entry!.bodyPart : bodyPart;
     return Scaffold(
-      appBar: AppTheme.appBar(
-          initialBodyPart?.displayString() ?? 'Lägg till kroppsdel'),
+      appBar: AppTheme.appBar(initialBodyPart?.displayString(context) ??
+          AppLocalizations.of(context)!.addBodyPart),
       body: ListView(
         padding: AppTheme.screenPadding,
         children: [
@@ -81,21 +82,25 @@ class EditJournalEntry extends ConsumerWidget {
           children: [
             if (initialBodyPart == null) BodyPartSelect(form: form),
             if (initialBodyPart == null) AppTheme.spacer2x,
-            Text('Smärtnivå', style: AppTheme.labelLarge),
             Text(
-              'Välj ett nummer mellan 1-10',
+              AppLocalizations.of(context)!.painLevel,
+              style: AppTheme.labelLarge,
+            ),
+            Text(
+              AppLocalizations.of(context)!.painLevelHelper,
               style: AppTheme.paragraphMedium,
             ),
             AppTheme.spacer2x,
             PainSlider(formKey: 'painLevel'),
             AppTheme.spacer2x,
-            Text('Kommentar ( valfri )', style: AppTheme.labelLarge),
+            Text(
+                '${AppLocalizations.of(context)!.comment} ( ${AppLocalizations.of(context)!.optional} )',
+                style: AppTheme.labelLarge),
             AppTheme.spacer,
-            const StyledTextField(
+            StyledTextField(
               formControlName: 'comment',
-              placeholder: 'Skriv en kommentar',
-              helperText:
-                  'Beskriv hur du mår, vad du har gjort, hur du har sovit etc.',
+              placeholder: AppLocalizations.of(context)!.painCommentPlaceholder,
+              helperText: AppLocalizations.of(context)!.painCommentHelper,
               maxLines: 3,
             ),
             AppTheme.spacer2x,
@@ -117,7 +122,9 @@ class EditJournalEntry extends ConsumerWidget {
                       form.reset();
                       GoRouter.of(context).pop();
                     },
-                    title: existingEntry != null ? 'Uppdatera' : 'Spara',
+                    title: existingEntry != null
+                        ? AppLocalizations.of(context)!.update
+                        : AppLocalizations.of(context)!.save,
                   )),
             ),
           ],
