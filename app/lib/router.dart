@@ -10,7 +10,7 @@ import 'package:scimovement/screens/demo/demo.dart';
 import 'package:scimovement/screens/detail/activity.dart';
 import 'package:scimovement/screens/detail/calories.dart';
 import 'package:scimovement/screens/detail/sedentary.dart';
-import 'package:scimovement/screens/exercise.dart';
+import 'package:scimovement/screens/exercise/exercise.dart';
 import 'package:scimovement/screens/introduction.dart';
 import 'package:scimovement/screens/journal/edit_entry.dart';
 import 'package:scimovement/screens/journal/journal_list.dart';

@@ -2,13 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/models/bouts.dart';
+import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/stat_widget.dart';
 import 'package:go_router/go_router.dart';
 
 final exerciseWidgetProvider = FutureProvider<WidgetValues>((ref) async {
-  List<Bout> bouts = await ref.watch(excerciseBoutsProvider.future);
-  return WidgetValues(bouts.length, 0);
+  List<Bout> previous =
+      await ref.watch(excerciseBoutsProvider(const Pagination(page: 7)).future);
+  List<Bout> current =
+      await ref.watch(excerciseBoutsProvider(const Pagination()).future);
+  return WidgetValues(current.length, previous.length);
 });
 
 class ExerciseWidget extends ConsumerWidget {
