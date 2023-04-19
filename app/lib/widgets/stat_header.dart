@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/stat_widget.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class StatHeader extends ConsumerWidget {
   final Unit unit;
@@ -21,7 +22,7 @@ class StatHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     DateTime date = ref.watch(dateProvider);
-    String dateText = ref.watch(dateDisplayProvider);
+    String dateText = ref.watch(dateDisplayProvider(context));
     Pagination page = ref.watch(paginationProvider);
 
     return Column(
@@ -29,7 +30,9 @@ class StatHeader extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          isAverage ? 'Genomsnitt' : 'Totalt',
+          isAverage
+              ? AppLocalizations.of(context)!.average
+              : AppLocalizations.of(context)!.total,
           style: AppTheme.labelLarge.copyWith(color: AppTheme.colors.gray),
         ),
         Row(

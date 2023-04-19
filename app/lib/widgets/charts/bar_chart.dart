@@ -26,7 +26,7 @@ class CustomBarChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (chartData.data.isEmpty) {
-      return ChartWrapper.empty();
+      return ChartWrapper.empty(context);
     }
     // get max value from energy
     double width = chartData.mode == ChartMode.week ? 32 : 6;
@@ -53,7 +53,7 @@ class CustomBarChart extends StatelessWidget {
                 var value =
                     group.value.fold<double>(0, (a, b) => a + b.value).toInt();
                 return BarTooltipItem(
-                  '${displayDate(group.key)}\n$value ${unit.displayString()}',
+                  '${displayDate(context, group.key)}\n$value ${unit.displayString()}',
                   AppTheme.labelMedium,
                 );
               },

@@ -6,6 +6,7 @@ import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/stat_widget.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 final exerciseWidgetProvider = FutureProvider<WidgetValues>((ref) async {
   List<Bout> previous =
@@ -28,7 +29,7 @@ class ExerciseWidget extends ConsumerWidget {
       },
       child: ref.watch(exerciseWidgetProvider).when(
             data: (WidgetValues values) => StatWidget(
-              title: 'Träningspass',
+              title: AppLocalizations.of(context)!.workout,
               values: values,
               unit: Unit.amount,
               asset: asset,
@@ -44,7 +45,7 @@ class ExerciseWidget extends ConsumerWidget {
                   );
                 },
                 size: ButtonSize.tiny,
-                title: 'Lägg till',
+                title: AppLocalizations.of(context)!.add,
               ),
             ),
             error: (_, __) => StatWidget.error(asset),

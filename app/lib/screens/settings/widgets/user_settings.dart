@@ -9,6 +9,7 @@ import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/snackbar_message.dart';
 import 'package:scimovement/widgets/text_field.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class UserSettings extends HookWidget {
   final User user;
@@ -60,7 +61,7 @@ class UserSettings extends HookWidget {
           children: [
             StyledTextField(
               formControlName: 'email',
-              placeholder: 'Email',
+              placeholder: AppLocalizations.of(context)!.email,
               keyboardType: TextInputType.emailAddress,
               canEdit: editing.value,
               disabled: !editing.value,
@@ -68,7 +69,7 @@ class UserSettings extends HookWidget {
             AppTheme.spacer,
             StyledTextField(
               formControlName: 'password',
-              placeholder: 'Lösenord',
+              placeholder: AppLocalizations.of(context)!.password,
               keyboardType: TextInputType.visiblePassword,
               obscureText: true,
               canEdit: editing.value,
@@ -83,7 +84,7 @@ class UserSettings extends HookWidget {
             FormDropdown(
               form: form,
               formKey: 'gender',
-              title: 'Kön',
+              title: AppLocalizations.of(context)!.gender,
               readOnly: !editing.value,
               items: Gender.values
                   .map((gender) => DropdownMenuItem(
@@ -95,7 +96,7 @@ class UserSettings extends HookWidget {
             AppTheme.spacer,
             StyledTextField(
               formControlName: 'weight',
-              placeholder: 'Vikt',
+              placeholder: AppLocalizations.of(context)!.weight,
               keyboardType: TextInputType.number,
               canEdit: editing.value,
               disabled: !editing.value,
@@ -106,7 +107,7 @@ class UserSettings extends HookWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Button(
-                        title: 'Avbryt',
+                        title: AppLocalizations.of(context)!.cancel,
                         width: 120,
                         secondary: true,
                         onPressed: () {
@@ -120,7 +121,7 @@ class UserSettings extends HookWidget {
                     ],
                   )
                 : Button(
-                    title: 'Editera profil',
+                    title: AppLocalizations.of(context)!.editProfile,
                     width: 200,
                     secondary: true,
                     onPressed: () => editing.value = !editing.value,
@@ -153,8 +154,9 @@ class ConditionDropDown extends StatelessWidget {
                   readOnly: readOnly,
                   form: form,
                   formKey: 'condition',
-                  title: 'Tillstånd',
-                  hint: 'Välj tillstånd',
+                  title: AppLocalizations.of(context)!.condition,
+                  hint:
+                      '${AppLocalizations.of(context)!.select} ${AppLocalizations.of(context)!.condition.toLowerCase()}',
                   items: Condition.values
                       .map((condition) => DropdownMenuItem(
                             value: condition,
@@ -171,8 +173,9 @@ class ConditionDropDown extends StatelessWidget {
                     readOnly: readOnly,
                     form: form,
                     formKey: 'injuryLevel',
-                    title: 'Skadenivå',
-                    hint: 'Välj skadenivå',
+                    title: AppLocalizations.of(context)!.injuryLevel,
+                    hint:
+                        '${AppLocalizations.of(context)!.select} ${AppLocalizations.of(context)!.injuryLevel.toLowerCase()}',
                     items: [5, 6, 7, 8, 9]
                         .map((value) => DropdownMenuItem(
                               value: value,
@@ -194,7 +197,7 @@ class SubmitButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return ReactiveFormConsumer(
       builder: ((context, form, child) => Button(
-            title: 'Spara',
+            title: AppLocalizations.of(context)!.save,
             width: 130,
             disabled: form.pristine || !form.valid,
             onPressed: () async {
@@ -212,7 +215,7 @@ class SubmitButton extends ConsumerWidget {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackbarMessage(
                   context: context,
-                  message: 'Uppdaterad',
+                  message: AppLocalizations.of(context)!.updated,
                 ),
               );
             },

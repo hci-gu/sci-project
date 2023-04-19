@@ -7,7 +7,7 @@ final onboardingStepProvider = StateProvider<int>((ref) => 0);
 final onboardingDoneProvider = Provider<bool>((ref) {
   bool isDone = ref.watch(onboardingStepProvider) == onboardingStepCount;
   if (isDone) {
-    Storage.storeOnboardingDone(true);
+    Storage().storeOnboardingDone(true);
   }
   return isDone;
 });

@@ -9,7 +9,7 @@ class DateSelect extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     DateTime date = ref.watch(dateProvider);
-    String dateText = ref.watch(dateDisplayProvider);
+    String dateText = ref.watch(dateDisplayProvider(context));
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
