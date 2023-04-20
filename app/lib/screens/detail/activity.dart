@@ -11,6 +11,7 @@ import 'package:scimovement/widgets/charts/chart_wrapper.dart';
 import 'package:scimovement/widgets/info_box.dart';
 import 'package:scimovement/widgets/stat_header.dart';
 import 'package:scimovement/widgets/stat_widget.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ActivityScreen extends ConsumerWidget {
   const ActivityScreen({Key? key}) : super(key: key);
@@ -21,7 +22,7 @@ class ActivityScreen extends ConsumerWidget {
     bool isDay = pagination.mode == ChartMode.day;
 
     return DetailScreen(
-      title: 'Rörelse',
+      title: AppLocalizations.of(context)!.movement,
       header: StatHeader(
         unit: Unit.time,
         isAverage: !isDay,
@@ -33,10 +34,10 @@ class ActivityScreen extends ConsumerWidget {
       pageBuilder: (ctx, page) => isDay
           ? AllActivitiesArc(Pagination(mode: pagination.mode, page: page))
           : ActivityBarChart(Pagination(mode: pagination.mode, page: page)),
-      infoBox: const InfoBox(
-        title: 'Om Rörelse',
-        text:
-            'Här visas en uppskattning av din dagliga aktivitet. Rörelse (lågintensiv aktivitet, blå). Består av aktiviteter som upplevs som lätt ansträngning och kan beskrivas som 20 - 45% av en individs maximal kapacitet.\nAktivitet (Medel till hög intensiv aktivitet, grön). Består av aktiviteter som upplevs som något ansträngande till ansträngande och mycket ansträngande. Dessa kan beskrivas som medel 46 - 63% och hög 54 - 90% av maximal intensitet.\n\nAktivitetsnivån är baserad på procent (%) av maximal kapacitet (relativ intensitet), detta gör att samma aktivitet kan uppfattas olika anstränga hos olika individer.',
+      infoBox: InfoBox(
+        title:
+            '${AppLocalizations.of(context)!.about} ${AppLocalizations.of(context)!.movement}',
+        text: AppLocalizations.of(context)!.aboutMovement,
       ),
     );
   }

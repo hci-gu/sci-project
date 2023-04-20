@@ -4,6 +4,7 @@ import 'package:scimovement/models/bouts.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/widgets/stat_widget.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 final sedentaryWidgetProvider = FutureProvider<WidgetValues>((ref) async {
   double current =
@@ -26,7 +27,7 @@ class SedentaryWidget extends ConsumerWidget {
       },
       child: ref.watch(sedentaryWidgetProvider).when(
             data: (WidgetValues values) => StatWidget(
-              title: 'Stillasittande',
+              title: AppLocalizations.of(context)!.sedentary,
               values: values,
               unit: Unit.time,
               asset: asset,

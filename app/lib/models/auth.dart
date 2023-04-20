@@ -33,7 +33,7 @@ class UserState extends StateNotifier<User?> {
     try {
       state = await Api().login(email, password);
       if (state != null) {
-        await Storage.storeCredentails(Credentials(email, password));
+        await Storage().storeCredentails(Credentials(email, password));
       }
     } catch (e) {
       rethrow;
@@ -45,7 +45,7 @@ class UserState extends StateNotifier<User?> {
     try {
       state = await Api().register(email, password, values);
       if (state != null) {
-        await Storage.storeCredentails(Credentials(email, password));
+        await Storage().storeCredentails(Credentials(email, password));
       }
     } catch (e) {
       rethrow;
@@ -61,7 +61,7 @@ class UserState extends StateNotifier<User?> {
 
   Future<void> logout() async {
     state = null;
-    await Storage.clearCredentials();
+    await Storage().clearCredentials();
   }
 
   Future<void> update(Map<String, dynamic> update) async {
@@ -94,7 +94,7 @@ class UserState extends StateNotifier<User?> {
         });
       }
     }
-    await Storage.storeNotificationRequest(_hasPermission);
+    await Storage().storeNotificationRequest(_hasPermission);
 
     return _hasPermission ? 'granted' : 'denied';
   }

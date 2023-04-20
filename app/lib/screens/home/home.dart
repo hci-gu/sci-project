@@ -52,12 +52,6 @@ class HomeScreen extends HookConsumerWidget {
               // const Expanded(child: SedentaryWidget()),
             ],
           ),
-          // Button(
-          //   width: 225,
-          //   onPressed: () => context.goNamed('exercise'),
-          //   icon: Icons.electric_bolt_outlined,
-          //   title: 'Träningspass',
-          // )
         ],
       ),
     );

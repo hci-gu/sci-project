@@ -11,6 +11,7 @@ import 'package:scimovement/widgets/charts/chart_wrapper.dart';
 import 'package:scimovement/widgets/info_box.dart';
 import 'package:scimovement/widgets/stat_header.dart';
 import 'package:scimovement/widgets/stat_widget.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SedentaryScreen extends ConsumerWidget {
   const SedentaryScreen({Key? key}) : super(key: key);
@@ -20,7 +21,7 @@ class SedentaryScreen extends ConsumerWidget {
     Pagination pagination = ref.watch(paginationProvider);
 
     return DetailScreen(
-      title: 'Stillasittande',
+      title: AppLocalizations.of(context)!.sedentary,
       header: StatHeader(
         unit: Unit.time,
         provider: averageSedentaryBout(pagination),
@@ -29,10 +30,10 @@ class SedentaryScreen extends ConsumerWidget {
       pageBuilder: (ctx, page) => pagination.mode == ChartMode.day
           ? SedentaryArc(Pagination(mode: pagination.mode, page: page))
           : SedentaryBarChart(Pagination(mode: pagination.mode, page: page)),
-      infoBox: const InfoBox(
-        title: 'Om Stillasittande',
-        text:
-            'Här visas en uppskattning av den totala tid - fördelat över dagen - du sitter still och arbetar, tittar på TV, läser eller äter.',
+      infoBox: InfoBox(
+        title:
+            '${AppLocalizations.of(context)!.about} ${AppLocalizations.of(context)!.sedentary}',
+        text: AppLocalizations.of(context)!.aboutSedentary,
       ),
     );
   }

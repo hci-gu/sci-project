@@ -1,6 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:scimovement/api/api.dart';
 import 'package:intl/intl.dart';
 import 'package:timezone/standalone.dart' as tz;
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 enum Gender { male, female }
 
@@ -30,11 +32,11 @@ class BodyPart {
     return '${type.name}${side != null ? '-${side!.name}' : ''}';
   }
 
-  String displayString() {
+  String displayString(BuildContext context) {
     if (type == BodyPartType.neck || type == BodyPartType.back) {
-      return type.displayString();
+      return type.displayString(context);
     }
-    return '${side != null ? '${side!.displayString()} ' : ''}${type.displayString()}';
+    return '${side != null ? '${side!.displayString(context)} ' : ''}${type.displayString(context)}';
   }
 
   @override
@@ -46,12 +48,12 @@ class BodyPart {
 }
 
 extension SideDisplayAsString on Side {
-  String displayString() {
+  String displayString(BuildContext context) {
     switch (this) {
       case Side.left:
-        return 'Vänster';
+        return AppLocalizations.of(context)!.left;
       case Side.right:
-        return 'Höger';
+        return AppLocalizations.of(context)!.right;
     }
   }
 }
@@ -68,20 +70,20 @@ Side? sideFromString(String side) {
 }
 
 extension BodyPartTypeDisplayAsString on BodyPartType {
-  String displayString() {
+  String displayString(BuildContext context) {
     switch (this) {
       case BodyPartType.neck:
-        return 'Nacke';
+        return AppLocalizations.of(context)!.bodyPartNeck;
       case BodyPartType.back:
-        return 'Rygg';
+        return AppLocalizations.of(context)!.bodyPartBack;
       case BodyPartType.scapula:
-        return 'Skulderblad';
+        return AppLocalizations.of(context)!.bodyPartScapula;
       case BodyPartType.shoulderJoint:
-        return 'Axelled';
+        return AppLocalizations.of(context)!.bodyPartShoulderJoint;
       case BodyPartType.elbow:
-        return 'Armbåge';
+        return AppLocalizations.of(context)!.bodyPartElbow;
       case BodyPartType.hand:
-        return 'Hand';
+        return AppLocalizations.of(context)!.bodyPartHand;
       default:
         return toString();
     }
@@ -219,20 +221,20 @@ class User {
 enum Activity { sedentary, moving, active, skiErgo, armErgo, weights }
 
 extension ActivityDisplayString on Activity {
-  String displayString() {
+  String displayString(BuildContext context) {
     switch (this) {
       case Activity.sedentary:
-        return 'Stillasittande';
+        return AppLocalizations.of(context)!.sedentary;
       case Activity.moving:
-        return 'Rörelse';
+        return AppLocalizations.of(context)!.movement;
       case Activity.active:
-        return 'Aktiv';
+        return AppLocalizations.of(context)!.active;
       case Activity.weights:
-        return 'Vikter';
+        return AppLocalizations.of(context)!.weights;
       case Activity.skiErgo:
-        return 'Ski Ergometer';
+        return AppLocalizations.of(context)!.skiErgo;
       case Activity.armErgo:
-        return 'Armcykel';
+        return AppLocalizations.of(context)!.armErgo;
       default:
         return toString();
     }

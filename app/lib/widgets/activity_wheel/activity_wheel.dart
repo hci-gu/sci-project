@@ -54,12 +54,12 @@ class ActivityWheel extends ConsumerWidget {
       child: ref.watch(activityProvider).when(
             error: _error,
             loading: _loading,
-            data: _body,
+            data: (data) => _body(context, data),
           ),
     );
   }
 
-  Widget _body(List<ActivityGroup> activityGroups) {
+  Widget _body(BuildContext context, List<ActivityGroup> activityGroups) {
     bool allEmpty = activityGroups.every((e) => e.energy.isEmpty);
     return _container(
       Column(
@@ -88,7 +88,7 @@ class ActivityWheel extends ConsumerWidget {
                         ),
                         AppTheme.spacer,
                         Text(
-                          e.activity.displayString(),
+                          e.activity.displayString(context),
                           style: AppTheme.labelLarge,
                         ),
                       ],

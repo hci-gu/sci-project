@@ -6,6 +6,7 @@ import 'package:scimovement/models/journal.dart';
 import 'package:scimovement/screens/journal/widgets/body_part_icon.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class BodyPartGrid extends ConsumerWidget {
   const BodyPartGrid({Key? key}) : super(key: key);
@@ -25,7 +26,7 @@ class BodyPartGrid extends ConsumerWidget {
     return Column(
       children: [
         Text(
-          'Lägg till en kroppsdel för att börja spåra din smärta.',
+          AppLocalizations.of(context)!.trackPainEmpty,
           style: AppTheme.paragraphMedium,
         ),
         AppTheme.spacer2x,
@@ -44,7 +45,7 @@ class BodyPartGrid extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Tryck på en kropssdel för att lägga till en ny smärtupplevelse.',
+          AppLocalizations.of(context)!.trackPainDescription,
           style: AppTheme.paragraph,
         ),
         AppTheme.spacer,
@@ -64,7 +65,7 @@ class BodyPartGrid extends ConsumerWidget {
                         'bodyPart': e.bodyPart,
                       },
                     ),
-                    child: _listItem(e),
+                    child: _listItem(context, e),
                   ),
                 )
                 .toList(),
@@ -75,7 +76,7 @@ class BodyPartGrid extends ConsumerWidget {
     );
   }
 
-  Widget _listItem(JournalEntry entry) {
+  Widget _listItem(BuildContext context, JournalEntry entry) {
     return Container(
       decoration: AppTheme.widgetDecoration,
       child: Padding(
@@ -86,13 +87,13 @@ class BodyPartGrid extends ConsumerWidget {
             BodyPartIcon(bodyPart: entry.bodyPart, size: 64),
             AppTheme.spacer,
             Text(
-              entry.bodyPart.displayString(),
+              entry.bodyPart.displayString(context),
               style: AppTheme.labelMedium,
               textAlign: TextAlign.center,
             ),
             FittedBox(
               child: Text(
-                timeago.format(entry.time, locale: 'sv'),
+                timeago.format(entry.time),
                 style: AppTheme.paragraphSmall,
                 textAlign: TextAlign.center,
               ),
@@ -114,7 +115,10 @@ class BodyPartGrid extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Icon(Icons.add, size: 48),
-              Text('Lägg till', style: AppTheme.labelLarge),
+              Text(
+                AppLocalizations.of(context)!.add,
+                style: AppTheme.labelLarge,
+              ),
             ],
           ),
         ),

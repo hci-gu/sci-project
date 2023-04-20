@@ -3,26 +3,32 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:intl/date_symbol_data_local.dart';
 import 'package:scimovement/models/auth.dart';
+import 'package:scimovement/models/locale.dart';
 import 'package:scimovement/router.dart';
 import 'package:scimovement/storage.dart';
 import 'package:scimovement/theme/theme.dart';
+import 'package:collection/collection.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-void initializeTzAndLocale() {
+void initializeTzAndLocale(String? languageCode) {
   tz.initializeTimeZones();
-  timeago.setLocaleMessages('sv', timeago.SvMessages());
-  Intl.defaultLocale = 'sv_SE';
-  initializeDateFormatting();
+  timeago.setLocaleMessages(
+    languageCode ?? 'en',
+    languageCode == 'sv' ? timeago.SvMessages() : timeago.EnMessages(),
+  );
+  Intl.defaultLocale = languageCode;
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  initializeTzAndLocale();
-  bool onboardingDone = await Storage.getOnboardingDone();
-  Credentials? credentials = await Storage.getCredentials();
+  await Storage().reloadPrefs();
+  bool onboardingDone = Storage().getOnboardingDone();
+  Credentials? credentials = Storage().getCredentials();
+  String? languageCode = Storage().getLanguageCode();
+  initializeTzAndLocale(languageCode);
   LicenseRegistry.addLicense(() async* {
     final license =
         await rootBundle.loadString('assets/licenses/icon_license.txt');
@@ -31,11 +37,9 @@ void main() async {
 
   runApp(
     ProviderScope(
-      overrides: [
-        userProvider.overrideWithValue(
-          credentials != null ? UserState(credentials) : UserState(),
-        ),
-      ],
+      overrides: credentials != null
+          ? [userProvider.overrideWith((ref) => UserState(credentials))]
+          : [],
       child: App(
         onboardingDone: onboardingDone,
         loggedIn: credentials != null && credentials.email.isNotEmpty,
@@ -71,7 +75,18 @@ class App extends ConsumerWidget {
       routeInformationParser: router.routeInformationParser,
       routerDelegate: router.routerDelegate,
       debugShowCheckedModeBanner: false,
-      locale: const Locale('sv', 'SE'),
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localeResolutionCallback: (Locale? locale, _) {
+        Locale? resolvedLocale = AppLocalizations.supportedLocales
+            .firstWhereOrNull((Locale supportedLocale) =>
+                supportedLocale.languageCode == locale?.languageCode);
+        return resolvedLocale ?? const Locale('en');
+      },
+      locale: ref.watch(localeProvider),
+      builder: (_, child) {
+        return child ?? const SizedBox.shrink();
+      },
     );
   }
 }

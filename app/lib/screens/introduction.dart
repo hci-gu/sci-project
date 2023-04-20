@@ -3,6 +3,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:scimovement/widgets/locale_select.dart';
 
 class IntroductionScreen extends StatelessWidget {
   const IntroductionScreen({Key? key}) : super(key: key);
@@ -11,19 +13,28 @@ class IntroductionScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: ListView(
-          padding: AppTheme.screenPadding,
+        child: Stack(
           children: [
-            const SizedBox(height: 64),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+            ListView(
+              padding: AppTheme.screenPadding,
               children: [
-                _header(),
-                AppTheme.spacer2x,
-                _actions(context),
-                Image.asset('assets/png/ryggmarg_logo.png', width: 200),
+                const SizedBox(height: 64),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _header(context),
+                    AppTheme.spacer2x,
+                    _actions(context),
+                    Image.asset('assets/png/ryggmarg_logo.png', width: 200),
+                  ],
+                ),
               ],
+            ),
+            Positioned(
+              top: AppTheme.basePadding,
+              right: AppTheme.basePadding,
+              child: LocaleSelect(),
             ),
           ],
         ),
@@ -31,12 +42,12 @@ class IntroductionScreen extends StatelessWidget {
     );
   }
 
-  Widget _header() {
+  Widget _header(BuildContext context) {
     return Column(
       children: [
         Text('RullaPå', style: AppTheme.headLine1.copyWith(height: 0.5)),
         Text(
-          'spåra din rörelse',
+          AppLocalizations.of(context)!.introductionScreenHeader,
           style:
               AppTheme.headLine3Light.copyWith(color: AppTheme.colors.primary),
         ),
@@ -46,7 +57,7 @@ class IntroductionScreen extends StatelessWidget {
         Padding(
           padding: AppTheme.elementPadding,
           child: Text(
-            'Välkommen till appen RullaPå!\nVälj ett alternativ nedan för att komma igång.',
+            AppLocalizations.of(context)!.introductionWelcome,
             textAlign: TextAlign.center,
             style: AppTheme.paragraphMedium,
           ),
@@ -59,13 +70,13 @@ class IntroductionScreen extends StatelessWidget {
     return Column(
       children: [
         Button(
-          title: 'Logga in',
+          title: AppLocalizations.of(context)!.login,
           width: 180,
           onPressed: () => context.goNamed('login'),
         ),
         AppTheme.spacer2x,
         Button(
-          title: 'Registrera',
+          title: AppLocalizations.of(context)!.register,
           width: 180,
           secondary: true,
           onPressed: () => context.goNamed('register'),

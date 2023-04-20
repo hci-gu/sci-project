@@ -4,6 +4,7 @@ import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/screens/journal/widgets/body_part_icon.dart';
 import 'package:scimovement/screens/settings/widgets/form_dropdown.dart';
 import 'package:scimovement/theme/theme.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class BodyPartSelect extends StatelessWidget {
   final FormGroup form;
@@ -20,9 +21,10 @@ class BodyPartSelect extends StatelessWidget {
                 flex: 2,
                 child: FormDropdown(
                   formKey: 'bodyPartType',
-                  title: 'Kroppsdel',
+                  title: AppLocalizations.of(context)!.bodyPart,
                   form: form,
-                  hint: 'Välj kroppsdel',
+                  hint:
+                      '${AppLocalizations.of(context)!.select} ${AppLocalizations.of(context)!.bodyPart.toLowerCase()}',
                   items: BodyPartType.values
                       .map((bodyPartType) => DropdownMenuItem(
                             value: bodyPartType,
@@ -40,7 +42,7 @@ class BodyPartSelect extends StatelessWidget {
                                     ),
                                   ),
                                   AppTheme.spacer,
-                                  Text(bodyPartType.displayString())
+                                  Text(bodyPartType.displayString(context))
                                 ],
                               ),
                             ),
@@ -54,13 +56,14 @@ class BodyPartSelect extends StatelessWidget {
                   flex: 1,
                   child: FormDropdown(
                     formKey: 'side',
-                    title: 'Sida',
+                    title: AppLocalizations.of(context)!.side,
                     form: form,
-                    hint: 'Välj sida',
+                    hint:
+                        '${AppLocalizations.of(context)!.select} ${AppLocalizations.of(context)!.side.toLowerCase()}',
                     items: Side.values
                         .map((side) => DropdownMenuItem(
                               value: side,
-                              child: Text(side.displayString()),
+                              child: Text(side.displayString(context)),
                             ))
                         .toList(),
                   ),

@@ -1,4 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 enum ChartMode {
   day,
@@ -8,16 +10,16 @@ enum ChartMode {
 }
 
 extension ChartModeDisplayName on ChartMode {
-  String get displayName {
+  String displayName(BuildContext context) {
     switch (this) {
       case ChartMode.day:
-        return 'Dag';
+        return AppLocalizations.of(context)!.day;
       case ChartMode.week:
-        return 'Vecka';
+        return AppLocalizations.of(context)!.week;
       case ChartMode.month:
-        return 'Månad';
+        return AppLocalizations.of(context)!.month;
       case ChartMode.year:
-        return 'År';
+        return AppLocalizations.of(context)!.year;
     }
   }
 }
@@ -71,30 +73,32 @@ final dateProvider = StateProvider<DateTime>((ref) => DateTime.now());
 final paginationProvider =
     StateProvider<Pagination>((ref) => const Pagination());
 
-String displayDate(DateTime date) {
+String displayDate(BuildContext context, DateTime date) {
   DateTime now = DateTime.now();
   DateTime today = DateTime(now.year, now.month, now.day);
   DateTime yesterday = today.subtract(const Duration(days: 1));
 
   if (!date.isBefore(today)) {
-    return 'Idag';
+    return AppLocalizations.of(context)!.today;
   } else if (!date.isBefore(yesterday)) {
-    return 'Igår';
+    return AppLocalizations.of(context)!.yesterday;
   }
 
   return date.toString().substring(0, 10);
 }
 
-final dateDisplayProvider = Provider<String>((ref) {
+final dateDisplayProvider =
+    Provider.family<String, BuildContext>((ref, context) {
   Pagination pagination = ref.watch(paginationProvider);
   DateTime date =
       ref.watch(dateProvider).subtract(pagination.duration * pagination.page);
-  return displayDate(date);
+  return displayDate(context, date);
 });
-final previousDateDisplayProvider = Provider<String>((ref) {
+final previousDateDisplayProvider =
+    Provider.family<String, BuildContext>((ref, context) {
   Pagination pagination = ref.watch(paginationProvider);
   DateTime date = ref
       .watch(dateProvider)
       .subtract(pagination.duration * (pagination.page + 1));
-  return displayDate(date);
+  return displayDate(context, date);
 });

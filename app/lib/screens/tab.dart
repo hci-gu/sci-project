@@ -4,6 +4,7 @@ import 'package:scimovement/screens/home/home.dart';
 import 'package:scimovement/screens/journal/journal.dart';
 import 'package:scimovement/screens/settings/settings.dart';
 import 'package:scimovement/theme/theme.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class TabScreen extends StatelessWidget {
   final List<String> routes;
@@ -33,18 +34,18 @@ class TabScreen extends StatelessWidget {
         child: BottomNavigationBar(
           elevation: 0,
           backgroundColor: AppTheme.colors.white,
-          items: const [
+          items: [
             BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              label: 'Hem',
+              icon: const Icon(Icons.home_outlined),
+              label: AppLocalizations.of(context)!.home,
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.menu_book_sharp),
-              label: 'Loggbok',
+              icon: const Icon(Icons.menu_book_sharp),
+              label: AppLocalizations.of(context)!.logbook,
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              label: 'Profil',
+              icon: const Icon(Icons.person_outline),
+              label: AppLocalizations.of(context)!.profile,
             ),
           ],
           currentIndex: index,
