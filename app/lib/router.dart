@@ -244,18 +244,27 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
               child: SedentaryScreen(),
             ),
           ),
+          GoRoute(
+            name: 'demo-exercise',
+            path: 'exercise',
+            builder: (_, __) => const DemoWrapper(
+              child: ExcerciseScreen(),
+            ),
+          ),
         ],
       ),
       GoRoute(
         name: 'demo-profile',
         path: '/demo/profile',
         pageBuilder: (context, state) => const NoTransitionPage(
-          child: TabScreen(
-            routes: [
-              '/demo',
-              '/demo/journal',
-              '/demo/profile',
-            ],
+          child: DemoWrapper(
+            child: TabScreen(
+              routes: [
+                '/demo',
+                '/demo/journal',
+                '/demo/profile',
+              ],
+            ),
           ),
         ),
       ),
@@ -263,12 +272,14 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
         name: 'demo-journal',
         path: '/demo/journal',
         pageBuilder: (context, state) => const NoTransitionPage(
-          child: TabScreen(
-            routes: [
-              '/demo',
-              '/demo/journal',
-              '/demo/profile',
-            ],
+          child: DemoWrapper(
+            child: TabScreen(
+              routes: [
+                '/demo',
+                '/demo/journal',
+                '/demo/profile',
+              ],
+            ),
           ),
         ),
         routes: [],
