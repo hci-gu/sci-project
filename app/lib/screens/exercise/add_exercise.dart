@@ -9,6 +9,7 @@ import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/duration_picker.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AddExcercise extends HookConsumerWidget {
   final Function callback;
@@ -30,7 +31,9 @@ class AddExcercise extends HookConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Text('Registrera Träningspass', style: AppTheme.headLine3),
+          Text(
+              '${AppLocalizations.of(context)!.register} ${AppLocalizations.of(context)!.workout.toLowerCase()}',
+              style: AppTheme.headLine3),
           AppTheme.spacer2x,
           ActivitySelect(
             value: activity.value,
@@ -39,10 +42,12 @@ class AddExcercise extends HookConsumerWidget {
             },
           ),
           AppTheme.spacer2x,
-          Text('Starttid:', style: AppTheme.labelLarge),
+          Text('${AppLocalizations.of(context)!.startTime}:',
+              style: AppTheme.labelLarge),
           Button(
             width: 150,
-            title: 'Ändra ${time.value.format(context)}',
+            title:
+                '${AppLocalizations.of(context)!.change} ${time.value.format(context)}',
             size: ButtonSize.small,
             onPressed: () async {
               TimeOfDay? selectedTime = await showTimePicker(
@@ -55,7 +60,8 @@ class AddExcercise extends HookConsumerWidget {
             },
           ),
           AppTheme.spacer2x,
-          Text('Längd:', style: AppTheme.labelLarge),
+          Text('${AppLocalizations.of(context)!.length}:',
+              style: AppTheme.labelLarge),
           DurationPicker(
             value: duration.value,
             onChange: (value) {
@@ -86,7 +92,7 @@ class AddExcercise extends HookConsumerWidget {
                 ref.refresh(excerciseBoutsProvider(const Pagination()));
                 callback();
               },
-              title: 'Lägg till',
+              title: AppLocalizations.of(context)!.add,
             ),
           )
         ],
@@ -118,8 +124,8 @@ class ActivitySelect extends StatelessWidget {
           isDense: true,
           items: Activity.values
               .where((e) => e.isExercise)
-              .map((e) =>
-                  DropdownMenuItem(child: Text(e.displayString()), value: e))
+              .map((e) => DropdownMenuItem(
+                  child: Text(e.displayString(context)), value: e))
               .toList(),
           onChanged: (value) => onChanged(value),
           style: AppTheme.labelLarge.copyWith(color: AppTheme.colors.white),
@@ -128,7 +134,7 @@ class ActivitySelect extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           underline: Container(),
           hint: Text(
-            'Välj aktivitet',
+            '${AppLocalizations.of(context)!.select} ${AppLocalizations.of(context)!.activity.toLowerCase()}',
             style: AppTheme.labelTiny.copyWith(color: AppTheme.colors.white),
           ),
           value: value,

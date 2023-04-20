@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/screens/journal/widgets/body_part_grid.dart';
 import 'package:scimovement/screens/journal/widgets/journal_chart.dart';
 import 'package:scimovement/theme/theme.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class JournalScreen extends ConsumerWidget {
   const JournalScreen({Key? key}) : super(key: key);
@@ -26,7 +27,8 @@ class JournalScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               AppTheme.separator,
-              Text('Spåra smärta', style: AppTheme.headLine3),
+              Text(AppLocalizations.of(context)!.trackPain,
+                  style: AppTheme.headLine3),
               const BodyPartGrid(),
               AppTheme.separator,
               _seeAll(context),
@@ -46,8 +48,14 @@ class JournalScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Smärta', style: AppTheme.headLine2),
-            Text('Från muskler och leder', style: AppTheme.paragraphMedium),
+            Text(
+              AppLocalizations.of(context)!.pain,
+              style: AppTheme.headLine2,
+            ),
+            Text(
+              AppLocalizations.of(context)!.musclePainSubtitle,
+              style: AppTheme.paragraphMedium,
+            ),
           ],
         ));
   }
@@ -58,10 +66,10 @@ class JournalScreen extends ConsumerWidget {
       leading: const Icon(Icons.list),
       onTap: () => GoRouter.of(context).goNamed('journal-list'),
       title: Text(
-        'Lista inlägg',
+        AppLocalizations.of(context)!.listEntries,
         style: AppTheme.labelLarge,
       ),
-      subtitle: const Text('Se/editera gamla inlägg'),
+      subtitle: Text(AppLocalizations.of(context)!.listEntriesDescription),
       trailing: const Icon(Icons.arrow_forward_ios),
     );
   }

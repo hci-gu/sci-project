@@ -8,6 +8,7 @@ import 'package:scimovement/models/energy.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/screens/exercise/add_exercise.dart';
 import 'package:scimovement/widgets/editable_list_item.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ExcerciseScreen extends HookConsumerWidget {
   final bool startWithAdd;
@@ -23,7 +24,7 @@ class ExcerciseScreen extends HookConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Träning'),
+        title: Text(AppLocalizations.of(context)!.exercise),
       ),
       floatingActionButton: Builder(builder: (context) {
         return AddExerciseButton(
@@ -34,7 +35,7 @@ class ExcerciseScreen extends HookConsumerWidget {
         );
       }),
       body: ref.watch(excerciseBoutsProvider(const Pagination())).when(
-            data: (data) => _body(ref, data),
+            data: (data) => _body(context, ref, data),
             error: (_, __) => Container(),
             loading: () => const Center(
               child: CircularProgressIndicator(),
@@ -43,13 +44,13 @@ class ExcerciseScreen extends HookConsumerWidget {
     );
   }
 
-  Widget _body(WidgetRef ref, List<Bout> bouts) {
+  Widget _body(BuildContext context, WidgetRef ref, List<Bout> bouts) {
     return ListView.builder(
       itemCount: bouts.length,
       itemBuilder: (context, index) {
         return EditableListItem(
           id: bouts[index].time.toString(),
-          title: bouts[index].activity.displayString(),
+          title: bouts[index].activity.displayString(context),
           subtitle: bouts[index].displayDuration,
           onDismissed: () async {
             await Api().deleteBout(bouts[index].id);

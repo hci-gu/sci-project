@@ -10,6 +10,7 @@ import 'package:scimovement/widgets/charts/energy_line_chart.dart';
 import 'package:scimovement/widgets/info_box.dart';
 import 'package:scimovement/widgets/stat_header.dart';
 import 'package:scimovement/widgets/stat_widget.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class CaloriesScreen extends ConsumerWidget {
   const CaloriesScreen({Key? key}) : super(key: key);
@@ -20,7 +21,7 @@ class CaloriesScreen extends ConsumerWidget {
     bool isDay = pagination.mode == ChartMode.day;
 
     return DetailScreen(
-      title: 'Kalorier',
+      title: AppLocalizations.of(context)!.calories,
       header: StatHeader(
         unit: Unit.calories,
         isAverage: !isDay,
@@ -34,10 +35,10 @@ class CaloriesScreen extends ConsumerWidget {
               pagination: Pagination(page: page, mode: pagination.mode),
             )
           : EnergyBarChart(Pagination(page: page, mode: pagination.mode)),
-      infoBox: const InfoBox(
-        title: 'Om Kalorier',
-        text:
-            'Här visas en uppskattningen av din dagliga energiförbrukning (kalorier) vilket sker genom att aktivitetsarmbandet (klockan) registrerar rörelsen från accelerometern och hjärtfrekvensen kontinuerligt. Informationen från aktivitetsarmbandet samt information om skadenivå, kön och kroppsvikt används för att beräkna energiförbrukning samt aktivitetsnivå (intensitet). ',
+      infoBox: InfoBox(
+        title:
+            '${AppLocalizations.of(context)!.about} ${AppLocalizations.of(context)!.calories}',
+        text: AppLocalizations.of(context)!.aboutCalories,
       ),
     );
   }

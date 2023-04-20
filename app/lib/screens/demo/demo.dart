@@ -10,7 +10,9 @@ import 'package:scimovement/models/journal.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/models/energy.dart';
 import 'package:scimovement/screens/home/widgets/energy_widget.dart';
+import 'package:scimovement/screens/home/widgets/exercise_widget.dart';
 import 'package:scimovement/screens/home/widgets/sedentary_widget.dart';
+import 'package:scimovement/screens/journal/widgets/journal_chart.dart';
 import 'package:scimovement/widgets/activity_wheel/activity_wheel.dart';
 import 'package:scimovement/widgets/charts/energy_line_chart.dart';
 
@@ -159,13 +161,15 @@ class DemoWrapper extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return ProviderScope(
       overrides: [
-        userProvider.overrideWithValue(UserState.fromMockUser(
-          User(
-            id: 'abc-123',
-            email: 'demo@email.com',
-            notificationSettings: NotificationSettings(),
+        userProvider.overrideWith(
+          (ref) => UserState.fromMockUser(
+            User(
+              id: 'abc-123',
+              email: 'demo@email.com',
+              notificationSettings: NotificationSettings(),
+            ),
           ),
-        )),
+        ),
         energyProvider.overrideWithProvider(
           (argument) => FutureProvider<List<Energy>>(
             (ref) async {
@@ -181,15 +185,26 @@ class DemoWrapper extends ConsumerWidget {
             },
           ),
         ),
-        journalProvider.overrideWithProvider(
-          FutureProvider<List<JournalEntry>>(
+        excerciseBoutsProvider.overrideWithProvider(
+          (argument) => FutureProvider<List<Bout>>(
             (ref) async {
-              return [];
+              return [
+                Bout(
+                  activity: Activity.weights,
+                  minutes: 30,
+                  time: DateTime.now(),
+                  id: 1,
+                ),
+              ];
             },
           ),
         ),
+        journalProvider.overrideWith((ref) => []),
+        journalChartProvider,
+        movementBarChartProvider,
         notificationsEnabledProvider.overrideWithValue(false),
         userHasDataProvider.overrideWithValue(true),
+        exerciseWidgetProvider,
         averageSedentaryBout,
         totalEnergyProvider,
         averageEnergyProvider,
