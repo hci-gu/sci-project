@@ -43,15 +43,16 @@ class HomeScreen extends HookConsumerWidget {
             ),
           if (!showDataWidgets) const NoDataMessage(),
           AppTheme.spacer2x,
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Expanded(child: ExerciseWidget()),
-              AppTheme.spacer2x,
-              Expanded(child: Container()),
-              // const Expanded(child: SedentaryWidget()),
-            ],
-          ),
+          if (showDataWidgets)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Expanded(child: ExerciseWidget()),
+                AppTheme.spacer2x,
+                Expanded(child: Container()),
+                // const Expanded(child: SedentaryWidget()),
+              ],
+            ),
         ],
       ),
     );

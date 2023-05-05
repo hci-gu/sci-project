@@ -218,7 +218,15 @@ class User {
   }
 }
 
-enum Activity { sedentary, moving, active, skiErgo, armErgo, weights }
+enum Activity {
+  sedentary,
+  moving,
+  active,
+  skiErgo,
+  armErgo,
+  weights,
+  rollOutside
+}
 
 extension ActivityDisplayString on Activity {
   String displayString(BuildContext context) {
@@ -235,6 +243,8 @@ extension ActivityDisplayString on Activity {
         return AppLocalizations.of(context)!.skiErgo;
       case Activity.armErgo:
         return AppLocalizations.of(context)!.armErgo;
+      case Activity.rollOutside:
+        return AppLocalizations.of(context)!.rollOutside;
       default:
         return toString();
     }
@@ -252,6 +262,7 @@ extension ActivityGroupValue on Activity {
       case Activity.weights:
       case Activity.skiErgo:
       case Activity.armErgo:
+      case Activity.rollOutside:
         return 2;
       default:
         return 0;
@@ -265,6 +276,7 @@ extension ActivityIsExercise on Activity {
       case Activity.weights:
       case Activity.skiErgo:
       case Activity.armErgo:
+      case Activity.rollOutside:
         return true;
       default:
         return false;
@@ -286,6 +298,8 @@ Activity activityFromString(string) {
       return Activity.skiErgo;
     case 'armErgo':
       return Activity.armErgo;
+    case 'rollOutside':
+      return Activity.rollOutside;
     default:
       return Activity.moving;
   }

@@ -220,6 +220,7 @@ class AnimatedWheel extends HookWidget {
       case Activity.weights:
       case Activity.skiErgo:
       case Activity.armErgo:
+      case Activity.rollOutside:
         return const Interval(0.7, 1, curve: Curves.easeInOut);
     }
   }
