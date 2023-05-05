@@ -21,29 +21,41 @@
     "values": {}
   },
   "skiErgo": {
-    "constant": 0.230183284229348,
+    "constant": -0.279175,
     "values": {
-      "weight": 0.0174070397777326,
-      "watt": 0.076825194274764
+      "weight": 0.024284,
+      "hr": 0.006011,
+      "acc": 0.000026,
+      "watt": 0.061199,
+      "gender": 0.166133,
+      "condition": -0.33262
     }
   },
-  "armErgo": {
-    "constant": -0.603421,
+  "paraArmErgo": {
+    "constant": -0.851716,
     "values": {
-      "weight": 0.013435,
-      "hr": 0.012068,
-      "acc": 0.000091,
-      "gender": 0.590387,
-      "condition": -0.493678
+      "weight": 0.012285,
+      "hr": 0.007026,
+      "watt": 0.049639,
+      "gender": 0.315138
+    }
+  },
+  "tetraArmErgo": {
+    "constant": 0.176998,
+    "values": {
+      "weight": 0.000703,
+      "hr": 0.003116,
+      "watt": 0.033687,
+      "gender": 0.449037
     }
   },
   "paraWeights": {
-    "constant": -4.04913828489822,
+    "constant": -4.049138,
     "values": {
-      "hr": 0.0143314447204367,
-      "weight": 0.039208416794491,
+      "hr": 0.014331,
+      "weight": 0.039208,
       "acc": 0.000307940063570141,
-      "gender": 0.76596174333638
+      "gender": 0.765962
     }
   },
   "tetraWeights": {
@@ -52,6 +64,27 @@
       "acc": 0.000227067912695819,
       "gender": 0.587303205287161,
       "injuryLevel": 0.166452279742845
+    }
+  },
+  "rollOutside": {
+    "constant": 1.049943,
+    "values": {
+      "weight": 0.042735,
+      "hr": 0.018813,
+      "acc": 0.000003,
+      "gender": 1.521108,
+      "condition": -1.465018
+    }
+  },
+  "rollOutsideSpeed": {
+    "constant": -2.987271,
+    "values": {
+      "weight": 0.048749,
+      "hr": 0.006251,
+      "acc": -0.000037,
+      "gender": 0.411615,
+      "condition": -0.722612,
+      "speed": 0.647398
     }
   }
 }

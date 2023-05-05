@@ -2,9 +2,11 @@ import {
   standardCoeff,
   zeroCoeff,
   skiErgo,
-  armErgo,
+  paraArmErgo,
+  tetraArmErgo,
   paraWeights,
   tetraWeights,
+  rollOutside,
 } from './coeffs.json'
 import { Activity, Condition } from '../../constants'
 
@@ -31,6 +33,17 @@ const weights = (condition: Condition) => {
   }
 }
 
+const armErgo = (condition: Condition) => {
+  switch (condition) {
+    case Condition.paraplegic:
+      return paraArmErgo
+    case Condition.tetraplegic:
+      return tetraArmErgo
+    default:
+      return standardCoeff
+  }
+}
+
 export default function getCoeff({
   condition,
   activity,
@@ -43,14 +56,17 @@ export default function getCoeff({
     case Activity.skiErgo:
       return skiErgo
     case Activity.armErgo:
-      return armErgo
+      return armErgo(condition)
     case Activity.weights:
       return weights(condition)
+    case Activity.rollOutside:
+      return rollOutside
     // movement
     case Activity.sedentary:
       return zeroCoeff
     case Activity.active:
     case Activity.moving:
+
     default:
       return standardCoeff
   }
