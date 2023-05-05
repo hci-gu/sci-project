@@ -5,6 +5,7 @@ export enum Activity {
   weights = 'weights',
   skiErgo = 'skiErgo',
   armErgo = 'armErgo',
+  rollOutside = 'rollOutside',
 }
 
 export enum Gender {
