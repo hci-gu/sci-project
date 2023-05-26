@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/screens/journal/widgets/body_part_icon.dart';
+import 'package:scimovement/screens/journal/widgets/entry_shortcut.dart';
 import 'package:scimovement/theme/theme.dart';
 
 class SelectJournalTypeScreen extends StatelessWidget {
@@ -33,62 +34,28 @@ class SelectJournalTypeScreen extends StatelessWidget {
             mainAxisSpacing: AppTheme.basePadding * 4,
             shrinkWrap: true,
             children: [
-              GestureDetector(
+              JournalEntryShortcut(
                 onTap: () =>
                     GoRouter.of(context).goNamed('create-journal', extra: {
                   'type': JournalType.pain,
                 }),
-                child: Container(
-                  decoration: AppTheme.widgetDecoration,
-                  child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        BodyPartIcon(
-                          bodyPart: BodyPart(BodyPartType.scapula, null),
-                          size: 48,
-                        ),
-                        AppTheme.spacer,
-                        Text(
-                          'Smärta i muskler och leder',
-                          style: AppTheme.labelMedium,
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
+                icon: BodyPartIcon(
+                  bodyPart: BodyPart(BodyPartType.scapula, null),
+                  size: 48,
                 ),
+                title: 'Smärta i muskler och leder',
               ),
-              GestureDetector(
+              JournalEntryShortcut(
                 onTap: () =>
                     GoRouter.of(context).goNamed('create-journal', extra: {
                   'type': JournalType.pressureRelease,
                 }),
-                child: Container(
-                  decoration: AppTheme.widgetDecoration,
-                  child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.access_alarm,
-                          size: 48,
-                        ),
-                        AppTheme.spacer,
-                        Text(
-                          'Tryckavlastning',
-                          style: AppTheme.labelMedium,
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
+                icon: const Icon(
+                  Icons.access_alarm,
+                  size: 48,
                 ),
-              )
+                title: 'Tryckavlastning',
+              ),
             ],
           )
         ],

@@ -147,10 +147,15 @@ class Api {
       if (response.statusCode == 200) {
         List<dynamic> data = response.data;
         return data.map((json) {
-          if (journalTypeFromString(json['type']) == JournalType.pain) {
-            return PainLevelEntry.fromJson(json);
+          JournalType type = journalTypeFromString(json['type']);
+          switch (type) {
+            case JournalType.pain:
+              return PainLevelEntry.fromJson(json);
+            case JournalType.pressureRelease:
+              return PressureReleaseEntry.fromJson(json);
+            default:
+              return JournalEntry.fromJson(json);
           }
-          return JournalEntry.fromJson(json);
         }).toList();
       }
     } catch (e) {}
