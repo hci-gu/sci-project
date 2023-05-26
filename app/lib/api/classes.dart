@@ -412,6 +412,8 @@ class JournalEntry {
   String shortcutTitle(BuildContext context) {
     return '';
   }
+
+  String get identifier => '';
 }
 
 class PainLevelEntry extends JournalEntry {
@@ -419,18 +421,13 @@ class PainLevelEntry extends JournalEntry {
   final BodyPart bodyPart;
 
   PainLevelEntry({
-    required int id,
-    required DateTime time,
-    required JournalType type,
-    required String comment,
+    required super.id,
+    required super.time,
+    required super.type,
+    required super.comment,
     required this.painLevel,
     required this.bodyPart,
-  }) : super(
-          id: id,
-          time: time,
-          type: type,
-          comment: comment,
-        );
+  });
 
   factory PainLevelEntry.fromJson(Map<String, dynamic> json) {
     Map<String, dynamic> info = json['info'];
@@ -447,10 +444,7 @@ class PainLevelEntry extends JournalEntry {
   @override
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      't': time.toIso8601String(),
-      'type': type.name,
-      'comment': comment,
+      ...super.toJson(),
       'info': {
         'painLevel': painLevel,
         'bodyPart': bodyPart.toString(),
@@ -466,5 +460,81 @@ class PainLevelEntry extends JournalEntry {
   @override
   String shortcutTitle(BuildContext context) {
     return bodyPart.displayString(context);
+  }
+
+  @override
+  String get identifier {
+    return bodyPart.toString();
+  }
+}
+
+enum PressureReleaseExercise {
+  forwards,
+  rightSide,
+  leftSide,
+}
+
+PressureReleaseExercise prExerciseFromString(String string) {
+  switch (string) {
+    case 'forwards':
+      return PressureReleaseExercise.forwards;
+    case 'rightSide':
+      return PressureReleaseExercise.rightSide;
+    case 'leftSide':
+      return PressureReleaseExercise.leftSide;
+    default:
+      return PressureReleaseExercise.forwards;
+  }
+}
+
+class PressureReleaseEntry extends JournalEntry {
+  final List<PressureReleaseExercise> exercises;
+
+  PressureReleaseEntry({
+    required super.id,
+    required super.time,
+    required super.type,
+    required super.comment,
+    required this.exercises,
+  });
+
+  factory PressureReleaseEntry.fromJson(Map<String, dynamic> json) {
+    Map<String, dynamic> info = json['info'];
+    List<dynamic> exercises = info['exercises'];
+
+    return PressureReleaseEntry(
+      id: json['id'],
+      time: tz.TZDateTime.parse(tz.getLocation(Api().tz), json['t']),
+      type: journalTypeFromString(json['type']),
+      comment: json['comment'],
+      exercises: exercises.map((e) => prExerciseFromString(e)).toList(),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      ...super.toJson(),
+      'info': {
+        'exercise': exercises.map(
+          (e) => e.name.toString(),
+        ),
+      }
+    };
+  }
+
+  @override
+  String title(BuildContext context) {
+    return 'Tryckavlastning';
+  }
+
+  @override
+  String shortcutTitle(BuildContext context) {
+    return title(context);
+  }
+
+  @override
+  String get identifier {
+    return 'pressureRelease';
   }
 }

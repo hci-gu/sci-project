@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/models/journal.dart';
 import 'package:scimovement/screens/journal/widgets/body_part_icon.dart';
+import 'package:scimovement/screens/journal/widgets/entry_shortcut.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -49,12 +50,14 @@ class JournalShortcutGrid extends ConsumerWidget {
           children: [
             ...data
                 .map(
-                  (e) => GestureDetector(
+                  (e) => JournalEntryShortcut(
                     onTap: () => GoRouter.of(context).goNamed(
                       'create-journal',
                       extra: {'entry': e},
                     ),
-                    child: _listItem(context, e),
+                    icon: _iconForEntry(e),
+                    title: e.shortcutTitle(context),
+                    subtitle: timeago.format(e.time),
                   ),
                 )
                 .toList(),
@@ -64,31 +67,16 @@ class JournalShortcutGrid extends ConsumerWidget {
     );
   }
 
-  Widget _listItem(BuildContext context, JournalEntry entry) {
-    return Container(
-      decoration: AppTheme.widgetDecoration,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // BodyPartIcon(bodyPart: entry.bodyPart, size: 48),
-            AppTheme.spacer,
-            Text(
-              entry.shortcutTitle(context),
-              style: AppTheme.labelMedium,
-              textAlign: TextAlign.center,
-            ),
-            FittedBox(
-              child: Text(
-                timeago.format(entry.time),
-                style: AppTheme.paragraphSmall,
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+  Widget _iconForEntry(JournalEntry entry) {
+    if (entry is PainLevelEntry) {
+      return BodyPartIcon(
+        bodyPart: entry.bodyPart,
+        size: 48,
+      );
+    }
+    if (entry is PressureReleaseEntry) {
+      return const Icon(Icons.alarm, size: 48);
+    }
+    return const Icon(Icons.abc);
   }
 }

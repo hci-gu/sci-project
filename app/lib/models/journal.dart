@@ -27,33 +27,48 @@ final bodyPartFilterProvider = StateProvider<BodyPart?>((ref) => null);
 final uniqueEntriesProvider = FutureProvider<List<JournalEntry>>((ref) async {
   List<JournalEntry> journal = await ref.watch(journalProvider.future);
 
-  // filter out all unique journal entries based on bodyPart
-  List<PainLevelEntry> uniquePainLevelEntries = [];
-  for (PainLevelEntry entry in journal.reversed.whereType<PainLevelEntry>()) {
-    if (!uniquePainLevelEntries.any((e) => e.bodyPart == entry.bodyPart)) {
-      uniquePainLevelEntries.add(entry);
+  List<JournalEntry> uniqueEntries = [];
+  for (JournalEntry entry in journal.reversed) {
+    if (!uniqueEntries.any((e) => e.identifier == entry.identifier)) {
+      uniqueEntries.add(entry);
     }
   }
 
-  return [...uniquePainLevelEntries];
+  return uniqueEntries;
 });
 
 class JournalState extends StateNotifier<DateTime> {
   JournalState() : super(DateTime.now());
 
-  Future createJournalEntry(Map<String, dynamic> values) async {
+  Future createJournalEntry(
+      JournalType type, Map<String, dynamic> values) async {
+    Map<String, dynamic> info = {};
+
     String comment = values['comment'] as String;
-    int painLevel = values['painLevel'] as int;
-    BodyPart bodyPart = BodyPart(
-        values['bodyPartType'] as BodyPartType, values['side'] as Side?);
+
+    switch (type) {
+      case JournalType.pain:
+        BodyPart bodyPart = BodyPart(
+            values['bodyPartType'] as BodyPartType, values['side'] as Side?);
+        info = {
+          'painLevel': values['painLevel'] as int,
+          'bodyPart': bodyPart.toString(),
+        };
+        break;
+      case JournalType.pressureRelease:
+        List<PressureReleaseExercise> exercises =
+            values['exercises'] as List<PressureReleaseExercise>;
+        info = {
+          'exercises': exercises.map((e) => e.name.toString()).toList(),
+        };
+        break;
+      default:
+    }
 
     await Api().createJournalEntry({
-      'type': 'pain',
+      'type': type.name,
       'comment': comment,
-      'info': {
-        'painLevel': painLevel,
-        'bodyPart': bodyPart.toString(),
-      }
+      'info': info,
     });
     state = DateTime.now();
   }
