@@ -12,7 +12,6 @@ import 'package:scimovement/models/energy.dart';
 import 'package:scimovement/screens/home/widgets/energy_widget.dart';
 import 'package:scimovement/screens/home/widgets/exercise_widget.dart';
 import 'package:scimovement/screens/home/widgets/sedentary_widget.dart';
-import 'package:scimovement/screens/journal/widgets/journal_chart.dart';
 import 'package:scimovement/widgets/activity_wheel/activity_wheel.dart';
 import 'package:scimovement/widgets/charts/energy_line_chart.dart';
 
@@ -200,7 +199,6 @@ class DemoWrapper extends ConsumerWidget {
           ),
         ),
         journalProvider.overrideWith((ref) => []),
-        journalChartProvider,
         movementBarChartProvider,
         notificationsEnabledProvider.overrideWithValue(false),
         userHasDataProvider.overrideWithValue(true),

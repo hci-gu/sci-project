@@ -8,8 +8,8 @@ import 'package:scimovement/theme/theme.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class BodyPartGrid extends ConsumerWidget {
-  const BodyPartGrid({Key? key}) : super(key: key);
+class JournalShortcutGrid extends ConsumerWidget {
+  const JournalShortcutGrid({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -25,16 +25,12 @@ class BodyPartGrid extends ConsumerWidget {
   Widget _emptyState(BuildContext context) {
     return Column(
       children: [
+        Text('Välkommen till loggboken!', style: AppTheme.labelLarge),
+        AppTheme.spacer,
         Text(
-          AppLocalizations.of(context)!.trackPainEmpty,
+          '',
           style: AppTheme.paragraphMedium,
-        ),
-        AppTheme.spacer2x,
-        SizedBox(
-          width: MediaQuery.of(context).size.width * 0.33,
-          height: MediaQuery.of(context).size.width * 0.33,
-          child: _addItem(context),
-        ),
+        )
       ],
     );
   }
@@ -44,14 +40,9 @@ class BodyPartGrid extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          AppLocalizations.of(context)!.trackPainDescription,
-          style: AppTheme.paragraph,
-        ),
-        AppTheme.spacer,
         GridView.count(
           physics: const NeverScrollableScrollPhysics(),
-          crossAxisCount: 2,
+          crossAxisCount: 3,
           crossAxisSpacing: AppTheme.basePadding * 2,
           mainAxisSpacing: AppTheme.basePadding * 2,
           shrinkWrap: true,
@@ -61,15 +52,12 @@ class BodyPartGrid extends ConsumerWidget {
                   (e) => GestureDetector(
                     onTap: () => GoRouter.of(context).goNamed(
                       'create-journal',
-                      extra: {
-                        'bodyPart': e.bodyPart,
-                      },
+                      extra: {'entry': e},
                     ),
                     child: _listItem(context, e),
                   ),
                 )
                 .toList(),
-            _addItem(context),
           ],
         )
       ],
@@ -84,10 +72,10 @@ class BodyPartGrid extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            BodyPartIcon(bodyPart: entry.bodyPart, size: 64),
+            // BodyPartIcon(bodyPart: entry.bodyPart, size: 48),
             AppTheme.spacer,
             Text(
-              entry.bodyPart.displayString(context),
+              entry.shortcutTitle(context),
               style: AppTheme.labelMedium,
               textAlign: TextAlign.center,
             ),
@@ -99,28 +87,6 @@ class BodyPartGrid extends ConsumerWidget {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _addItem(BuildContext context) {
-    return GestureDetector(
-      onTap: () => GoRouter.of(context).goNamed('create-journal'),
-      child: Container(
-        decoration: AppTheme.widgetDecoration,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.add, size: 48),
-              Text(
-                AppLocalizations.of(context)!.add,
-                style: AppTheme.labelLarge,
-              ),
-            ],
-          ),
         ),
       ),
     );
