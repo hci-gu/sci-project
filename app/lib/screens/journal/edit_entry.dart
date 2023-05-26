@@ -12,40 +12,42 @@ import 'package:scimovement/widgets/text_field.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class EditJournalEntryScreen extends ConsumerWidget {
-  final BodyPart? bodyPart;
+  final bool shouldCreateEntry;
+  final JournalType? type;
   final JournalEntry? entry;
 
-  const EditJournalEntryScreen({
-    Key? key,
-    this.bodyPart,
-    this.entry,
-  }) : super(key: key);
+  const EditJournalEntryScreen(
+      {Key? key, this.entry, this.type, this.shouldCreateEntry = true})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    BodyPart? initialBodyPart = entry != null ? entry!.bodyPart : bodyPart;
+    // BodyPart? initialBodyPart = entry != null ? entry!.bodyPart : bodyPart;
     return Scaffold(
-      appBar: AppTheme.appBar(initialBodyPart?.displayString(context) ??
-          AppLocalizations.of(context)!.addBodyPart),
+      appBar: AppTheme.appBar('test'),
       body: ListView(
         padding: AppTheme.screenPadding,
         children: [
-          EditJournalEntry(
-            initialBodyPart: initialBodyPart,
-            existingEntry: entry,
-          ),
+          if (entry is PainLevelEntry || type == JournalType.pain)
+            EditPainLevelEntry(
+              shouldCreateEntry: shouldCreateEntry,
+              initialBodyPart: (entry as PainLevelEntry?)?.bodyPart,
+              existingEntry: entry as PainLevelEntry?,
+            ),
         ],
       ),
     );
   }
 }
 
-class EditJournalEntry extends ConsumerWidget {
+class EditPainLevelEntry extends ConsumerWidget {
+  final bool shouldCreateEntry;
   final BodyPart? initialBodyPart;
-  final JournalEntry? existingEntry;
+  final PainLevelEntry? existingEntry;
 
-  const EditJournalEntry({
+  const EditPainLevelEntry({
     Key? key,
+    required this.shouldCreateEntry,
     this.initialBodyPart,
     this.existingEntry,
   }) : super(key: key);
@@ -109,14 +111,14 @@ class EditJournalEntry extends ConsumerWidget {
                     width: 160,
                     disabled: !form.valid,
                     onPressed: () async {
-                      if (existingEntry != null) {
-                        await ref
-                            .read(updateJournalProvider.notifier)
-                            .updateJournalEntry(existingEntry!, form.value);
-                      } else {
+                      if (shouldCreateEntry) {
                         await ref
                             .read(updateJournalProvider.notifier)
                             .createJournalEntry(form.value);
+                      } else {
+                        await ref
+                            .read(updateJournalProvider.notifier)
+                            .updateJournalEntry(existingEntry!, form.value);
                       }
 
                       form.reset();

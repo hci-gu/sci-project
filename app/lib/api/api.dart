@@ -146,20 +146,19 @@ class Api {
       var response = await dio.get('/journal/$_userId');
       if (response.statusCode == 200) {
         List<dynamic> data = response.data;
-        return data.map((json) => JournalEntry.fromJson(json)).toList();
+        return data.map((json) {
+          if (journalTypeFromString(json['type']) == JournalType.pain) {
+            return PainLevelEntry.fromJson(json);
+          }
+          return JournalEntry.fromJson(json);
+        }).toList();
       }
     } catch (e) {}
     return [];
   }
 
-  Future createJournalEntry(
-      String comment, int painLevel, String bodyPart) async {
-    await dio.post('/journal/$_userId', data: {
-      'type': JournalType.pain.name,
-      'comment': comment,
-      'painLevel': painLevel,
-      'bodyPart': bodyPart,
-    });
+  Future createJournalEntry(Map<String, dynamic> form) async {
+    await dio.post('/journal/$_userId', data: form);
   }
 
   Future updateJournalEntry(JournalEntry entry) async {

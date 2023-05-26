@@ -72,8 +72,9 @@ class App extends ConsumerWidget {
     return MaterialApp.router(
       title: 'RullaPå',
       theme: AppTheme.theme,
-      routeInformationParser: router.routeInformationParser,
-      routerDelegate: router.routerDelegate,
+      routerConfig: router,
+      // routeInformationParser: router.routeInformationParser,
+      // routerDelegate: router.routerDelegate,
       debugShowCheckedModeBanner: false,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,

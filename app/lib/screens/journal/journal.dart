@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:scimovement/screens/journal/widgets/body_part_grid.dart';
-import 'package:scimovement/screens/journal/widgets/journal_chart.dart';
+import 'package:scimovement/screens/journal/widgets/journal_shortcut_grid.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:scimovement/widgets/button.dart';
 
 class JournalScreen extends ConsumerWidget {
   const JournalScreen({Key? key}) : super(key: key);
@@ -19,17 +19,15 @@ class JournalScreen extends ConsumerWidget {
       padding: EdgeInsets.symmetric(vertical: AppTheme.basePadding * 3),
       children: [
         _header(context),
-        AppTheme.spacer2x,
-        const JournalChart(),
         Padding(
           padding: hPadding,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               AppTheme.separator,
-              Text(AppLocalizations.of(context)!.trackPain,
-                  style: AppTheme.headLine3),
-              const BodyPartGrid(),
+              const JournalShortcutGrid(),
+              AppTheme.spacer2x,
+              _addItem(context),
               AppTheme.separator,
               _seeAll(context),
               AppTheme.separator,
@@ -37,6 +35,15 @@ class JournalScreen extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _addItem(BuildContext context) {
+    return Button(
+      width: 200,
+      icon: Icons.add,
+      title: 'Ny loggning',
+      onPressed: () => GoRouter.of(context).goNamed('select-journal-type'),
     );
   }
 
@@ -49,11 +56,11 @@ class JournalScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              AppLocalizations.of(context)!.pain,
+              'Loggbok',
               style: AppTheme.headLine2,
             ),
             Text(
-              AppLocalizations.of(context)!.musclePainSubtitle,
+              'Tryck på en knapp nedan för att skapa nytt inlägg inom samma kategori.',
               style: AppTheme.paragraphMedium,
             ),
           ],

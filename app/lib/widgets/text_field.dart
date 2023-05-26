@@ -55,12 +55,12 @@ class StyledTextField extends StatelessWidget {
           maxLines: maxLines,
           obscureText: obscureText,
           readOnly: disabled || !canEdit,
-          onTap: () => onTap(),
-          validationMessages: (control) => {
-            ValidationMessage.required: 'Fältet är obligatoriskt',
-            ValidationMessage.email: 'Måste vara en giltig e-postadress',
-            ValidationMessage.minLength: 'Måste vara minst 8 tecken',
-            ValidationMessage.mustMatch: 'Lösenorden måste matcha',
+          onTap: (_) => onTap(),
+          validationMessages: {
+            ValidationMessage.required: (_) => 'Fältet är obligatoriskt',
+            ValidationMessage.email: (_) => 'Måste vara en giltig e-postadress',
+            ValidationMessage.minLength: (_) => 'Måste vara minst 8 tecken',
+            ValidationMessage.mustMatch: (_) => 'Lösenorden måste matcha',
           },
         ),
       ),

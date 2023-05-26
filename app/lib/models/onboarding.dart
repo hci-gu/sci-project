@@ -1,7 +1,7 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/storage.dart';
 
-const int onboardingStepCount = 5;
+const int onboardingStepCount = 0;
 final onboardingStepProvider = StateProvider<int>((ref) => 0);
 
 final onboardingDoneProvider = Provider<bool>((ref) {

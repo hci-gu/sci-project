@@ -40,12 +40,12 @@ class JournalListScreen extends ConsumerWidget {
             itemBuilder: (context) => [
               PopupMenuItem(
                   child: Text(AppLocalizations.of(context)!.all), value: null),
-              ...data.map(
-                (e) => PopupMenuItem(
-                  child: Text(e.bodyPart.displayString(context)),
-                  value: e.bodyPart,
-                ),
-              ),
+              ...data.whereType<PainLevelEntry>().map(
+                    (e) => PopupMenuItem(
+                      child: Text(e.bodyPart.displayString(context)),
+                      value: e.bodyPart,
+                    ),
+                  ),
             ],
           ),
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -63,15 +63,14 @@ class JournalListScreen extends ConsumerWidget {
         return EditableListItem(
           id: data[index].id.toString(),
           key: Key(data[index].id.toString()),
-          title:
-              '${data[index].painLevel.toString()} - ${data[index].bodyPart.displayString(context)}',
+          title: data[index].title(context),
           subtitle: _displayTime(data[index].time),
           onDismissed: () => ref
               .read(updateJournalProvider.notifier)
               .deleteJournalEntry(data[index].id),
           onTap: () => GoRouter.of(context).goNamed(
             'update-journal',
-            params: {
+            pathParameters: {
               'id': data[index].id.toString(),
             },
             extra: {

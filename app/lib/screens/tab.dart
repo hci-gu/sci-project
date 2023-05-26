@@ -1,26 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:scimovement/screens/home/home.dart';
-import 'package:scimovement/screens/journal/journal.dart';
-import 'package:scimovement/screens/settings/settings.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class TabScreen extends StatelessWidget {
   final List<String> routes;
+  final StatefulNavigationShell navigationShell;
 
-  const TabScreen({Key? key, this.routes = const ['/', '/journal', '/profile']})
+  const TabScreen(
+      {Key? key,
+      required this.navigationShell,
+      this.routes = const ['/', '/journal', '/profile']})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    int index = routes.contains(GoRouter.of(context).location)
-        ? routes.indexOf(GoRouter.of(context).location)
-        : 0;
-
     return Scaffold(
       body: SafeArea(
-        child: _page(index),
+        child: navigationShell,
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
@@ -48,26 +45,15 @@ class TabScreen extends StatelessWidget {
               label: AppLocalizations.of(context)!.profile,
             ),
           ],
-          currentIndex: index,
+          currentIndex: navigationShell.currentIndex,
           selectedItemColor: AppTheme.colors.primary,
           onTap: (index) {
-            GoRouter.of(context).go(routes[index]);
+            navigationShell.goBranch(index,
+                initialLocation: index == navigationShell.currentIndex);
+            // GoRouter.of(context).go(routes[index]);
           },
         ),
       ),
     );
-  }
-
-  _page(int index) {
-    switch (index) {
-      case 0:
-        return HomeScreen();
-      case 1:
-        return const JournalScreen();
-      case 2:
-        return const SettingsScreen();
-      default:
-        return HomeScreen();
-    }
   }
 }

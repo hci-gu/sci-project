@@ -364,13 +364,21 @@ class Bout {
 
 enum JournalType {
   pain,
+  pressureRelease,
+  pressureUlcer,
 }
 
 JournalType journalTypeFromString(String type) {
-  if (type == 'pain') {
-    return JournalType.pain;
+  switch (type) {
+    case 'pressureUlcer':
+      return JournalType.pressureUlcer;
+    case 'pressureRelease':
+      return JournalType.pressureRelease;
+    case 'pain':
+      return JournalType.pain;
+    default:
+      return JournalType.pain;
   }
-  return JournalType.pain;
 }
 
 class JournalEntry {
@@ -378,17 +386,15 @@ class JournalEntry {
   final DateTime time;
   final JournalType type;
   final String comment;
-  final int painLevel;
-  final BodyPart bodyPart;
 
   JournalEntry({
     required this.id,
     required this.time,
     required this.type,
     required this.comment,
-    required this.painLevel,
-    required this.bodyPart,
   });
+
+  Map<String, dynamic> toJson() => {};
 
   factory JournalEntry.fromJson(Map<String, dynamic> json) {
     return JournalEntry(
@@ -396,19 +402,69 @@ class JournalEntry {
       time: tz.TZDateTime.parse(tz.getLocation(Api().tz), json['t']),
       type: journalTypeFromString(json['type']),
       comment: json['comment'],
-      painLevel: json['painLevel'],
-      bodyPart: BodyPart.fromString(json['bodyPart']),
     );
   }
 
+  String title(BuildContext context) {
+    return '';
+  }
+
+  String shortcutTitle(BuildContext context) {
+    return '';
+  }
+}
+
+class PainLevelEntry extends JournalEntry {
+  final int painLevel;
+  final BodyPart bodyPart;
+
+  PainLevelEntry({
+    required int id,
+    required DateTime time,
+    required JournalType type,
+    required String comment,
+    required this.painLevel,
+    required this.bodyPart,
+  }) : super(
+          id: id,
+          time: time,
+          type: type,
+          comment: comment,
+        );
+
+  factory PainLevelEntry.fromJson(Map<String, dynamic> json) {
+    Map<String, dynamic> info = json['info'];
+    return PainLevelEntry(
+      id: json['id'],
+      time: tz.TZDateTime.parse(tz.getLocation(Api().tz), json['t']),
+      type: journalTypeFromString(json['type']),
+      comment: json['comment'],
+      painLevel: info['painLevel'],
+      bodyPart: BodyPart.fromString(info['bodyPart']),
+    );
+  }
+
+  @override
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       't': time.toIso8601String(),
       'type': type.name,
       'comment': comment,
-      'painLevel': painLevel,
-      'bodyPart': bodyPart.toString(),
+      'info': {
+        'painLevel': painLevel,
+        'bodyPart': bodyPart.toString(),
+      }
     };
+  }
+
+  @override
+  String title(BuildContext context) {
+    return '${painLevel.toString()} - ${bodyPart.displayString(context)}';
+  }
+
+  @override
+  String shortcutTitle(BuildContext context) {
+    return bodyPart.displayString(context);
   }
 }
