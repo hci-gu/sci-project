@@ -6,6 +6,7 @@ import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/screens/home/widgets/energy_widget.dart';
 import 'package:scimovement/screens/home/widgets/exercise_widget.dart';
 import 'package:scimovement/screens/home/widgets/no_data_message.dart';
+import 'package:scimovement/screens/home/widgets/pressure_release_widget.dart';
 import 'package:scimovement/screens/home/widgets/sedentary_widget.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/activity_wheel/activity_wheel.dart';
@@ -45,11 +46,12 @@ class HomeScreen extends HookConsumerWidget {
           AppTheme.spacer2x,
           if (showDataWidgets)
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Expanded(child: ExerciseWidget()),
                 AppTheme.spacer2x,
-                Expanded(child: Container()),
+                const Expanded(child: PressureReleaseWidget()),
                 // const Expanded(child: SedentaryWidget()),
               ],
             ),

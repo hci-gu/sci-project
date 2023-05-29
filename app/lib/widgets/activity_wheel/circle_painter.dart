@@ -22,7 +22,7 @@ class CirclePainter extends CustomPainter {
   const CirclePainter({
     required this.chartRadius,
     required this.items,
-    this.strokeWidth = 17.5,
+    this.strokeWidth = 9,
     this.animationValue = 1.0,
   });
 

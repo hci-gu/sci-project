@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/models/pagination.dart';
+import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
 
 class DateSelect extends ConsumerWidget {
@@ -10,42 +11,31 @@ class DateSelect extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     DateTime date = ref.watch(dateProvider);
     String dateText = ref.watch(dateDisplayProvider(context));
+    String dateSubtitle = ref.watch(subtitleDateDisplayProvider(context));
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        IconButton(
-          onPressed: () {
-            ref.read(dateProvider.notifier).state = date.subtract(
-              const Duration(days: 1),
-            );
-          },
-          icon: const Icon(Icons.arrow_back_ios_new),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(dateText, style: AppTheme.headLine2),
+            Text(
+              dateSubtitle,
+              style: AppTheme.paragraphMedium,
+            ),
+          ],
         ),
         Button(
-          width: 120,
-          title: dateText,
-          subtitle:
-              dateText.length != 10 ? date.toString().substring(0, 10) : null,
+          width: 44,
           onPressed: () async {
             DateTime? selectedDate = await _selectDate(context, date);
-
             if (selectedDate != null) {
               ref.read(dateProvider.notifier).state = selectedDate;
             }
           },
-        ),
-        if (canGoForward(date))
-          IconButton(
-            onPressed: () {
-              ref.read(dateProvider.notifier).state = date.add(
-                const Duration(days: 1),
-              );
-            },
-            icon: const Icon(Icons.arrow_forward_ios),
-          )
-        else
-          const SizedBox(width: 48),
+          icon: Icons.calendar_month,
+        )
       ],
     );
   }
