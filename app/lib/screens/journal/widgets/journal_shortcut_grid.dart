@@ -51,7 +51,7 @@ class JournalShortcutGrid extends ConsumerWidget {
             ...data
                 .map(
                   (e) => JournalEntryShortcut(
-                    onTap: () => GoRouter.of(context).goNamed(
+                    onTap: () => context.goNamed(
                       'create-journal',
                       extra: {'entry': e},
                     ),

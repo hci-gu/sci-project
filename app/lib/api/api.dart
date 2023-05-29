@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:scimovement/api/classes.dart';
+import 'package:scimovement/models/goals.dart';
 import 'package:scimovement/models/pagination.dart';
 
 // const String apiUrl = 'https://sci-api.prod.appadem.in';
@@ -172,6 +173,37 @@ class Api {
 
   Future deleteJournalEntry(int id) async {
     await dio.delete('/journal/$_userId/$id');
+  }
+
+  Future<List<Goal>> getGoals() async {
+    try {
+      var response = await dio.get('/goals/$_userId');
+      if (response.statusCode == 200) {
+        List<dynamic> data = response.data;
+        return data.map((json) {
+          String type = json['type'];
+
+          if (type == 'journal') {
+            return JournalGoal.fromJson(json);
+          }
+
+          return Goal.fromJson(json);
+        }).toList();
+      }
+    } catch (_) {}
+    return [];
+  }
+
+  Future createGoal(Map<String, dynamic> form) async {
+    await dio.post('/goals/$_userId', data: form);
+  }
+
+  Future updateGoal(Goal goal) async {
+    await dio.patch('/goals/$_userId/${goal.id}', data: goal.toJson());
+  }
+
+  Future deleteGoal(int id) async {
+    await dio.delete('/goals/$_userId/$id');
   }
 
   String chartModeToGroup(ChartMode mode) {

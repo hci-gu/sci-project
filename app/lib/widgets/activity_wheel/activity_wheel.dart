@@ -62,7 +62,7 @@ class ActivityWheel extends ConsumerWidget {
   Widget _body(BuildContext context, List<ActivityGroup> activityGroups) {
     bool allEmpty = activityGroups.every((e) => e.energy.isEmpty);
     return _container(
-      Column(
+      Row(
         children: [
           AnimatedWheel(
             activityGroups: allEmpty ? emptyActivityGroups() : activityGroups,
@@ -70,8 +70,9 @@ class ActivityWheel extends ConsumerWidget {
           AppTheme.spacer2x,
           FittedBox(
             fit: BoxFit.contain,
-            child: Row(
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: activityGroups
                   .map(
                     (e) => Row(
@@ -140,8 +141,8 @@ class AnimatedWheel extends HookWidget {
     }, []);
 
     return SizedBox(
-      width: 200,
-      height: 200,
+      width: 160,
+      height: 100,
       child: Stack(
         alignment: AlignmentDirectional.center,
         children: [
@@ -153,7 +154,7 @@ class AnimatedWheel extends HookWidget {
               children: activityGroups
                   .map(
                     (e) => Row(
-                      mainAxisSize: MainAxisSize.max,
+                      mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.baseline,
                       textBaseline: TextBaseline.alphabetic,
@@ -161,8 +162,9 @@ class AnimatedWheel extends HookWidget {
                         Text(
                           e.value.toStringAsFixed(0),
                           style: TextStyle(
+                            height: 0.85,
                             fontSize:
-                                38 / MediaQuery.of(context).textScaleFactor,
+                                28 / MediaQuery.of(context).textScaleFactor,
                             fontWeight: FontWeight.w800,
                             color: AppTheme.colors
                                 .activityLevelToColor(e.activity),
@@ -186,7 +188,7 @@ class AnimatedWheel extends HookWidget {
             animation: controller,
             builder: (_, __) => CustomPaint(
               painter: CirclePainter(
-                chartRadius: 100,
+                chartRadius: 60,
                 items: activityGroups
                     .map(
                       (e) => CircleChartItem(
@@ -202,7 +204,7 @@ class AnimatedWheel extends HookWidget {
                 animationValue:
                     CurveTween(curve: Curves.linear).evaluate(controller),
               ),
-              size: const Size(200, 200),
+              size: const Size(120, 120),
             ),
           ),
         ],

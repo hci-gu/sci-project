@@ -11,6 +11,7 @@ import 'package:scimovement/theme/theme.dart';
 import 'package:collection/collection.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 void initializeTzAndLocale(String? languageCode) {
@@ -20,6 +21,7 @@ void initializeTzAndLocale(String? languageCode) {
     languageCode == 'sv' ? timeago.SvMessages() : timeago.EnMessages(),
   );
   Intl.defaultLocale = languageCode;
+  initializeDateFormatting(languageCode);
 }
 
 void main() async {

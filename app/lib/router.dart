@@ -25,7 +25,7 @@ import 'package:scimovement/screens/register.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 List<String> detailRoutes = ['calories', 'activity', 'sedentary'];
-String landingRoute = '/journal/type';
+String landingRoute = '/';
 
 class RouteChangeObserver extends NavigatorObserver {
   final Ref _ref;
@@ -187,14 +187,16 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
                     name: 'select-journal-type',
                     path: 'type',
                     builder: (_, state) => SelectJournalTypeScreen(),
-                  ),
-                  GoRoute(
-                    name: 'create-journal',
-                    path: 'create',
-                    builder: (_, state) => EditJournalEntryScreen(
-                      type: (state.extra as Map?)?['type'],
-                      entry: (state.extra as Map?)?['entry'],
-                    ),
+                    routes: [
+                      GoRoute(
+                        name: 'create-journal',
+                        path: 'create',
+                        builder: (_, state) => EditJournalEntryScreen(
+                          type: (state.extra as Map?)?['type'],
+                          entry: (state.extra as Map?)?['entry'],
+                        ),
+                      ),
+                    ],
                   ),
                   GoRoute(
                     name: 'journal-list',

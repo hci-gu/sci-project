@@ -14,7 +14,7 @@ class JournalListScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.pain),
+        title: Text('Loggbok'),
         actions: [
           _bodyPartFilter(ref),
         ],
