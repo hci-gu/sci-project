@@ -16,6 +16,7 @@ export interface GetQuerySchema extends ValidatedRequestSchema {
   [ContainerTypes.Query]: {
     from: Date
     to: Date
+    date: Date
     group: string
     activity: Activity
     watt: number
@@ -26,6 +27,7 @@ export const getQuery = validator.query(
   Joi.object({
     from: Joi.date().optional().default(moment().startOf('day').toDate()),
     to: Joi.date().optional().default(moment().endOf('day').toDate()),
+    date: Joi.date().optional().default(moment().endOf('day').toDate()),
     group: Joi.string()
       .valid('hour', 'day', 'week', 'month', 'year')
       .optional(),

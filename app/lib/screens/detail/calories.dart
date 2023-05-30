@@ -35,10 +35,14 @@ class CaloriesScreen extends ConsumerWidget {
               pagination: Pagination(page: page, mode: pagination.mode),
             )
           : EnergyBarChart(Pagination(page: page, mode: pagination.mode)),
-      infoBox: InfoBox(
-        title:
-            '${AppLocalizations.of(context)!.about} ${AppLocalizations.of(context)!.calories}',
-        text: AppLocalizations.of(context)!.aboutCalories,
+      content: Column(
+        children: [
+          InfoBox(
+            title:
+                '${AppLocalizations.of(context)!.about} ${AppLocalizations.of(context)!.calories}',
+            text: AppLocalizations.of(context)!.aboutCalories,
+          ),
+        ],
       ),
     );
   }

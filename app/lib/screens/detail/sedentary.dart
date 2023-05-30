@@ -30,10 +30,14 @@ class SedentaryScreen extends ConsumerWidget {
       pageBuilder: (ctx, page) => pagination.mode == ChartMode.day
           ? SedentaryArc(Pagination(mode: pagination.mode, page: page))
           : SedentaryBarChart(Pagination(mode: pagination.mode, page: page)),
-      infoBox: InfoBox(
-        title:
-            '${AppLocalizations.of(context)!.about} ${AppLocalizations.of(context)!.sedentary}',
-        text: AppLocalizations.of(context)!.aboutSedentary,
+      content: Column(
+        children: [
+          InfoBox(
+            title:
+                '${AppLocalizations.of(context)!.about} ${AppLocalizations.of(context)!.sedentary}',
+            text: AppLocalizations.of(context)!.aboutSedentary,
+          ),
+        ],
       ),
     );
   }

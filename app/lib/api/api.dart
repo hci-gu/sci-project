@@ -142,9 +142,16 @@ class Api {
     return getUser(_userId);
   }
 
-  Future<List<JournalEntry>> getJournal() async {
+  Future<List<JournalEntry>> getJournal(
+    DateTime from,
+    DateTime to,
+    ChartMode mode,
+  ) async {
     try {
-      var response = await dio.get('/journal/$_userId');
+      var response = await dio.get('/journal/$_userId', queryParameters: {
+        'from': from.toIso8601String().substring(0, 16),
+        'to': to.toIso8601String().substring(0, 16),
+      });
       if (response.statusCode == 200) {
         List<dynamic> data = response.data;
         return data.map((json) {
@@ -175,9 +182,11 @@ class Api {
     await dio.delete('/journal/$_userId/$id');
   }
 
-  Future<List<Goal>> getGoals() async {
+  Future<List<Goal>> getGoals(DateTime date) async {
     try {
-      var response = await dio.get('/goals/$_userId');
+      var response = await dio.get('/goals/$_userId', queryParameters: {
+        'date': date.toIso8601String().substring(0, 16),
+      });
       if (response.statusCode == 200) {
         List<dynamic> data = response.data;
         return data.map((json) {
@@ -190,7 +199,9 @@ class Api {
           return Goal.fromJson(json);
         }).toList();
       }
-    } catch (_) {}
+    } catch (e) {
+      print(e);
+    }
     return [];
   }
 

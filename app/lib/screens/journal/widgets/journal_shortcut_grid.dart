@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/models/journal.dart';
+import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/screens/journal/widgets/body_part_icon.dart';
 import 'package:scimovement/screens/journal/widgets/entry_shortcut.dart';
 import 'package:scimovement/theme/theme.dart';
@@ -14,7 +15,9 @@ class JournalShortcutGrid extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ref.watch(uniqueEntriesProvider).when(
+    final pagination = Pagination(page: 0, mode: ChartMode.month);
+
+    return ref.watch(uniqueEntriesProvider(pagination)).when(
           data: (data) => data.isEmpty
               ? _emptyState(context)
               : _buildList(context, data, ref),

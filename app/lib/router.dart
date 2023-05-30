@@ -9,8 +9,10 @@ import 'package:scimovement/models/onboarding.dart';
 import 'package:scimovement/screens/demo/demo.dart';
 import 'package:scimovement/screens/detail/activity.dart';
 import 'package:scimovement/screens/detail/calories.dart';
+import 'package:scimovement/screens/detail/pressure_release.dart';
 import 'package:scimovement/screens/detail/sedentary.dart';
 import 'package:scimovement/screens/exercise/exercise.dart';
+import 'package:scimovement/screens/goal/goal.dart';
 import 'package:scimovement/screens/home/home.dart';
 import 'package:scimovement/screens/introduction.dart';
 import 'package:scimovement/screens/journal/edit_entry.dart';
@@ -164,6 +166,22 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
                     name: 'sedentary',
                     path: 'sedentary',
                     builder: (_, __) => const SedentaryScreen(),
+                  ),
+                  GoRoute(
+                    name: 'pressure-release',
+                    path: 'pressure-release',
+                    builder: (_, __) => const PressureReleaseScreen(),
+                    routes: [
+                      GoRoute(
+                        path: 'goal',
+                        name: 'edit-goal',
+                        builder: (_, state) {
+                          return GoalScreen(
+                            goal: (state.extra as Map?)?['goal'],
+                          );
+                        },
+                      ),
+                    ],
                   ),
                   GoRoute(
                     path: 'exercise',

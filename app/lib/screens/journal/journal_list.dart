@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/models/journal.dart';
+import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/widgets/editable_list_item.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -16,10 +17,13 @@ class JournalListScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text('Loggbok'),
         actions: [
-          _bodyPartFilter(ref),
+          _bodyPartFilter(ref, Pagination(page: 0, mode: ChartMode.month)),
         ],
       ),
-      body: ref.watch(filteredJournalProvider).when(
+      body: ref
+          .watch(filteredJournalProvider(
+              Pagination(page: 0, mode: ChartMode.month)))
+          .when(
             data: (data) => _buildList(context, data.reversed.toList(), ref),
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, s) => Text(e.toString()),
@@ -27,8 +31,8 @@ class JournalListScreen extends ConsumerWidget {
     );
   }
 
-  Widget _bodyPartFilter(WidgetRef ref) {
-    return ref.watch(uniqueEntriesProvider).when(
+  Widget _bodyPartFilter(WidgetRef ref, Pagination pagination) {
+    return ref.watch(uniqueEntriesProvider(pagination)).when(
           data: (data) => PopupMenuButton<BodyPart>(
             icon: const Icon(Icons.filter_list),
             onSelected: (filter) {

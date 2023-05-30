@@ -10,6 +10,7 @@ enum ChartMode {
   day,
   week,
   month,
+  quarter,
   year,
 }
 
@@ -22,6 +23,8 @@ extension ChartModeDisplayName on ChartMode {
         return AppLocalizations.of(context)!.week;
       case ChartMode.month:
         return AppLocalizations.of(context)!.month;
+      case ChartMode.quarter:
+        return AppLocalizations.of(context)!.quarter;
       case ChartMode.year:
         return AppLocalizations.of(context)!.year;
     }
@@ -50,6 +53,8 @@ class Pagination {
         return const Duration(days: 6);
       case ChartMode.month:
         return const Duration(days: 30);
+      case ChartMode.quarter:
+        return const Duration(days: 90);
       case ChartMode.year:
         return const Duration(days: 365);
     }

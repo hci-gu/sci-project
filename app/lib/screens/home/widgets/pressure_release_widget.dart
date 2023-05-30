@@ -3,7 +3,9 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/models/goals.dart';
+import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/theme/theme.dart';
+import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/stat_widget.dart';
 import 'package:go_router/go_router.dart';
 
@@ -33,7 +35,7 @@ class GoalProgress extends StatelessWidget {
             borderRadius: BorderRadius.circular(5),
             border: Border.all(color: AppTheme.colors.black.withOpacity(0.1)),
           ),
-          clipBehavior: Clip.none,
+          clipBehavior: Clip.antiAliasWithSaveLayer,
           width: 100,
           height: 8,
           child: LinearProgressIndicator(
@@ -51,12 +53,42 @@ class PressureReleaseWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    Pagination pagination = ref.watch(paginationProvider);
     String asset = 'assets/svg/alarm.svg';
-    return ref.watch(journalGoalProvider(JournalType.pressureRelease)).when(
+    return ref.watch(journalGoalProvider(pagination)).when(
           data: (goal) => _body(context, goal),
           error: (_, __) => StatWidget.error(asset),
           loading: () => StatWidget.loading(asset),
         );
+  }
+
+  Widget _emptyState(BuildContext context) {
+    return StatWidget.container(
+      Column(children: [
+        SizedBox(
+          width: 150,
+          child: Text(
+            'Skapa ett mål för tryckavlastning',
+            style: AppTheme.labelLarge,
+            textAlign: TextAlign.center,
+          ),
+        ),
+        SvgPicture.asset('assets/svg/set_goal.svg', height: 56),
+        AppTheme.spacer,
+        Button(
+          width: 140,
+          onPressed: () {},
+          size: ButtonSize.tiny,
+          title: 'Sätt igång',
+        ),
+      ]),
+      AppTheme.widgetDecoration.copyWith(
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
+        ),
+      ),
+    );
   }
 
   Widget _body(BuildContext context, JournalGoal? goal) {
@@ -66,83 +98,94 @@ class PressureReleaseWidget extends ConsumerWidget {
         GestureDetector(
           onTap: () {
             String path = GoRouter.of(context).location;
-            context.go('$path${path.length > 1 ? '/' : ''}sedentary');
+            context.go('$path${path.length > 1 ? '/' : ''}pressure-release');
           },
-          child: StatWidget.container(
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Row(
+          child: goal != null
+              ? StatWidget.container(
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      SvgPicture.asset(asset, height: 24),
-                      AppTheme.spacerHalf,
-                      Text('Tryckavlastning', style: AppTheme.labelTiny),
+                      Row(
+                        children: [
+                          SvgPicture.asset(asset, height: 24),
+                          AppTheme.spacerHalf,
+                          Text('Tryckavlastning', style: AppTheme.labelTiny),
+                        ],
+                      ),
+                      Container(
+                        height: 44,
+                        width: 44,
+                        color: Colors.amber,
+                      ),
+                      GoalProgress(goal: goal)
                     ],
                   ),
-                  Container(
-                    height: 44,
-                    width: 44,
-                    color: Colors.amber,
-                  ),
-                  if (goal != null) GoalProgress(goal: goal)
-                ],
-              ),
-              AppTheme.widgetDecoration.copyWith(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(24),
-                  topRight: Radius.circular(24),
-                ),
-              )),
+                  AppTheme.widgetDecoration.copyWith(
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(24),
+                      topRight: Radius.circular(24),
+                    ),
+                  ))
+              : _emptyState(context),
         ),
         AppTheme.spacerHalf,
-        GestureDetector(
-          onTap: () {
-            context.goNamed('create-journal', extra: {
-              'type': JournalType.pressureUlcer,
-            });
-          },
-          child: AspectRatio(
-            aspectRatio: 3,
-            child: Container(
-              decoration: AppTheme.widgetDecoration.copyWith(
-                borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(12),
-                  bottomRight: Radius.circular(12),
-                ),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Row(
-                  children: [
-                    Column(
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              width: 12,
-                              height: 12,
-                              decoration: BoxDecoration(
-                                color: Colors.amber,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            AppTheme.spacerHalf,
-                            Text('Inget trycksår', style: AppTheme.labelLarge),
-                          ],
-                        ),
-                        Text('Sedan 12 dagar tillbaka',
-                            style: AppTheme.paragraphSmall),
-                      ],
-                    ),
-                    Icon(Icons.edit_outlined)
-                  ],
-                ),
-              ),
+        const PressureUlcerWidget(),
+      ],
+    );
+  }
+}
+
+class PressureUlcerWidget extends StatelessWidget {
+  const PressureUlcerWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        context.goNamed('create-journal', extra: {
+          'type': JournalType.pressureUlcer,
+        });
+      },
+      child: AspectRatio(
+        aspectRatio: 3,
+        child: Container(
+          decoration: AppTheme.widgetDecoration.copyWith(
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(12),
+              bottomRight: Radius.circular(12),
             ),
           ),
-        )
-      ],
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Row(
+              children: [
+                Column(
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 12,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            color: Colors.amber,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        AppTheme.spacerHalf,
+                        Text('Inget trycksår', style: AppTheme.labelLarge),
+                      ],
+                    ),
+                    Text('Sedan 12 dagar tillbaka',
+                        style: AppTheme.paragraphSmall),
+                  ],
+                ),
+                Icon(Icons.edit_outlined)
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
