@@ -22,7 +22,20 @@ export enum Condition {
 
 export enum JournalType {
   painLevel = 'painLevel',
+  pressureRelease = 'pressureRelease',
+  pressureUlcer = 'pressureUlcer',
   bodyTemperature = 'bodyTemperature',
+}
+
+export enum GoalType {
+  journal = 'journal',
+}
+
+export enum TimeFrame {
+  day = 'day',
+  week = 'week',
+  month = 'month',
+  year = 'year',
 }
 
 export const SEDENTARY_THRESHOLD = 2700

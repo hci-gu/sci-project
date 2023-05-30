@@ -23,6 +23,7 @@ class StatHeader extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     DateTime date = ref.watch(dateProvider);
     String dateText = ref.watch(dateDisplayProvider(context));
+    String dateSubTitle = ref.watch(subtitleDateDisplayProvider(context));
     Pagination page = ref.watch(paginationProvider);
 
     return Column(
@@ -57,7 +58,9 @@ class StatHeader extends ConsumerWidget {
           ],
         ),
         Text(
-          page.mode == ChartMode.day ? dateText : _displayDateRange(page, date),
+          page.mode == ChartMode.day
+              ? '$dateText - $dateSubTitle'
+              : _displayDateRange(page, date),
           style: AppTheme.labelLarge.copyWith(color: AppTheme.colors.gray),
         ),
       ],

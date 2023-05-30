@@ -1,16 +1,26 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api/api.dart';
 import 'package:scimovement/api/classes.dart';
+import 'package:scimovement/models/pagination.dart';
 
-final journalProvider = FutureProvider<List<JournalEntry>>((ref) async {
+final journalProvider = FutureProvider.family<List<JournalEntry>, Pagination>(
+    (ref, pagination) async {
   ref.watch(updateJournalProvider);
+  DateTime date = ref.watch(dateProvider);
 
-  List<JournalEntry> journal = await Api().getJournal();
+  List<JournalEntry> journal = await Api().getJournal(
+    pagination.from(date),
+    pagination.to(date),
+    pagination.mode,
+  );
   return journal;
 });
 
-final filteredJournalProvider = FutureProvider<List<JournalEntry>>((ref) async {
-  List<JournalEntry> journal = await ref.watch(journalProvider.future);
+final filteredJournalProvider =
+    FutureProvider.family<List<JournalEntry>, Pagination>(
+        (ref, pagination) async {
+  List<JournalEntry> journal =
+      await ref.watch(journalProvider(pagination).future);
   BodyPart? bodyPart = ref.watch(bodyPartFilterProvider);
 
   if (bodyPart == null) {
@@ -24,8 +34,19 @@ final filteredJournalProvider = FutureProvider<List<JournalEntry>>((ref) async {
 });
 final bodyPartFilterProvider = StateProvider<BodyPart?>((ref) => null);
 
-final uniqueEntriesProvider = FutureProvider<List<JournalEntry>>((ref) async {
-  List<JournalEntry> journal = await ref.watch(journalProvider.future);
+final pressureReleaseCountProvider =
+    FutureProvider.family<num, Pagination>((ref, pagination) async {
+  List<JournalEntry> journal =
+      await ref.watch(journalProvider(pagination).future);
+
+  return journal.whereType<PressureReleaseEntry>().length;
+});
+
+final uniqueEntriesProvider =
+    FutureProvider.family<List<JournalEntry>, Pagination>(
+        (ref, pagination) async {
+  List<JournalEntry> journal =
+      await ref.watch(journalProvider(pagination).future);
 
   List<JournalEntry> uniqueEntries = [];
   for (JournalEntry entry in journal.reversed) {

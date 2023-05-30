@@ -1,21 +1,15 @@
 import express from 'express'
 import { ValidatedRequest } from 'express-joi-validation'
-import moment from 'moment'
-import Journal from '../../db/models/Journal'
+import Goal from '../../db/models/Goal'
 import { getQuery, GetQuerySchema } from '../validation'
+import { getGoalProgress } from './utils'
 
 const router = express.Router()
 
 router.post('/:userId', async (req, res) => {
   const { userId } = req.params
   try {
-    const response = await Journal.save(
-      {
-        ...req.body,
-        t: new Date(),
-      },
-      userId
-    )
+    const response = await Goal.save(req.body, userId)
     res.send(response)
   } catch (e) {
     console.log(e)
@@ -27,7 +21,7 @@ router.delete('/:userId/:id', async (req, res) => {
   const { id } = req.params
 
   try {
-    await Journal.delete(id)
+    await Goal.delete(id)
     res.sendStatus(200)
   } catch (e) {
     res.sendStatus(500)
@@ -38,7 +32,7 @@ router.patch('/:userId/:id', async (req, res) => {
   const { id } = req.params
 
   try {
-    const updated = await Journal.update(id, req.body)
+    const updated = await Goal.update(id, req.body)
     res.json(updated)
   } catch (e) {
     res.sendStatus(500)
@@ -50,20 +44,23 @@ router.get(
   getQuery,
   async (req: ValidatedRequest<GetQuerySchema>, res) => {
     const { id } = req.params
-    const { from, to } = req.query
+    const { date } = req.query
 
     try {
-      const response = await Journal.find(
-        {
-          userId: id,
-          from,
-          to,
-        },
-        {}
+      const goals = await Goal.find({
+        userId: id,
+      })
+      const goalsWithProgress = await Promise.all(
+        goals.map(async (g) => {
+          return {
+            ...g.dataValues,
+            progress: await getGoalProgress(id, g, date),
+          }
+        })
       )
-      res.json(response)
+      res.json(goalsWithProgress)
     } catch (e) {
-      console.log('GET /journal/:id', e)
+      console.log('GET /goal/:id', e)
       return res.sendStatus(500)
     }
   }

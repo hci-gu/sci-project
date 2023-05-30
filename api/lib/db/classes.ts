@@ -5,7 +5,14 @@ import {
   CreationOptional,
   ForeignKey,
 } from 'sequelize'
-import { Activity, Condition, Gender, JournalType } from '../constants'
+import {
+  Activity,
+  Condition,
+  Gender,
+  TimeFrame,
+  GoalType,
+  JournalType,
+} from '../constants'
 
 export type NotificationSettings = {
   activity: boolean
@@ -100,10 +107,25 @@ export class Journal extends Model<
   declare t: Date
   declare type: JournalType
   declare comment: string
+  declare imageUrl: CreationOptional<string>
+  declare info: CreationOptional<object>
 
   declare UserId?: ForeignKey<User['id']>
-  declare painLevel: CreationOptional<number>
-  declare bodyPart: CreationOptional<string>
+}
+
+export class Goal extends Model<
+  InferAttributes<Goal>,
+  InferCreationAttributes<Goal>
+> {
+  declare id: CreationOptional<number>
+  declare type: GoalType
+  declare journalType: JournalType
+  declare timeFrame: TimeFrame
+  declare value: number
+  declare start: string
+  declare info: CreationOptional<object>
+
+  declare UserId?: ForeignKey<User['id']>
 }
 
 export class Position extends Model<

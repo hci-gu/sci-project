@@ -104,7 +104,9 @@ class EditJournalEntryScreen extends ConsumerWidget {
                               .updateJournalEntry(entry!, form.value);
                         }
                         form.reset();
-                        GoRouter.of(context).pop();
+                        while (context.canPop()) {
+                          context.pop();
+                        }
                       },
                       title: entry != null
                           ? AppLocalizations.of(context)!.update

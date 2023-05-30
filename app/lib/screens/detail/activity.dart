@@ -34,10 +34,14 @@ class ActivityScreen extends ConsumerWidget {
       pageBuilder: (ctx, page) => isDay
           ? AllActivitiesArc(Pagination(mode: pagination.mode, page: page))
           : ActivityBarChart(Pagination(mode: pagination.mode, page: page)),
-      infoBox: InfoBox(
-        title:
-            '${AppLocalizations.of(context)!.about} ${AppLocalizations.of(context)!.movement}',
-        text: AppLocalizations.of(context)!.aboutMovement,
+      content: Column(
+        children: [
+          InfoBox(
+            title:
+                '${AppLocalizations.of(context)!.about} ${AppLocalizations.of(context)!.movement}',
+            text: AppLocalizations.of(context)!.aboutMovement,
+          ),
+        ],
       ),
     );
   }

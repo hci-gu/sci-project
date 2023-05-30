@@ -13,6 +13,7 @@
     "day": "Dag",
     "week": "Vecka",
     "month": "Månad",
+    "quarter": "Kvartal",
     "year": "År",
     "logout": "Logga ut",
     "from": "Från",

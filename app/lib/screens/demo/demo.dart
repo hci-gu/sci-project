@@ -198,7 +198,7 @@ class DemoWrapper extends ConsumerWidget {
             },
           ),
         ),
-        journalProvider.overrideWith((ref) => []),
+        journalProvider.overrideWith((ref, _) => []),
         movementBarChartProvider,
         notificationsEnabledProvider.overrideWithValue(false),
         userHasDataProvider.overrideWithValue(true),
