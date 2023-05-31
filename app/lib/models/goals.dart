@@ -1,10 +1,10 @@
 import 'package:collection/collection.dart';
-import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api/api.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/models/journal.dart';
 import 'package:scimovement/models/pagination.dart';
+import 'package:timezone/standalone.dart' as tz;
 
 enum TimeFrame {
   day,
@@ -23,6 +23,7 @@ class Goal {
   final int id;
   final int value;
   final int progress;
+  final DateTime reminder;
   final TimeFrame timeFrame;
   final Duration start;
 
@@ -30,6 +31,7 @@ class Goal {
     required this.id,
     required this.value,
     required this.progress,
+    required this.reminder,
     required this.start,
     this.timeFrame = TimeFrame.day,
   });
@@ -41,6 +43,7 @@ class Goal {
       id: json['id'],
       value: json['value'],
       progress: json['progress'],
+      reminder: DateTime.parse(json['reminder']),
       start: Duration(hours: int.parse(hour), minutes: int.parse(minute)),
     );
   }
@@ -61,6 +64,7 @@ class JournalGoal extends Goal {
     required super.id,
     required super.value,
     required super.progress,
+    required super.reminder,
     required super.start,
     super.timeFrame,
     required this.type,
@@ -73,6 +77,7 @@ class JournalGoal extends Goal {
       id: json['id'],
       value: json['value'],
       progress: json['progress'],
+      reminder: tz.TZDateTime.parse(tz.getLocation(Api().tz), json['reminder']),
       start: Duration(hours: int.parse(hour), minutes: int.parse(minute)),
       type: journalTypeFromString(json['journalType']),
     );
@@ -82,6 +87,7 @@ class JournalGoal extends Goal {
 final goalsProvider =
     FutureProvider.family<List<Goal>, Pagination>((ref, pagination) async {
   ref.watch(updateJournalProvider);
+  ref.watch(updateGoalProvider);
   DateTime date = ref.watch(dateProvider);
 
   return Api().getGoals(pagination.from(date));

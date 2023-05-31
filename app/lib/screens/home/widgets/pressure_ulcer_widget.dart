@@ -9,6 +9,7 @@ import 'package:scimovement/theme/theme.dart';
 import 'package:go_router/go_router.dart';
 import 'package:scimovement/widgets/button.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:visibility_detector/visibility_detector.dart';
 
 class PressureUlcerDisplay {
   final String title;
@@ -71,32 +72,37 @@ class PressureUlcerWidget extends ConsumerWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 12,
-                  height: 12,
-                  decoration: BoxDecoration(
-                    color: display.color,
-                    borderRadius: BorderRadius.circular(6),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: display.color,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                  ),
+                  AppTheme.spacerHalf,
+                  Text(
+                    display.title,
+                    style: AppTheme.labelLarge,
+                  ),
+                ],
+              ),
+              if (display.subtitle != null)
+                Expanded(
+                  child: AutoSizeText(
+                    display.subtitle!,
+                    style: AppTheme.paragraphSmall,
+                    maxLines: 2,
                   ),
                 ),
-                AppTheme.spacerHalf,
-                Text(
-                  display.title,
-                  style: AppTheme.labelLarge,
-                ),
-              ],
-            ),
-            if (display.subtitle != null)
-              Text(
-                display.subtitle!,
-                style: AppTheme.paragraphSmall,
-              ),
-          ],
+            ],
+          ),
         ),
         const Icon(Icons.edit_outlined)
       ],
@@ -137,6 +143,18 @@ class PressureUlcerWidget extends ConsumerWidget {
             ...pressureUlcers
                 .map((e) => PressureUlcerModalItem(entry: e))
                 .toList(),
+            AppTheme.spacer,
+            Button(
+              onPressed: () {
+                Navigator.pop(context);
+                context.goNamed('create-journal', extra: {
+                  'type': JournalType.pressureUlcer,
+                });
+              },
+              title: 'Lägg till trycksår',
+              width: 200,
+            ),
+            AppTheme.separator,
             _seeAllRow(context),
           ],
         ),
@@ -147,9 +165,12 @@ class PressureUlcerWidget extends ConsumerWidget {
   Widget _seeAllRow(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: () => context.goNamed('journal-list', extra: {
-        'type': JournalType.pressureUlcer,
-      }),
+      onTap: () {
+        Navigator.pop(context);
+        context.goNamed('journal-list', extra: {
+          'type': JournalType.pressureUlcer,
+        });
+      },
       child: Column(
         children: [
           Row(
@@ -175,12 +196,15 @@ class PressureUlcerModalItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: () => context.goNamed(
-        'create-journal',
-        extra: {
-          'entry': entry,
-        },
-      ),
+      onTap: () {
+        Navigator.pop(context);
+        context.goNamed(
+          'create-journal',
+          extra: {
+            'entry': entry,
+          },
+        );
+      },
       child: Column(
         children: [
           Row(
@@ -221,7 +245,15 @@ class PressureUlcerModalItem extends StatelessWidget {
               ),
               Button(
                 secondary: true,
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.pop(context);
+                  context.goNamed(
+                    'create-journal',
+                    extra: {
+                      'entry': entry,
+                    },
+                  );
+                },
                 title: 'ändra',
                 width: 64,
                 size: ButtonSize.tiny,

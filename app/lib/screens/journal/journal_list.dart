@@ -25,7 +25,7 @@ class JournalListScreen extends HookConsumerWidget {
         ref.read(journalTypeFilterProvider.notifier).state = type;
       });
       return () => {};
-    });
+    }, []);
 
     return Scaffold(
       appBar: AppBar(

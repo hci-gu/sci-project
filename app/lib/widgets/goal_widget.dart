@@ -43,8 +43,8 @@ class GoalWidget extends StatelessWidget {
                     ),
                   ),
                   AppTheme.spacer,
-                  const Text(
-                    '4 avlastningar kvar för att nå\n ditt dagliga mål.',
+                  Text(
+                    '${goal.value - goal.progress} avlastningar kvar för att nå\n ditt dagliga mål.',
                     maxLines: 2,
                   )
                 ],

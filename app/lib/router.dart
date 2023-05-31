@@ -75,7 +75,7 @@ class RouterNotifier extends ChangeNotifier {
       return landingRoute;
     }
 
-    // redirect form onboarding to home when done
+    // redirect from onboarding to home when done
     if (state.matchedLocation == '/onboarding' && _onboardingDone) {
       return landingRoute;
     }
@@ -248,11 +248,11 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
           ),
         ],
       ),
-      // GoRoute(
-      //   name: 'onboarding',
-      //   path: '/onboarding',
-      //   builder: (_, __) => const OnboardingScreen(),
-      // ),
+      GoRoute(
+        name: 'onboarding',
+        path: '/onboarding',
+        builder: (_, __) => const OnboardingScreen(),
+      ),
       // GoRoute(
       //   name: 'demo',
       //   path: '/demo',

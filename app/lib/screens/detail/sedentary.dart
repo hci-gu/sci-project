@@ -3,6 +3,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/models/bouts.dart';
 import 'package:scimovement/models/chart.dart';
+import 'package:scimovement/models/journal.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/screens/detail/screen.dart';
 import 'package:scimovement/widgets/activity_arc/activity_arc.dart';
@@ -43,6 +44,25 @@ class SedentaryScreen extends ConsumerWidget {
   }
 }
 
+class SedentaryArcData {
+  final List<Bout> bouts;
+  final List<PressureReleaseEntry> pressureReleases;
+
+  const SedentaryArcData(this.bouts, this.pressureReleases);
+}
+
+final sedentaryArcProvider =
+    FutureProvider.family<SedentaryArcData, Pagination>(
+        (ref, pagination) async {
+  final bouts = await ref.watch(boutsProvider(pagination).future);
+  final journal = await ref.watch(journalProvider(pagination).future);
+
+  return SedentaryArcData(
+    bouts.where((e) => e.activity == Activity.sedentary).toList(),
+    journal.whereType<PressureReleaseEntry>().toList(),
+  );
+});
+
 class SedentaryArc extends ConsumerWidget {
   final Pagination pagination;
 
@@ -50,9 +70,10 @@ class SedentaryArc extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ref.watch(boutsProvider(pagination)).when(
+    return ref.watch(sedentaryArcProvider(pagination)).when(
           data: (data) => ActivityArc(
-            bouts: data.where((e) => e.activity == Activity.sedentary).toList(),
+            bouts: data.bouts,
+            journalEntries: data.pressureReleases,
             activities: const [Activity.sedentary],
           ),
           error: (e, stacktrace) => ChartWrapper.error(e.toString()),
