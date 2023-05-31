@@ -21,17 +21,15 @@ final filteredJournalProvider =
         (ref, pagination) async {
   List<JournalEntry> journal =
       await ref.watch(journalProvider(pagination).future);
-  BodyPart? bodyPart = ref.watch(bodyPartFilterProvider);
+  JournalType? type = ref.watch(journalTypeFilterProvider);
 
-  if (bodyPart == null) {
+  if (type == null) {
     return journal;
   }
 
-  return journal
-      .whereType<PainLevelEntry>()
-      .where((e) => e.bodyPart == bodyPart)
-      .toList();
+  return journal.where((e) => e.type == type).toList();
 });
+final journalTypeFilterProvider = StateProvider<JournalType?>((ref) => null);
 final bodyPartFilterProvider = StateProvider<BodyPart?>((ref) => null);
 
 final pressureReleaseCountProvider =
@@ -58,6 +56,16 @@ final uniqueEntriesProvider =
   return uniqueEntries;
 });
 
+final pressureUlcerProvider =
+    FutureProvider<List<PressureUlcerEntry>>((ref) async {
+  ref.watch(updateJournalProvider);
+  DateTime date = ref.watch(dateProvider);
+
+  List<JournalEntry> journal =
+      await Api().getJournalForType(JournalType.pressureUlcer, date);
+  return journal.whereType<PressureUlcerEntry>().toList();
+});
+
 class JournalState extends StateNotifier<DateTime> {
   JournalState() : super(DateTime.now());
 
@@ -66,6 +74,7 @@ class JournalState extends StateNotifier<DateTime> {
     Map<String, dynamic> info = {};
 
     String comment = values['comment'] as String;
+    DateTime time = values['time'] as DateTime;
 
     switch (type) {
       case JournalType.pain:
@@ -83,10 +92,21 @@ class JournalState extends StateNotifier<DateTime> {
           'exercises': exercises.map((e) => e.name.toString()).toList(),
         };
         break;
+      case JournalType.pressureUlcer:
+        BodyPart bodyPart = BodyPart(
+            values['bodyPartType'] as BodyPartType, values['side'] as Side?);
+        PressureUlcerType pressureUlcerType =
+            values['pressureUlcerType'] as PressureUlcerType;
+        info = {
+          'pressureUlcerType': pressureUlcerType.name,
+          'bodyPart': bodyPart.toString(),
+        };
+        break;
       default:
     }
 
     await Api().createJournalEntry({
+      't': time.toIso8601String(),
       'type': type.name,
       'comment': comment,
       'info': info,
@@ -96,20 +116,8 @@ class JournalState extends StateNotifier<DateTime> {
 
   Future updateJournalEntry(
       JournalEntry entry, Map<String, dynamic> values) async {
-    String comment = values['comment'] as String;
-    int painLevel = values['painLevel'] as int;
-    BodyPart bodyPart = BodyPart(
-        values['bodyPartType'] as BodyPartType, values['side'] as Side?);
-
     await Api().updateJournalEntry(
-      PainLevelEntry(
-        type: entry.type,
-        id: entry.id,
-        comment: comment,
-        time: entry.time,
-        painLevel: painLevel,
-        bodyPart: bodyPart,
-      ),
+      entry.fromFormUpdate(values),
     );
     state = DateTime.now();
   }

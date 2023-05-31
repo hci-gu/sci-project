@@ -56,6 +56,17 @@ class SelectJournalTypeScreen extends StatelessWidget {
                 ),
                 title: 'Tryckavlastning',
               ),
+              JournalEntryShortcut(
+                onTap: () =>
+                    GoRouter.of(context).goNamed('create-journal', extra: {
+                  'type': JournalType.pressureUlcer,
+                }),
+                icon: const Icon(
+                  Icons.album_outlined,
+                  size: 48,
+                ),
+                title: 'Trycksår',
+              ),
             ],
           )
         ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:scimovement/api/api.dart';
 import 'package:intl/intl.dart';
+import 'package:scimovement/theme/theme.dart';
 import 'package:timezone/standalone.dart' as tz;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -368,6 +369,21 @@ enum JournalType {
   pressureUlcer,
 }
 
+extension JournalTypeDisplayAsString on JournalType {
+  String displayString(BuildContext context) {
+    switch (this) {
+      case JournalType.pain:
+        return 'Pain';
+      case JournalType.pressureRelease:
+        return 'Pressure release';
+      case JournalType.pressureUlcer:
+        return 'Pressure ulcer';
+      default:
+        return toString();
+    }
+  }
+}
+
 JournalType journalTypeFromString(String type) {
   switch (type) {
     case 'pressureUlcer':
@@ -394,7 +410,10 @@ class JournalEntry {
     required this.comment,
   });
 
-  Map<String, dynamic> toJson() => {};
+  Map<String, dynamic> toJson() => {
+        't': time.toIso8601String(),
+        'comment': comment,
+      };
 
   factory JournalEntry.fromJson(Map<String, dynamic> json) {
     return JournalEntry(
@@ -412,6 +431,8 @@ class JournalEntry {
   String shortcutTitle(BuildContext context) {
     return '';
   }
+
+  JournalEntry fromFormUpdate(Map<String, dynamic> values) => this;
 
   String get identifier => '';
 }
@@ -450,6 +471,19 @@ class PainLevelEntry extends JournalEntry {
         'bodyPart': bodyPart.toString(),
       }
     };
+  }
+
+  @override
+  JournalEntry fromFormUpdate(Map<String, dynamic> values) {
+    return PainLevelEntry(
+      id: id,
+      type: type,
+      time: values['time'] as DateTime,
+      comment: values['comment'] as String,
+      painLevel: values['painLevel'] as int,
+      bodyPart: BodyPart(
+          values['bodyPartType'] as BodyPartType, values['side'] as Side?),
+    );
   }
 
   @override
@@ -516,11 +550,24 @@ class PressureReleaseEntry extends JournalEntry {
     return {
       ...super.toJson(),
       'info': {
-        'exercise': exercises.map(
-          (e) => e.name.toString(),
-        ),
+        'exercises': exercises
+            .map(
+              (e) => e.name.toString(),
+            )
+            .toList(),
       }
     };
+  }
+
+  @override
+  JournalEntry fromFormUpdate(Map<String, dynamic> values) {
+    return PressureReleaseEntry(
+      id: id,
+      type: type,
+      time: values['time'] as DateTime,
+      comment: values['comment'] as String,
+      exercises: values['exercises'] as List<PressureReleaseExercise>,
+    );
   }
 
   @override
@@ -536,5 +583,131 @@ class PressureReleaseEntry extends JournalEntry {
   @override
   String get identifier {
     return 'pressureRelease';
+  }
+}
+
+enum PressureUlcerType {
+  none,
+  category1,
+  category2,
+  category3,
+  category4,
+}
+
+extension PressureUlcerTypeExtension on PressureUlcerType {
+  String displayString(BuildContext context) {
+    switch (this) {
+      case PressureUlcerType.none:
+        return 'Inget trycksår';
+      case PressureUlcerType.category1:
+        return 'Rodnad';
+      case PressureUlcerType.category2:
+        return 'Ytligt sår';
+      case PressureUlcerType.category3:
+        return 'Öppet sår';
+      case PressureUlcerType.category4:
+        return 'Djupt öppet sår';
+    }
+  }
+
+  String description(BuildContext context) {
+    switch (this) {
+      case PressureUlcerType.none:
+        return 'Trycksåret har läkt';
+      case PressureUlcerType.category1:
+        return 'Rodnad som inte bleknar vid tryck';
+      case PressureUlcerType.category2:
+        return 'Delhudsskada, blåsa, spricka, avskavd hud';
+      case PressureUlcerType.category3:
+        return 'Öppen hud med liten grop';
+      case PressureUlcerType.category4:
+        return 'Ett öppet djupt sår där ben, senor och muskler kan vara synliga.';
+    }
+  }
+
+  Color get color {
+    switch (this) {
+      case PressureUlcerType.none:
+        return AppTheme.colors.error.withOpacity(0);
+      case PressureUlcerType.category1:
+        return AppTheme.colors.error.withOpacity(0.25);
+      case PressureUlcerType.category2:
+        return AppTheme.colors.error.withOpacity(0.5);
+      case PressureUlcerType.category3:
+        return AppTheme.colors.error.withOpacity(0.75);
+      case PressureUlcerType.category4:
+        return AppTheme.colors.error;
+    }
+  }
+}
+
+enum PressureUlcerLocation {
+  other,
+}
+
+class PressureUlcerEntry extends JournalEntry {
+  final PressureUlcerType pressureUlcerType;
+  final BodyPart bodyPart;
+
+  PressureUlcerEntry({
+    required super.id,
+    required super.time,
+    required super.type,
+    required super.comment,
+    required this.pressureUlcerType,
+    required this.bodyPart,
+  });
+
+  factory PressureUlcerEntry.fromJson(Map<String, dynamic> json) {
+    Map<String, dynamic> info = json['info'];
+    return PressureUlcerEntry(
+      id: json['id'],
+      time: tz.TZDateTime.parse(tz.getLocation(Api().tz), json['t']),
+      type: journalTypeFromString(json['type']),
+      comment: json['comment'],
+      pressureUlcerType: PressureUlcerType.values.firstWhere(
+          (e) => e.name == info['pressureUlcerType'],
+          orElse: () => PressureUlcerType.category1),
+      bodyPart: BodyPart.fromString(info['bodyPart']),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      ...super.toJson(),
+      'info': {
+        'pressureUlcerType': pressureUlcerType.name,
+        'bodyPart': bodyPart.toString(),
+      }
+    };
+  }
+
+  @override
+  JournalEntry fromFormUpdate(Map<String, dynamic> values) {
+    return PressureUlcerEntry(
+      id: id,
+      type: type,
+      time: values['time'] as DateTime,
+      comment: values['comment'] as String,
+      pressureUlcerType: values['pressureUlcerType'] as PressureUlcerType,
+      bodyPart: BodyPart(
+          values['bodyPartType'] as BodyPartType, values['side'] as Side?),
+    );
+  }
+
+  @override
+  String title(BuildContext context) {
+    return 'Trycksår';
+  }
+
+  @override
+  String shortcutTitle(BuildContext context) {
+    return 'Trycksår \n${bodyPart.displayString(context)}';
+  }
+
+  @override
+  String get identifier {
+    return 'pressureUlcer ${bodyPart.toString()}';
   }
 }

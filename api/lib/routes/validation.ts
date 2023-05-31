@@ -5,13 +5,14 @@ import {
   createValidator,
   ValidatedRequestSchema,
 } from 'express-joi-validation'
-import { Activity } from '../constants'
+import { Activity, JournalType } from '../constants'
 
 const validator = createValidator({})
 
 export interface GetQuerySchema extends ValidatedRequestSchema {
   [ContainerTypes.Params]: {
     id: string
+    type: string
   }
   [ContainerTypes.Query]: {
     from: Date
@@ -20,6 +21,7 @@ export interface GetQuerySchema extends ValidatedRequestSchema {
     group: string
     activity: Activity
     watt: number
+    type: string
   }
 }
 
@@ -35,5 +37,6 @@ export const getQuery = validator.query(
       .valid(...Object.values(Activity))
       .optional(),
     watt: Joi.number().optional(),
+    type: Joi.string().optional(),
   })
 )

@@ -142,6 +142,33 @@ class Api {
     return getUser(_userId);
   }
 
+  Future<List<JournalEntry>> getJournalForType(
+      JournalType type, DateTime date) async {
+    try {
+      var response =
+          await dio.get('/journal/$_userId/${type.name}', queryParameters: {
+        'to': date.toIso8601String().substring(0, 16),
+      });
+      if (response.statusCode == 200) {
+        List<dynamic> data = response.data;
+        return data.map((json) {
+          JournalType type = journalTypeFromString(json['type']);
+          switch (type) {
+            case JournalType.pain:
+              return PainLevelEntry.fromJson(json);
+            case JournalType.pressureRelease:
+              return PressureReleaseEntry.fromJson(json);
+            case JournalType.pressureUlcer:
+              return PressureUlcerEntry.fromJson(json);
+            default:
+              return JournalEntry.fromJson(json);
+          }
+        }).toList();
+      }
+    } catch (e) {}
+    return [];
+  }
+
   Future<List<JournalEntry>> getJournal(
     DateTime from,
     DateTime to,
@@ -161,6 +188,8 @@ class Api {
               return PainLevelEntry.fromJson(json);
             case JournalType.pressureRelease:
               return PressureReleaseEntry.fromJson(json);
+            case JournalType.pressureUlcer:
+              return PressureUlcerEntry.fromJson(json);
             default:
               return JournalEntry.fromJson(json);
           }
