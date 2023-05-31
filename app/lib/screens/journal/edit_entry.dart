@@ -97,6 +97,7 @@ class EditJournalEntryScreen extends ConsumerWidget {
     if (entry is PressureUlcerEntry || type == JournalType.pressureUlcer) {
       return PressureUlcerForm(
         form: form,
+        entry: entry as PressureUlcerEntry?,
         shouldCreateEntry: shouldCreateEntry,
       );
     }

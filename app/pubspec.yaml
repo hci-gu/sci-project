@@ -36,6 +36,7 @@ dependencies:
   flutter_portal: ^1.1.1
   package_info_plus: ^4.0.1
   timeago: ^3.3.0
+  auto_size_text: ^3.0.0
 
 dev_dependencies:
   flutter_test:

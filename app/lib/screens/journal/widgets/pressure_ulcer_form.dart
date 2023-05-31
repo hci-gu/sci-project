@@ -6,11 +6,13 @@ import 'package:scimovement/theme/theme.dart';
 
 class PressureUlcerForm extends StatelessWidget {
   final FormGroup form;
+  final PressureUlcerEntry? entry;
   final bool shouldCreateEntry;
 
   const PressureUlcerForm({
     super.key,
     required this.form,
+    this.entry,
     this.shouldCreateEntry = true,
   });
 
@@ -30,18 +32,18 @@ class PressureUlcerForm extends StatelessWidget {
         AppTheme.spacer2x,
         const PressureUlcerTypeSelect(formKey: 'pressureUlcerType'),
         AppTheme.spacer2x,
-        if (shouldCreateEntry)
+        if (entry == null || !shouldCreateEntry)
           Text(
             'Var är ditt sår någonstans?',
             style: AppTheme.labelLarge,
           ),
-        if (shouldCreateEntry)
+        if (entry == null || !shouldCreateEntry)
           Text(
             'Välj den plats på kroppen där ditt trycksår finns.',
             style: AppTheme.paragraphMedium,
           ),
-        if (shouldCreateEntry) AppTheme.spacer2x,
-        if (shouldCreateEntry) BodyPartSelect(form: form),
+        if (entry == null || !shouldCreateEntry) AppTheme.spacer2x,
+        if (entry == null || !shouldCreateEntry) BodyPartSelect(form: form),
         AppTheme.spacer2x,
       ],
     );
@@ -51,7 +53,8 @@ class PressureUlcerForm extends StatelessWidget {
       PressureUlcerEntry? pressureUlcerEntry, bool shouldCreateEntry) {
     return {
       'pressureUlcerType': FormControl<PressureUlcerType>(
-        value: shouldCreateEntry ? pressureUlcerEntry?.pressureUlcerType : null,
+        value:
+            !shouldCreateEntry ? pressureUlcerEntry?.pressureUlcerType : null,
       ),
       'bodyPartType': FormControl<BodyPartType>(
         value: pressureUlcerEntry?.bodyPart.type,
