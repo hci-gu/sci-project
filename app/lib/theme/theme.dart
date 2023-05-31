@@ -228,6 +228,6 @@ class AppTheme {
       color: const Color.fromRGBO(0, 0, 0, 0.1),
     ),
     color: AppTheme.colors.white,
-    borderRadius: BorderRadius.circular(24),
+    borderRadius: BorderRadius.circular(16),
   );
 }

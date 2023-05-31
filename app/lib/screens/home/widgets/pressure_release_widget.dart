@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/models/goals.dart';
 import 'package:scimovement/models/pagination.dart';
+import 'package:scimovement/screens/home/widgets/pressure_ulcer_widget.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/stat_widget.dart';
@@ -107,7 +107,7 @@ class PressureReleaseWidget extends ConsumerWidget {
                     children: [
                       Row(
                         children: [
-                          SvgPicture.asset(asset, height: 24),
+                          SvgPicture.asset(asset, height: 18),
                           AppTheme.spacerHalf,
                           Text('Tryckavlastning', style: AppTheme.labelTiny),
                         ],
@@ -131,61 +131,6 @@ class PressureReleaseWidget extends ConsumerWidget {
         AppTheme.spacerHalf,
         const PressureUlcerWidget(),
       ],
-    );
-  }
-}
-
-class PressureUlcerWidget extends StatelessWidget {
-  const PressureUlcerWidget({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        context.goNamed('create-journal', extra: {
-          'type': JournalType.pressureUlcer,
-        });
-      },
-      child: AspectRatio(
-        aspectRatio: 3,
-        child: Container(
-          decoration: AppTheme.widgetDecoration.copyWith(
-            borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(12),
-              bottomRight: Radius.circular(12),
-            ),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Row(
-              children: [
-                Column(
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 12,
-                          height: 12,
-                          decoration: BoxDecoration(
-                            color: Colors.amber,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        AppTheme.spacerHalf,
-                        Text('Inget trycksår', style: AppTheme.labelLarge),
-                      ],
-                    ),
-                    Text('Sedan 12 dagar tillbaka',
-                        style: AppTheme.paragraphSmall),
-                  ],
-                ),
-                Icon(Icons.edit_outlined)
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

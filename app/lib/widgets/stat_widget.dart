@@ -210,15 +210,15 @@ class StatWidget extends StatelessWidget {
         ),
       );
 
-  static Widget error(String asset) => _emptyContainer([
-        SvgPicture.asset(asset),
+  static Widget error([String? asset]) => _emptyContainer([
+        asset != null ? SvgPicture.asset(asset) : Container(),
         AppTheme.spacer2x,
         const Text('error'),
       ]);
 
-  static Widget loading(String asset) => _emptyContainer(
+  static Widget loading([String? asset]) => _emptyContainer(
         [
-          SvgPicture.asset(asset),
+          asset != null ? SvgPicture.asset(asset) : Container(),
           AppTheme.spacer4x,
           const CircularProgressIndicator(),
         ],

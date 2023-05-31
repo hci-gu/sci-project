@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -8,21 +9,40 @@ import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/widgets/editable_list_item.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class JournalListScreen extends ConsumerWidget {
-  const JournalListScreen({Key? key}) : super(key: key);
+class JournalListScreen extends HookConsumerWidget {
+  final JournalType? type;
+
+  const JournalListScreen({
+    super.key,
+    this.type,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    useEffect(() {
+      // only do after mounted
+      WidgetsBinding.instance!.addPostFrameCallback((_) {
+        ref.read(journalTypeFilterProvider.notifier).state = type;
+      });
+      return () => {};
+    });
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Loggbok'),
         actions: [
-          _bodyPartFilter(ref, Pagination(page: 0, mode: ChartMode.month)),
+          _bodyPartFilter(
+            ref,
+            const Pagination(page: 0, mode: ChartMode.month),
+          ),
         ],
       ),
       body: ref
-          .watch(filteredJournalProvider(
-              Pagination(page: 0, mode: ChartMode.month)))
+          .watch(
+            filteredJournalProvider(
+              const Pagination(page: 0, mode: ChartMode.month),
+            ),
+          )
           .when(
             data: (data) => _buildList(context, data.reversed.toList(), ref),
             loading: () => const Center(child: CircularProgressIndicator()),
@@ -32,31 +52,27 @@ class JournalListScreen extends ConsumerWidget {
   }
 
   Widget _bodyPartFilter(WidgetRef ref, Pagination pagination) {
-    return ref.watch(uniqueEntriesProvider(pagination)).when(
-          data: (data) => PopupMenuButton<BodyPart>(
-            icon: const Icon(Icons.filter_list),
-            onSelected: (filter) {
-              ref.read(bodyPartFilterProvider.notifier).state = filter;
-            },
-            onCanceled: () {
-              ref.read(bodyPartFilterProvider.notifier).state = null;
-            },
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                  child: Text(AppLocalizations.of(context)!.all), value: null),
-              ...data.whereType<PainLevelEntry>().map(
-                    (e) => PopupMenuItem(
-                      child: Text(e.bodyPart.displayString(context)),
-                      value: e.bodyPart,
-                    ),
-                  ),
-            ],
+    return PopupMenuButton<JournalType>(
+      icon: const Icon(Icons.filter_list),
+      onSelected: (filter) {
+        ref.read(journalTypeFilterProvider.notifier).state = filter;
+      },
+      onCanceled: () {
+        ref.read(journalTypeFilterProvider.notifier).state = null;
+      },
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          value: null,
+          child: Text(AppLocalizations.of(context)!.all),
+        ),
+        ...JournalType.values.map(
+          (e) => PopupMenuItem(
+            value: e,
+            child: Text(e.displayString(context)),
           ),
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, s) => Text(
-            e.toString(),
-          ),
-        );
+        ),
+      ],
+    );
   }
 
   Widget _buildList(

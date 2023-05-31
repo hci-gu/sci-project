@@ -50,18 +50,23 @@ export default {
       to,
     }: {
       userId: string
-      from: Date
-      to: Date
+      from?: Date
+      to?: Date
     },
     filter = {}
   ) => {
+    const where: any = {
+      UserId: userId,
+    }
+    if (from && to) {
+      where.t = {
+        [Op.between]: [from, to],
+      }
+    }
     return JournalModel.findAll({
       attributes: ['id', 't', 'type', 'comment', 'info'],
       where: {
-        UserId: userId,
-        t: {
-          [Op.between]: [from, to],
-        },
+        ...where,
         ...filter,
       },
       order: [['t', 'ASC']],

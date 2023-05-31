@@ -15,9 +15,10 @@ class JournalShortcutGrid extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final pagination = Pagination(page: 0, mode: ChartMode.month);
-
-    return ref.watch(uniqueEntriesProvider(pagination)).when(
+    return ref
+        .watch(uniqueEntriesProvider(
+            const Pagination(page: 0, mode: ChartMode.month)))
+        .when(
           data: (data) => data.isEmpty
               ? _emptyState(context)
               : _buildList(context, data, ref),

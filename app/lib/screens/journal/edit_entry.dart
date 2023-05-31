@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/models/journal.dart';
-import 'package:scimovement/screens/journal/widgets/body_part_select.dart';
-import 'package:scimovement/screens/journal/widgets/pain_slider.dart';
-import 'package:scimovement/screens/journal/widgets/pressure_release_exercise_select.dart';
+import 'package:scimovement/screens/journal/widgets/pain_level_form.dart';
+import 'package:scimovement/screens/journal/widgets/pressure_release_form.dart';
+import 'package:scimovement/screens/journal/widgets/pressure_ulcer_form.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/text_field.dart';
@@ -21,65 +22,55 @@ class EditJournalEntryScreen extends ConsumerWidget {
       {Key? key, this.entry, this.type, this.shouldCreateEntry = true})
       : super(key: key);
 
-  FormGroup buildForm() => fb.group({
-        if (entry is PainLevelEntry || type == JournalType.pain)
-          ...buildPainLevelForm(),
-        if (entry is PressureReleaseEntry ||
-            type == JournalType.pressureRelease)
-          ...buildPressureReleaseForm(),
-        'comment': FormControl<String>(
-          value: entry?.comment ?? '',
-        ),
-      });
-
-  buildPainLevelForm() {
-    PainLevelEntry? painLevelEntry = entry as PainLevelEntry?;
-    return {
-      'bodyPartType': FormControl<BodyPartType>(
-        value: painLevelEntry?.bodyPart.type,
+  FormGroup buildForm() {
+    Map<String, FormControl> defaultFields = {
+      'time': FormControl<DateTime>(
+        value:
+            shouldCreateEntry ? DateTime.now() : entry?.time ?? DateTime.now(),
         validators: [Validators.required],
       ),
-      'side': FormControl<Side>(
-        value: painLevelEntry?.bodyPart.side ?? Side.right,
-        validators: [Validators.required],
-      ),
-      'painLevel': FormControl<int>(
-        value: painLevelEntry?.painLevel ?? 0,
-        validators: [
-          Validators.required,
-          Validators.min(0),
-          Validators.max(10)
-        ],
+      'comment': FormControl<String>(
+        value: entry?.comment ?? '',
       ),
     };
+
+    return fb.group({
+      ...defaultFields,
+      if (entry is PainLevelEntry || type == JournalType.pain)
+        ...PainLevelForm.buildForm(entry as PainLevelEntry?),
+      if (entry is PressureReleaseEntry || type == JournalType.pressureRelease)
+        ...PressureReleaseForm.buildForm(entry as PressureReleaseEntry?),
+      if (entry is PressureUlcerEntry || type == JournalType.pressureUlcer)
+        ...PressureUlcerForm.buildForm(
+            entry as PressureUlcerEntry?, shouldCreateEntry)
+    });
   }
 
-  buildPressureReleaseForm() {
-    PressureReleaseEntry? pressureReleaseEntry = entry as PressureReleaseEntry?;
-
-    return {
-      'exercises': FormControl<List<PressureReleaseExercise>>(
-        value: pressureReleaseEntry?.exercises ?? [],
-      ),
-    };
+  String _appBarTitle(BuildContext context) {
+    if (entry != null) {
+      return entry!.title(context);
+    }
+    if (type != null) {
+      return type!.displayString(context);
+    }
+    return 'Ny loggning';
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // BodyPart? initialBodyPart = entry != null ? entry!.bodyPart : bodyPart;
     return Scaffold(
-      appBar: AppTheme.appBar('test'),
+      appBar: AppTheme.appBar(_appBarTitle(context)),
       body: ReactiveFormBuilder(
         form: buildForm,
         builder: (context, form, _) {
           return ListView(
             padding: AppTheme.screenPadding,
             children: [
-              if (entry is PainLevelEntry || type == JournalType.pain)
-                PainLevelForm(form: form, entry: entry as PainLevelEntry?),
-              if (entry is PressureReleaseEntry ||
-                  type == JournalType.pressureRelease)
-                PressureReleaseForm(form: form),
+              Text('Dag och tid', style: AppTheme.labelLarge),
+              AppTheme.spacer,
+              const DateTimeButton(formKey: 'time'),
+              AppTheme.spacer2x,
+              _typeSpecificForm(form),
               StyledTextField(
                 formControlName: 'comment',
                 placeholder:
@@ -88,90 +79,102 @@ class EditJournalEntryScreen extends ConsumerWidget {
                 maxLines: 3,
               ),
               AppTheme.spacer2x,
-              ReactiveFormConsumer(
-                builder: ((context, form, child) => Button(
-                      width: 160,
-                      disabled: !form.valid,
-                      onPressed: () async {
-                        if (shouldCreateEntry) {
-                          await ref
-                              .read(updateJournalProvider.notifier)
-                              .createJournalEntry(
-                                  entry?.type ?? type!, form.value);
-                        } else {
-                          await ref
-                              .read(updateJournalProvider.notifier)
-                              .updateJournalEntry(entry!, form.value);
-                        }
-                        form.reset();
-                        while (context.canPop()) {
-                          context.pop();
-                        }
-                      },
-                      title: entry != null
-                          ? AppLocalizations.of(context)!.update
-                          : AppLocalizations.of(context)!.save,
-                    )),
-              ),
+              _submitButton(ref),
             ],
           );
         },
       ),
     );
   }
-}
 
-class PainLevelForm extends StatelessWidget {
-  final PainLevelEntry? entry;
-  final FormGroup form;
+  Widget _typeSpecificForm(FormGroup form) {
+    if (entry is PainLevelEntry || type == JournalType.pain) {
+      return PainLevelForm(form: form, entry: entry as PainLevelEntry?);
+    }
+    if (entry is PressureReleaseEntry || type == JournalType.pressureRelease) {
+      return PressureReleaseForm(form: form);
+    }
+    if (entry is PressureUlcerEntry || type == JournalType.pressureUlcer) {
+      return PressureUlcerForm(
+        form: form,
+        shouldCreateEntry: shouldCreateEntry,
+      );
+    }
 
-  const PainLevelForm({
-    Key? key,
-    this.entry,
-    required this.form,
-  }) : super(key: key);
+    return Container();
+  }
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (entry == null) BodyPartSelect(form: form),
-        if (entry == null) AppTheme.spacer2x,
-        Text(
-          AppLocalizations.of(context)!.painLevel,
-          style: AppTheme.labelLarge,
-        ),
-        Text(
-          AppLocalizations.of(context)!.painLevelHelper,
-          style: AppTheme.paragraphMedium,
-        ),
-        AppTheme.spacer2x,
-        PainSlider(formKey: 'painLevel'),
-        AppTheme.spacer2x,
-        Text(
-            '${AppLocalizations.of(context)!.comment} ( ${AppLocalizations.of(context)!.optional} )',
-            style: AppTheme.labelLarge),
-        AppTheme.spacer,
-      ],
+  Widget _submitButton(WidgetRef ref) {
+    return ReactiveFormConsumer(
+      builder: ((context, form, child) => Button(
+            width: 160,
+            disabled: !form.valid,
+            onPressed: () async {
+              if (shouldCreateEntry) {
+                await ref
+                    .read(updateJournalProvider.notifier)
+                    .createJournalEntry(entry?.type ?? type!, form.value);
+              } else {
+                await ref
+                    .read(updateJournalProvider.notifier)
+                    .updateJournalEntry(entry!, form.value);
+              }
+              form.reset();
+              if (context.mounted) {
+                while (context.canPop()) {
+                  context.pop();
+                }
+              }
+            },
+            title: entry != null
+                ? AppLocalizations.of(context)!.update
+                : AppLocalizations.of(context)!.save,
+          )),
     );
   }
 }
 
-class PressureReleaseForm extends StatelessWidget {
-  final FormGroup form;
+class DateTimeButton extends StatelessWidget {
+  final String formKey;
 
-  const PressureReleaseForm({
+  const DateTimeButton({
     super.key,
-    required this.form,
+    required this.formKey,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        PressureReleaseExerciseSelect(form: form),
-      ],
+    return ReactiveFormConsumer(
+      builder: (context, form, _) => Button(
+        title:
+            DateFormat('yyyy-MM-dd HH:mm').format(form.control(formKey).value),
+        width: 160,
+        icon: Icons.calendar_month_outlined,
+        onPressed: () async {
+          DateTime? date = await showDatePicker(
+            context: context,
+            initialDate: form.control(formKey).value,
+            firstDate: DateTime.now().subtract(const Duration(days: 365)),
+            lastDate: DateTime.now(),
+          );
+          if (context.mounted) {
+            TimeOfDay? time = await showTimePicker(
+              context: context,
+              initialTime: TimeOfDay.fromDateTime(form.control(formKey).value),
+            );
+            if (date != null && time != null) {
+              DateTime timestamp = DateTime(
+                date.year,
+                date.month,
+                date.day,
+                time.hour,
+                time.minute,
+              );
+              form.control(formKey).value = timestamp;
+            }
+          }
+        },
+      ),
     );
   }
 }

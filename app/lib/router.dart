@@ -219,7 +219,9 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
                   GoRoute(
                     name: 'journal-list',
                     path: 'list',
-                    builder: (_, state) => const JournalListScreen(),
+                    builder: (_, state) => JournalListScreen(
+                      type: (state.extra as Map?)?['type'],
+                    ),
                     routes: [
                       GoRoute(
                         name: 'update-journal',

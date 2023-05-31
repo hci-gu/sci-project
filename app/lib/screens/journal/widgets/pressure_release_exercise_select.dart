@@ -11,11 +11,14 @@ class PressureReleaseExerciseSelect extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    ValueNotifier<List<PressureReleaseExercise>> state = useState([
-      PressureReleaseExercise.forwards,
-      PressureReleaseExercise.rightSide,
-      PressureReleaseExercise.leftSide,
-    ]);
+    ValueNotifier<List<PressureReleaseExercise>> state = useState(
+      form.control('exercises').value ??
+          [
+            PressureReleaseExercise.forwards,
+            PressureReleaseExercise.rightSide,
+            PressureReleaseExercise.leftSide,
+          ],
+    );
 
     return ReactiveFormConsumer(
       builder: ((context, formGroup, child) => Column(
