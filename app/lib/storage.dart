@@ -1,3 +1,4 @@
+import 'package:scimovement/models/app_features.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Credentials {
@@ -62,6 +63,26 @@ class Storage {
 
   String? getLanguageCode() {
     return prefs.getString('languageCode');
+  }
+
+  Future storeAppFeatures(List<AppFeature> features) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setStringList(
+      'appFeatures',
+      features.map((e) => e.toString()).toList(),
+    );
+  }
+
+  List<AppFeature> getAppFeatures() {
+    final List<String>? features = prefs.getStringList('appFeatures');
+    if (features == null) {
+      return AppFeature.values.toList();
+    }
+
+    return features
+        .map((e) =>
+            AppFeature.values.firstWhere((element) => element.toString() == e))
+        .toList();
   }
 
   static final Storage _instance = Storage._internal();

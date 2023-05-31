@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import 'package:scimovement/models/goals.dart';
@@ -97,19 +98,25 @@ class GoalScreen extends ConsumerWidget {
           disabled: form.valid == false,
           width: 180,
           title: 'Spara',
-          onPressed: () {
+          onPressed: () async {
             if (goal != null) {
               Duration start = form.value['start'] as Duration;
-              ref.read(updateGoalProvider.notifier).updateGoal(
+              await ref.read(updateGoalProvider.notifier).updateGoal(
                     Goal(
                       id: goal!.id,
                       value: form.value['value'] as int,
                       start: start,
                       progress: 0,
+                      reminder: DateTime.now(),
                     ),
                   );
             } else {
-              ref.read(updateGoalProvider.notifier).createGoal(form.value);
+              await ref
+                  .read(updateGoalProvider.notifier)
+                  .createGoal(form.value);
+            }
+            if (context.mounted) {
+              context.pop();
             }
           },
         ),
