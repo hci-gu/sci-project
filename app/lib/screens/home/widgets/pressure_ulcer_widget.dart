@@ -155,7 +155,7 @@ class PressureUlcerWidget extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Se trycksårs historik', style: AppTheme.labelLarge),
+              Text('Se trycksårshistorik', style: AppTheme.labelLarge),
               const Icon(Icons.arrow_forward_ios),
             ],
           ),
@@ -176,10 +176,7 @@ class PressureUlcerModalItem extends StatelessWidget {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () => context.goNamed(
-        'update-journal',
-        pathParameters: {
-          'id': entry.id.toString(),
-        },
+        'create-journal',
         extra: {
           'entry': entry,
         },
