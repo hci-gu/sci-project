@@ -3,13 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/models/journal.dart';
-import 'package:scimovement/models/pagination.dart';
-import 'package:scimovement/screens/journal/widgets/pressure_ulcer_form.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:go_router/go_router.dart';
 import 'package:scimovement/widgets/button.dart';
 import 'package:timeago/timeago.dart' as timeago;
-import 'package:visibility_detector/visibility_detector.dart';
 
 class PressureUlcerDisplay {
   final String title;

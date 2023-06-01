@@ -214,6 +214,13 @@ class AppTheme {
           color: const Color.fromRGBO(0, 0, 0, 0.1),
         ),
       );
+  static Widget get separatorSmall => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Container(
+          height: 1,
+          color: const Color.fromRGBO(0, 0, 0, 0.1),
+        ),
+      );
 
   static BoxDecoration cardDecoration = BoxDecoration(
     color: colors.white,

@@ -37,7 +37,6 @@ class HomeScreen extends HookConsumerWidget {
           const DateSelect(),
           AppTheme.spacer2x,
           StaggeredGrid.count(
-            // physics: const NeverScrollableScrollPhysics(),
             crossAxisCount: 2,
             crossAxisSpacing: AppTheme.basePadding * 2,
             mainAxisSpacing: AppTheme.basePadding * 2,

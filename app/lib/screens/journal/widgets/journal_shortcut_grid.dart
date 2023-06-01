@@ -8,7 +8,6 @@ import 'package:scimovement/screens/journal/widgets/body_part_icon.dart';
 import 'package:scimovement/screens/journal/widgets/entry_shortcut.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:timeago/timeago.dart' as timeago;
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class JournalShortcutGrid extends ConsumerWidget {
   const JournalShortcutGrid({Key? key}) : super(key: key);
@@ -17,7 +16,7 @@ class JournalShortcutGrid extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return ref
         .watch(uniqueEntriesProvider(
-            const Pagination(page: 0, mode: ChartMode.month)))
+            const Pagination(page: 0, mode: ChartMode.quarter)))
         .when(
           data: (data) => data.isEmpty
               ? _emptyState(context)

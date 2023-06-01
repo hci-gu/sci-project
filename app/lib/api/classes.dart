@@ -540,7 +540,7 @@ class PressureReleaseEntry extends JournalEntry {
       id: json['id'],
       time: tz.TZDateTime.parse(tz.getLocation(Api().tz), json['t']),
       type: journalTypeFromString(json['type']),
-      comment: json['comment'],
+      comment: json['comment'] ?? '',
       exercises: exercises.map((e) => prExerciseFromString(e)).toList(),
     );
   }

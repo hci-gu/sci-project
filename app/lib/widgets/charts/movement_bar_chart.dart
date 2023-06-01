@@ -5,7 +5,6 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/theme/theme.dart';
-import 'package:scimovement/widgets/charts/chart_wrapper.dart';
 import 'package:scimovement/widgets/charts/utils/chart_data.dart';
 
 class MovementBarChart extends StatelessWidget {

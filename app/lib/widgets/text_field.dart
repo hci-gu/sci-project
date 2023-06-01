@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:reactive_forms/reactive_forms.dart';
-import 'package:scimovement/theme/theme.dart';
 
 class StyledTextField extends StatelessWidget {
   final String formControlName;
