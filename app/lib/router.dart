@@ -6,7 +6,6 @@ import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/models/onboarding.dart';
-import 'package:scimovement/screens/demo/demo.dart';
 import 'package:scimovement/screens/detail/activity.dart';
 import 'package:scimovement/screens/detail/calories.dart';
 import 'package:scimovement/screens/detail/pressure_release.dart';
@@ -27,7 +26,7 @@ import 'package:scimovement/screens/register.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 List<String> detailRoutes = ['calories', 'activity', 'sedentary'];
-String landingRoute = '/';
+String landingRoute = '/journal/list';
 
 class RouteChangeObserver extends NavigatorObserver {
   final Ref _ref;
@@ -242,7 +241,7 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
               GoRoute(
                 path: '/settings',
                 name: 'settings',
-                builder: (context, state) => SettingsScreen(),
+                builder: (context, state) => const SettingsScreen(),
               )
             ],
           ),

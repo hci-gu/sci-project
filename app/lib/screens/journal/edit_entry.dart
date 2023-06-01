@@ -127,9 +127,9 @@ class EditJournalEntryScreen extends ConsumerWidget {
                 }
               }
             },
-            title: entry != null
-                ? AppLocalizations.of(context)!.update
-                : AppLocalizations.of(context)!.save,
+            title: shouldCreateEntry
+                ? AppLocalizations.of(context)!.save
+                : AppLocalizations.of(context)!.update,
           )),
     );
   }

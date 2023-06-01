@@ -155,14 +155,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_portal:
-    dependency: "direct main"
-    description:
-      name: flutter_portal
-      sha256: "4601b3dc24f385b3761721bd852a3f6c09cddd4e943dd184ed58ee1f43006257"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.4"
   flutter_riverpod:
     dependency: transitive
     description:
@@ -570,6 +562,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.4.0"
+  timelines:
+    dependency: "direct main"
+    description:
+      name: timelines
+      sha256: "40214f5ab772ff45459cb8c15e5f60505a6828af0c0eb1eec6f29ed911a4c1c5"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0"
   timezone:
     dependency: "direct main"
     description:
@@ -682,14 +682,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.4"
-  visibility_detector:
-    dependency: "direct main"
-    description:
-      name: visibility_detector
-      sha256: dd5cc11e13494f432d15939c3aa8ae76844c42b723398643ce9addb88a5ed420
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.4.0+2"
   win32:
     dependency: transitive
     description:
