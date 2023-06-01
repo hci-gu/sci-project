@@ -4,7 +4,7 @@ import moment from 'moment'
 import Journal from '../../db/models/Journal'
 import { getQuery, GetQuerySchema } from '../validation'
 import { JournalType } from '../../constants'
-import { getCurrentPressureUlcers } from './utils'
+import { fillMockData, getCurrentPressureUlcers } from './utils'
 
 const router = express.Router()
 
@@ -74,6 +74,14 @@ router.get(
     }
   }
 )
+
+router.get('/:id/mock', async (req, res) => {
+  await fillMockData(req.params.id)
+
+  res.json({
+    message: 'ok',
+  })
+})
 
 router.get(
   '/:id/:type',

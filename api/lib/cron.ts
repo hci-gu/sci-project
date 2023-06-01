@@ -6,6 +6,8 @@ import * as push from './push'
 import AccelCount from './db/models/AccelCount'
 import { NotificationSettings, User } from './db/classes'
 import JournalModel from './db/models/Journal'
+import GoalModel from './db/models/Goal'
+import { getGoalInfo } from './routes/goals/utils'
 
 const CronJob = require('cron').CronJob
 
@@ -13,6 +15,7 @@ enum MessageType {
   Activity = 'activity',
   Data = 'data',
   Journal = 'journal',
+  Goal = 'goal',
 }
 const cacheKeyForType = (type: MessageType, user: User) =>
   `${user.id}-${type}-notification`
@@ -41,6 +44,12 @@ const checkActivityAndSendMessage = async (user: User) => {
 }
 
 const checkForDataAndSendMessage = async (user: User) => {
+  // if the user has never sent data, don't send a message they may not have a watch.
+  const hasEverSentData = await AccelCount.hasData(user.id)
+  if (!hasEverSentData) {
+    return false
+  }
+
   const counts = await AccelCount.find({
     userId: user.id,
     from: moment().subtract(1, 'hour').toDate(),
@@ -65,11 +74,38 @@ const checkForDataAndSendMessage = async (user: User) => {
   return counts.length > 0
 }
 
+const fetchGoalsAndCheckReminders = async (user: User) => {
+  const goals = await GoalModel.find({ userId: user.id })
+
+  for (const goal of goals) {
+    const goalInfo = await getGoalInfo(user.id, goal)
+
+    if (goalInfo.reminder && moment(goalInfo.reminder).isBefore(moment())) {
+      const cacheKey = cacheKeyForType(MessageType.Goal, user)
+      const notification = await redis.get(cacheKey)
+      if (!notification) {
+        const message = {
+          title: 'Påminnelse',
+          body: `Det är dags att Avlasta!`,
+        }
+        await redis.set(cacheKey, message, 60 * 45)
+        push.send({
+          deviceId: user.deviceId,
+          message,
+          action: 'create-journal?type=pressureRelease',
+        })
+      }
+    }
+  }
+}
+
 const sendMessages = async (user: User) => {
   const hasData = await checkForDataAndSendMessage(user)
   if (hasData && user.notificationSettings.activity) {
-    checkActivityAndSendMessage(user)
+    await checkActivityAndSendMessage(user)
   }
+
+  await fetchGoalsAndCheckReminders(user)
 }
 
 // run every other minute during the day
