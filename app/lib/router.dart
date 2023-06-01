@@ -17,6 +17,7 @@ import 'package:scimovement/screens/introduction.dart';
 import 'package:scimovement/screens/journal/edit_entry.dart';
 import 'package:scimovement/screens/journal/journal.dart';
 import 'package:scimovement/screens/journal/journal_list.dart';
+import 'package:scimovement/screens/journal/perform_pressure_release.dart';
 import 'package:scimovement/screens/journal/select_journal_type.dart';
 import 'package:scimovement/screens/login.dart';
 import 'package:scimovement/screens/settings/settings.dart';
@@ -26,7 +27,7 @@ import 'package:scimovement/screens/register.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 List<String> detailRoutes = ['calories', 'activity', 'sedentary'];
-String landingRoute = '/journal/list';
+String landingRoute = '/';
 
 class RouteChangeObserver extends NavigatorObserver {
   final Ref _ref;
@@ -231,6 +232,11 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
                         ),
                       ),
                     ],
+                  ),
+                  GoRoute(
+                    path: 'perform-pressure-release',
+                    name: 'perform-pressure-release',
+                    builder: (_, __) => const PerformPressureReleaseScreen(),
                   ),
                 ],
               )

@@ -50,7 +50,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/licenses/
-    - assets/png/
+    - assets/images/
     - assets/svg/
   fonts:
     - family: Manrope

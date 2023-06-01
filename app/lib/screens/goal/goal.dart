@@ -23,7 +23,7 @@ class GoalScreen extends ConsumerWidget {
           validators: [
             Validators.required,
             Validators.min(0),
-            Validators.max(10)
+            Validators.max(20)
           ],
         ),
         'start': FormControl<Duration>(
@@ -107,6 +107,7 @@ class GoalScreen extends ConsumerWidget {
                       value: form.value['value'] as int,
                       start: start,
                       progress: 0,
+                      recurrence: Duration.zero,
                       reminder: DateTime.now(),
                     ),
                   );

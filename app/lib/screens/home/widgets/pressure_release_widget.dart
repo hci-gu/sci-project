@@ -10,6 +10,7 @@ import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/screens/home/widgets/pressure_ulcer_widget.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
+import 'package:scimovement/widgets/progress_indicator_around.dart';
 import 'package:scimovement/widgets/stat_widget.dart';
 import 'package:go_router/go_router.dart';
 
@@ -119,11 +120,10 @@ class PressureReleaseWidget extends ConsumerWidget {
                           Text('Tryckavlastning', style: AppTheme.labelTiny),
                         ],
                       ),
-                      TimeUntilGoal(goal: goal),
                       RebuildOnTimer(
-                        duration: const Duration(seconds: 2),
-                        child: GoalProgress(goal: goal),
-                      )
+                        child: TimeUntilGoal(goal: goal),
+                      ),
+                      GoalProgress(goal: goal)
                     ],
                   ),
                   AppTheme.widgetDecoration.copyWith(
@@ -160,14 +160,11 @@ class TimeUntilGoal extends StatelessWidget {
           '${timeLeft.inMinutes.remainder(60).toString().padLeft(2, '0')}:${timeLeft.inSeconds.remainder(60).toString().padLeft(2, '0')}';
     }
 
-    print(timerText);
-
-    return Container(
-      padding: EdgeInsets.all(AppTheme.basePadding),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(100),
-        border: Border.all(color: AppTheme.colors.black.withOpacity(0.1)),
-      ),
+    return ProgressIndicatorAround(
+      size: 50,
+      value: timeLeft.inMinutes / goal.recurrence.inMinutes,
+      strokeWidth: 2.5,
+      duration: 1,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
