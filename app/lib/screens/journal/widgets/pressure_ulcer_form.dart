@@ -30,7 +30,10 @@ class PressureUlcerForm extends StatelessWidget {
           style: AppTheme.paragraphMedium,
         ),
         AppTheme.spacer2x,
-        const PressureUlcerTypeSelect(formKey: 'pressureUlcerType'),
+        PressureUlcerTypeSelect(
+          formKey: 'pressureUlcerType',
+          showNone: entry != null || !shouldCreateEntry,
+        ),
         AppTheme.spacer2x,
         if (entry == null || !shouldCreateEntry)
           Text(
@@ -70,8 +73,13 @@ class PressureUlcerForm extends StatelessWidget {
 
 class PressureUlcerTypeSelect extends StatelessWidget {
   final String formKey;
+  final bool showNone;
 
-  const PressureUlcerTypeSelect({super.key, required this.formKey});
+  const PressureUlcerTypeSelect({
+    super.key,
+    required this.formKey,
+    this.showNone = true,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -95,6 +103,12 @@ class PressureUlcerTypeSelect extends StatelessWidget {
                 style: AppTheme.paragraphMedium,
               ),
               items: PressureUlcerType.values
+                  .where((e) {
+                    if (!showNone) {
+                      return e != PressureUlcerType.none;
+                    }
+                    return true;
+                  })
                   .map((e) => _dropdownItem(context, e))
                   .toList(),
               value: form.control(formKey).value,
