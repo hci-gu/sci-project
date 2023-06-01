@@ -2,7 +2,7 @@ import express from 'express'
 import { ValidatedRequest } from 'express-joi-validation'
 import Goal from '../../db/models/Goal'
 import { getQuery, GetQuerySchema } from '../validation'
-import { getGoalProgress } from './utils'
+import { getGoalInfo } from './utils'
 
 const router = express.Router()
 
@@ -52,9 +52,10 @@ router.get(
       })
       const goalsWithProgress = await Promise.all(
         goals.map(async (g) => {
+          const info = await getGoalInfo(id, g, date)
           return {
             ...g.dataValues,
-            progress: await getGoalProgress(id, g, date),
+            ...info,
           }
         })
       )

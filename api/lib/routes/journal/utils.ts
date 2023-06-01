@@ -32,3 +32,36 @@ export const getCurrentPressureUlcers = async (userId: string, to?: Date) => {
 
   return Object.values(lastEntries)
 }
+
+export const fillMockData = async (userId: string, days = 90) => {
+  let pressureReleases = []
+
+  for (let i = 0; i < days; i++) {
+    // random wake up time between 6 and 8
+    const wakeUpHour = Math.floor(Math.random() * 2) + 6
+    const date = moment()
+      .subtract(i, 'days')
+      .startOf('day')
+      .add(wakeUpHour, 'hours')
+      .toDate()
+
+    const numberOfPressureReleases = Math.floor(
+      Math.pow(Math.random(), 0.5) * 10
+    )
+
+    for (let j = 0; j < numberOfPressureReleases; j++) {
+      const timestamp = moment(date).add(j, 'hours').toDate()
+      const pressureRelease = {
+        timestamp,
+        type: JournalType.pressureRelease,
+        info: { exercises: ['rightSide', 'leftSide', 'forwards'] },
+      }
+      pressureReleases.push(pressureRelease)
+    }
+  }
+
+  for (let e of pressureReleases) {
+    console.log(e)
+    await Journal.save(e, userId)
+  }
+}
