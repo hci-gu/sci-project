@@ -39,7 +39,8 @@ class EditJournalEntryScreen extends ConsumerWidget {
       if (entry is PainLevelEntry || type == JournalType.pain)
         ...PainLevelForm.buildForm(entry as PainLevelEntry?),
       if (entry is PressureReleaseEntry || type == JournalType.pressureRelease)
-        ...PressureReleaseForm.buildForm(entry as PressureReleaseEntry?),
+        ...PressureReleaseForm.buildForm(
+            entry as PressureReleaseEntry?, shouldCreateEntry),
       if (entry is PressureUlcerEntry || type == JournalType.pressureUlcer)
         ...PressureUlcerForm.buildForm(
             entry as PressureUlcerEntry?, shouldCreateEntry)

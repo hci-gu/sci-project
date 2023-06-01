@@ -20,15 +20,21 @@ class PressureReleaseForm extends StatelessWidget {
     );
   }
 
-  static buildForm(PressureReleaseEntry? pressureReleaseEntry) {
+  static buildForm(
+      PressureReleaseEntry? pressureReleaseEntry, bool shouldCreateEntry) {
+    List<PressureReleaseExercise> exercises = [
+      PressureReleaseExercise.leftSide,
+      PressureReleaseExercise.rightSide,
+      PressureReleaseExercise.forwards,
+    ];
+
+    if (!shouldCreateEntry && pressureReleaseEntry != null) {
+      exercises = pressureReleaseEntry.exercises;
+    }
+
     return {
       'exercises': FormControl<List<PressureReleaseExercise>>(
-        value: pressureReleaseEntry?.exercises ??
-            [
-              PressureReleaseExercise.leftSide,
-              PressureReleaseExercise.rightSide,
-              PressureReleaseExercise.forwards,
-            ],
+        value: exercises,
       ),
     };
   }
