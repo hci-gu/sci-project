@@ -26,6 +26,7 @@ class Goal {
   final DateTime reminder;
   final TimeFrame timeFrame;
   final Duration start;
+  final Duration recurrence;
 
   Goal({
     required this.id,
@@ -33,6 +34,7 @@ class Goal {
     required this.progress,
     required this.reminder,
     required this.start,
+    required this.recurrence,
     this.timeFrame = TimeFrame.day,
   });
 
@@ -44,6 +46,7 @@ class Goal {
       value: json['value'],
       progress: json['progress'],
       reminder: DateTime.parse(json['reminder']),
+      recurrence: Duration(minutes: json['recurrence']),
       start: Duration(hours: int.parse(hour), minutes: int.parse(minute)),
     );
   }
@@ -66,6 +69,7 @@ class JournalGoal extends Goal {
     required super.progress,
     required super.reminder,
     required super.start,
+    required super.recurrence,
     super.timeFrame,
     required this.type,
   });
@@ -79,6 +83,7 @@ class JournalGoal extends Goal {
       progress: json['progress'],
       reminder: tz.TZDateTime.parse(tz.getLocation(Api().tz), json['reminder']),
       start: Duration(hours: int.parse(hour), minutes: int.parse(minute)),
+      recurrence: Duration(minutes: json['recurrence']),
       type: journalTypeFromString(json['journalType']),
     );
   }

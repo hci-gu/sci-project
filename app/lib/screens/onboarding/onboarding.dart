@@ -91,7 +91,7 @@ class WatchFunctions extends ConsumerWidget {
     return Column(
       children: [
         Text('Klockfunktioner', style: AppTheme.headLine3),
-        Image.asset('assets/png/fitbit.png', width: 200),
+        Image.asset('assets/images/fitbit.png', width: 200),
         const AppFeatureWidget(
           asset: 'assets/svg/flame.svg',
           title: 'Kalorier',
@@ -131,7 +131,7 @@ class PressureReleaseFunctions extends ConsumerWidget {
     return Column(
       children: [
         Text('Trycksår & avlastning', style: AppTheme.headLine3),
-        Image.asset('assets/png/fitbit.png', width: 200),
+        Image.asset('assets/images/fitbit.png', width: 200),
         const AppFeatureWidget(
           asset: 'assets/svg/alarm.svg',
           title: 'Tryckavlastning',

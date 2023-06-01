@@ -26,7 +26,7 @@ class IntroductionScreen extends StatelessWidget {
                     _header(context),
                     AppTheme.spacer2x,
                     _actions(context),
-                    Image.asset('assets/png/ryggmarg_logo.png', width: 200),
+                    Image.asset('assets/images/ryggmarg_logo.png', width: 200),
                   ],
                 ),
               ],

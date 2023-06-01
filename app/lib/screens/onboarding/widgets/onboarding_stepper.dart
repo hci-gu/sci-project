@@ -6,10 +6,12 @@ import 'package:scimovement/widgets/button.dart';
 
 class StepIndicator extends StatelessWidget {
   final int index;
+  final int count;
 
   const StepIndicator({
     Key? key,
     this.index = 0,
+    this.count = 3,
   }) : super(key: key);
 
   @override
@@ -17,7 +19,7 @@ class StepIndicator extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(
-        onboardingStepCount,
+        count,
         (i) => Padding(
           padding: const EdgeInsets.only(left: 8),
           child: Container(
@@ -87,6 +89,7 @@ class OnboardingStepper extends ConsumerWidget {
           AppTheme.spacer,
           StepIndicator(
             index: ref.watch(onboardingStepProvider),
+            count: onboardingStepCount,
           )
         ],
       ),
