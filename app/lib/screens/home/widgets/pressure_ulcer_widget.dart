@@ -85,9 +85,12 @@ class PressureUlcerWidget extends ConsumerWidget {
                     ),
                   ),
                   AppTheme.spacerHalf,
-                  Text(
-                    display.title,
-                    style: AppTheme.labelLarge,
+                  Expanded(
+                    child: AutoSizeText(
+                      display.title,
+                      style: AppTheme.labelLarge,
+                      maxLines: 1,
+                    ),
                   ),
                 ],
               ),
@@ -117,7 +120,7 @@ class PressureUlcerWidget extends ConsumerWidget {
             bottomRight: Radius.circular(12),
           ),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        padding: const EdgeInsets.only(left: 8, top: 8, bottom: 0, right: 4),
         child: child,
       ),
     );

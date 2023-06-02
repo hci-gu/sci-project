@@ -10,6 +10,7 @@ import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/goal_widget.dart';
 import 'package:scimovement/widgets/stat_header.dart';
 import 'package:scimovement/widgets/stat_widget.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class PressureReleaseScreen extends ConsumerWidget {
   const PressureReleaseScreen({super.key});
@@ -30,7 +31,6 @@ class PressureReleaseScreen extends ConsumerWidget {
         content: Column(
           children: [
             _goalWidget(context, ref, pagination),
-            // InfoBox(title: 'a', text: 'o'),
           ],
         ));
   }
@@ -46,7 +46,7 @@ class PressureReleaseScreen extends ConsumerWidget {
                 Button(
                   width: 160,
                   onPressed: () => context.goNamed('edit-goal'),
-                  title: 'Skapa ditt mål',
+                  title: AppLocalizations.of(context)!.createYourGoal,
                 ),
               ],
             );

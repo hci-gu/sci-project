@@ -6,11 +6,10 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import 'package:scimovement/models/goals.dart';
-import 'package:scimovement/models/journal.dart';
-import 'package:scimovement/screens/journal/widgets/pain_slider.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/text_field.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class GoalScreen extends ConsumerWidget {
   final Goal? goal;
@@ -35,7 +34,7 @@ class GoalScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: AppTheme.appBar('Mål'),
+      appBar: AppTheme.appBar(AppLocalizations.of(context)!.goal),
       body: ReactiveFormBuilder(
         form: buildForm,
         builder: (context, form, _) {
@@ -49,25 +48,25 @@ class GoalScreen extends ConsumerWidget {
                 ),
               ),
               Text(
-                'Sätt ditt dagliga mål för avlastning',
+                AppLocalizations.of(context)!.goalPressureRelease,
                 textAlign: TextAlign.center,
                 style: AppTheme.headLine3,
               ),
               AppTheme.spacer2x,
               _textSection(
-                'Hur många gånger per dag?',
-                'Vi rekommenderar 6 gånger om dagen.',
+                AppLocalizations.of(context)!.goalTimePerDay,
+                AppLocalizations.of(context)!.goalTimePerDayDescription,
               ),
               AppTheme.spacer2x,
-              const StyledTextField(
+              StyledTextField(
                 formControlName: 'value',
-                placeholder: 'Välj ett nummer',
+                placeholder: AppLocalizations.of(context)!.pickANumber,
                 keyboardType: TextInputType.number,
               ),
               AppTheme.spacer2x,
               _textSection(
-                'Vilken tid på dagen vill du börja?',
-                'T.ex. en timme efter att du brukar vakna.',
+                AppLocalizations.of(context)!.goalStart,
+                AppLocalizations.of(context)!.goalStartDescription,
               ),
               AppTheme.spacer2x,
               ReactiveFormConsumer(
@@ -97,7 +96,7 @@ class GoalScreen extends ConsumerWidget {
         child: Button(
           disabled: form.valid == false,
           width: 180,
-          title: 'Spara',
+          title: AppLocalizations.of(context)!.save,
           onPressed: () async {
             if (goal != null) {
               Duration start = form.value['start'] as Duration;
