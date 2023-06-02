@@ -31,7 +31,7 @@ class GoalProgress extends StatelessWidget {
               style: AppTheme.labelLarge.copyWith(fontSize: 12),
             ),
             Text(
-              ' Av dagens mål',
+              ' ${AppLocalizations.of(context)!.ofTodaysGoal}',
               style: AppTheme.paragraphSmall.copyWith(fontSize: 10),
             ),
           ],
@@ -77,7 +77,7 @@ class PressureReleaseWidget extends ConsumerWidget {
         SizedBox(
           width: 150,
           child: Text(
-            'Skapa ett mål för tryckavlastning',
+            AppLocalizations.of(context)!.pressureReleaseCreateGoal,
             style: AppTheme.labelLarge,
             textAlign: TextAlign.center,
           ),
@@ -88,7 +88,7 @@ class PressureReleaseWidget extends ConsumerWidget {
           width: 140,
           onPressed: () {},
           size: ButtonSize.tiny,
-          title: 'Sätt igång',
+          title: AppLocalizations.of(context)!.getStarted,
         ),
       ]),
       AppTheme.widgetDecoration.copyWith(

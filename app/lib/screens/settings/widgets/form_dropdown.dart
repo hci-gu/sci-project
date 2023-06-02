@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import 'package:scimovement/theme/theme.dart';
@@ -35,7 +36,7 @@ class FormDropdown extends StatelessWidget {
               (i) => Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  AutoSizeText(
                     title,
                     style: AppTheme.labelTiny,
                   ),

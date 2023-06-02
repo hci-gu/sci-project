@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import 'package:scimovement/api/classes.dart';
@@ -39,6 +40,7 @@ class BodyPartSelect extends StatelessWidget {
                                         bodyPartType,
                                         form.value['side'] as Side,
                                       ),
+                                      size: 48,
                                     ),
                                   ),
                                   AppTheme.spacer,
@@ -50,7 +52,7 @@ class BodyPartSelect extends StatelessWidget {
                       .toList(),
                 ),
               ),
-              if (showSideDropdown()) AppTheme.spacer2x,
+              if (showSideDropdown()) AppTheme.spacer,
               if (showSideDropdown())
                 Flexible(
                   flex: 1,
@@ -63,7 +65,9 @@ class BodyPartSelect extends StatelessWidget {
                     items: Side.values
                         .map((side) => DropdownMenuItem(
                               value: side,
-                              child: Text(side.displayString(context)),
+                              child: Text(
+                                side.displayString(context),
+                              ),
                             ))
                         .toList(),
                   ),
