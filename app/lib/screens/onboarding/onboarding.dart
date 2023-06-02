@@ -18,24 +18,26 @@ class OnboardingScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      body: Stack(
-        children: [
-          ListView(
-            padding: EdgeInsets.only(
-              bottom: 100,
-              top: AppTheme.basePadding * 2,
-              left: AppTheme.basePadding * 2,
-              right: AppTheme.basePadding * 2,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            ListView(
+              padding: EdgeInsets.only(
+                bottom: 100,
+                top: AppTheme.basePadding * 2,
+                left: AppTheme.basePadding * 2,
+                right: AppTheme.basePadding * 2,
+              ),
+              children: [
+                OnboardingStep(),
+              ],
             ),
-            children: [
-              OnboardingStep(),
-            ],
-          ),
-          const Positioned(
-            bottom: 0,
-            child: OnboardingStepper(),
-          ),
-        ],
+            const Positioned(
+              bottom: 0,
+              child: OnboardingStepper(),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -80,6 +82,8 @@ class OnboardingWelcome extends StatelessWidget {
           height: 80,
         ),
         AppTheme.spacer2x,
+        Text(AppLocalizations.of(context)!.onboardingIntro,
+            style: AppTheme.paragraphMedium),
       ],
     );
   }
@@ -170,24 +174,24 @@ class PainFunctions extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       children: [
-        Text('Smärta i muskler & leder', style: AppTheme.headLine3),
+        Text(AppLocalizations.of(context)!.musclePainTitle,
+            style: AppTheme.headLine3),
         SizedBox(
           height: 200,
           child: Center(
             child: SvgPicture.asset('assets/svg/scapula.svg', height: 100),
           ),
         ),
-        const AppFeatureWidget(
+        AppFeatureWidget(
           asset: 'assets/svg/alarm.svg',
-          title: 'Logga din smärta',
-          description:
-              'Här kan du registrera vart du har smärta samt vilken nivå av smärta du har just idag.',
+          title: AppLocalizations.of(context)!.onboardingPainFeature,
+          description: AppLocalizations.of(context)!.onboardingPainDescription,
         ),
         AppTheme.spacer4x,
-        const FeatureToggle(
+        FeatureToggle(
           feature: AppFeature.pain,
-          addText: 'Jag vill ha dessa funktioner',
-          removeText: 'Inte intresserad',
+          addText: AppLocalizations.of(context)!.onboardingWantFunctions,
+          removeText: AppLocalizations.of(context)!.onboardingNotInterested,
         ),
       ],
     );

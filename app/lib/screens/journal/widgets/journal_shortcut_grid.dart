@@ -46,13 +46,13 @@ class JournalShortcutGrid extends ConsumerWidget {
   Widget _buildList(
       BuildContext context, List<JournalEntry> data, WidgetRef ref) {
     return SizedBox(
-      height: 320,
+      height: data.length > 2 ? 320 : 148,
       child: ListView(
         scrollDirection: Axis.horizontal,
         children: [
           GridView.count(
             physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: 2,
+            crossAxisCount: data.length > 2 ? 2 : 1,
             scrollDirection: Axis.horizontal,
             crossAxisSpacing: AppTheme.basePadding * 2,
             mainAxisSpacing: AppTheme.basePadding * 2,
@@ -89,6 +89,6 @@ class JournalShortcutGrid extends ConsumerWidget {
     if (entry is PressureReleaseEntry) {
       return const Icon(Icons.alarm, size: 48);
     }
-    return const Icon(Icons.abc);
+    return const Icon(Icons.album_outlined);
   }
 }
