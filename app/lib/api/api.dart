@@ -4,8 +4,8 @@ import 'package:scimovement/models/goals.dart';
 import 'package:scimovement/models/pagination.dart';
 
 // const String apiUrl = 'https://sci-api.prod.appadem.in';
-const String apiUrl = 'http://192.168.10.107:4000';
-// const String apiUrl = 'http://localhost:4000';
+// const String apiUrl = 'http://192.168.10.107:4000';
+const String apiUrl = 'http://localhost:4000';
 const emptyBody = {};
 
 class Api {

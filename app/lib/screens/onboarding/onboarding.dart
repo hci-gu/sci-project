@@ -10,6 +10,7 @@ import 'package:scimovement/screens/onboarding/widgets/onboarding_stepper.dart';
 import 'package:scimovement/screens/settings/widgets/app_settings.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/snackbar_message.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class OnboardingScreen extends ConsumerWidget {
   const OnboardingScreen({Key? key}) : super(key: key);
@@ -71,7 +72,8 @@ class OnboardingWelcome extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text('Välkommen till RullaPå!', style: AppTheme.headLine3),
+        Text(AppLocalizations.of(context)!.introductionWelcome,
+            style: AppTheme.headLine3),
         AppTheme.spacer2x,
         SvgPicture.asset(
           'assets/svg/person.svg',
@@ -90,33 +92,35 @@ class WatchFunctions extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       children: [
-        Text('Klockfunktioner', style: AppTheme.headLine3),
+        Text(AppLocalizations.of(context)!.watchFunctions,
+            style: AppTheme.headLine3),
         Image.asset('assets/images/fitbit.png', width: 200),
-        const AppFeatureWidget(
+        AppFeatureWidget(
           asset: 'assets/svg/flame.svg',
-          title: 'Kalorier',
+          title: AppLocalizations.of(context)!.calories,
           description:
-              'Här visas en uppskattning av din dagliga energiförbrukning (kalorier) du. Du kan även  jämföra med en genomsnittlig dag under senaste veckan.',
+              AppLocalizations.of(context)!.onboardingCaloriesDescription,
         ),
         AppTheme.spacer,
-        const AppFeatureWidget(
+        AppFeatureWidget(
           asset: 'assets/svg/wheelchair.svg',
-          title: 'Stillasittande',
+          title: AppLocalizations.of(context)!.sedentary,
           description:
-              'Här får du information om hur länge du sitter still sammanlagt under en dag, hur ofta du bryter upp ditt stillasittande samt hur länge du sitter still innan du är aktiv. ',
+              AppLocalizations.of(context)!.onboardingSedentaryDescription,
         ),
         AppTheme.spacer,
-        const AppFeatureWidget(
+        AppFeatureWidget(
           asset: 'assets/svg/wheelchair.svg',
-          title: 'Rörelse',
+          title: AppLocalizations.of(context)!.movement,
           description:
-              'Här visas hur länge och när du är fysiskt  aktiv, beskrivet som låg, medlel och hög intensitet',
+              AppLocalizations.of(context)!.onboardingMovementDescription,
         ),
         AppTheme.spacer4x,
-        const FeatureToggle(
+        FeatureToggle(
           feature: AppFeature.watch,
-          addText: 'Jag vill ha dessa funktioner',
-          removeText: 'Inte intresserad / Har inte en klocka',
+          addText: AppLocalizations.of(context)!.onboardingWantFunctions,
+          removeText:
+              '${AppLocalizations.of(context)!.onboardingNotInterested} / ${AppLocalizations.of(context)!.onboardingDontHaveWatch}',
         ),
       ],
     );
@@ -130,26 +134,29 @@ class PressureReleaseFunctions extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       children: [
-        Text('Trycksår & avlastning', style: AppTheme.headLine3),
+        Text(
+            AppLocalizations.of(context)!
+                .onboardingPressureReleaseAndUlcerTitle,
+            style: AppTheme.headLine3),
         Image.asset('assets/images/fitbit.png', width: 200),
-        const AppFeatureWidget(
+        AppFeatureWidget(
           asset: 'assets/svg/alarm.svg',
-          title: 'Tryckavlastning',
-          description:
-              'Här får du information om hur ofta du har tryckavlastat samt hur länge du suttit still mellan dina tryckavlastningar. Du kan även ställa in hur många gånger under dagen som du skall påminnas.',
+          title: AppLocalizations.of(context)!.pressureRelease,
+          description: AppLocalizations.of(context)!
+              .onboardingPressureReleaseDescription,
         ),
         AppTheme.spacer,
-        const AppFeatureWidget(
+        AppFeatureWidget(
           asset: 'assets/svg/wheelchair.svg',
-          title: 'Trycksår',
+          title: AppLocalizations.of(context)!.pressureUlcer,
           description:
-              'Här kan du registrera placering, grad samt fotografera utbredningen av trycksår för att kunna följa utvecklingen av ditt trycksår.',
+              AppLocalizations.of(context)!.onboaridngPressureUlcerDescription,
         ),
         AppTheme.spacer4x,
-        const FeatureToggle(
+        FeatureToggle(
           feature: AppFeature.pressureRelease,
-          addText: 'Jag vill ha dessa funktioner',
-          removeText: 'Inte intresserad',
+          addText: AppLocalizations.of(context)!.onboardingWantFunctions,
+          removeText: AppLocalizations.of(context)!.onboardingNotInterested,
         ),
       ],
     );
@@ -194,7 +201,10 @@ class PushNotifications extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       children: [
-        Text('Pushnotiser', style: AppTheme.headLine3),
+        Text(
+          AppLocalizations.of(context)!.pushNotifications,
+          style: AppTheme.headLine3,
+        ),
         const SizedBox(
           height: 200,
           child: Center(
@@ -202,13 +212,16 @@ class PushNotifications extends ConsumerWidget {
           ),
         ),
         Text(
-          'För att kunna få påminnelser eller rekommendationer genom pushnotiser så behöver du ge ditt godkännande att appen ska få skicka pushnotiser till dig.',
+          AppLocalizations.of(context)!.onboardingPushDescription,
           style: AppTheme.paragraphMedium,
         ),
         AppTheme.spacer2x,
         Row(
           children: [
-            Text('Aktivera pushnotiser', style: AppTheme.labelLarge),
+            Text(
+              AppLocalizations.of(context)!.onboardingActivatePush,
+              style: AppTheme.labelLarge,
+            ),
             AppTheme.spacer2x,
             CupertinoSwitch(
               thumbColor: AppTheme.colors.white,
@@ -231,7 +244,7 @@ class PushNotifications extends ConsumerWidget {
         ),
         AppTheme.spacer2x,
         Text(
-          'Du kan när som helst ändra dina inställningar i appen.',
+          AppLocalizations.of(context)!.onboardingSettingsInfo,
           style: AppTheme.paragraphMedium,
         ),
         if (ref.watch(notificationsEnabledProvider))
@@ -244,8 +257,7 @@ class PushNotifications extends ConsumerWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackbarMessage(
         context: context,
-        message:
-            'Du måste slå på notifikationer i telefonens appinställningar.',
+        message: AppLocalizations.of(context)!.pushPermissionsErrorMessage,
         type: SnackbarType.error,
       ),
     );
@@ -303,41 +315,48 @@ class FeatureToggle extends ConsumerWidget {
     bool hasFeature = features.contains(feature);
     Selected selection = hasFeature ? Selected.yes : Selected.no;
 
+    didChange(bool remove) {
+      if (!hasFeature && !remove) {
+        ref.read(appFeaturesProvider.notifier).state = [...features, feature];
+      }
+      if (hasFeature && remove) {
+        ref.read(appFeaturesProvider.notifier).state =
+            features.whereNot((e) => e == feature).toList();
+      }
+    }
+
     return Column(
       children: [
-        Row(
-          children: [
-            Radio(
-              value: Selected.yes,
-              groupValue: selection,
-              onChanged: (_) {
-                if (!hasFeature) {
-                  ref.read(appFeaturesProvider.notifier).state = [
-                    ...features,
-                    feature
-                  ];
-                }
-              },
-            ),
-            AppTheme.spacer,
-            Text(addText, style: AppTheme.paragraphMedium),
-          ],
+        GestureDetector(
+          onTap: () => didChange(false),
+          behavior: HitTestBehavior.opaque,
+          child: Row(
+            children: [
+              Radio(
+                value: Selected.yes,
+                groupValue: selection,
+                onChanged: (_) => didChange(false),
+              ),
+              AppTheme.spacer,
+              Text(addText, style: AppTheme.paragraphMedium),
+            ],
+          ),
         ),
-        Row(
-          children: [
-            Radio(
-              value: Selected.no,
-              groupValue: selection,
-              onChanged: (_) {
-                if (hasFeature) {
-                  ref.read(appFeaturesProvider.notifier).state =
-                      features.whereNot((e) => e == feature).toList();
-                }
-              },
-            ),
-            AppTheme.spacer,
-            Text(removeText, style: AppTheme.paragraphMedium),
-          ],
+        AppTheme.spacer,
+        GestureDetector(
+          onTap: () => didChange(true),
+          behavior: HitTestBehavior.opaque,
+          child: Row(
+            children: [
+              Radio(
+                value: Selected.no,
+                groupValue: selection,
+                onChanged: (_) => didChange(true),
+              ),
+              AppTheme.spacer,
+              Text(removeText, style: AppTheme.paragraphMedium),
+            ],
+          ),
         ),
       ],
     );

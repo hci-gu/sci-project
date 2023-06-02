@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/theme/theme.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class PressureReleaseExerciseSelect extends HookWidget {
   final FormGroup form;
@@ -24,9 +25,13 @@ class PressureReleaseExerciseSelect extends HookWidget {
       builder: ((context, formGroup, child) => Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Välj övningar', style: AppTheme.labelLarge),
               Text(
-                'Tänk på att fullständing tryckavlastning ger bäst resultat.',
+                AppLocalizations.of(context)!.pressureReleaseSelectExercises,
+                style: AppTheme.labelLarge,
+              ),
+              Text(
+                AppLocalizations.of(context)!
+                    .pressureReleaseSelectExercisesDescription,
                 style: AppTheme.paragraphMedium,
               ),
               AppTheme.spacer2x,

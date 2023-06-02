@@ -7,6 +7,7 @@ import 'package:scimovement/screens/onboarding/widgets/onboarding_stepper.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/progress_indicator_around.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class PerformPressureReleaseScreen extends HookWidget {
   final List<PressureReleaseExercise> exercises;
@@ -28,7 +29,7 @@ class PerformPressureReleaseScreen extends HookWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tryckavlastning'),
+        title: Text(AppLocalizations.of(context)!.pressureRelease),
       ),
       body: ListView(
         padding: AppTheme.screenPadding,
@@ -63,10 +64,10 @@ class PerformPressureReleaseScreen extends HookWidget {
                   isPaused.value = !isPaused.value;
                 },
                 title: isDone
-                    ? 'Tillbaka'
+                    ? AppLocalizations.of(context)!.back
                     : isPaused.value
-                        ? 'Starta'
-                        : 'Pausa',
+                        ? AppLocalizations.of(context)!.start
+                        : AppLocalizations.of(context)!.pause,
               ),
             ],
           ),
@@ -83,7 +84,10 @@ class PerformPressureReleaseScreen extends HookWidget {
           color: AppTheme.colors.success,
           size: 100,
         ),
-        Text('Bra jobbat!', style: AppTheme.headLine1),
+        Text(
+          AppLocalizations.of(context)!.goodWork,
+          style: AppTheme.headLine1,
+        ),
       ],
     );
   }
@@ -134,13 +138,13 @@ class PressureReleaseExerciseWidget extends HookWidget {
           height: 225,
         ),
         Text(
-          'Tänk på att du luta dig tillräckligt mycket åt sidan för att släppa trycket helt.',
+          'PLACEHOLDER: text för den här övningen',
           style: AppTheme.paragraphMedium,
           textAlign: TextAlign.center,
         ),
         AppTheme.spacer4x,
         Text(
-          'Håll positionen i',
+          AppLocalizations.of(context)!.holdPositionFor,
           style: AppTheme.headLine3,
           textAlign: TextAlign.center,
         ),
@@ -157,7 +161,7 @@ class PressureReleaseExerciseWidget extends HookWidget {
         ),
         AppTheme.spacer,
         Text(
-          'sekunder',
+          AppLocalizations.of(context)!.seconds,
           style: AppTheme.headLine3,
           textAlign: TextAlign.center,
         ),

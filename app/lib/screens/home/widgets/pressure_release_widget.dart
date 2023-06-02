@@ -13,6 +13,7 @@ import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/progress_indicator_around.dart';
 import 'package:scimovement/widgets/stat_widget.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class GoalProgress extends StatelessWidget {
   final Goal goal;
@@ -117,7 +118,10 @@ class PressureReleaseWidget extends ConsumerWidget {
                         children: [
                           SvgPicture.asset(asset, height: 18),
                           AppTheme.spacerHalf,
-                          Text('Tryckavlastning', style: AppTheme.labelTiny),
+                          Text(
+                            AppLocalizations.of(context)!.pressureRelease,
+                            style: AppTheme.labelTiny,
+                          ),
                         ],
                       ),
                       RebuildOnTimer(

@@ -49,8 +49,6 @@ class JournalListScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ScrollController scrollController = useScrollController();
-
     useEffect(() {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ref.read(journalTypeFilterProvider.notifier).state = type;
@@ -58,20 +56,9 @@ class JournalListScreen extends HookConsumerWidget {
       return () => {};
     }, [type]);
 
-    // useEffect(() {
-    //   scrollController.addListener(() {
-    //     if (scrollController.position.pixels ==
-    //         scrollController.position.maxScrollExtent) {
-    //       // ref.read(filteredJournalProvider.notifier).fetchNextPage();
-    //     }
-    //   });
-
-    //   return () => scrollController.removeListener();
-    // }, []);
-
     return Scaffold(
       appBar: AppBar(
-        title: Text('Loggbok'),
+        title: Text(AppLocalizations.of(context)!.logbook),
         actions: [
           _typeFilter(context, ref),
         ],
@@ -97,8 +84,10 @@ class JournalListScreen extends HookConsumerWidget {
   }
 
   Widget _emptyState(BuildContext context) {
-    return const Center(
-      child: Text('Du har ingen data för den här perioden'),
+    return Center(
+      child: Text(
+        AppLocalizations.of(context)!.journalNoData,
+      ),
     );
   }
 

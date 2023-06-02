@@ -7,6 +7,7 @@ import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/screens/journal/widgets/body_part_icon.dart';
 import 'package:scimovement/screens/journal/widgets/entry_shortcut.dart';
 import 'package:scimovement/theme/theme.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class JournalShortcutGrid extends ConsumerWidget {
@@ -29,7 +30,10 @@ class JournalShortcutGrid extends ConsumerWidget {
   Widget _emptyState(BuildContext context) {
     return Column(
       children: [
-        Text('Välkommen till loggboken!', style: AppTheme.labelLarge),
+        Text(
+          AppLocalizations.of(context)!.journalWelcome,
+          style: AppTheme.labelLarge,
+        ),
         AppTheme.spacer,
         Text(
           '',
