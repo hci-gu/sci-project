@@ -15,7 +15,10 @@ export const getNextReminder = (goal: Goal, journal: Journal[]) => {
   const tz: string = 'Europe/Stockholm'
 
   if (journal.length === 0) {
-    return moment.tz(goal.start, 'HH:mm', tz).toDate()
+    return moment
+      .tz(goal.start, 'HH:mm', tz)
+      .add(getGoalReccurence(goal), 'minutes')
+      .toDate()
   }
 
   const lastEntry = moment.tz(journal[journal.length - 1].t, tz)

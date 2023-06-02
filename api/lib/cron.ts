@@ -77,16 +77,30 @@ const checkForDataAndSendMessage = async (user: User) => {
 const fetchGoalsAndCheckReminders = async (user: User) => {
   const goals = await GoalModel.find({ userId: user.id })
 
+  const userHasData = await AccelCount.hasData(user.id)
+
   for (const goal of goals) {
     const goalInfo = await getGoalInfo(user.id, goal)
 
     if (goalInfo.reminder && moment(goalInfo.reminder).isBefore(moment())) {
+      if (userHasData) {
+        const activity = await activityForPeriod({
+          from: moment().subtract(10, 'minutes').toDate(),
+          to: new Date(),
+          id: user.id,
+        })
+        if (activity.minutesInactive <= 5) {
+          // user has been active in the last 5 minutes, no need to send a reminder
+          continue
+        }
+      }
+
       const cacheKey = cacheKeyForType(MessageType.Goal, user)
       const notification = await redis.get(cacheKey)
       if (!notification) {
         const message = {
-          title: 'Påminnelse',
-          body: `Det är dags att Avlasta!`,
+          title: 'Påminnelse att tryckavlasta',
+          body: `Nu är det dags att tryckavlasta!`,
         }
         await redis.set(cacheKey, message, 60 * 45)
         push.send({
