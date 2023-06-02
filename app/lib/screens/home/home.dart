@@ -3,11 +3,9 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:scimovement/models/app_features.dart';
-import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/screens/home/widgets/energy_widget.dart';
 import 'package:scimovement/screens/home/widgets/exercise_widget.dart';
-import 'package:scimovement/screens/home/widgets/no_data_message.dart';
 import 'package:scimovement/screens/home/widgets/pressure_release_widget.dart';
 import 'package:scimovement/screens/home/widgets/sedentary_widget.dart';
 import 'package:scimovement/theme/theme.dart';
@@ -20,7 +18,7 @@ class HomeScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    bool showDataWidgets = ref.watch(userHasDataProvider);
+    // bool showDataWidgets = ref.watch(userHasDataProvider);
     List<AppFeature> features = ref.watch(appFeaturesProvider);
 
     return SmartRefresher(

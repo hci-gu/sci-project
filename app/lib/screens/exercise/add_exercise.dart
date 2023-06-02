@@ -32,8 +32,9 @@ class AddExcercise extends HookConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Text(
-              '${AppLocalizations.of(context)!.register} ${AppLocalizations.of(context)!.workout.toLowerCase()}',
-              style: AppTheme.headLine3),
+            '${AppLocalizations.of(context)!.register} ${AppLocalizations.of(context)!.workout.toLowerCase()}',
+            style: AppTheme.headLine3,
+          ),
           AppTheme.spacer2x,
           ActivitySelect(
             value: activity.value,
@@ -86,10 +87,9 @@ class AddExcercise extends HookConsumerWidget {
                   duration.value.inMinutes,
                   activity.value!,
                 );
-
-                ref.refresh(boutsProvider(const Pagination()));
-                ref.refresh(energyProvider(const Pagination()));
-                ref.refresh(excerciseBoutsProvider(const Pagination()));
+                ref.invalidate(boutsProvider(const Pagination()));
+                ref.invalidate(energyProvider(const Pagination()));
+                ref.invalidate(excerciseBoutsProvider(const Pagination()));
                 callback();
               },
               title: AppLocalizations.of(context)!.add,
@@ -124,8 +124,12 @@ class ActivitySelect extends StatelessWidget {
           isDense: true,
           items: Activity.values
               .where((e) => e.isExercise)
-              .map((e) => DropdownMenuItem(
-                  child: Text(e.displayString(context)), value: e))
+              .map(
+                (e) => DropdownMenuItem(
+                  value: e,
+                  child: Text(e.displayString(context)),
+                ),
+              )
               .toList(),
           onChanged: (value) => onChanged(value),
           style: AppTheme.labelLarge.copyWith(color: AppTheme.colors.white),
