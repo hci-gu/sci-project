@@ -1,10 +1,7 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
-import 'package:scimovement/models/locale.dart';
 
 enum ChartMode {
   day,
@@ -131,7 +128,6 @@ final subtitleDateDisplayProvider =
 
 final previousDateDisplayProvider =
     Provider.family<String, BuildContext>((ref, context) {
-  Locale? locale = ref.watch(localeProvider);
   Pagination pagination = ref.watch(paginationProvider);
   DateTime date = ref
       .watch(dateProvider)
