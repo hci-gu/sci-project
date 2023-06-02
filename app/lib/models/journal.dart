@@ -93,13 +93,13 @@ class JournalState extends StateNotifier<DateTime> {
         };
         break;
       case JournalType.pressureUlcer:
-        BodyPart bodyPart = BodyPart(
-            values['bodyPartType'] as BodyPartType, values['side'] as Side?);
+        PressureUlcerLocation location =
+            values['location'] as PressureUlcerLocation;
         PressureUlcerType pressureUlcerType =
             values['pressureUlcerType'] as PressureUlcerType;
         info = {
           'pressureUlcerType': pressureUlcerType.name,
-          'bodyPart': bodyPart.toString(),
+          'location': location.name,
         };
         break;
       default:

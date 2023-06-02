@@ -691,11 +691,67 @@ extension PressureUlcerTypeExtension on PressureUlcerType {
 
 enum PressureUlcerLocation {
   other,
+  ancle,
+  heel,
+  insideKnee,
+  hip,
+  sacrum,
+  sitBones,
+  scapula,
+  shoulder,
+}
+
+extension PressureUlcerLocationExtensions on PressureUlcerLocation {
+  String displayString(BuildContext context) {
+    switch (this) {
+      case PressureUlcerLocation.ancle:
+        return AppLocalizations.of(context)!.ancle;
+      case PressureUlcerLocation.heel:
+        return AppLocalizations.of(context)!.heel;
+      case PressureUlcerLocation.insideKnee:
+        return AppLocalizations.of(context)!.insideKnee;
+      case PressureUlcerLocation.hip:
+        return AppLocalizations.of(context)!.hip;
+      case PressureUlcerLocation.sacrum:
+        return AppLocalizations.of(context)!.sacrum;
+      case PressureUlcerLocation.sitBones:
+        return AppLocalizations.of(context)!.sitBones;
+      case PressureUlcerLocation.scapula:
+        return AppLocalizations.of(context)!.scapula;
+      case PressureUlcerLocation.shoulder:
+        return AppLocalizations.of(context)!.shoulder;
+      default:
+        return AppLocalizations.of(context)!.other;
+    }
+  }
+}
+
+PressureUlcerLocation pressureUlcerLocationFromString(String location) {
+  switch (location) {
+    case 'ancle':
+      return PressureUlcerLocation.ancle;
+    case 'heel':
+      return PressureUlcerLocation.heel;
+    case 'insideKnee':
+      return PressureUlcerLocation.insideKnee;
+    case 'hip':
+      return PressureUlcerLocation.hip;
+    case 'sacrum':
+      return PressureUlcerLocation.sacrum;
+    case 'sitBones':
+      return PressureUlcerLocation.sitBones;
+    case 'scapula':
+      return PressureUlcerLocation.scapula;
+    case 'shoulder':
+      return PressureUlcerLocation.shoulder;
+    default:
+      return PressureUlcerLocation.other;
+  }
 }
 
 class PressureUlcerEntry extends JournalEntry {
   final PressureUlcerType pressureUlcerType;
-  final BodyPart bodyPart;
+  final PressureUlcerLocation location;
 
   PressureUlcerEntry({
     required super.id,
@@ -703,7 +759,7 @@ class PressureUlcerEntry extends JournalEntry {
     required super.type,
     required super.comment,
     required this.pressureUlcerType,
-    required this.bodyPart,
+    required this.location,
   });
 
   factory PressureUlcerEntry.fromJson(Map<String, dynamic> json) {
@@ -716,7 +772,7 @@ class PressureUlcerEntry extends JournalEntry {
       pressureUlcerType: PressureUlcerType.values.firstWhere(
           (e) => e.name == info['pressureUlcerType'],
           orElse: () => PressureUlcerType.category1),
-      bodyPart: BodyPart.fromString(info['bodyPart']),
+      location: pressureUlcerLocationFromString(info['location']),
     );
   }
 
@@ -726,7 +782,7 @@ class PressureUlcerEntry extends JournalEntry {
       ...super.toJson(),
       'info': {
         'pressureUlcerType': pressureUlcerType.name,
-        'bodyPart': bodyPart.toString(),
+        'location': location.name,
       }
     };
   }
@@ -739,8 +795,7 @@ class PressureUlcerEntry extends JournalEntry {
       time: values['time'] as DateTime,
       comment: values['comment'] as String,
       pressureUlcerType: values['pressureUlcerType'] as PressureUlcerType,
-      bodyPart: BodyPart(
-          values['bodyPartType'] as BodyPartType, values['side'] as Side?),
+      location: values['location'] as PressureUlcerLocation,
     );
   }
 
@@ -751,11 +806,11 @@ class PressureUlcerEntry extends JournalEntry {
 
   @override
   String shortcutTitle(BuildContext context) {
-    return '${AppLocalizations.of(context)!.pressureUlcer} \n${bodyPart.displayString(context)}';
+    return '${AppLocalizations.of(context)!.pressureUlcer} \n${location.displayString(context)}';
   }
 
   @override
   String get identifier {
-    return 'pressureUlcer ${bodyPart.toString()}';
+    return 'pressureUlcer ${location.name}';
   }
 }

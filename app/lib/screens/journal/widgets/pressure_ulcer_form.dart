@@ -1,7 +1,8 @@
+import 'package:easy_image_viewer/easy_image_viewer.dart';
 import 'package:flutter/material.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import 'package:scimovement/api/classes.dart';
-import 'package:scimovement/screens/journal/widgets/body_part_select.dart';
+import 'package:scimovement/screens/settings/widgets/form_dropdown.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -47,7 +48,8 @@ class PressureUlcerForm extends StatelessWidget {
             style: AppTheme.paragraphMedium,
           ),
         if (entry == null || !shouldCreateEntry) AppTheme.spacer2x,
-        if (entry == null || !shouldCreateEntry) BodyPartSelect(form: form),
+        if (entry == null || !shouldCreateEntry)
+          PressureUlcerLocationSelect(form: form),
         AppTheme.spacer2x,
       ],
     );
@@ -60,15 +62,58 @@ class PressureUlcerForm extends StatelessWidget {
         value:
             !shouldCreateEntry ? pressureUlcerEntry?.pressureUlcerType : null,
       ),
-      'bodyPartType': FormControl<BodyPartType>(
-        value: pressureUlcerEntry?.bodyPart.type,
-        validators: [Validators.required],
-      ),
-      'side': FormControl<Side>(
-        value: pressureUlcerEntry?.bodyPart.side ?? Side.right,
+      'location': FormControl<PressureUlcerLocation>(
+        value: pressureUlcerEntry?.location,
         validators: [Validators.required],
       ),
     };
+  }
+}
+
+class PressureUlcerLocationSelect extends StatelessWidget {
+  final FormGroup form;
+
+  const PressureUlcerLocationSelect({
+    super.key,
+    required this.form,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        GestureDetector(
+          onTap: () {
+            showImageViewer(
+              context,
+              Image.asset('assets/images/pressure_ulcer_map.png').image,
+            );
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Image.asset('assets/images/pressure_ulcer_map.png'),
+          ),
+        ),
+        AppTheme.spacer,
+        FormDropdown(
+          formKey: 'location',
+          title: 'Plats',
+          form: form,
+          hint: AppLocalizations.of(context)!.pressureUlcerLocationHint,
+          items: PressureUlcerLocation.values
+              .map((location) => DropdownMenuItem(
+                    value: location,
+                    child: Text(
+                      location.displayString(context),
+                    ),
+                  ))
+              .toList(),
+        ),
+      ],
+    );
   }
 }
 
@@ -96,7 +141,7 @@ class PressureUlcerTypeSelect extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: DropdownButton(
-              isDense: true,
+              isDense: false,
               itemHeight: null,
               isExpanded: true,
               hint: Text(
@@ -120,6 +165,12 @@ class PressureUlcerTypeSelect extends StatelessWidget {
                   Icon(Icons.keyboard_arrow_down, color: AppTheme.colors.black),
               underline: Container(),
               selectedItemBuilder: (context) => PressureUlcerType.values
+                  .where((e) {
+                    if (!showNone) {
+                      return e != PressureUlcerType.none;
+                    }
+                    return true;
+                  })
                   .map((e) => _dropdownItem(context, e, true))
                   .toList(),
             ),
@@ -141,14 +192,12 @@ class PressureUlcerTypeSelect extends StatelessWidget {
 
 class PressureUlcerItem extends StatelessWidget {
   final PressureUlcerType type;
-  final BodyPart? bodyPart;
   final bool showDescription;
 
   const PressureUlcerItem({
     super.key,
     required this.type,
     this.showDescription = false,
-    this.bodyPart,
   });
 
   @override

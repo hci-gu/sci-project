@@ -33,7 +33,6 @@ class PressureReleaseForm extends StatelessWidget {
           onPressed: () {
             List<PressureReleaseExercise> exercises =
                 form.control('exercises').value;
-
             if (!exercises.contains(PressureReleaseExercise.lying)) {
               context.goNamed('perform-pressure-release', extra: {
                 'exercises': exercises,

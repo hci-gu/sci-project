@@ -137,7 +137,7 @@ class PressureUlcerWidget extends ConsumerWidget {
       clipBehavior: Clip.hardEdge,
       builder: (context) => Padding(
         padding: AppTheme.elementPadding,
-        child: Column(
+        child: ListView(
           children: [
             Text(
               AppLocalizations.of(context)!.pressureUlcerChangeStatus,
@@ -160,6 +160,7 @@ class PressureUlcerWidget extends ConsumerWidget {
             ),
             AppTheme.separator,
             _seeAllRow(context),
+            AppTheme.spacer2x,
           ],
         ),
       ),
@@ -237,7 +238,7 @@ class PressureUlcerModalItem extends StatelessWidget {
                         AppTheme.spacer,
                         Expanded(
                           child: AutoSizeText(
-                            '${entry.pressureUlcerType.displayString(context)} - ${entry.bodyPart.displayString(context)}',
+                            '${entry.pressureUlcerType.displayString(context)} - ${entry.location.displayString(context)}',
                             style: AppTheme.labelLarge,
                             maxLines: 2,
                           ),
