@@ -6,6 +6,7 @@ import 'package:scimovement/models/journal.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:go_router/go_router.dart';
 import 'package:scimovement/widgets/button.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class PressureUlcerDisplay {
@@ -135,7 +136,10 @@ class PressureUlcerWidget extends ConsumerWidget {
         padding: AppTheme.elementPadding,
         child: Column(
           children: [
-            Text('Ändra status på trycksår', style: AppTheme.labelLarge),
+            Text(
+              AppLocalizations.of(context)!.pressureUlcerChangeStatus,
+              style: AppTheme.labelLarge,
+            ),
             AppTheme.separator,
             ...pressureUlcers
                 .map((e) => PressureUlcerModalItem(entry: e))
@@ -148,7 +152,7 @@ class PressureUlcerWidget extends ConsumerWidget {
                   'type': JournalType.pressureUlcer,
                 });
               },
-              title: 'Lägg till trycksår',
+              title: AppLocalizations.of(context)!.pressuerUlcerAdd,
               width: 200,
             ),
             AppTheme.separator,
@@ -173,7 +177,10 @@ class PressureUlcerWidget extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Se trycksårshistorik', style: AppTheme.labelLarge),
+              Text(
+                AppLocalizations.of(context)!.pressuerUlcerViewHistory,
+                style: AppTheme.labelLarge,
+              ),
               const Icon(Icons.arrow_forward_ios),
             ],
           ),
@@ -251,7 +258,7 @@ class PressureUlcerModalItem extends StatelessWidget {
                     },
                   );
                 },
-                title: 'ändra',
+                title: AppLocalizations.of(context)!.change,
                 width: 64,
                 size: ButtonSize.tiny,
               )

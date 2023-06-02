@@ -54,7 +54,7 @@ class EditJournalEntryScreen extends ConsumerWidget {
     if (type != null) {
       return type!.displayString(context);
     }
-    return 'Ny loggning';
+    return AppLocalizations.of(context)!.newEntry;
   }
 
   @override
@@ -67,7 +67,10 @@ class EditJournalEntryScreen extends ConsumerWidget {
           return ListView(
             padding: AppTheme.screenPadding,
             children: [
-              Text('Dag och tid', style: AppTheme.labelLarge),
+              Text(
+                AppLocalizations.of(context)!.dateAndTime,
+                style: AppTheme.labelLarge,
+              ),
               AppTheme.spacer,
               const DateTimeButton(formKey: 'time'),
               AppTheme.spacer2x,
