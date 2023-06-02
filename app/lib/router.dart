@@ -27,7 +27,7 @@ import 'package:scimovement/screens/register.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 List<String> detailRoutes = ['calories', 'activity', 'sedentary'];
-String landingRoute = '/';
+String landingRoute = '/journal/type';
 
 class RouteChangeObserver extends NavigatorObserver {
   final Ref _ref;
@@ -236,7 +236,14 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
                   GoRoute(
                     path: 'perform-pressure-release',
                     name: 'perform-pressure-release',
-                    builder: (_, __) => const PerformPressureReleaseScreen(),
+                    builder: (_, state) => PerformPressureReleaseScreen(
+                      exercises: (state.extra as Map?)?['exercises'] ??
+                          [
+                            PressureReleaseExercise.forwards,
+                            PressureReleaseExercise.rightSide,
+                            PressureReleaseExercise.leftSide,
+                          ],
+                    ),
                   ),
                 ],
               )

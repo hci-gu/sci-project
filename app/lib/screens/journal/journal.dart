@@ -19,13 +19,13 @@ class JournalScreen extends ConsumerWidget {
       padding: EdgeInsets.symmetric(vertical: AppTheme.basePadding * 3),
       children: [
         _header(context),
+        Padding(padding: hPadding, child: AppTheme.separator),
+        const JournalShortcutGrid(),
         Padding(
           padding: hPadding,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              AppTheme.separator,
-              const JournalShortcutGrid(),
               AppTheme.spacer2x,
               _addItem(context),
               AppTheme.separator,
@@ -42,7 +42,7 @@ class JournalScreen extends ConsumerWidget {
     return Button(
       width: 200,
       icon: Icons.add,
-      title: 'Ny loggning',
+      title: AppLocalizations.of(context)!.newEntry,
       onPressed: () => GoRouter.of(context).goNamed('select-journal-type'),
     );
   }
@@ -56,11 +56,11 @@ class JournalScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Loggbok',
+              AppLocalizations.of(context)!.logbook,
               style: AppTheme.headLine2,
             ),
             Text(
-              'Tryck på en knapp nedan för att skapa nytt inlägg inom samma kategori.',
+              AppLocalizations.of(context)!.journalShortcutDescription,
               style: AppTheme.paragraphMedium,
             ),
           ],

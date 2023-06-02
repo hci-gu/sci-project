@@ -3,6 +3,7 @@ import 'package:reactive_forms/reactive_forms.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/screens/journal/widgets/body_part_select.dart';
 import 'package:scimovement/theme/theme.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class PressureUlcerForm extends StatelessWidget {
   final FormGroup form;
@@ -22,11 +23,11 @@ class PressureUlcerForm extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Trycksårsklassificering',
+          AppLocalizations.of(context)!.pressureUlcerClassification,
           style: AppTheme.labelLarge,
         ),
         Text(
-          'Välj den nivå av skada som ditt trycksår har nu.',
+          AppLocalizations.of(context)!.pressureUlcerClassificationDescription,
           style: AppTheme.paragraphMedium,
         ),
         AppTheme.spacer2x,
@@ -37,12 +38,12 @@ class PressureUlcerForm extends StatelessWidget {
         AppTheme.spacer2x,
         if (entry == null || !shouldCreateEntry)
           Text(
-            'Var är ditt sår någonstans?',
+            AppLocalizations.of(context)!.pressureUlcerLocation,
             style: AppTheme.labelLarge,
           ),
         if (entry == null || !shouldCreateEntry)
           Text(
-            'Välj den plats på kroppen där ditt trycksår finns.',
+            AppLocalizations.of(context)!.pressureUlcerLocationDescription,
             style: AppTheme.paragraphMedium,
           ),
         if (entry == null || !shouldCreateEntry) AppTheme.spacer2x,
@@ -85,7 +86,7 @@ class PressureUlcerTypeSelect extends StatelessWidget {
   Widget build(BuildContext context) {
     return ReactiveFormConsumer(
       builder: (BuildContext context, form, _) => SizedBox(
-        width: 200,
+        width: 280,
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: Colors.white,
@@ -99,7 +100,7 @@ class PressureUlcerTypeSelect extends StatelessWidget {
               itemHeight: null,
               isExpanded: true,
               hint: Text(
-                'Välj skadenivå',
+                AppLocalizations.of(context)!.selectInjuryLevel,
                 style: AppTheme.paragraphMedium,
               ),
               items: PressureUlcerType.values

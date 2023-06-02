@@ -84,6 +84,13 @@ class EditJournalEntryScreen extends ConsumerWidget {
               ),
               AppTheme.spacer2x,
               _submitButton(ref),
+              if (type == JournalType.pressureRelease ||
+                  (entry != null && entry!.type == JournalType.pressureRelease))
+                PressureReleaseForm.actions(
+                  context,
+                  form,
+                  () => _onSave(context, ref, form, false),
+                ),
             ],
           );
         },
@@ -109,31 +116,36 @@ class EditJournalEntryScreen extends ConsumerWidget {
     return Container();
   }
 
+  Future _onSave(BuildContext context, WidgetRef ref, FormGroup form,
+      [bool shouldPop = true]) async {
+    if (shouldCreateEntry) {
+      await ref
+          .read(updateJournalProvider.notifier)
+          .createJournalEntry(entry?.type ?? type!, form.value);
+    } else {
+      await ref
+          .read(updateJournalProvider.notifier)
+          .updateJournalEntry(entry!, form.value);
+    }
+    form.reset();
+    if (context.mounted && shouldPop) {
+      while (context.canPop()) {
+        context.pop();
+      }
+    }
+  }
+
   Widget _submitButton(WidgetRef ref) {
     return ReactiveFormConsumer(
-      builder: ((context, form, child) => Button(
-            width: 160,
-            disabled: !form.valid,
-            onPressed: () async {
-              if (shouldCreateEntry) {
-                await ref
-                    .read(updateJournalProvider.notifier)
-                    .createJournalEntry(entry?.type ?? type!, form.value);
-              } else {
-                await ref
-                    .read(updateJournalProvider.notifier)
-                    .updateJournalEntry(entry!, form.value);
-              }
-              form.reset();
-              if (context.mounted) {
-                while (context.canPop()) {
-                  context.pop();
-                }
-              }
-            },
-            title: shouldCreateEntry
-                ? AppLocalizations.of(context)!.save
-                : AppLocalizations.of(context)!.update,
+      builder: ((context, form, child) => Center(
+            child: Button(
+              width: 160,
+              disabled: !form.valid,
+              onPressed: () => _onSave(context, ref, form),
+              title: shouldCreateEntry
+                  ? AppLocalizations.of(context)!.save
+                  : AppLocalizations.of(context)!.update,
+            ),
           )),
     );
   }

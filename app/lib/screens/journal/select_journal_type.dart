@@ -4,6 +4,7 @@ import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/screens/journal/widgets/body_part_icon.dart';
 import 'package:scimovement/screens/journal/widgets/entry_shortcut.dart';
 import 'package:scimovement/theme/theme.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SelectJournalTypeScreen extends StatelessWidget {
   // const SelectJournalTypeScreen({super.key});
@@ -11,7 +12,7 @@ class SelectJournalTypeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppTheme.appBar('Ny loggning'),
+      appBar: AppTheme.appBar(AppLocalizations.of(context)!.newEntry),
       body: ListView(
         padding: EdgeInsets.symmetric(
           horizontal: AppTheme.basePadding * 3,
@@ -19,11 +20,11 @@ class SelectJournalTypeScreen extends StatelessWidget {
         ),
         children: [
           Text(
-            'Vad vill du registrera?',
+            AppLocalizations.of(context)!.journalCategoriesTitle,
             style: AppTheme.headLine3,
           ),
           Text(
-            'Välj en utav de kategorier du ser nedanför',
+            AppLocalizations.of(context)!.journalCategoriesDescription,
             style: AppTheme.paragraphMedium,
           ),
           AppTheme.spacer2x,
@@ -43,7 +44,7 @@ class SelectJournalTypeScreen extends StatelessWidget {
                   bodyPart: BodyPart(BodyPartType.scapula, null),
                   size: 48,
                 ),
-                title: 'Smärta i muskler och leder',
+                title: AppLocalizations.of(context)!.musclePainTitle,
               ),
               JournalEntryShortcut(
                 onTap: () =>
@@ -54,7 +55,7 @@ class SelectJournalTypeScreen extends StatelessWidget {
                   Icons.access_alarm,
                   size: 48,
                 ),
-                title: 'Tryckavlastning',
+                title: AppLocalizations.of(context)!.pressureRelease,
               ),
               JournalEntryShortcut(
                 onTap: () =>
@@ -65,7 +66,7 @@ class SelectJournalTypeScreen extends StatelessWidget {
                   Icons.album_outlined,
                   size: 48,
                 ),
-                title: 'Trycksår',
+                title: AppLocalizations.of(context)!.pressureUlcer,
               ),
             ],
           )

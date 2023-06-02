@@ -155,7 +155,7 @@ class PressureUlcerWidget extends ConsumerWidget {
                   'type': JournalType.pressureUlcer,
                 });
               },
-              title: AppLocalizations.of(context)!.pressuerUlcerAdd,
+              title: AppLocalizations.of(context)!.pressureUlcerAdd,
               width: 200,
             ),
             AppTheme.separator,
@@ -181,7 +181,7 @@ class PressureUlcerWidget extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                AppLocalizations.of(context)!.pressuerUlcerViewHistory,
+                AppLocalizations.of(context)!.pressureUlcerViewHistory,
                 style: AppTheme.labelLarge,
               ),
               const Icon(Icons.arrow_forward_ios),
@@ -235,9 +235,12 @@ class PressureUlcerModalItem extends StatelessWidget {
                           ),
                         ),
                         AppTheme.spacer,
-                        Text(
-                          '${entry.pressureUlcerType.displayString(context)} - ${entry.bodyPart.displayString(context)}',
-                          style: AppTheme.labelLarge,
+                        Expanded(
+                          child: AutoSizeText(
+                            '${entry.pressureUlcerType.displayString(context)} - ${entry.bodyPart.displayString(context)}',
+                            style: AppTheme.labelLarge,
+                            maxLines: 2,
+                          ),
                         ),
                       ],
                     ),

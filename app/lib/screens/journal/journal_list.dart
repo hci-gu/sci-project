@@ -7,8 +7,10 @@ import 'package:intl/intl.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/models/journal.dart';
 import 'package:scimovement/models/pagination.dart';
+import 'package:scimovement/screens/journal/widgets/body_part_icon.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:scimovement/widgets/confirm_dialog.dart';
 import 'package:timelines/timelines.dart';
 
 class JournalEvent {
@@ -49,6 +51,8 @@ class JournalListScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ValueNotifier<bool> editMode = useState(false);
+
     useEffect(() {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ref.read(journalTypeFilterProvider.notifier).state = type;
@@ -60,6 +64,14 @@ class JournalListScreen extends HookConsumerWidget {
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.logbook),
         actions: [
+          IconButton(
+            onPressed: () {
+              editMode.value = !editMode.value;
+            },
+            icon: Icon(editMode.value
+                ? Icons.cancel_outlined
+                : Icons.delete_outline_outlined),
+          ),
           _typeFilter(context, ref),
         ],
       ),
@@ -75,6 +87,7 @@ class JournalListScreen extends HookConsumerWidget {
                       context,
                       JournalTimeline(data.reversed.toList()),
                       ref,
+                      editMode.value,
                     ),
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, s) => Text(e.toString()),
@@ -96,8 +109,8 @@ class JournalListScreen extends HookConsumerWidget {
 
     return PopupMenuButton<JournalType>(
       icon: filter == null
-          ? const Icon(Icons.filter_list)
-          : Text(filter.displayString(context)),
+          ? const Icon(Icons.filter_list_off)
+          : const Icon(Icons.filter_list),
       onSelected: (filter) {
         ref.read(journalTypeFilterProvider.notifier).state = filter;
       },
@@ -119,8 +132,8 @@ class JournalListScreen extends HookConsumerWidget {
     );
   }
 
-  Widget _buildList(
-      BuildContext context, JournalTimeline timeline, WidgetRef ref) {
+  Widget _buildList(BuildContext context, JournalTimeline timeline,
+      WidgetRef ref, bool isEditing) {
     return Timeline.tileBuilder(
       theme: TimelineThemeData(
         nodePosition: 0,
@@ -139,7 +152,10 @@ class JournalListScreen extends HookConsumerWidget {
         itemCount: timeline.events.length,
         contentsBuilder: (context, index) => Padding(
           padding: const EdgeInsets.only(left: 8),
-          child: JournalGroupItem(event: timeline.events[index]),
+          child: JournalGroupItem(
+            event: timeline.events[index],
+            isEditing: isEditing,
+          ),
         ),
         indicatorBuilder: (_, index) => const OutlinedDotIndicator(
           position: 0,
@@ -153,9 +169,14 @@ class JournalListScreen extends HookConsumerWidget {
 }
 
 class JournalGroupItem extends HookWidget {
+  final bool isEditing;
   final JournalEvent event;
 
-  const JournalGroupItem({super.key, required this.event});
+  const JournalGroupItem({
+    super.key,
+    required this.event,
+    this.isEditing = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -194,7 +215,11 @@ class JournalGroupItem extends HookWidget {
           duration: const Duration(milliseconds: 250),
           curve: Curves.easeOutCubic,
           child: opened.value
-              ? _InnerTimeline(entries: event.entries, opened: opened.value)
+              ? _InnerTimeline(
+                  entries: event.entries,
+                  opened: opened.value,
+                  isEditing: isEditing,
+                )
               : _InnerTimeline(entries: [], opened: opened.value),
         ),
       ],
@@ -204,10 +229,12 @@ class JournalGroupItem extends HookWidget {
 
 class _InnerTimeline extends StatelessWidget {
   final List<JournalEntry> entries;
+  final bool isEditing;
   final bool opened;
 
   const _InnerTimeline({
     required this.entries,
+    this.isEditing = false,
     this.opened = true,
   });
 
@@ -242,6 +269,7 @@ class _InnerTimeline extends StatelessWidget {
 
             return JournalTimelineRow(
               entry: entries[index - 1],
+              isEditing: isEditing,
             );
           },
           // itemExtentBuilder: (_, index) => isEdgeIndex(index) ? 10.0 : 72.0,
@@ -254,15 +282,30 @@ class _InnerTimeline extends StatelessWidget {
   }
 }
 
-class JournalTimelineRow extends StatelessWidget {
+class JournalTimelineRow extends ConsumerWidget {
   final JournalEntry entry;
+  final bool isEditing;
 
-  const JournalTimelineRow({super.key, required this.entry});
+  const JournalTimelineRow({
+    super.key,
+    required this.entry,
+    this.isEditing = false,
+  });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return GestureDetector(
-        onTap: () {
+        onTap: () async {
+          if (isEditing) {
+            bool? confirm = await _showDeleteConfirm(context);
+            if (confirm != null && confirm) {
+              ref
+                  .read(updateJournalProvider.notifier)
+                  .deleteJournalEntry(entry.id);
+            }
+            return;
+          }
+
           GoRouter.of(context).goNamed(
             'update-journal',
             pathParameters: {
@@ -287,38 +330,95 @@ class JournalTimelineRow extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       pressureUlcerEntry.title(context),
-                      style: AppTheme.labelMedium,
+                      style: AppTheme.labelTiny,
                     ),
                     AppTheme.spacer,
-                    Container(
-                      width: 12,
-                      height: 12,
-                      decoration: BoxDecoration(
-                        color: pressureUlcerEntry.pressureUlcerType.color,
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                            color: AppTheme.colors.black.withOpacity(0.1)),
-                      ),
-                    ),
-                    AppTheme.spacer,
-                    Text(
-                      pressureUlcerEntry.pressureUlcerType
-                          .displayString(context),
-                      style: AppTheme.paragraphMedium,
+                    Row(
+                      children: [
+                        Container(
+                          width: 12,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            color: pressureUlcerEntry.pressureUlcerType.color,
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                                color: AppTheme.colors.black.withOpacity(0.1)),
+                          ),
+                        ),
+                        AppTheme.spacer,
+                        Text(
+                          pressureUlcerEntry.pressureUlcerType
+                              .displayString(context),
+                          style: AppTheme.paragraphMedium,
+                        ),
+                      ],
                     ),
                   ],
                 ),
-                Text(DateFormat(DateFormat.HOUR24_MINUTE).format(entry.time)),
+                Text(
+                  DateFormat(DateFormat.HOUR24_MINUTE).format(entry.time),
+                  style: AppTheme.paragraphSmall,
+                ),
               ],
             ),
-            const Icon(
-              Icons.arrow_forward_ios,
-              size: 16,
+            isEditing
+                ? Icon(
+                    Icons.delete,
+                    color: AppTheme.colors.error,
+                    size: 16,
+                  )
+                : const Icon(
+                    Icons.arrow_forward_ios,
+                    size: 16,
+                  ),
+          ],
+        );
+      case JournalType.pain:
+        PainLevelEntry painLevelEntry = entry as PainLevelEntry;
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  painLevelEntry.type.displayString(context),
+                  style: AppTheme.labelTiny,
+                ),
+                Row(
+                  children: [
+                    BodyPartIcon(
+                      bodyPart: painLevelEntry.bodyPart,
+                      size: 24,
+                    ),
+                    AppTheme.spacer,
+                    Text(
+                      entry.title(context),
+                      style: AppTheme.labelTiny,
+                    ),
+                  ],
+                ),
+                Text(
+                  DateFormat(DateFormat.HOUR24_MINUTE).format(entry.time),
+                  style: AppTheme.paragraphSmall,
+                ),
+              ],
             ),
+            isEditing
+                ? Icon(
+                    Icons.delete,
+                    color: AppTheme.colors.error,
+                    size: 16,
+                  )
+                : const Icon(
+                    Icons.arrow_forward_ios,
+                    size: 16,
+                  ),
           ],
         );
       default:
@@ -330,15 +430,24 @@ class JournalTimelineRow extends StatelessWidget {
               children: [
                 Text(
                   entry.title(context),
-                  style: AppTheme.labelMedium,
+                  style: AppTheme.labelTiny,
                 ),
-                Text(DateFormat(DateFormat.HOUR24_MINUTE).format(entry.time)),
+                Text(
+                  DateFormat(DateFormat.HOUR24_MINUTE).format(entry.time),
+                  style: AppTheme.paragraphSmall,
+                ),
               ],
             ),
-            const Icon(
-              Icons.arrow_forward_ios,
-              size: 16,
-            ),
+            isEditing
+                ? Icon(
+                    Icons.delete,
+                    color: AppTheme.colors.error,
+                    size: 16,
+                  )
+                : const Icon(
+                    Icons.arrow_forward_ios,
+                    size: 16,
+                  ),
           ],
         );
     }
@@ -363,4 +472,10 @@ class JournalTimelineRow extends StatelessWidget {
       ),
     );
   }
+
+  _showDeleteConfirm(BuildContext context) => confirmDialog(
+        context,
+        title: 'are you sure?',
+        message: 'HALLÅ ELLER?',
+      );
 }

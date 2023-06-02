@@ -45,32 +45,37 @@ class JournalShortcutGrid extends ConsumerWidget {
 
   Widget _buildList(
       BuildContext context, List<JournalEntry> data, WidgetRef ref) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        GridView.count(
-          physics: const NeverScrollableScrollPhysics(),
-          crossAxisCount: 3,
-          crossAxisSpacing: AppTheme.basePadding * 2,
-          mainAxisSpacing: AppTheme.basePadding * 2,
-          shrinkWrap: true,
-          children: [
-            ...data
-                .map(
-                  (e) => JournalEntryShortcut(
-                    onTap: () => context.goNamed(
-                      'create-journal',
-                      extra: {'entry': e},
+    return SizedBox(
+      height: 320,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: [
+          GridView.count(
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisCount: 2,
+            scrollDirection: Axis.horizontal,
+            crossAxisSpacing: AppTheme.basePadding * 2,
+            mainAxisSpacing: AppTheme.basePadding * 2,
+            shrinkWrap: true,
+            padding: EdgeInsets.symmetric(horizontal: AppTheme.basePadding * 2),
+            children: [
+              ...data
+                  .map(
+                    (e) => JournalEntryShortcut(
+                      onTap: () => context.goNamed(
+                        'create-journal',
+                        extra: {'entry': e},
+                      ),
+                      icon: _iconForEntry(e),
+                      title: e.shortcutTitle(context),
+                      subtitle: timeago.format(e.time),
                     ),
-                    icon: _iconForEntry(e),
-                    title: e.shortcutTitle(context),
-                    subtitle: timeago.format(e.time),
-                  ),
-                )
-                .toList(),
-          ],
-        )
-      ],
+                  )
+                  .toList(),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
