@@ -27,8 +27,8 @@ class GoalWidget extends StatelessWidget {
               Row(
                 children: [
                   Container(
-                    width: 30,
-                    height: 30,
+                    width: 30 * MediaQuery.of(context).textScaleFactor,
+                    height: 30 * MediaQuery.of(context).textScaleFactor,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(15),
                       color: AppTheme.colors.primary,
@@ -55,10 +55,12 @@ class GoalWidget extends StatelessWidget {
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(5),
-                  border:
-                      Border.all(color: AppTheme.colors.black.withOpacity(0.1)),
+                  border: Border.all(
+                    color: AppTheme.colors.black.withOpacity(0.1),
+                    strokeAlign: BorderSide.strokeAlignOutside,
+                  ),
                 ),
-                clipBehavior: Clip.none,
+                clipBehavior: Clip.antiAlias,
                 width: 200,
                 height: 8,
                 child: LinearProgressIndicator(
@@ -68,13 +70,15 @@ class GoalWidget extends StatelessWidget {
               ),
             ],
           ),
-          Button(
-            width: 100,
-            title: AppLocalizations.of(context)!.editGoal,
-            size: ButtonSize.small,
-            onPressed: () => context.goNamed('edit-goal', extra: {
-              'goal': goal,
-            }),
+          Expanded(
+            child: Button(
+              width: 100,
+              title: AppLocalizations.of(context)!.editGoal,
+              size: ButtonSize.small,
+              onPressed: () => context.goNamed('edit-goal', extra: {
+                'goal': goal,
+              }),
+            ),
           )
         ],
       ),

@@ -39,6 +39,7 @@ class PerformPressureReleaseScreen extends HookWidget {
               isDone
                   ? _doneWidget(context)
                   : PressureReleaseExerciseWidget(
+                      duration: 900 / exercises.length,
                       key: Key(exercises[currentExercise.value].name),
                       exercise: exercises[currentExercise.value],
                       isPaused: isPaused.value,
@@ -129,16 +130,16 @@ class PressureReleaseExerciseWidget extends HookWidget {
     return Column(
       children: [
         Text(
-          exercise.name,
+          exercise.displayString(context),
           style: AppTheme.headLine2,
           textAlign: TextAlign.center,
         ),
         Image.asset(
-          'assets/images/pressure_release.jpeg',
+          exercise.asset,
           height: 225,
         ),
         Text(
-          'PLACEHOLDER: text för den här övningen',
+          exercise.description(context),
           style: AppTheme.paragraphMedium,
           textAlign: TextAlign.center,
         ),

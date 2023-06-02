@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/screens/journal/widgets/pressure_release_exercise_select.dart';
+import 'package:scimovement/theme/theme.dart';
+import 'package:scimovement/widgets/button.dart';
 
 class PressureReleaseForm extends StatelessWidget {
   final FormGroup form;
@@ -20,12 +23,37 @@ class PressureReleaseForm extends StatelessWidget {
     );
   }
 
+  static Widget actions(
+      BuildContext context, FormGroup form, Function callback) {
+    return Column(
+      children: [
+        AppTheme.spacer,
+        Button(
+          width: 160,
+          onPressed: () {
+            List<PressureReleaseExercise> exercises =
+                form.control('exercises').value;
+
+            if (!exercises.contains(PressureReleaseExercise.lying)) {
+              context.goNamed('perform-pressure-release', extra: {
+                'exercises': exercises,
+              });
+            }
+
+            callback();
+          },
+          title: 'Starta',
+        ),
+      ],
+    );
+  }
+
   static buildForm(
       PressureReleaseEntry? pressureReleaseEntry, bool shouldCreateEntry) {
     List<PressureReleaseExercise> exercises = [
+      PressureReleaseExercise.forwards,
       PressureReleaseExercise.leftSide,
       PressureReleaseExercise.rightSide,
-      PressureReleaseExercise.forwards,
     ];
 
     if (!shouldCreateEntry && pressureReleaseEntry != null) {

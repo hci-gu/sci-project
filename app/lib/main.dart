@@ -102,7 +102,7 @@ class App extends ConsumerWidget {
       }
     }
 
-    if (!kIsWeb) {
+    if (!kIsWeb && false) {
       // Handle notification taps
       Push.instance.onNotificationTap.listen((data) {
         handleLaunchFromNotification(data);

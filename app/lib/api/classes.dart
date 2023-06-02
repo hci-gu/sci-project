@@ -120,12 +120,12 @@ Gender genderFromString(String gender) {
 enum Condition { paraplegic, tetraplegic }
 
 extension ConditionDisplayAsString on Condition {
-  String displayString() {
+  String displayString(BuildContext context) {
     switch (this) {
       case Condition.paraplegic:
-        return 'Paraplegi';
+        return AppLocalizations.of(context)!.paraplegic;
       case Condition.tetraplegic:
-        return 'Tetraplegi';
+        return AppLocalizations.of(context)!.tetraplegic;
       default:
         return toString();
     }
@@ -373,11 +373,11 @@ extension JournalTypeDisplayAsString on JournalType {
   String displayString(BuildContext context) {
     switch (this) {
       case JournalType.pain:
-        return 'Pain';
+        return AppLocalizations.of(context)!.pain;
       case JournalType.pressureRelease:
-        return 'Pressure release';
+        return AppLocalizations.of(context)!.pressureRelease;
       case JournalType.pressureUlcer:
-        return 'Pressure ulcer';
+        return AppLocalizations.of(context)!.pressureUlcer;
       default:
         return toString();
     }
@@ -506,6 +506,7 @@ enum PressureReleaseExercise {
   forwards,
   rightSide,
   leftSide,
+  lying,
 }
 
 PressureReleaseExercise prExerciseFromString(String string) {
@@ -516,8 +517,55 @@ PressureReleaseExercise prExerciseFromString(String string) {
       return PressureReleaseExercise.rightSide;
     case 'leftSide':
       return PressureReleaseExercise.leftSide;
+    case 'lying':
+      return PressureReleaseExercise.lying;
     default:
       return PressureReleaseExercise.forwards;
+  }
+}
+
+extension PressureReleaseExerciseExtension on PressureReleaseExercise {
+  String get asset {
+    switch (this) {
+      case PressureReleaseExercise.forwards:
+        return 'assets/images/pressure_release_forward.jpeg';
+      case PressureReleaseExercise.rightSide:
+        return 'assets/images/pressure_release_right.jpeg';
+      case PressureReleaseExercise.leftSide:
+        return 'assets/images/pressure_release_left.jpeg';
+      case PressureReleaseExercise.lying:
+        return 'assets/images/pressure_release_lying.jpeg';
+    }
+  }
+
+  String displayString(BuildContext context) {
+    switch (this) {
+      case PressureReleaseExercise.forwards:
+        return AppLocalizations.of(context)!.pressureReleaseExerciseLeanForward;
+      case PressureReleaseExercise.rightSide:
+        return AppLocalizations.of(context)!.pressureReleaseExerciseLeanRight;
+      case PressureReleaseExercise.leftSide:
+        return AppLocalizations.of(context)!.pressureReleaseExerciseLeanLeft;
+      case PressureReleaseExercise.lying:
+        return AppLocalizations.of(context)!.pressureReleaseExerciseLying;
+    }
+  }
+
+  String description(BuildContext context) {
+    switch (this) {
+      case PressureReleaseExercise.forwards:
+        return AppLocalizations.of(context)!
+            .pressureReleaseExerciseLeanForwardDescription;
+      case PressureReleaseExercise.rightSide:
+        return AppLocalizations.of(context)!
+            .pressureReleaseExerciseLeanRightDescription;
+      case PressureReleaseExercise.leftSide:
+        return AppLocalizations.of(context)!
+            .pressureReleaseExerciseLeanLeftDescription;
+      case PressureReleaseExercise.lying:
+        return AppLocalizations.of(context)!
+            .pressureReleaseExerciseLyingDescription;
+    }
   }
 }
 
@@ -598,30 +646,30 @@ extension PressureUlcerTypeExtension on PressureUlcerType {
   String displayString(BuildContext context) {
     switch (this) {
       case PressureUlcerType.none:
-        return 'Inget trycksår';
+        return AppLocalizations.of(context)!.noPressureUlcer;
       case PressureUlcerType.category1:
-        return 'Rodnad';
+        return AppLocalizations.of(context)!.pressureUlcerCategory1;
       case PressureUlcerType.category2:
-        return 'Ytligt sår';
+        return AppLocalizations.of(context)!.pressureUlcerCategory2;
       case PressureUlcerType.category3:
-        return 'Öppet sår';
+        return AppLocalizations.of(context)!.pressureUlcerCategory3;
       case PressureUlcerType.category4:
-        return 'Djupt öppet sår';
+        return AppLocalizations.of(context)!.pressureUlcerCategory4;
     }
   }
 
   String description(BuildContext context) {
     switch (this) {
       case PressureUlcerType.none:
-        return 'Trycksåret har läkt';
+        return AppLocalizations.of(context)!.noPressureUlcerDescription;
       case PressureUlcerType.category1:
-        return 'Rodnad som inte bleknar vid tryck';
+        return AppLocalizations.of(context)!.pressureUlcerCategory1Description;
       case PressureUlcerType.category2:
-        return 'Delhudsskada, blåsa, spricka, avskavd hud';
+        return AppLocalizations.of(context)!.pressureUlcerCategory2Description;
       case PressureUlcerType.category3:
-        return 'Öppen hud med liten grop';
+        return AppLocalizations.of(context)!.pressureUlcerCategory3Description;
       case PressureUlcerType.category4:
-        return 'Ett öppet djupt sår där ben, senor och muskler kan vara synliga.';
+        return AppLocalizations.of(context)!.pressureUlcerCategory4Description;
     }
   }
 
@@ -698,12 +746,12 @@ class PressureUlcerEntry extends JournalEntry {
 
   @override
   String title(BuildContext context) {
-    return 'Trycksår';
+    return AppLocalizations.of(context)!.pressureUlcer;
   }
 
   @override
   String shortcutTitle(BuildContext context) {
-    return 'Trycksår \n${bodyPart.displayString(context)}';
+    return '${AppLocalizations.of(context)!.pressureUlcer} \n${bodyPart.displayString(context)}';
   }
 
   @override

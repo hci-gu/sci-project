@@ -35,13 +35,39 @@ class PressureReleaseExerciseSelect extends HookWidget {
                 style: AppTheme.paragraphMedium,
               ),
               AppTheme.spacer2x,
-              Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _exerciseItem(state, PressureReleaseExercise.forwards),
-                  _exerciseItem(state, PressureReleaseExercise.rightSide),
-                  _exerciseItem(state, PressureReleaseExercise.leftSide),
+                  Text('Sittande övningar:', style: AppTheme.labelMedium),
+                  AppTheme.spacer,
+                  Row(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _exerciseItem(
+                          context, state, PressureReleaseExercise.forwards),
+                      _exerciseItem(
+                          context, state, PressureReleaseExercise.rightSide),
+                      _exerciseItem(
+                          context, state, PressureReleaseExercise.leftSide),
+                    ],
+                  ),
+                ],
+              ),
+              AppTheme.spacer2x,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Liggande', style: AppTheme.labelMedium),
+                  AppTheme.spacer,
+                  Row(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      _exerciseItem(
+                          context, state, PressureReleaseExercise.lying),
+                    ],
+                  ),
                 ],
               ),
               AppTheme.spacer2x,
@@ -51,6 +77,18 @@ class PressureReleaseExerciseSelect extends HookWidget {
   }
 
   void _onTap(state, PressureReleaseExercise exercise) {
+    if (exercise == PressureReleaseExercise.lying) {
+      state.value = [PressureReleaseExercise.lying];
+      form.patchValue({
+        'exercises': state.value,
+      });
+      return;
+    }
+
+    if (state.value.contains(PressureReleaseExercise.lying)) {
+      state.value.remove(PressureReleaseExercise.lying);
+    }
+
     if (state.value.contains(exercise)) {
       state.value.remove(exercise);
     } else {
@@ -61,23 +99,34 @@ class PressureReleaseExerciseSelect extends HookWidget {
     });
   }
 
-  Widget _exerciseItem(state, PressureReleaseExercise exercise) {
+  Widget _exerciseItem(
+      BuildContext context, state, PressureReleaseExercise exercise) {
     bool selected = state.value.contains(exercise);
     return GestureDetector(
       onTap: () {
         _onTap(state, exercise);
       },
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(
-            color:
-                selected ? AppTheme.colors.success : AppTheme.colors.lightGray,
-            width: 2,
+      child: Column(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: selected
+                    ? AppTheme.colors.success
+                    : AppTheme.colors.lightGray,
+                width: 4,
+                strokeAlign: BorderSide.strokeAlignOutside,
+              ),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            clipBehavior: Clip.antiAlias,
+            width: 90,
+            height: 90,
+            child: Image.asset(exercise.asset),
           ),
-        ),
-        width: 100,
-        height: 100,
-        child: Center(child: Text(exercise.name.toString())),
+          AppTheme.spacer,
+          Text(exercise.displayString(context)),
+        ],
       ),
     );
   }
