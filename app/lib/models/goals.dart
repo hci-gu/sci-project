@@ -77,11 +77,13 @@ class JournalGoal extends Goal {
   factory JournalGoal.fromJson(Map<String, dynamic> json) {
     String hour = json['start'].toString().substring(0, 2);
     String minute = json['start'].toString().substring(3, 5);
+    String dateString = json['reminder'];
+    DateTime reminder = DateTime.parse(dateString.replaceAll('Z', ''));
     return JournalGoal(
       id: json['id'],
       value: json['value'],
       progress: json['progress'],
-      reminder: tz.TZDateTime.parse(tz.getLocation(Api().tz), json['reminder']),
+      reminder: reminder,
       start: Duration(hours: int.parse(hour), minutes: int.parse(minute)),
       recurrence: Duration(minutes: json['recurrence']),
       type: journalTypeFromString(json['journalType']),

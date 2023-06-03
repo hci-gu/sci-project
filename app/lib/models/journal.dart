@@ -63,7 +63,10 @@ final pressureUlcerProvider =
 
   List<JournalEntry> journal =
       await Api().getJournalForType(JournalType.pressureUlcer, date);
-  return journal.whereType<PressureUlcerEntry>().toList();
+  List<PressureUlcerEntry> pressureUlcers =
+      journal.whereType<PressureUlcerEntry>().toList();
+  pressureUlcers.sort((a, b) => a.time.compareTo(b.time));
+  return pressureUlcers;
 });
 
 class JournalState extends StateNotifier<DateTime> {

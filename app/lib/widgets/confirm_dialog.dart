@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 Future<bool?> confirmDialog(
   BuildContext context, {
@@ -39,7 +40,7 @@ Future<bool?> confirmDialog(
                   secondary: true,
                   rounded: true,
                   size: ButtonSize.small,
-                  title: 'Avbryt',
+                  title: AppLocalizations.of(context)!.cancel,
                 ),
               ),
               SizedBox(width: AppTheme.basePadding * 4),
@@ -51,7 +52,7 @@ Future<bool?> confirmDialog(
                   rounded: true,
                   size: ButtonSize.small,
                   color: AppTheme.colors.error,
-                  title: 'Ja',
+                  title: AppLocalizations.of(context)!.yes,
                 ),
               ),
             ],

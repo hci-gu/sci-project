@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/models/goals.dart';
 import 'package:scimovement/models/journal.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/screens/detail/screen.dart';
 import 'package:scimovement/screens/detail/sedentary.dart';
+import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/goal_widget.dart';
 import 'package:scimovement/widgets/stat_header.dart';
@@ -27,10 +29,23 @@ class PressureReleaseScreen extends ConsumerWidget {
         header: StatHeader(
           provider: pressureReleaseCountProvider(pagination),
           unit: Unit.amount,
+          isAverage: false,
         ),
         content: Column(
           children: [
             _goalWidget(context, ref, pagination),
+            AppTheme.separator,
+            Button(
+              icon: Icons.alarm,
+              width: 200,
+              onPressed: () => context.goNamed(
+                'create-journal',
+                extra: {
+                  'type': JournalType.pressureRelease,
+                },
+              ),
+              title: 'Tryckavlasta nu',
+            )
           ],
         ));
   }

@@ -30,7 +30,7 @@ class EditJournalEntryScreen extends ConsumerWidget {
         validators: [Validators.required],
       ),
       'comment': FormControl<String>(
-        value: entry?.comment ?? '',
+        value: entry != null && !shouldCreateEntry ? entry?.comment : '',
       ),
     };
 
@@ -83,19 +83,25 @@ class EditJournalEntryScreen extends ConsumerWidget {
                 maxLines: 3,
               ),
               AppTheme.spacer2x,
-              _submitButton(ref),
-              if (type == JournalType.pressureRelease ||
-                  (entry != null && entry!.type == JournalType.pressureRelease))
-                PressureReleaseForm.actions(
-                  context,
-                  form,
-                  () => _onSave(context, ref, form, false),
-                ),
+              _actions(context, ref, form),
             ],
           );
         },
       ),
     );
+  }
+
+  Widget _actions(BuildContext context, WidgetRef ref, FormGroup form) {
+    if (type == JournalType.pressureRelease ||
+        (entry != null && entry!.type == JournalType.pressureRelease)) {
+      return PressureReleaseForm.actions(
+        context,
+        form,
+        (goBack) => _onSave(context, ref, form, goBack),
+      );
+    }
+
+    return _submitButton(ref);
   }
 
   Widget _typeSpecificForm(FormGroup form) {
@@ -127,12 +133,12 @@ class EditJournalEntryScreen extends ConsumerWidget {
           .read(updateJournalProvider.notifier)
           .updateJournalEntry(entry!, form.value);
     }
-    form.reset();
     if (context.mounted && shouldPop) {
       while (context.canPop()) {
         context.pop();
       }
     }
+    form.reset();
   }
 
   Widget _submitButton(WidgetRef ref) {
@@ -163,8 +169,8 @@ class DateTimeButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ReactiveFormConsumer(
       builder: (context, form, _) => Button(
-        title:
-            DateFormat('yyyy-MM-dd HH:mm').format(form.control(formKey).value),
+        title: DateFormat('yyyy-MM-dd HH:mm')
+            .format(form.control(formKey).value ?? DateTime.now()),
         width: 160,
         icon: Icons.calendar_month_outlined,
         onPressed: () async {
