@@ -134,3 +134,10 @@ final previousDateDisplayProvider =
       .subtract(pagination.duration * (pagination.page + 1));
   return displayDate(context, date);
 });
+
+final isTodayProvider = Provider<bool>((ref) {
+  DateTime date = ref.watch(dateProvider);
+  DateTime now = DateTime.now();
+  DateTime today = DateTime(now.year, now.month, now.day);
+  return !date.isBefore(today);
+});

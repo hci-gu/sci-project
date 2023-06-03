@@ -26,8 +26,13 @@ import 'package:scimovement/screens/onboarding/onboarding.dart';
 import 'package:scimovement/screens/register.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-List<String> detailRoutes = ['calories', 'activity', 'sedentary'];
-String landingRoute = '/journal/type';
+List<String> detailRoutes = [
+  'calories',
+  'activity',
+  'sedentary',
+  'pressure-release'
+];
+String landingRoute = '/';
 
 class RouteChangeObserver extends NavigatorObserver {
   final Ref _ref;

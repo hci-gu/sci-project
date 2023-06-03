@@ -143,15 +143,15 @@ class ArcPainter extends CustomPainter {
       double minute = entry.time.hour * 60.0 + entry.time.minute;
       double start = minute * pi / 2 / 1440;
 
-      Rect rect = _rectForActivity(Activity.armErgo, drawRect);
+      Rect rect = drawRect.inflate(24);
       canvas.drawArc(
         rect,
         offset + start,
-        10 * pi / 2 / 1440 + 0.006,
+        6 * pi / 2 / 1440 + 0.006,
         false,
         Paint()
-          ..color = AppTheme.colors.orange
-          ..strokeWidth = 20
+          ..color = AppTheme.colors.success
+          ..strokeWidth = 16
           ..style = PaintingStyle.stroke,
       );
     }

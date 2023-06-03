@@ -418,7 +418,7 @@ class JournalEntry {
   factory JournalEntry.fromJson(Map<String, dynamic> json) {
     return JournalEntry(
       id: json['id'],
-      time: tz.TZDateTime.parse(tz.getLocation(Api().tz), json['t']),
+      time: DateTime.parse(json['t']),
       type: journalTypeFromString(json['type']),
       comment: json['comment'],
     );
@@ -454,7 +454,7 @@ class PainLevelEntry extends JournalEntry {
     Map<String, dynamic> info = json['info'];
     return PainLevelEntry(
       id: json['id'],
-      time: tz.TZDateTime.parse(tz.getLocation(Api().tz), json['t']),
+      time: DateTime.parse(json['t']),
       type: journalTypeFromString(json['type']),
       comment: json['comment'],
       painLevel: info['painLevel'],
@@ -586,7 +586,7 @@ class PressureReleaseEntry extends JournalEntry {
 
     return PressureReleaseEntry(
       id: json['id'],
-      time: tz.TZDateTime.parse(tz.getLocation(Api().tz), json['t']),
+      time: DateTime.parse(json['t']),
       type: journalTypeFromString(json['type']),
       comment: json['comment'] ?? '',
       exercises: exercises.map((e) => prExerciseFromString(e)).toList(),
@@ -766,7 +766,7 @@ class PressureUlcerEntry extends JournalEntry {
     Map<String, dynamic> info = json['info'];
     return PressureUlcerEntry(
       id: json['id'],
-      time: tz.TZDateTime.parse(tz.getLocation(Api().tz), json['t']),
+      time: DateTime.parse(json['t']),
       type: journalTypeFromString(json['type']),
       comment: json['comment'],
       pressureUlcerType: PressureUlcerType.values.firstWhere(

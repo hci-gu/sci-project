@@ -27,9 +27,18 @@ class PressureReleaseForm extends StatelessWidget {
       BuildContext context, FormGroup form, Function callback) {
     return Column(
       children: [
-        AppTheme.spacer,
         Button(
-          width: 160,
+          secondary: true,
+          width: 200,
+          onPressed: () {
+            callback(true);
+          },
+          title: 'Spara',
+        ),
+        Text('Jag har redan tryckavlastat', style: AppTheme.paragraphSmall),
+        AppTheme.spacer2x,
+        Button(
+          width: 200,
           onPressed: () {
             List<PressureReleaseExercise> exercises =
                 form.control('exercises').value;
@@ -39,7 +48,7 @@ class PressureReleaseForm extends StatelessWidget {
               });
             }
 
-            callback();
+            callback(false);
           },
           title: 'Starta',
         ),

@@ -475,7 +475,7 @@ class JournalTimelineRow extends ConsumerWidget {
 
   _showDeleteConfirm(BuildContext context) => confirmDialog(
         context,
-        title: 'are you sure?',
-        message: 'HALLÅ ELLER?',
+        title: AppLocalizations.of(context)!.remove,
+        message: AppLocalizations.of(context)!.removeConfirmation,
       );
 }

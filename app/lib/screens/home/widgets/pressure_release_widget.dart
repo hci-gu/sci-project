@@ -31,7 +31,7 @@ class GoalProgress extends StatelessWidget {
               style: AppTheme.labelLarge.copyWith(fontSize: 12),
             ),
             Text(
-              ' ${AppLocalizations.of(context)!.ofTodaysGoal}',
+              ' ${AppLocalizations.of(context)!.ofDailyGoal}',
               style: AppTheme.paragraphSmall.copyWith(fontSize: 10),
             ),
           ],
@@ -63,9 +63,10 @@ class PressureReleaseWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     Pagination pagination = ref.watch(paginationProvider);
+    bool isToday = ref.watch(isTodayProvider);
     String asset = 'assets/svg/alarm.svg';
     return ref.watch(journalGoalProvider(pagination)).when(
-          data: (goal) => _body(context, goal),
+          data: (goal) => _body(context, goal, isToday),
           error: (_, __) => StatWidget.error(asset),
           loading: () => StatWidget.loading(asset),
         );
@@ -100,8 +101,7 @@ class PressureReleaseWidget extends ConsumerWidget {
     );
   }
 
-  Widget _body(BuildContext context, JournalGoal? goal) {
-    String asset = 'assets/svg/alarm.svg';
+  Widget _body(BuildContext context, JournalGoal? goal, bool isToday) {
     return Column(
       children: [
         GestureDetector(
@@ -110,38 +110,113 @@ class PressureReleaseWidget extends ConsumerWidget {
             context.go('$path${path.length > 1 ? '/' : ''}pressure-release');
           },
           child: goal != null
-              ? StatWidget.container(
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Row(
-                        children: [
-                          SvgPicture.asset(asset, height: 18),
-                          AppTheme.spacerHalf,
-                          Text(
-                            AppLocalizations.of(context)!.pressureRelease,
-                            style: AppTheme.labelTiny,
-                          ),
-                        ],
-                      ),
-                      RebuildOnTimer(
-                        child: TimeUntilGoal(goal: goal),
-                      ),
-                      GoalProgress(goal: goal)
-                    ],
-                  ),
-                  AppTheme.widgetDecoration.copyWith(
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(24),
-                      topRight: Radius.circular(24),
-                    ),
-                  ))
+              ? _withGoal(context, goal, isToday)
               : _emptyState(context),
         ),
         AppTheme.spacerHalf,
         const PressureUlcerWidget(),
       ],
     );
+  }
+
+  Widget _oldProgress(BuildContext context, Goal goal) {
+    String asset = 'assets/svg/alarm.svg';
+    bool finishedGoal = goal.progress >= goal.value;
+    return StatWidget.container(
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Row(
+              children: [
+                SvgPicture.asset(asset, height: 18),
+                AppTheme.spacerHalf,
+                Text(
+                  AppLocalizations.of(context)!.pressureRelease,
+                  style: AppTheme.labelTiny,
+                ),
+              ],
+            ),
+            AppTheme.spacer,
+            SvgPicture.asset(
+                finishedGoal
+                    ? 'assets/svg/goal_done.svg'
+                    : 'assets/svg/set_goal.svg',
+                height: 36),
+            AppTheme.spacer,
+            GoalProgress(goal: goal)
+          ],
+        ),
+        AppTheme.widgetDecoration.copyWith(
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
+          ),
+        ));
+  }
+
+  Widget _withGoal(BuildContext context, Goal goal, bool isToday) {
+    if (!isToday) {
+      return _oldProgress(context, goal);
+    }
+
+    String asset = 'assets/svg/alarm.svg';
+    Duration timeLeft = goal.reminder.difference(DateTime.now());
+
+    if (timeLeft.inMinutes <= 0) {
+      return StatWidget.container(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SvgPicture.asset(asset, height: 24),
+              AppTheme.spacer,
+              Text(
+                'Dags av avlasta',
+                style: AppTheme.labelMedium,
+              ),
+              Button(
+                onPressed: () {},
+                title: 'Starta',
+                size: ButtonSize.tiny,
+                width: 100,
+              ),
+              AppTheme.spacer,
+              GoalProgress(goal: goal)
+            ],
+          ),
+          AppTheme.widgetDecoration.copyWith(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
+            ),
+          ));
+    }
+
+    return StatWidget.container(
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Row(
+              children: [
+                SvgPicture.asset(asset, height: 18),
+                AppTheme.spacerHalf,
+                Text(
+                  AppLocalizations.of(context)!.pressureRelease,
+                  style: AppTheme.labelTiny,
+                ),
+              ],
+            ),
+            RebuildOnTimer(
+              child: TimeUntilGoal(goal: goal),
+            ),
+            GoalProgress(goal: goal)
+          ],
+        ),
+        AppTheme.widgetDecoration.copyWith(
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
+          ),
+        ));
   }
 }
 
