@@ -174,7 +174,11 @@ class PressureReleaseWidget extends ConsumerWidget {
                 style: AppTheme.labelMedium,
               ),
               Button(
-                onPressed: () {},
+                onPressed: () {
+                  String path = GoRouter.of(context).location;
+                  context
+                      .go('$path${path.length > 1 ? '/' : ''}pressure-release');
+                },
                 title: 'Starta',
                 size: ButtonSize.tiny,
                 width: 100,

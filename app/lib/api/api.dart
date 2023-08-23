@@ -165,7 +165,7 @@ class Api {
           }
         }).toList();
       }
-    } catch (e) {}
+    } catch (_) {}
     return [];
   }
 

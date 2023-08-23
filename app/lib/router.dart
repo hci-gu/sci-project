@@ -53,13 +53,9 @@ extension on Route<dynamic> {
 
 class RouterNotifier extends ChangeNotifier {
   final Ref _ref;
-  bool _onboardingDone = false;
 
-  RouterNotifier(this._ref, this._onboardingDone) {
-    _ref.listen<bool>(onboardingDoneProvider, (_, done) {
-      _onboardingDone = done;
-      notifyListeners();
-    });
+  RouterNotifier(this._ref) {
+    _ref.listen<bool>(onboardingDoneProvider, (_, done) => notifyListeners());
 
     _ref.listen<String?>(
       userProvider.select((value) => value?.id),
@@ -69,6 +65,7 @@ class RouterNotifier extends ChangeNotifier {
 
   String? _redirectLogic(BuildContext context, GoRouterState state) {
     bool loggedIn = _ref.read(userProvider) != null;
+    bool onboardingDone = _ref.read(onboardingDoneProvider);
     if (state.matchedLocation.contains('/demo')) {
       return null;
     }
@@ -81,13 +78,13 @@ class RouterNotifier extends ChangeNotifier {
     }
 
     // redirect from onboarding to home when done
-    if (state.matchedLocation == '/onboarding' && _onboardingDone) {
+    if (state.matchedLocation == '/onboarding' && onboardingDone) {
       return landingRoute;
     }
 
     // redirect from login screen to home or onboarding after login
     if (loggedIn && _isLoginRoute(state.matchedLocation)) {
-      if (_onboardingDone) {
+      if (onboardingDone) {
         return landingRoute;
       } else {
         return '/onboarding';
@@ -119,7 +116,7 @@ final profileKey = UniqueKey();
 final journalKey = UniqueKey();
 
 final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
-  final routerNotifier = RouterNotifier(ref, props.onboardingDone);
+  final routerNotifier = RouterNotifier(ref);
 
   return GoRouter(
     initialLocation: props.loggedIn ? '/loading' : '/introduction',

@@ -18,10 +18,9 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 void initializeTzAndLocale(String? languageCode) {
   tz.initializeTimeZones();
-  timeago.setLocaleMessages(
-    languageCode ?? 'en',
-    languageCode == 'sv' ? timeago.SvMessages() : timeago.EnMessages(),
-  );
+  timeago.setLocaleMessages('en', timeago.EnMessages());
+  timeago.setLocaleMessages('sv', timeago.SvMessages());
+  timeago.setDefaultLocale(languageCode ?? 'en');
   Intl.defaultLocale = languageCode;
   initializeDateFormatting(languageCode);
 }
