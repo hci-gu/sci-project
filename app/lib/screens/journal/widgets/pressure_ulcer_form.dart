@@ -145,7 +145,7 @@ class PressureUlcerTypeSelect extends StatelessWidget {
               itemHeight: null,
               isExpanded: true,
               hint: Text(
-                AppLocalizations.of(context)!.selectInjuryLevel,
+                AppLocalizations.of(context)!.pressureUlcerClassificationHint,
                 style: AppTheme.paragraphMedium,
               ),
               items: PressureUlcerType.values

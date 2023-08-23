@@ -18,7 +18,6 @@ class HomeScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // bool showDataWidgets = ref.watch(userHasDataProvider);
     List<AppFeature> features = ref.watch(appFeaturesProvider);
 
     return SmartRefresher(
@@ -53,29 +52,6 @@ class HomeScreen extends HookConsumerWidget {
                 const PressureReleaseWidget(),
             ],
           ),
-          // if (showDataWidgets)
-          //   Row(
-          //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          //     children: [
-          //       const Expanded(child: EnergyWidget()),
-          //       AppTheme.spacer2x,
-          //       const Expanded(child: SedentaryWidget()),
-          //     ],
-          //   ),
-          // if (!showDataWidgets) const NoDataMessage(),
-          // AppTheme.spacer2x,
-          // if (showDataWidgets)
-          //   Row(
-          //     crossAxisAlignment: CrossAxisAlignment.start,
-          //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          //     children: [
-          //       const Expanded(child: ExerciseWidget()),
-          //       AppTheme.spacer2x,
-          //       if (features.contains(AppFeature.pressureRelease))
-          //         const Expanded(child: PressureReleaseWidget()),
-          //       // const Expanded(child: SedentaryWidget()),
-          //     ],
-          //   ),
         ],
       ),
     );
