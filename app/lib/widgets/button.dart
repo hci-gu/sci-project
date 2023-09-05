@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:scimovement/theme/theme.dart';
 
@@ -86,6 +88,7 @@ class Button extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget button;
+
     color ??= AppTheme.primarySwatch;
     if (disabled) {
       color = Colors.grey;
@@ -156,19 +159,16 @@ class Button extends StatelessWidget {
       );
     }
 
+    double buttonScaleFactor =
+        min(1.5, max(1, MediaQuery.of(context).textScaleFactor));
+
     return AbsorbPointer(
       absorbing: disabled || loading,
-      child: width != null
-          ? SizedBox(
-              width: width,
-              child: button,
-              height: size.height,
-            )
-          : SizedBox(
-              width: width,
-              child: button,
-              height: size.height,
-            ),
+      child: SizedBox(
+        width: (width ?? 200) * buttonScaleFactor,
+        height: size.height,
+        child: button,
+      ),
     );
   }
 }

@@ -39,6 +39,7 @@ class BodyPartSelect extends StatelessWidget {
                                         bodyPartType,
                                         form.value['side'] as Side,
                                       ),
+                                      size: 48,
                                     ),
                                   ),
                                   AppTheme.spacer,
@@ -50,7 +51,7 @@ class BodyPartSelect extends StatelessWidget {
                       .toList(),
                 ),
               ),
-              if (showSideDropdown()) AppTheme.spacer2x,
+              if (showSideDropdown()) AppTheme.spacer,
               if (showSideDropdown())
                 Flexible(
                   flex: 1,
@@ -63,7 +64,9 @@ class BodyPartSelect extends StatelessWidget {
                     items: Side.values
                         .map((side) => DropdownMenuItem(
                               value: side,
-                              child: Text(side.displayString(context)),
+                              child: Text(
+                                side.displayString(context),
+                              ),
                             ))
                         .toList(),
                   ),

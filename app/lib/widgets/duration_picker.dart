@@ -173,7 +173,7 @@ class DurationDisplay extends StatelessWidget {
         borderRadius: BorderRadius.circular(4),
       ),
       width: 80,
-      height: 40,
+      height: 44,
       child: Padding(
         padding: AppTheme.elementPadding,
         child: Row(

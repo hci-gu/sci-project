@@ -17,7 +17,12 @@ class ChartModeSelect extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4.0),
         child: DropdownButton<ChartMode>(
           isDense: true,
-          items: ChartMode.values
+          items: [
+            ChartMode.day,
+            ChartMode.week,
+            ChartMode.month,
+            ChartMode.year
+          ]
               .map((e) => DropdownMenuItem(
                   child: Text(e.displayName(context)), value: e))
               .toList(),

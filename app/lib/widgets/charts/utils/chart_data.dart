@@ -90,6 +90,14 @@ class ChartData {
               base.subtract(Duration(days: i)).day,
             ): [],
         };
+      case ChartMode.quarter:
+        return {
+          for (int i = 0; i < 90; i++)
+            DateTime(
+              base.subtract(Duration(days: i)).year,
+              base.subtract(Duration(days: i)).month,
+            ): [],
+        };
       case ChartMode.year:
         return {
           for (int i = 0; i < 11; i++)

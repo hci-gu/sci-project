@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:scimovement/api/api.dart';
 import 'package:intl/intl.dart';
+import 'package:scimovement/theme/theme.dart';
 import 'package:timezone/standalone.dart' as tz;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -119,12 +120,12 @@ Gender genderFromString(String gender) {
 enum Condition { paraplegic, tetraplegic }
 
 extension ConditionDisplayAsString on Condition {
-  String displayString() {
+  String displayString(BuildContext context) {
     switch (this) {
       case Condition.paraplegic:
-        return 'Paraplegi';
+        return AppLocalizations.of(context)!.paraplegic;
       case Condition.tetraplegic:
-        return 'Tetraplegi';
+        return AppLocalizations.of(context)!.tetraplegic;
       default:
         return toString();
     }
@@ -364,13 +365,36 @@ class Bout {
 
 enum JournalType {
   pain,
+  pressureRelease,
+  pressureUlcer,
+}
+
+extension JournalTypeDisplayAsString on JournalType {
+  String displayString(BuildContext context) {
+    switch (this) {
+      case JournalType.pain:
+        return AppLocalizations.of(context)!.pain;
+      case JournalType.pressureRelease:
+        return AppLocalizations.of(context)!.pressureRelease;
+      case JournalType.pressureUlcer:
+        return AppLocalizations.of(context)!.pressureUlcer;
+      default:
+        return toString();
+    }
+  }
 }
 
 JournalType journalTypeFromString(String type) {
-  if (type == 'pain') {
-    return JournalType.pain;
+  switch (type) {
+    case 'pressureUlcer':
+      return JournalType.pressureUlcer;
+    case 'pressureRelease':
+      return JournalType.pressureRelease;
+    case 'pain':
+      return JournalType.pain;
+    default:
+      return JournalType.pain;
   }
-  return JournalType.pain;
 }
 
 class JournalEntry {
@@ -378,37 +402,415 @@ class JournalEntry {
   final DateTime time;
   final JournalType type;
   final String comment;
-  final int painLevel;
-  final BodyPart bodyPart;
 
   JournalEntry({
     required this.id,
     required this.time,
     required this.type,
     required this.comment,
-    required this.painLevel,
-    required this.bodyPart,
   });
+
+  Map<String, dynamic> toJson() => {
+        't': time.toIso8601String(),
+        'comment': comment,
+      };
 
   factory JournalEntry.fromJson(Map<String, dynamic> json) {
     return JournalEntry(
       id: json['id'],
-      time: tz.TZDateTime.parse(tz.getLocation(Api().tz), json['t']),
+      time: DateTime.parse(json['t']),
       type: journalTypeFromString(json['type']),
       comment: json['comment'],
-      painLevel: json['painLevel'],
-      bodyPart: BodyPart.fromString(json['bodyPart']),
     );
   }
 
+  String title(BuildContext context) {
+    return '';
+  }
+
+  String shortcutTitle(BuildContext context) {
+    return '';
+  }
+
+  JournalEntry fromFormUpdate(Map<String, dynamic> values) => this;
+
+  String get identifier => '';
+}
+
+class PainLevelEntry extends JournalEntry {
+  final int painLevel;
+  final BodyPart bodyPart;
+
+  PainLevelEntry({
+    required super.id,
+    required super.time,
+    required super.type,
+    required super.comment,
+    required this.painLevel,
+    required this.bodyPart,
+  });
+
+  factory PainLevelEntry.fromJson(Map<String, dynamic> json) {
+    Map<String, dynamic> info = json['info'];
+    return PainLevelEntry(
+      id: json['id'],
+      time: DateTime.parse(json['t']),
+      type: journalTypeFromString(json['type']),
+      comment: json['comment'],
+      painLevel: info['painLevel'],
+      bodyPart: BodyPart.fromString(info['bodyPart']),
+    );
+  }
+
+  @override
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      't': time.toIso8601String(),
-      'type': type.name,
-      'comment': comment,
-      'painLevel': painLevel,
-      'bodyPart': bodyPart.toString(),
+      ...super.toJson(),
+      'info': {
+        'painLevel': painLevel,
+        'bodyPart': bodyPart.toString(),
+      }
     };
+  }
+
+  @override
+  JournalEntry fromFormUpdate(Map<String, dynamic> values) {
+    return PainLevelEntry(
+      id: id,
+      type: type,
+      time: values['time'] as DateTime,
+      comment: values['comment'] as String,
+      painLevel: values['painLevel'] as int,
+      bodyPart: BodyPart(
+          values['bodyPartType'] as BodyPartType, values['side'] as Side?),
+    );
+  }
+
+  @override
+  String title(BuildContext context) {
+    return '${painLevel.toString()} - ${bodyPart.displayString(context)}';
+  }
+
+  @override
+  String shortcutTitle(BuildContext context) {
+    return bodyPart.displayString(context);
+  }
+
+  @override
+  String get identifier {
+    return bodyPart.toString();
+  }
+}
+
+enum PressureReleaseExercise {
+  forwards,
+  rightSide,
+  leftSide,
+  lying,
+}
+
+PressureReleaseExercise prExerciseFromString(String string) {
+  switch (string) {
+    case 'forwards':
+      return PressureReleaseExercise.forwards;
+    case 'rightSide':
+      return PressureReleaseExercise.rightSide;
+    case 'leftSide':
+      return PressureReleaseExercise.leftSide;
+    case 'lying':
+      return PressureReleaseExercise.lying;
+    default:
+      return PressureReleaseExercise.forwards;
+  }
+}
+
+extension PressureReleaseExerciseExtension on PressureReleaseExercise {
+  String get asset {
+    switch (this) {
+      case PressureReleaseExercise.forwards:
+        return 'assets/images/pressure_release_forward.jpeg';
+      case PressureReleaseExercise.rightSide:
+        return 'assets/images/pressure_release_right.jpeg';
+      case PressureReleaseExercise.leftSide:
+        return 'assets/images/pressure_release_left.jpeg';
+      case PressureReleaseExercise.lying:
+        return 'assets/images/pressure_release_lying.jpeg';
+    }
+  }
+
+  String displayString(BuildContext context) {
+    switch (this) {
+      case PressureReleaseExercise.forwards:
+        return AppLocalizations.of(context)!.pressureReleaseExerciseLeanForward;
+      case PressureReleaseExercise.rightSide:
+        return AppLocalizations.of(context)!.pressureReleaseExerciseLeanRight;
+      case PressureReleaseExercise.leftSide:
+        return AppLocalizations.of(context)!.pressureReleaseExerciseLeanLeft;
+      case PressureReleaseExercise.lying:
+        return AppLocalizations.of(context)!.pressureReleaseExerciseLying;
+    }
+  }
+
+  String description(BuildContext context) {
+    switch (this) {
+      case PressureReleaseExercise.forwards:
+        return AppLocalizations.of(context)!
+            .pressureReleaseExerciseLeanForwardDescription;
+      case PressureReleaseExercise.rightSide:
+        return AppLocalizations.of(context)!
+            .pressureReleaseExerciseLeanRightDescription;
+      case PressureReleaseExercise.leftSide:
+        return AppLocalizations.of(context)!
+            .pressureReleaseExerciseLeanLeftDescription;
+      case PressureReleaseExercise.lying:
+        return AppLocalizations.of(context)!
+            .pressureReleaseExerciseLyingDescription;
+    }
+  }
+}
+
+class PressureReleaseEntry extends JournalEntry {
+  final List<PressureReleaseExercise> exercises;
+
+  PressureReleaseEntry({
+    required super.id,
+    required super.time,
+    required super.type,
+    required super.comment,
+    required this.exercises,
+  });
+
+  factory PressureReleaseEntry.fromJson(Map<String, dynamic> json) {
+    Map<String, dynamic> info = json['info'];
+    List<dynamic> exercises = info['exercises'];
+
+    return PressureReleaseEntry(
+      id: json['id'],
+      time: DateTime.parse(json['t']),
+      type: journalTypeFromString(json['type']),
+      comment: json['comment'] ?? '',
+      exercises: exercises.map((e) => prExerciseFromString(e)).toList(),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      ...super.toJson(),
+      'info': {
+        'exercises': exercises
+            .map(
+              (e) => e.name.toString(),
+            )
+            .toList(),
+      }
+    };
+  }
+
+  @override
+  JournalEntry fromFormUpdate(Map<String, dynamic> values) {
+    return PressureReleaseEntry(
+      id: id,
+      type: type,
+      time: values['time'] as DateTime,
+      comment: values['comment'] as String,
+      exercises: values['exercises'] as List<PressureReleaseExercise>,
+    );
+  }
+
+  @override
+  String title(BuildContext context) {
+    return 'Tryckavlastning';
+  }
+
+  @override
+  String shortcutTitle(BuildContext context) {
+    return title(context);
+  }
+
+  @override
+  String get identifier {
+    return 'pressureRelease';
+  }
+}
+
+enum PressureUlcerType {
+  none,
+  category1,
+  category2,
+  category3,
+  category4,
+}
+
+extension PressureUlcerTypeExtension on PressureUlcerType {
+  String displayString(BuildContext context) {
+    switch (this) {
+      case PressureUlcerType.none:
+        return AppLocalizations.of(context)!.noPressureUlcer;
+      case PressureUlcerType.category1:
+        return AppLocalizations.of(context)!.pressureUlcerCategory1;
+      case PressureUlcerType.category2:
+        return AppLocalizations.of(context)!.pressureUlcerCategory2;
+      case PressureUlcerType.category3:
+        return AppLocalizations.of(context)!.pressureUlcerCategory3;
+      case PressureUlcerType.category4:
+        return AppLocalizations.of(context)!.pressureUlcerCategory4;
+    }
+  }
+
+  String description(BuildContext context) {
+    switch (this) {
+      case PressureUlcerType.none:
+        return AppLocalizations.of(context)!.noPressureUlcerDescription;
+      case PressureUlcerType.category1:
+        return AppLocalizations.of(context)!.pressureUlcerCategory1Description;
+      case PressureUlcerType.category2:
+        return AppLocalizations.of(context)!.pressureUlcerCategory2Description;
+      case PressureUlcerType.category3:
+        return AppLocalizations.of(context)!.pressureUlcerCategory3Description;
+      case PressureUlcerType.category4:
+        return AppLocalizations.of(context)!.pressureUlcerCategory4Description;
+    }
+  }
+
+  Color get color {
+    switch (this) {
+      case PressureUlcerType.none:
+        return AppTheme.colors.error.withOpacity(0);
+      case PressureUlcerType.category1:
+        return AppTheme.colors.error.withOpacity(0.25);
+      case PressureUlcerType.category2:
+        return AppTheme.colors.error.withOpacity(0.5);
+      case PressureUlcerType.category3:
+        return AppTheme.colors.error.withOpacity(0.75);
+      case PressureUlcerType.category4:
+        return AppTheme.colors.error;
+    }
+  }
+}
+
+enum PressureUlcerLocation {
+  other,
+  ancle,
+  heel,
+  insideKnee,
+  hip,
+  sacrum,
+  sitBones,
+  scapula,
+  shoulder,
+}
+
+extension PressureUlcerLocationExtensions on PressureUlcerLocation {
+  String displayString(BuildContext context) {
+    switch (this) {
+      case PressureUlcerLocation.ancle:
+        return AppLocalizations.of(context)!.ancle;
+      case PressureUlcerLocation.heel:
+        return AppLocalizations.of(context)!.heel;
+      case PressureUlcerLocation.insideKnee:
+        return AppLocalizations.of(context)!.insideKnee;
+      case PressureUlcerLocation.hip:
+        return AppLocalizations.of(context)!.hip;
+      case PressureUlcerLocation.sacrum:
+        return AppLocalizations.of(context)!.sacrum;
+      case PressureUlcerLocation.sitBones:
+        return AppLocalizations.of(context)!.sitBones;
+      case PressureUlcerLocation.scapula:
+        return AppLocalizations.of(context)!.scapula;
+      case PressureUlcerLocation.shoulder:
+        return AppLocalizations.of(context)!.shoulder;
+      default:
+        return AppLocalizations.of(context)!.other;
+    }
+  }
+}
+
+PressureUlcerLocation pressureUlcerLocationFromString(String location) {
+  switch (location) {
+    case 'ancle':
+      return PressureUlcerLocation.ancle;
+    case 'heel':
+      return PressureUlcerLocation.heel;
+    case 'insideKnee':
+      return PressureUlcerLocation.insideKnee;
+    case 'hip':
+      return PressureUlcerLocation.hip;
+    case 'sacrum':
+      return PressureUlcerLocation.sacrum;
+    case 'sitBones':
+      return PressureUlcerLocation.sitBones;
+    case 'scapula':
+      return PressureUlcerLocation.scapula;
+    case 'shoulder':
+      return PressureUlcerLocation.shoulder;
+    default:
+      return PressureUlcerLocation.other;
+  }
+}
+
+class PressureUlcerEntry extends JournalEntry {
+  final PressureUlcerType pressureUlcerType;
+  final PressureUlcerLocation location;
+
+  PressureUlcerEntry({
+    required super.id,
+    required super.time,
+    required super.type,
+    required super.comment,
+    required this.pressureUlcerType,
+    required this.location,
+  });
+
+  factory PressureUlcerEntry.fromJson(Map<String, dynamic> json) {
+    Map<String, dynamic> info = json['info'];
+    return PressureUlcerEntry(
+      id: json['id'],
+      time: DateTime.parse(json['t']),
+      type: journalTypeFromString(json['type']),
+      comment: json['comment'],
+      pressureUlcerType: PressureUlcerType.values.firstWhere(
+          (e) => e.name == info['pressureUlcerType'],
+          orElse: () => PressureUlcerType.category1),
+      location: pressureUlcerLocationFromString(info['location']),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      ...super.toJson(),
+      'info': {
+        'pressureUlcerType': pressureUlcerType.name,
+        'location': location.name,
+      }
+    };
+  }
+
+  @override
+  JournalEntry fromFormUpdate(Map<String, dynamic> values) {
+    return PressureUlcerEntry(
+      id: id,
+      type: type,
+      time: values['time'] as DateTime,
+      comment: values['comment'] as String,
+      pressureUlcerType: values['pressureUlcerType'] as PressureUlcerType,
+      location: values['location'] as PressureUlcerLocation,
+    );
+  }
+
+  @override
+  String title(BuildContext context) {
+    return AppLocalizations.of(context)!.pressureUlcer;
+  }
+
+  @override
+  String shortcutTitle(BuildContext context) {
+    return '${AppLocalizations.of(context)!.pressureUlcer} \n${location.displayString(context)}';
+  }
+
+  @override
+  String get identifier {
+    return 'pressureUlcer ${location.name}';
   }
 }

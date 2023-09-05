@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:scimovement/models/auth.dart';
+import 'package:scimovement/models/app_features.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/screens/home/widgets/energy_widget.dart';
 import 'package:scimovement/screens/home/widgets/exercise_widget.dart';
-import 'package:scimovement/screens/home/widgets/no_data_message.dart';
+import 'package:scimovement/screens/home/widgets/pressure_release_widget.dart';
 import 'package:scimovement/screens/home/widgets/sedentary_widget.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/activity_wheel/activity_wheel.dart';
@@ -17,7 +18,7 @@ class HomeScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    bool showDataWidgets = ref.watch(userHasDataProvider);
+    List<AppFeature> features = ref.watch(appFeaturesProvider);
 
     return SmartRefresher(
       controller: _refreshController,
@@ -26,33 +27,31 @@ class HomeScreen extends HookConsumerWidget {
         _refreshController.refreshCompleted();
       },
       child: ListView(
-        padding: AppTheme.screenPadding,
+        padding: EdgeInsets.symmetric(
+          horizontal: AppTheme.basePadding * 2,
+        ),
         children: [
-          if (showDataWidgets) const DateSelect(),
-          AppTheme.spacer4x,
-          if (showDataWidgets) const ActivityWheel(),
+          const DateSelect(),
           AppTheme.spacer2x,
-          if (showDataWidgets)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Expanded(child: EnergyWidget()),
-                AppTheme.spacer2x,
-                const Expanded(child: SedentaryWidget()),
-              ],
-            ),
-          if (!showDataWidgets) const NoDataMessage(),
-          AppTheme.spacer2x,
-          if (showDataWidgets)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Expanded(child: ExerciseWidget()),
-                AppTheme.spacer2x,
-                Expanded(child: Container()),
-                // const Expanded(child: SedentaryWidget()),
-              ],
-            ),
+          StaggeredGrid.count(
+            crossAxisCount: 2,
+            crossAxisSpacing: AppTheme.basePadding * 2,
+            mainAxisSpacing: AppTheme.basePadding * 2,
+            children: [
+              if (features.contains(AppFeature.watch))
+                const StaggeredGridTile.count(
+                  crossAxisCellCount: 2,
+                  mainAxisCellCount: 1,
+                  child: ActivityWheel(),
+                ),
+              if (features.contains(AppFeature.watch)) const EnergyWidget(),
+              if (features.contains(AppFeature.watch)) const SedentaryWidget(),
+              if (features.contains(AppFeature.exercise))
+                const ExerciseWidget(),
+              if (features.contains(AppFeature.pressureRelease))
+                const PressureReleaseWidget(),
+            ],
+          ),
         ],
       ),
     );

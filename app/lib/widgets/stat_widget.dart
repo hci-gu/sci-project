@@ -72,7 +72,7 @@ class StatWidget extends StatelessWidget {
         ? values.percentChange
         : values.diff.toDouble();
 
-    return _container(
+    return container(
       Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -184,11 +184,11 @@ class StatWidget extends StatelessWidget {
     );
   }
 
-  static Widget _container(Widget child) {
+  static Widget container(Widget child, [BoxDecoration? decoration]) {
     return AspectRatio(
       aspectRatio: 1,
       child: Container(
-        decoration: AppTheme.widgetDecoration,
+        decoration: decoration ?? AppTheme.widgetDecoration,
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
         child: FittedBox(
           fit: BoxFit.contain,
@@ -198,7 +198,7 @@ class StatWidget extends StatelessWidget {
     );
   }
 
-  static Widget _emptyContainer(List<Widget> children) => _container(
+  static Widget _emptyContainer(List<Widget> children) => container(
         Center(
           child: SizedBox(
             width: 128,
@@ -210,15 +210,15 @@ class StatWidget extends StatelessWidget {
         ),
       );
 
-  static Widget error(String asset) => _emptyContainer([
-        SvgPicture.asset(asset),
+  static Widget error([String? asset]) => _emptyContainer([
+        asset != null ? SvgPicture.asset(asset) : Container(),
         AppTheme.spacer2x,
         const Text('error'),
       ]);
 
-  static Widget loading(String asset) => _emptyContainer(
+  static Widget loading([String? asset]) => _emptyContainer(
         [
-          SvgPicture.asset(asset),
+          asset != null ? SvgPicture.asset(asset) : Container(),
           AppTheme.spacer4x,
           const CircularProgressIndicator(),
         ],
