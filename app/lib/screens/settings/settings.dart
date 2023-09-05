@@ -7,6 +7,7 @@ import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/models/onboarding.dart';
 import 'package:scimovement/screens/settings/widgets/app_settings.dart';
 import 'package:scimovement/screens/settings/widgets/user_settings.dart';
+import 'package:scimovement/storage.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
 import 'package:go_router/go_router.dart';
@@ -161,8 +162,7 @@ class OnboardingButton extends ConsumerWidget {
       width: 220,
       secondary: true,
       onPressed: () async {
-        ref.read(onboardingStepProvider.notifier).state = onboardingStepCount;
-        await Future.delayed(const Duration(milliseconds: 100));
+        await Storage().storeOnboardingDone(false);
         ref.read(onboardingStepProvider.notifier).state = 0;
         await Future.delayed(const Duration(milliseconds: 100));
         context.goNamed('onboarding');

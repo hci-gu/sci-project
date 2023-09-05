@@ -17,8 +17,8 @@ export default {
         t: DataTypes.DATE,
         type: DataTypes.STRING,
         comment: DataTypes.STRING,
-        painLevel: DataTypes.INTEGER,
-        bodyPart: DataTypes.STRING,
+        imageUrl: DataTypes.STRING,
+        info: DataTypes.JSONB,
       },
       {
         timestamps: false,
@@ -43,11 +43,31 @@ export default {
       ...data,
       UserId: userId,
     }),
-  find: ({ userId }: { userId: string }) => {
+  find: (
+    {
+      userId,
+      from,
+      to,
+    }: {
+      userId: string
+      from?: Date
+      to?: Date
+    },
+    filter = {}
+  ) => {
+    const where: any = {
+      UserId: userId,
+    }
+    if (from && to) {
+      where.t = {
+        [Op.between]: [from, to],
+      }
+    }
     return JournalModel.findAll({
-      attributes: ['id', 't', 'type', 'comment', 'painLevel', 'bodyPart'],
+      attributes: ['id', 't', 'type', 'comment', 'info'],
       where: {
-        UserId: userId,
+        ...where,
+        ...filter,
       },
       order: [['t', 'ASC']],
     })
@@ -63,8 +83,11 @@ export default {
           'agg_t',
         ],
         [
-          sequelizeInstance.fn('avg', sequelizeInstance.col('painLevel')),
-          'painLevel',
+          sequelizeInstance.fn(
+            'avg',
+            sequelizeInstance.literal("info->>'painLevel'")
+          ),
+          'agg_painLevel',
         ],
       ],
       group: ['agg_t'],
@@ -73,13 +96,16 @@ export default {
       docs.map((d) => ({
         // @ts-ignore
         t: d.get({ plain: true }).agg_t,
-        painLevel: d.painLevel,
+        info: {
+          // @ts-ignore
+          painLevel: d.agg_painLevel,
+        },
       }))
     )
   },
   getLastEntry: (userId: string) => {
     return JournalModel.findOne({
-      attributes: ['id', 't', 'type', 'comment', 'painLevel', 'bodyPart'],
+      attributes: ['id', 't', 'type', 'comment', 'info'],
       where: {
         UserId: userId,
       },

@@ -6,10 +6,12 @@ import 'package:scimovement/widgets/button.dart';
 
 class StepIndicator extends StatelessWidget {
   final int index;
+  final int count;
 
   const StepIndicator({
     Key? key,
     this.index = 0,
+    this.count = 3,
   }) : super(key: key);
 
   @override
@@ -17,7 +19,7 @@ class StepIndicator extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(
-        onboardingStepCount,
+        count,
         (i) => Padding(
           padding: const EdgeInsets.only(left: 8),
           child: Container(
@@ -37,8 +39,8 @@ class StepIndicator extends StatelessWidget {
   }
 }
 
-class OnboardingStepWidget extends ConsumerWidget {
-  const OnboardingStepWidget({Key? key}) : super(key: key);
+class OnboardingStepper extends ConsumerWidget {
+  const OnboardingStepper({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -48,30 +50,31 @@ class OnboardingStepWidget extends ConsumerWidget {
         horizontal: 32.0,
         vertical: 24.0,
       ),
-      decoration: BoxDecoration(
-        color: AppTheme.colors.white,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
-        ),
-      ),
       child: Column(
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              GestureDetector(
-                onTap: () {
-                  ref.read(onboardingStepProvider.notifier).state =
-                      onboardingStepCount;
-                },
-                child: Text(
-                  'Hoppa över',
-                  style: AppTheme.labelLarge.copyWith(
-                    decoration: TextDecoration.underline,
-                  ),
-                ),
-              ),
+              ref.watch(onboardingStepProvider) == 0
+                  ? GestureDetector(
+                      onTap: () {
+                        ref.read(onboardingStepProvider.notifier).state =
+                            onboardingStepCount;
+                      },
+                      child: Text(
+                        'Hoppa över',
+                        style: AppTheme.labelLarge.copyWith(
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    )
+                  : Button(
+                      width: 100,
+                      title: 'Tillbaka',
+                      secondary: true,
+                      onPressed: () =>
+                          ref.read(onboardingStepProvider.notifier).state--,
+                    ),
               Button(
                 width: 100,
                 title:
@@ -86,46 +89,8 @@ class OnboardingStepWidget extends ConsumerWidget {
           AppTheme.spacer,
           StepIndicator(
             index: ref.watch(onboardingStepProvider),
+            count: onboardingStepCount,
           )
-        ],
-      ),
-    );
-  }
-}
-
-const defaultContainer = SizedBox();
-
-class OnboardingStepMessage extends StatelessWidget {
-  final String title;
-  final String text;
-  final Widget action;
-
-  const OnboardingStepMessage({
-    Key? key,
-    required this.title,
-    required this.text,
-    this.action = defaultContainer,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: MediaQuery.of(context).size.width - 64,
-      decoration: AppTheme.cardDecoration,
-      padding: AppTheme.elementPadding,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: AppTheme.labelXLarge,
-          ),
-          Text(
-            text,
-            style: AppTheme.paragraphMedium,
-          ),
-          action,
         ],
       ),
     );

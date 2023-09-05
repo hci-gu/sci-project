@@ -1,10 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:scimovement/api/classes.dart';
+import 'package:scimovement/models/goals.dart';
 import 'package:scimovement/models/pagination.dart';
 
-// const String apiUrl = 'https://sci-api.prod.appadem.in';
-// const String apiUrl = 'http://192.168.0.33:4000';
-const String apiUrl = 'http://localhost:4000';
+const String apiUrl = 'https://sci-api.prod.appadem.in';
+// const String apiUrl = 'http://192.168.10.107:4000';
+// const String apiUrl = 'http://localhost:4000';
 const emptyBody = {};
 
 class Api {
@@ -141,25 +142,65 @@ class Api {
     return getUser(_userId);
   }
 
-  Future<List<JournalEntry>> getJournal() async {
+  Future<List<JournalEntry>> getJournalForType(
+      JournalType type, DateTime date) async {
     try {
-      var response = await dio.get('/journal/$_userId');
+      var response =
+          await dio.get('/journal/$_userId/${type.name}', queryParameters: {
+        'to': date.toIso8601String().substring(0, 16),
+      });
       if (response.statusCode == 200) {
         List<dynamic> data = response.data;
-        return data.map((json) => JournalEntry.fromJson(json)).toList();
+        return data.map((json) {
+          JournalType type = journalTypeFromString(json['type']);
+          switch (type) {
+            case JournalType.pain:
+              return PainLevelEntry.fromJson(json);
+            case JournalType.pressureRelease:
+              return PressureReleaseEntry.fromJson(json);
+            case JournalType.pressureUlcer:
+              return PressureUlcerEntry.fromJson(json);
+            default:
+              return JournalEntry.fromJson(json);
+          }
+        }).toList();
       }
-    } catch (e) {}
+    } catch (_) {}
     return [];
   }
 
-  Future createJournalEntry(
-      String comment, int painLevel, String bodyPart) async {
-    await dio.post('/journal/$_userId', data: {
-      'type': JournalType.pain.name,
-      'comment': comment,
-      'painLevel': painLevel,
-      'bodyPart': bodyPart,
-    });
+  Future<List<JournalEntry>> getJournal(
+    DateTime from,
+    DateTime to,
+    ChartMode mode,
+  ) async {
+    try {
+      var response = await dio.get('/journal/$_userId', queryParameters: {
+        'from': from.toIso8601String().substring(0, 16),
+        'to': to.toIso8601String().substring(0, 16),
+      });
+      if (response.statusCode == 200) {
+        List<dynamic> data = response.data;
+        return data.map((json) {
+          JournalType type = journalTypeFromString(json['type']);
+          switch (type) {
+            case JournalType.pain:
+              return PainLevelEntry.fromJson(json);
+            case JournalType.pressureRelease:
+              return PressureReleaseEntry.fromJson(json);
+            case JournalType.pressureUlcer:
+              return PressureUlcerEntry.fromJson(json);
+            default:
+              return JournalEntry.fromJson(json);
+          }
+        }).toList();
+      }
+    } catch (_) {}
+    return [];
+  }
+
+  Future createJournalEntry(Map<String, dynamic> form) async {
+    await dio.post('/journal/$_userId', data: form);
   }
 
   Future updateJournalEntry(JournalEntry entry) async {
@@ -168,6 +209,39 @@ class Api {
 
   Future deleteJournalEntry(int id) async {
     await dio.delete('/journal/$_userId/$id');
+  }
+
+  Future<List<Goal>> getGoals(DateTime date) async {
+    try {
+      var response = await dio.get('/goals/$_userId', queryParameters: {
+        'date': date.toIso8601String().substring(0, 16),
+      });
+      if (response.statusCode == 200) {
+        List<dynamic> data = response.data;
+        return data.map((json) {
+          String type = json['type'];
+
+          if (type == 'journal') {
+            return JournalGoal.fromJson(json);
+          }
+
+          return Goal.fromJson(json);
+        }).toList();
+      }
+    } catch (_) {}
+    return [];
+  }
+
+  Future createGoal(Map<String, dynamic> form) async {
+    await dio.post('/goals/$_userId', data: form);
+  }
+
+  Future updateGoal(Goal goal) async {
+    await dio.patch('/goals/$_userId/${goal.id}', data: goal.toJson());
+  }
+
+  Future deleteGoal(int id) async {
+    await dio.delete('/goals/$_userId/$id');
   }
 
   String chartModeToGroup(ChartMode mode) {

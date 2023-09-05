@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:reactive_forms/reactive_forms.dart';
-import 'package:scimovement/theme/theme.dart';
 
 class StyledTextField extends StatelessWidget {
   final String formControlName;
@@ -55,12 +54,12 @@ class StyledTextField extends StatelessWidget {
           maxLines: maxLines,
           obscureText: obscureText,
           readOnly: disabled || !canEdit,
-          onTap: () => onTap(),
-          validationMessages: (control) => {
-            ValidationMessage.required: 'Fältet är obligatoriskt',
-            ValidationMessage.email: 'Måste vara en giltig e-postadress',
-            ValidationMessage.minLength: 'Måste vara minst 8 tecken',
-            ValidationMessage.mustMatch: 'Lösenorden måste matcha',
+          onTap: (_) => onTap(),
+          validationMessages: {
+            ValidationMessage.required: (_) => 'Fältet är obligatoriskt',
+            ValidationMessage.email: (_) => 'Måste vara en giltig e-postadress',
+            ValidationMessage.minLength: (_) => 'Måste vara minst 8 tecken',
+            ValidationMessage.mustMatch: (_) => 'Lösenorden måste matcha',
           },
         ),
       ),

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:intl/intl.dart';
 
 enum ChartMode {
   day,
   week,
   month,
+  quarter,
   year,
 }
 
@@ -18,6 +20,8 @@ extension ChartModeDisplayName on ChartMode {
         return AppLocalizations.of(context)!.week;
       case ChartMode.month:
         return AppLocalizations.of(context)!.month;
+      case ChartMode.quarter:
+        return AppLocalizations.of(context)!.quarter;
       case ChartMode.year:
         return AppLocalizations.of(context)!.year;
     }
@@ -46,6 +50,8 @@ class Pagination {
         return const Duration(days: 6);
       case ChartMode.month:
         return const Duration(days: 30);
+      case ChartMode.quarter:
+        return const Duration(days: 90);
       case ChartMode.year:
         return const Duration(days: 365);
     }
@@ -84,7 +90,25 @@ String displayDate(BuildContext context, DateTime date) {
     return AppLocalizations.of(context)!.yesterday;
   }
 
-  return date.toString().substring(0, 10);
+  String weekday = DateFormat(DateFormat.WEEKDAY).format(date);
+  // capitalize
+  return weekday[0].toUpperCase() + weekday.substring(1);
+}
+
+String displayDateSubtitle(BuildContext context, DateTime date) {
+  DateTime now = DateTime.now();
+  DateTime today = DateTime(now.year, now.month, now.day);
+  DateTime yesterday = today.subtract(const Duration(days: 1));
+
+  if (!date.isBefore(today) || !date.isBefore(yesterday)) {
+    // weekday, dd M
+    String weekday = DateFormat(DateFormat.WEEKDAY).format(date);
+    weekday = weekday[0].toUpperCase() + weekday.substring(1);
+
+    return '$weekday, ${DateFormat(DateFormat.MONTH_DAY).format(date)}';
+  }
+
+  return DateFormat(DateFormat.YEAR_ABBR_MONTH_DAY).format(date);
 }
 
 final dateDisplayProvider =
@@ -94,6 +118,14 @@ final dateDisplayProvider =
       ref.watch(dateProvider).subtract(pagination.duration * pagination.page);
   return displayDate(context, date);
 });
+final subtitleDateDisplayProvider =
+    Provider.family<String, BuildContext>((ref, context) {
+  Pagination pagination = ref.watch(paginationProvider);
+  DateTime date =
+      ref.watch(dateProvider).subtract(pagination.duration * pagination.page);
+  return displayDateSubtitle(context, date);
+});
+
 final previousDateDisplayProvider =
     Provider.family<String, BuildContext>((ref, context) {
   Pagination pagination = ref.watch(paginationProvider);
@@ -101,4 +133,11 @@ final previousDateDisplayProvider =
       .watch(dateProvider)
       .subtract(pagination.duration * (pagination.page + 1));
   return displayDate(context, date);
+});
+
+final isTodayProvider = Provider<bool>((ref) {
+  DateTime date = ref.watch(dateProvider);
+  DateTime now = DateTime.now();
+  DateTime today = DateTime(now.year, now.month, now.day);
+  return !date.isBefore(today);
 });

@@ -25,16 +25,23 @@ export type PushMessage = {
 export const send = ({
   deviceId,
   message,
+  action,
 }: {
   deviceId: string
   message: PushMessage
+  action?: string
 }) => {
+  const body: PushNotifications.Data = {
+    title: message.title,
+    body: message.body,
+    topic: process.env.APN_TOPIC,
+  }
+  if (action) {
+    body.action = action
+  }
+
   return push
-    .send([deviceId], {
-      title: message.title,
-      body: message.body,
-      topic: process.env.APN_TOPIC,
-    })
+    .send([deviceId], body)
     .then((res) => console.info(JSON.stringify(res, null, 2)))
     .catch(console.error)
 }

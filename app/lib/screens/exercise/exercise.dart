@@ -54,9 +54,9 @@ class ExcerciseScreen extends HookConsumerWidget {
           subtitle: bouts[index].displayDuration,
           onDismissed: () async {
             await Api().deleteBout(bouts[index].id);
-            ref.refresh(boutsProvider(const Pagination()));
-            ref.refresh(energyProvider(const Pagination()));
-            ref.refresh(excerciseBoutsProvider(const Pagination()));
+            ref.invalidate(boutsProvider(const Pagination()));
+            ref.invalidate(energyProvider(const Pagination()));
+            ref.invalidate(excerciseBoutsProvider(const Pagination()));
           },
           onTap: () {},
         );

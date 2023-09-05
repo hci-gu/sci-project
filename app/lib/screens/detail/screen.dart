@@ -4,7 +4,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/chart_mode_select.dart';
-import 'package:scimovement/widgets/info_box.dart';
 import 'package:scimovement/widgets/stat_header.dart';
 
 typedef PageBuilder = Widget Function(BuildContext context, int page);
@@ -13,7 +12,7 @@ class DetailScreen extends HookConsumerWidget {
   final String title;
   final PageBuilder pageBuilder;
   final StatHeader header;
-  final InfoBox infoBox;
+  final Widget content;
   final double height;
 
   const DetailScreen({
@@ -21,13 +20,13 @@ class DetailScreen extends HookConsumerWidget {
     required this.title,
     required this.pageBuilder,
     required this.header,
-    required this.infoBox,
+    required this.content,
     this.height = 200,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    PageController _pageController = usePageController();
+    PageController pageController = usePageController();
 
     return Scaffold(
       appBar: AppTheme.appBar(title),
@@ -46,7 +45,7 @@ class DetailScreen extends HookConsumerWidget {
             child: SizedBox(
               height: height,
               child: PageView.builder(
-                controller: _pageController,
+                controller: pageController,
                 reverse: true,
                 onPageChanged: (int page) {
                   ref.read(paginationProvider.notifier).state = Pagination(
@@ -59,7 +58,7 @@ class DetailScreen extends HookConsumerWidget {
             ),
           ),
           AppTheme.separator,
-          infoBox,
+          content,
         ],
       ),
     );

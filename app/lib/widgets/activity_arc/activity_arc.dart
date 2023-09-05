@@ -7,10 +7,12 @@ import 'package:scimovement/theme/theme.dart';
 
 class ActivityArc extends HookWidget {
   final List<Bout> bouts;
+  final List<JournalEntry> journalEntries;
   final List<Activity> activities;
 
   const ActivityArc({
     required this.bouts,
+    this.journalEntries = const [],
     this.activities = const [
       Activity.active,
       Activity.moving,
@@ -47,7 +49,6 @@ class ActivityArc extends HookWidget {
       },
       blendMode: BlendMode.dstOut,
       child: Container(
-        // height: 10,
         clipBehavior: Clip.hardEdge,
         decoration: const BoxDecoration(),
         child: Stack(
@@ -58,6 +59,7 @@ class ActivityArc extends HookWidget {
                 deviceWidth: width,
                 bouts: bouts,
                 activities: activities,
+                journalEntries: journalEntries,
                 dragOffset: offset,
               ),
             ),
@@ -99,12 +101,14 @@ class ActivityArc extends HookWidget {
 class ArcPainter extends CustomPainter {
   final List<Bout> bouts;
   final List<Activity> activities;
+  final List<JournalEntry> journalEntries;
   final double dragOffset;
   final double deviceWidth;
 
   ArcPainter({
     required this.bouts,
     required this.deviceWidth,
+    this.journalEntries = const [],
     this.activities = Activity.values,
     this.dragOffset = 0.0,
   });
@@ -131,6 +135,23 @@ class ArcPainter extends CustomPainter {
               ? AppTheme.colors.black.withOpacity(0.4)
               : AppTheme.colors.activityLevelToColor(activity).withOpacity(0.33)
           ..strokeWidth = 2
+          ..style = PaintingStyle.stroke,
+      );
+    }
+
+    for (JournalEntry entry in journalEntries) {
+      double minute = entry.time.hour * 60.0 + entry.time.minute;
+      double start = minute * pi / 2 / 1440;
+
+      Rect rect = drawRect.inflate(24);
+      canvas.drawArc(
+        rect,
+        offset + start,
+        6 * pi / 2 / 1440 + 0.006,
+        false,
+        Paint()
+          ..color = AppTheme.colors.success
+          ..strokeWidth = 16
           ..style = PaintingStyle.stroke,
       );
     }
