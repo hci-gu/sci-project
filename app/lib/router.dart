@@ -32,7 +32,7 @@ List<String> detailRoutes = [
   'sedentary',
   'pressure-release'
 ];
-String landingRoute = '/';
+String landingRoute = '/journal';
 
 class RouteChangeObserver extends NavigatorObserver {
   final Ref _ref;
@@ -204,37 +204,52 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
                 builder: (context, state) => const JournalScreen(),
                 routes: [
                   GoRoute(
-                    name: 'select-journal-type',
-                    path: 'type',
-                    builder: (_, state) => SelectJournalTypeScreen(),
-                    routes: [
-                      GoRoute(
-                        name: 'create-journal',
-                        path: 'create',
-                        builder: (_, state) => EditJournalEntryScreen(
-                          type: (state.extra as Map?)?['type'],
-                          entry: (state.extra as Map?)?['entry'],
+                      name: 'select-journal-type',
+                      path: 'type',
+                      builder: (_, state) => const SelectJournalTypeScreen(),
+                      routes: [
+                        GoRoute(
+                          name: 'create-journal-from-type',
+                          path: 'create',
+                          builder: (_, state) => EditJournalEntryScreen(
+                            type: (state.extra as Map?)?['type'],
+                            entry: (state.extra as Map?)?['entry'],
+                          ),
                         ),
-                      ),
-                    ],
+                      ]),
+                  GoRoute(
+                    name: 'create-journal',
+                    path: 'create',
+                    builder: (_, state) => EditJournalEntryScreen(
+                      type: (state.extra as Map?)?['type'],
+                      entry: (state.extra as Map?)?['entry'],
+                    ),
                   ),
                   GoRoute(
-                    name: 'journal-list',
-                    path: 'list',
-                    builder: (_, state) => JournalListScreen(
-                      type: (state.extra as Map?)?['type'],
+                    name: 'update-journal',
+                    path: ':id',
+                    builder: (_, state) => EditJournalEntryScreen(
+                      shouldCreateEntry: false,
+                      entry: (state.extra as Map?)?['entry'],
                     ),
-                    routes: [
-                      GoRoute(
-                        name: 'update-journal',
-                        path: ':id',
-                        builder: (_, state) => EditJournalEntryScreen(
-                          shouldCreateEntry: false,
-                          entry: (state.extra as Map?)?['entry'],
-                        ),
-                      ),
-                    ],
                   ),
+                  // GoRoute(
+                  //   name: 'journal-list',
+                  //   path: 'list',
+                  //   builder: (_, state) => JournalListScreen(
+                  //     type: (state.extra as Map?)?['type'],
+                  //   ),
+                  //   routes: [
+                  //     GoRoute(
+                  //       name: 'update-journal',
+                  //       path: ':id',
+                  //       builder: (_, state) => EditJournalEntryScreen(
+                  //         shouldCreateEntry: false,
+                  //         entry: (state.extra as Map?)?['entry'],
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
                   GoRoute(
                     path: 'perform-pressure-release',
                     name: 'perform-pressure-release',
