@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:infinite_listview/infinite_listview.dart';
 import 'package:intl/intl.dart';
@@ -7,6 +6,7 @@ import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/models/journal.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/theme/theme.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class JournalCalendarDay extends ConsumerWidget {
   final DateTime date;
@@ -69,9 +69,12 @@ class JournalCalendarDay extends ConsumerWidget {
   }
 
   Widget dots() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: journal.take(3).map((e) => dot()).toList(),
+    return SizedBox(
+      width: 24,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: journal.take(3).map((e) => dot()).toList(),
+      ),
     );
   }
 
@@ -178,41 +181,61 @@ class JournalCalendarMonth extends ConsumerWidget {
   }
 }
 
-class JournalCalendar extends HookConsumerWidget {
+class WeekdayRow extends StatelessWidget {
+  const WeekdayRow({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      child: Row(
+        children: [
+          _weekday(AppLocalizations.of(context)!.monday),
+          _weekday(AppLocalizations.of(context)!.tuesday),
+          _weekday(AppLocalizations.of(context)!.wednesday),
+          _weekday(AppLocalizations.of(context)!.thursday),
+          _weekday(AppLocalizations.of(context)!.friday),
+          _weekday(AppLocalizations.of(context)!.saturday),
+          _weekday(AppLocalizations.of(context)!.sunday),
+        ],
+      ),
+    );
+  }
+
+  Widget _weekday(String day) {
+    return Expanded(
+      child: Text(
+        day.substring(0, 1).toUpperCase(),
+        textAlign: TextAlign.center,
+        style: AppTheme.labelTiny,
+      ),
+    );
+  }
+}
+
+class JournalCalendar extends StatelessWidget {
   const JournalCalendar({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     double itemExtent = (MediaQuery.of(context).size.height * 0.5) - 57;
-    InfiniteScrollController controller =
-        useMemoized(() => InfiniteScrollController());
-
-    // useEffect(() {
-    //   controller.addListener(() {
-    //     // get the current page
-    //     int page = controller.offset ~/ itemExtent;
-    //     if (page != currentPage.value) {
-    //       currentPage.value = page;
-    //       print('page changed: ${currentPage.value}');
-    //       ref.read(journalPaginationProvider.notifier).state =
-    //           Pagination(page: -page, mode: ChartMode.month);
-    //     }
-    //   });
-    //   return () => {};
-    // }, [currentPage, controller]);
-
     DateTime date = DateTime(DateTime.now().year, DateTime.now().month, 1);
 
-    return InfiniteListView.builder(
-      controller: controller,
-      itemExtent: itemExtent,
-      physics: const PageScrollPhysics(),
-      itemBuilder: (_, index) {
-        return JournalCalendarMonth(
-          date: DateTime(date.year, date.month + index, date.day),
-          page: -index - 1,
-        );
-      },
+    return Column(
+      children: [
+        const WeekdayRow(),
+        Expanded(
+          child: InfiniteListView.builder(
+            itemExtent: itemExtent,
+            physics: const PageScrollPhysics(),
+            itemBuilder: (_, index) {
+              return JournalCalendarMonth(
+                date: DateTime(date.year, date.month + index, date.day),
+                page: -index - 1,
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }

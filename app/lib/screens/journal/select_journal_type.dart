@@ -7,7 +7,9 @@ import 'package:scimovement/theme/theme.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SelectJournalTypeScreen extends StatelessWidget {
-  const SelectJournalTypeScreen({super.key});
+  final DateTime? initialDate;
+
+  const SelectJournalTypeScreen({super.key, this.initialDate});
 
   @override
   Widget build(BuildContext context) {
@@ -36,12 +38,7 @@ class SelectJournalTypeScreen extends StatelessWidget {
             shrinkWrap: true,
             children: [
               JournalEntryShortcut(
-                onTap: () => GoRouter.of(context).goNamed(
-                  'create-journal-from-type',
-                  extra: {
-                    'type': JournalType.pain,
-                  },
-                ),
+                onTap: () => _navigate(context, JournalType.pain),
                 icon: BodyPartIcon(
                   bodyPart: BodyPart(BodyPartType.scapula, null),
                   size: 48,
@@ -49,12 +46,7 @@ class SelectJournalTypeScreen extends StatelessWidget {
                 title: AppLocalizations.of(context)!.musclePainTitle,
               ),
               JournalEntryShortcut(
-                onTap: () => GoRouter.of(context).goNamed(
-                  'create-journal-from-type',
-                  extra: {
-                    'type': JournalType.pressureRelease,
-                  },
-                ),
+                onTap: () => _navigate(context, JournalType.pressureRelease),
                 icon: const Icon(
                   Icons.access_alarm,
                   size: 48,
@@ -62,12 +54,7 @@ class SelectJournalTypeScreen extends StatelessWidget {
                 title: AppLocalizations.of(context)!.pressureRelease,
               ),
               JournalEntryShortcut(
-                onTap: () => GoRouter.of(context).goNamed(
-                  'create-journal-from-type',
-                  extra: {
-                    'type': JournalType.pressureUlcer,
-                  },
-                ),
+                onTap: () => _navigate(context, JournalType.pressureUlcer),
                 icon: const Icon(
                   Icons.album_outlined,
                   size: 48,
@@ -78,6 +65,16 @@ class SelectJournalTypeScreen extends StatelessWidget {
           )
         ],
       ),
+    );
+  }
+
+  _navigate(BuildContext context, JournalType type) {
+    GoRouter.of(context).goNamed(
+      'create-journal-from-type',
+      extra: {
+        'type': type,
+        'date': initialDate,
+      },
     );
   }
 }
