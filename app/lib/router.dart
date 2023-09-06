@@ -16,7 +16,6 @@ import 'package:scimovement/screens/home/home.dart';
 import 'package:scimovement/screens/introduction.dart';
 import 'package:scimovement/screens/journal/edit_entry.dart';
 import 'package:scimovement/screens/journal/journal.dart';
-import 'package:scimovement/screens/journal/journal_list.dart';
 import 'package:scimovement/screens/journal/perform_pressure_release.dart';
 import 'package:scimovement/screens/journal/select_journal_type.dart';
 import 'package:scimovement/screens/login.dart';
@@ -206,7 +205,9 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
                   GoRoute(
                       name: 'select-journal-type',
                       path: 'type',
-                      builder: (_, state) => const SelectJournalTypeScreen(),
+                      builder: (_, state) => SelectJournalTypeScreen(
+                            initialDate: (state.extra as Map?)?['date'],
+                          ),
                       routes: [
                         GoRoute(
                           name: 'create-journal-from-type',
@@ -214,6 +215,7 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
                           builder: (_, state) => EditJournalEntryScreen(
                             type: (state.extra as Map?)?['type'],
                             entry: (state.extra as Map?)?['entry'],
+                            initialDate: (state.extra as Map?)?['date'],
                           ),
                         ),
                       ]),
@@ -233,23 +235,6 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
                       entry: (state.extra as Map?)?['entry'],
                     ),
                   ),
-                  // GoRoute(
-                  //   name: 'journal-list',
-                  //   path: 'list',
-                  //   builder: (_, state) => JournalListScreen(
-                  //     type: (state.extra as Map?)?['type'],
-                  //   ),
-                  //   routes: [
-                  //     GoRoute(
-                  //       name: 'update-journal',
-                  //       path: ':id',
-                  //       builder: (_, state) => EditJournalEntryScreen(
-                  //         shouldCreateEntry: false,
-                  //         entry: (state.extra as Map?)?['entry'],
-                  //       ),
-                  //     ),
-                  //   ],
-                  // ),
                   GoRoute(
                     path: 'perform-pressure-release',
                     name: 'perform-pressure-release',

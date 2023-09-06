@@ -15,18 +15,24 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class EditJournalEntryScreen extends ConsumerWidget {
   final bool shouldCreateEntry;
+  final DateTime? initialDate;
   final JournalType? type;
   final JournalEntry? entry;
 
   const EditJournalEntryScreen(
-      {Key? key, this.entry, this.type, this.shouldCreateEntry = true})
+      {Key? key,
+      this.entry,
+      this.type,
+      this.initialDate,
+      this.shouldCreateEntry = true})
       : super(key: key);
 
   FormGroup buildForm() {
     Map<String, FormControl> defaultFields = {
       'time': FormControl<DateTime>(
-        value:
-            shouldCreateEntry ? DateTime.now() : entry?.time ?? DateTime.now(),
+        value: shouldCreateEntry
+            ? initialDate ?? DateTime.now()
+            : entry?.time ?? DateTime.now(),
         validators: [Validators.required],
       ),
       'comment': FormControl<String>(
