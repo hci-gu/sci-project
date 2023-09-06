@@ -46,35 +46,28 @@ class JournalShortcutGrid extends ConsumerWidget {
   Widget _buildList(
       BuildContext context, List<JournalEntry> data, WidgetRef ref) {
     return SizedBox(
-      height: data.length > 2 ? 320 : 148,
+      height: 148,
       child: ListView(
         scrollDirection: Axis.horizontal,
-        children: [
-          GridView.count(
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: data.length > 2 ? 2 : 1,
-            scrollDirection: Axis.horizontal,
-            crossAxisSpacing: AppTheme.basePadding * 2,
-            mainAxisSpacing: AppTheme.basePadding * 2,
-            shrinkWrap: true,
-            padding: EdgeInsets.symmetric(horizontal: AppTheme.basePadding * 2),
-            children: [
-              ...data
-                  .map(
-                    (e) => JournalEntryShortcut(
-                      onTap: () => context.goNamed(
-                        'create-journal',
-                        extra: {'entry': e},
-                      ),
-                      icon: _iconForEntry(e),
-                      title: e.shortcutTitle(context),
-                      subtitle: timeago.format(e.time),
+        children: data
+            .map(
+              (e) => Padding(
+                padding: EdgeInsets.only(right: AppTheme.basePadding * 2),
+                child: SizedBox(
+                  width: 148,
+                  child: JournalEntryShortcut(
+                    onTap: () => context.goNamed(
+                      'create-journal',
+                      extra: {'entry': e},
                     ),
-                  )
-                  .toList(),
-            ],
-          ),
-        ],
+                    icon: _iconForEntry(e),
+                    title: e.shortcutTitle(context),
+                    subtitle: timeago.format(e.time),
+                  ),
+                ),
+              ),
+            )
+            .toList(),
       ),
     );
   }

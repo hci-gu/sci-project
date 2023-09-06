@@ -7,7 +7,7 @@ import 'package:scimovement/theme/theme.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SelectJournalTypeScreen extends StatelessWidget {
-  // const SelectJournalTypeScreen({super.key});
+  const SelectJournalTypeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -36,10 +36,12 @@ class SelectJournalTypeScreen extends StatelessWidget {
             shrinkWrap: true,
             children: [
               JournalEntryShortcut(
-                onTap: () =>
-                    GoRouter.of(context).goNamed('create-journal', extra: {
-                  'type': JournalType.pain,
-                }),
+                onTap: () => GoRouter.of(context).goNamed(
+                  'create-journal-from-type',
+                  extra: {
+                    'type': JournalType.pain,
+                  },
+                ),
                 icon: BodyPartIcon(
                   bodyPart: BodyPart(BodyPartType.scapula, null),
                   size: 48,
@@ -47,10 +49,12 @@ class SelectJournalTypeScreen extends StatelessWidget {
                 title: AppLocalizations.of(context)!.musclePainTitle,
               ),
               JournalEntryShortcut(
-                onTap: () =>
-                    GoRouter.of(context).goNamed('create-journal', extra: {
-                  'type': JournalType.pressureRelease,
-                }),
+                onTap: () => GoRouter.of(context).goNamed(
+                  'create-journal-from-type',
+                  extra: {
+                    'type': JournalType.pressureRelease,
+                  },
+                ),
                 icon: const Icon(
                   Icons.access_alarm,
                   size: 48,
@@ -58,10 +62,12 @@ class SelectJournalTypeScreen extends StatelessWidget {
                 title: AppLocalizations.of(context)!.pressureRelease,
               ),
               JournalEntryShortcut(
-                onTap: () =>
-                    GoRouter.of(context).goNamed('create-journal', extra: {
-                  'type': JournalType.pressureUlcer,
-                }),
+                onTap: () => GoRouter.of(context).goNamed(
+                  'create-journal-from-type',
+                  extra: {
+                    'type': JournalType.pressureUlcer,
+                  },
+                ),
                 icon: const Icon(
                   Icons.album_outlined,
                   size: 48,
