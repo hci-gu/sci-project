@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:infinite_listview/infinite_listview.dart';
 import 'package:intl/intl.dart';
 import 'package:scimovement/models/journal.dart';
 import 'package:scimovement/screens/journal/widgets/journal_calendar.dart';
@@ -17,11 +19,10 @@ class JournalScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppTheme.appBar(AppLocalizations.of(context)!.logbook),
-      body: const Column(
-        children: [
-          Expanded(child: JournalCalendar()),
-          Expanded(child: ListBottomSheet()),
-        ],
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return JournalScroller(height: constraints.maxHeight - 18);
+        },
       ),
       floatingActionButton: isToday(ref.watch(journalSelectedDateProvider))
           ? null
@@ -45,8 +46,77 @@ class JournalScreen extends ConsumerWidget {
   }
 }
 
+class JournalScroller extends HookConsumerWidget {
+  final double height;
+
+  const JournalScroller({super.key, required this.height});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    ValueNotifier<int> currentPage = useState(0);
+    InfiniteScrollController scrollController =
+        useMemoized(() => InfiniteScrollController());
+
+    useEffect(() {
+      scrollController.addListener(() {
+        int newPage = scrollController.offset ~/ height;
+        if (newPage != currentPage.value) {
+          currentPage.value = newPage;
+        }
+      });
+
+      return () {
+        scrollController.dispose();
+      };
+    }, []);
+
+    double listHeight =
+        height - JournalCalendar.heightForPage(context, currentPage.value);
+    return Column(
+      children: [
+        const WeekdayRow(),
+        Expanded(
+          child: Stack(
+            children: [
+              JournalCalendar(
+                controller: scrollController,
+                height: height,
+              ),
+              Positioned(
+                top: JournalCalendar.heightForPage(context, currentPage.value),
+                child: AnimatedSize(
+                  duration: const Duration(milliseconds: 300),
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width,
+                    height: listHeight,
+                    child: ListBottomSheet(
+                      onPageChanged: (Direction dir) {
+                        currentPage.value += dir == Direction.up ? -1 : 1;
+                        scrollController.animateTo(
+                          scrollController.offset +
+                              (dir == Direction.up ? -height : height),
+                          duration: const Duration(milliseconds: 400),
+                          curve: Curves.decelerate,
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+enum Direction { up, down }
+
 class ListBottomSheet extends HookConsumerWidget {
-  const ListBottomSheet({super.key});
+  final Function onPageChanged;
+
+  const ListBottomSheet({super.key, required this.onPageChanged});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -60,11 +130,12 @@ class ListBottomSheet extends HookConsumerWidget {
             width: 1,
           ),
         ),
+        color: AppTheme.colors.background,
       ),
       child: ListView(
         padding: AppTheme.elementPadding,
         children: [
-          _dateHeader(ref, date),
+          _dateHeader(context, ref, date),
           AppTheme.spacer2x,
           if (isToday(date)) _createEntry(context),
           const JournalList()
@@ -84,14 +155,22 @@ class ListBottomSheet extends HookConsumerWidget {
     );
   }
 
-  Widget _dateHeader(WidgetRef ref, DateTime date) {
+  Widget _dateHeader(BuildContext context, WidgetRef ref, DateTime date) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         IconButton(
           onPressed: () {
-            ref.read(journalSelectedDateProvider.notifier).state =
-                date.subtract(const Duration(days: 1));
+            DateTime newdate = date.subtract(const Duration(days: 1));
+            ref.read(journalSelectedDateProvider.notifier).state = newdate;
+            if (newdate.month < date.month || newdate.year < date.year) {
+              onPageChanged(Direction.up);
+              // controller.animateTo(
+              //   controller.offset - JournalCalendar.itemExtent(context),
+              //   duration: const Duration(milliseconds: 400),
+              //   curve: Curves.decelerate,
+              // );
+            }
           },
           icon: const Icon(Icons.chevron_left),
         ),
@@ -102,8 +181,11 @@ class ListBottomSheet extends HookConsumerWidget {
         ),
         IconButton(
           onPressed: () {
-            ref.read(journalSelectedDateProvider.notifier).state =
-                date.add(const Duration(days: 1));
+            DateTime newdate = date.add(const Duration(days: 1));
+            ref.read(journalSelectedDateProvider.notifier).state = newdate;
+            if (newdate.month > date.month || newdate.year > date.year) {
+              onPageChanged(Direction.down);
+            }
           },
           icon: const Icon(Icons.chevron_right),
         ),
@@ -125,6 +207,38 @@ class ListBottomSheet extends HookConsumerWidget {
         icon: Icons.add,
         title: AppLocalizations.of(context)!.newEntry,
         onPressed: () => GoRouter.of(context).goNamed('select-journal-type'),
+      ),
+    );
+  }
+}
+
+class WeekdayRow extends StatelessWidget {
+  const WeekdayRow({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 18,
+      child: Row(
+        children: [
+          _weekday(AppLocalizations.of(context)!.monday),
+          _weekday(AppLocalizations.of(context)!.tuesday),
+          _weekday(AppLocalizations.of(context)!.wednesday),
+          _weekday(AppLocalizations.of(context)!.thursday),
+          _weekday(AppLocalizations.of(context)!.friday),
+          _weekday(AppLocalizations.of(context)!.saturday),
+          _weekday(AppLocalizations.of(context)!.sunday),
+        ],
+      ),
+    );
+  }
+
+  Widget _weekday(String day) {
+    return Expanded(
+      child: Text(
+        day.substring(0, 1).toUpperCase(),
+        textAlign: TextAlign.center,
+        style: AppTheme.labelTiny,
       ),
     );
   }

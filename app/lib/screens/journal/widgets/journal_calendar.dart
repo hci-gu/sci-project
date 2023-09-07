@@ -6,7 +6,6 @@ import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/models/journal.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/theme/theme.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class JournalCalendarDay extends ConsumerWidget {
   final DateTime date;
@@ -112,41 +111,38 @@ class JournalCalendarMonth extends ConsumerWidget {
 
   Widget _body(BuildContext context, List<JournalEntry> journal) {
     int daysInMonth = DateTime(date.year, date.month + 1, 0).day;
-    int startIndex = date.weekday - 1;
+    int startIndex = DateTime(date.year, date.month, 1).weekday - 1;
     int endIndex = startIndex + daysInMonth;
 
-    return Center(
-      child: Column(
-        children: [
-          _header(context, startIndex),
-          GridView.count(
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: 7,
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 8,
-            shrinkWrap: true,
-            children: List.generate(
-              35,
-              (index) {
-                if (index < startIndex || index >= endIndex) {
-                  return const SizedBox();
-                }
+    return Column(
+      children: [
+        _header(context, startIndex),
+        GridView.count(
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisCount: 7,
+          crossAxisSpacing: 8,
+          mainAxisSpacing: 8,
+          shrinkWrap: true,
+          children: List.generate(
+            42,
+            (index) {
+              if (index < startIndex || index >= endIndex) {
+                return const SizedBox();
+              }
 
-                DateTime dayDate = date.add(
-                  Duration(days: index - startIndex),
-                );
+              DateTime dayDate = DateTime(
+                  date.year, date.month, date.day + index - startIndex);
 
-                return JournalCalendarDay(
-                  key: ValueKey(dayDate),
-                  date: dayDate,
-                  journal:
-                      journal.where((e) => e.time.day == dayDate.day).toList(),
-                );
-              },
-            ),
+              return JournalCalendarDay(
+                key: ValueKey(dayDate),
+                date: dayDate,
+                journal:
+                    journal.where((e) => e.time.day == dayDate.day).toList(),
+              );
+            },
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -160,7 +156,6 @@ class JournalCalendarMonth extends ConsumerWidget {
 
     return Padding(
       padding: EdgeInsets.only(
-        top: 16.0,
         left: MediaQuery.of(context).size.width * offset / 7.2,
       ),
       child: Row(
@@ -181,61 +176,44 @@ class JournalCalendarMonth extends ConsumerWidget {
   }
 }
 
-class WeekdayRow extends StatelessWidget {
-  const WeekdayRow({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      child: Row(
-        children: [
-          _weekday(AppLocalizations.of(context)!.monday),
-          _weekday(AppLocalizations.of(context)!.tuesday),
-          _weekday(AppLocalizations.of(context)!.wednesday),
-          _weekday(AppLocalizations.of(context)!.thursday),
-          _weekday(AppLocalizations.of(context)!.friday),
-          _weekday(AppLocalizations.of(context)!.saturday),
-          _weekday(AppLocalizations.of(context)!.sunday),
-        ],
-      ),
-    );
-  }
-
-  Widget _weekday(String day) {
-    return Expanded(
-      child: Text(
-        day.substring(0, 1).toUpperCase(),
-        textAlign: TextAlign.center,
-        style: AppTheme.labelTiny,
-      ),
-    );
-  }
-}
-
 class JournalCalendar extends StatelessWidget {
-  const JournalCalendar({super.key});
+  final InfiniteScrollController controller;
+  final double height;
+
+  const JournalCalendar(
+      {super.key, required this.controller, required this.height});
 
   @override
   Widget build(BuildContext context) {
-    double itemExtent = (MediaQuery.of(context).size.height * 0.5) - 57;
     DateTime date = DateTime(DateTime.now().year, DateTime.now().month, 1);
 
-    return Column(
-      children: [
-        const WeekdayRow(),
-        Expanded(
-          child: InfiniteListView.builder(
-            itemExtent: itemExtent,
-            physics: const PageScrollPhysics(),
-            itemBuilder: (_, index) {
-              return JournalCalendarMonth(
-                date: DateTime(date.year, date.month + index, date.day),
-                page: -index - 1,
-              );
-            },
-          ),
-        ),
-      ],
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: AppTheme.basePadding),
+      child: InfiniteListView.builder(
+        controller: controller,
+        itemExtent: height,
+        physics: const PageScrollPhysics(),
+        itemBuilder: (_, index) {
+          return JournalCalendarMonth(
+            date: DateTime(date.year, date.month + index, date.day),
+            page: -index - 1,
+          );
+        },
+      ),
     );
+  }
+
+  static double heightForPage(BuildContext context, int page) {
+    double itemWidth = (MediaQuery.of(context).size.width - 16) / 7;
+    DateTime date =
+        DateTime(DateTime.now().year, DateTime.now().month + page, 1);
+    int daysInMonth = DateTime(date.year, date.month + 1, 0).day;
+    int startIndex = date.weekday - 1;
+
+    double headerAndPadding = 24 + 8;
+    if (startIndex >= 6 || startIndex >= 5 && daysInMonth > 30) {
+      return itemWidth * 6 + headerAndPadding;
+    }
+    return itemWidth * 5 + headerAndPadding;
   }
 }
