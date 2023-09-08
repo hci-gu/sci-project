@@ -165,11 +165,6 @@ class ListBottomSheet extends HookConsumerWidget {
             ref.read(journalSelectedDateProvider.notifier).state = newdate;
             if (newdate.month < date.month || newdate.year < date.year) {
               onPageChanged(Direction.up);
-              // controller.animateTo(
-              //   controller.offset - JournalCalendar.itemExtent(context),
-              //   duration: const Duration(milliseconds: 400),
-              //   curve: Curves.decelerate,
-              // );
             }
           },
           icon: const Icon(Icons.chevron_left),

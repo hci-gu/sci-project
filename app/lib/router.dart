@@ -31,7 +31,7 @@ List<String> detailRoutes = [
   'sedentary',
   'pressure-release'
 ];
-String landingRoute = '/journal';
+String landingRoute = '/';
 
 class RouteChangeObserver extends NavigatorObserver {
   final Ref _ref;
