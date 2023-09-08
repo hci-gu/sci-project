@@ -160,6 +160,10 @@ class Api {
               return PressureReleaseEntry.fromJson(json);
             case JournalType.pressureUlcer:
               return PressureUlcerEntry.fromJson(json);
+            case JournalType.bladderEmptying:
+              return BladderEmptyingEntry.fromJson(json);
+            case JournalType.urinaryTractInfection:
+              return UTIEntry.fromJson(json);
             default:
               return JournalEntry.fromJson(json);
           }
@@ -190,12 +194,18 @@ class Api {
               return PressureReleaseEntry.fromJson(json);
             case JournalType.pressureUlcer:
               return PressureUlcerEntry.fromJson(json);
+            case JournalType.bladderEmptying:
+              return BladderEmptyingEntry.fromJson(json);
+            case JournalType.urinaryTractInfection:
+              return UTIEntry.fromJson(json);
             default:
               return JournalEntry.fromJson(json);
           }
         }).toList();
       }
-    } catch (_) {}
+    } catch (e) {
+      print(e);
+    }
     return [];
   }
 
