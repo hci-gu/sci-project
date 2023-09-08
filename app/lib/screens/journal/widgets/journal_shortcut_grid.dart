@@ -36,7 +36,7 @@ class JournalShortcutGrid extends ConsumerWidget {
         ),
         AppTheme.spacer,
         Text(
-          '',
+          AppLocalizations.of(context)!.journalWelcomeDescription,
           style: AppTheme.paragraphMedium,
         )
       ],
@@ -81,6 +81,9 @@ class JournalShortcutGrid extends ConsumerWidget {
     }
     if (entry is PressureReleaseEntry) {
       return const Icon(Icons.alarm, size: 48);
+    }
+    if (entry is BladderEmptyingEntry) {
+      return const Icon(Icons.water_drop_outlined, size: 48);
     }
     return const Icon(Icons.album_outlined);
   }

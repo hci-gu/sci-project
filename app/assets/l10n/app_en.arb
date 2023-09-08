@@ -130,6 +130,7 @@
     "dateAndTime": "Date and time",
     "journalNoData": "You have no data for this period",
     "journalWelcome": "Welcome to the Logbook",
+    "journalWelcomeDescription": "Here you can get an overview of what you have logged and create new entries, press the button below to get started.",
     "@_JOURNAL": {},
     "logbook": "Logbook",
     "listEntries": "List entries",

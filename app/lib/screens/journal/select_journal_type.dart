@@ -61,6 +61,23 @@ class SelectJournalTypeScreen extends StatelessWidget {
                 ),
                 title: AppLocalizations.of(context)!.pressureUlcer,
               ),
+              JournalEntryShortcut(
+                onTap: () => _navigate(context, JournalType.bladderEmptying),
+                icon: const Icon(
+                  Icons.water_drop_outlined,
+                  size: 48,
+                ),
+                title: 'Blåstömning',
+              ),
+              // JournalEntryShortcut(
+              //   onTap: () =>
+              //       _navigate(context, JournalType.urinaryTractInfection),
+              //   icon: const Icon(
+              //     Icons.water,
+              //     size: 48,
+              //   ),
+              //   title: 'Urinvägsinfektion',
+              // ),
             ],
           )
         ],

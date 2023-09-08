@@ -367,6 +367,8 @@ enum JournalType {
   pain,
   pressureRelease,
   pressureUlcer,
+  urinaryTractInfection,
+  bladderEmptying,
 }
 
 extension JournalTypeDisplayAsString on JournalType {
@@ -378,6 +380,10 @@ extension JournalTypeDisplayAsString on JournalType {
         return AppLocalizations.of(context)!.pressureRelease;
       case JournalType.pressureUlcer:
         return AppLocalizations.of(context)!.pressureUlcer;
+      case JournalType.bladderEmptying:
+        return 'Blåstömning';
+      case JournalType.urinaryTractInfection:
+        return 'Urinvägsinfektion';
       default:
         return toString();
     }
@@ -392,6 +398,10 @@ JournalType journalTypeFromString(String type) {
       return JournalType.pressureRelease;
     case 'pain':
       return JournalType.pain;
+    case 'bladderEmptying':
+      return JournalType.bladderEmptying;
+    case 'urinaryTractInfection':
+      return JournalType.urinaryTractInfection;
     default:
       return JournalType.pain;
   }
@@ -434,7 +444,198 @@ class JournalEntry {
 
   JournalEntry fromFormUpdate(Map<String, dynamic> values) => this;
 
-  String get identifier => '';
+  String get identifier => type.name;
+}
+
+enum UTIType { none, feeling, diagnosed }
+
+extension UTITypeExtension on UTIType {
+  String displayString(BuildContext context) {
+    switch (this) {
+      case UTIType.none:
+        return 'Ingen infektion';
+      case UTIType.feeling:
+        return 'Känning';
+      case UTIType.diagnosed:
+        return 'Diagnostiserad';
+    }
+  }
+
+  String description(BuildContext context) {
+    switch (this) {
+      case UTIType.none:
+        return 'Du har inga symptom för en urinvägsinfektion.';
+      case UTIType.feeling:
+        return 'Du misstänker att du har en urinvägsinfektion.';
+      case UTIType.diagnosed:
+        return 'Du har fått en diagnos på att du har en urinvägsinfektion.';
+    }
+  }
+}
+
+UTIType utiTypefromString(String type) {
+  switch (type) {
+    case 'none':
+      return UTIType.none;
+    case 'feeling':
+      return UTIType.feeling;
+    case 'diagnosed':
+      return UTIType.diagnosed;
+    default:
+      return UTIType.none;
+  }
+}
+
+class UTIEntry extends JournalEntry {
+  final UTIType utiType;
+
+  UTIEntry({
+    required super.id,
+    required super.time,
+    required super.type,
+    required super.comment,
+    required this.utiType,
+  });
+
+  factory UTIEntry.fromJson(Map<String, dynamic> json) {
+    Map<String, dynamic> info = json['info'];
+    return UTIEntry(
+      id: json['id'],
+      time: DateTime.parse(json['t']),
+      type: journalTypeFromString(json['type']),
+      comment: json['comment'],
+      utiType: utiTypefromString(info['utiType']),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      ...super.toJson(),
+      'info': {
+        'utiType': utiType.name,
+      }
+    };
+  }
+
+  @override
+  JournalEntry fromFormUpdate(Map<String, dynamic> values) {
+    return UTIEntry(
+      id: id,
+      type: type,
+      time: values['time'] as DateTime,
+      comment: values['comment'] as String,
+      utiType: values['utiType'] as UTIType,
+    );
+  }
+
+  @override
+  String title(BuildContext context) {
+    return 'Urinvägsinfektion';
+  }
+
+  @override
+  String shortcutTitle(BuildContext context) {
+    return title(context);
+  }
+}
+
+enum UrineType { normal, cloudy, bloody }
+
+extension UrineTypeExtensions on UrineType {
+  String displayString(BuildContext context) {
+    switch (this) {
+      case UrineType.normal:
+        return 'Normalt';
+      case UrineType.cloudy:
+        return 'Grumligt/Mjölkigt';
+      case UrineType.bloody:
+        return 'Blodigt';
+    }
+  }
+
+  String description(BuildContext context) {
+    switch (this) {
+      case UrineType.normal:
+        return 'En beskrivning';
+      case UrineType.cloudy:
+        return 'En beskrivning';
+      case UrineType.bloody:
+        return 'En beskrivning';
+    }
+  }
+}
+
+UrineType urineTypeFromString(String type) {
+  switch (type) {
+    case 'normal':
+      return UrineType.normal;
+    case 'cloudy':
+      return UrineType.cloudy;
+    case 'bloody':
+      return UrineType.bloody;
+    default:
+      return UrineType.normal;
+  }
+}
+
+class BladderEmptyingEntry extends JournalEntry {
+  final UrineType urineType;
+  final bool smell;
+
+  BladderEmptyingEntry({
+    required super.id,
+    required super.time,
+    required super.type,
+    required super.comment,
+    required this.urineType,
+    required this.smell,
+  });
+
+  factory BladderEmptyingEntry.fromJson(Map<String, dynamic> json) {
+    Map<String, dynamic> info = json['info'];
+    return BladderEmptyingEntry(
+      id: json['id'],
+      time: DateTime.parse(json['t']),
+      type: journalTypeFromString(json['type']),
+      comment: json['comment'],
+      urineType: urineTypeFromString(info['urineType']),
+      smell: info['smell'],
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() {
+    return {
+      ...super.toJson(),
+      'info': {
+        'urineType': urineType.toString(),
+        'smell': smell,
+      }
+    };
+  }
+
+  @override
+  JournalEntry fromFormUpdate(Map<String, dynamic> values) {
+    return BladderEmptyingEntry(
+      id: id,
+      type: type,
+      time: values['time'] as DateTime,
+      comment: values['comment'] as String,
+      urineType: values['urineType'] as UrineType,
+      smell: values['smell'] as bool,
+    );
+  }
+
+  @override
+  String title(BuildContext context) {
+    return 'Blåstömning';
+  }
+
+  @override
+  String shortcutTitle(BuildContext context) {
+    return title(context);
+  }
 }
 
 class PainLevelEntry extends JournalEntry {
