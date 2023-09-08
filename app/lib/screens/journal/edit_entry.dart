@@ -5,9 +5,11 @@ import 'package:intl/intl.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/models/journal.dart';
+import 'package:scimovement/screens/journal/widgets/forms/bladder_emptying_form.dart';
+import 'package:scimovement/screens/journal/widgets/forms/uti_form.dart';
 import 'package:scimovement/screens/journal/widgets/pain_level_form.dart';
-import 'package:scimovement/screens/journal/widgets/pressure_release_form.dart';
-import 'package:scimovement/screens/journal/widgets/pressure_ulcer_form.dart';
+import 'package:scimovement/screens/journal/widgets/forms/pressure_release_form.dart';
+import 'package:scimovement/screens/journal/widgets/forms/pressure_ulcer_form.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/text_field.dart';
@@ -15,18 +17,24 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class EditJournalEntryScreen extends ConsumerWidget {
   final bool shouldCreateEntry;
+  final DateTime? initialDate;
   final JournalType? type;
   final JournalEntry? entry;
 
   const EditJournalEntryScreen(
-      {Key? key, this.entry, this.type, this.shouldCreateEntry = true})
+      {Key? key,
+      this.entry,
+      this.type,
+      this.initialDate,
+      this.shouldCreateEntry = true})
       : super(key: key);
 
   FormGroup buildForm() {
     Map<String, FormControl> defaultFields = {
       'time': FormControl<DateTime>(
-        value:
-            shouldCreateEntry ? DateTime.now() : entry?.time ?? DateTime.now(),
+        value: shouldCreateEntry
+            ? initialDate ?? DateTime.now()
+            : entry?.time ?? DateTime.now(),
         validators: [Validators.required],
       ),
       'comment': FormControl<String>(
@@ -43,7 +51,12 @@ class EditJournalEntryScreen extends ConsumerWidget {
             entry as PressureReleaseEntry?, shouldCreateEntry),
       if (entry is PressureUlcerEntry || type == JournalType.pressureUlcer)
         ...PressureUlcerForm.buildForm(
-            entry as PressureUlcerEntry?, shouldCreateEntry)
+            entry as PressureUlcerEntry?, shouldCreateEntry),
+      if (entry is BladderEmptyingEntry || type == JournalType.bladderEmptying)
+        ...BladderEmptyingForm.buildForm(
+            entry as BladderEmptyingEntry?, shouldCreateEntry),
+      if (entry is UTIEntry || type == JournalType.urinaryTractInfection)
+        ...UTIForm.buildForm(entry as UTIEntry?, shouldCreateEntry)
     });
   }
 
@@ -115,6 +128,20 @@ class EditJournalEntryScreen extends ConsumerWidget {
       return PressureUlcerForm(
         form: form,
         entry: entry as PressureUlcerEntry?,
+        shouldCreateEntry: shouldCreateEntry,
+      );
+    }
+    if (entry is BladderEmptyingEntry || type == JournalType.bladderEmptying) {
+      return BladderEmptyingForm(
+        form: form,
+        entry: entry as BladderEmptyingEntry?,
+        shouldCreateEntry: shouldCreateEntry,
+      );
+    }
+    if (entry is UTIEntry || type == JournalType.urinaryTractInfection) {
+      return UTIForm(
+        form: form,
+        entry: entry as UTIEntry?,
         shouldCreateEntry: shouldCreateEntry,
       );
     }

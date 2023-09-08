@@ -6,7 +6,8 @@ import 'package:scimovement/models/pagination.dart';
 final journalProvider = FutureProvider.family<List<JournalEntry>, Pagination>(
     (ref, pagination) async {
   ref.watch(updateJournalProvider);
-  DateTime date = ref.watch(dateProvider);
+  DateTime date = DateTime.now();
+  date = DateTime(date.year, date.month, 1);
 
   List<JournalEntry> journal = await Api().getJournal(
     pagination.from(date),
@@ -16,19 +17,50 @@ final journalProvider = FutureProvider.family<List<JournalEntry>, Pagination>(
   return journal;
 });
 
-final filteredJournalProvider =
-    FutureProvider.family<List<JournalEntry>, Pagination>(
-        (ref, pagination) async {
+final journalPaginationProvider =
+    StateProvider<Pagination>((ref) => const Pagination());
+
+final journalForDayProvider =
+    FutureProvider.family<List<JournalEntry>, DateTime>((ref, date) async {
+  ref.watch(updateJournalProvider);
+  Pagination pagination = const Pagination(mode: ChartMode.day, page: 0);
+  List<JournalEntry> journal = await Api().getJournal(
+    pagination.from(date),
+    pagination.to(date),
+    pagination.mode,
+  );
+  return journal.where((element) => element.time.day == date.day).toList();
+});
+
+final paginatedJournalProvider = FutureProvider((ref) async {
+  Pagination pagination = ref.watch(journalPaginationProvider);
+
   List<JournalEntry> journal =
       await ref.watch(journalProvider(pagination).future);
-  JournalType? type = ref.watch(journalTypeFilterProvider);
-
-  if (type == null) {
-    return journal;
-  }
-
-  return journal.where((e) => e.type == type).toList();
+  return journal;
 });
+
+final journalSelectedDateProvider = StateProvider<DateTime>((ref) {
+  DateTime now = DateTime.now();
+  return DateTime(now.year, now.month, now.day);
+});
+
+// final journalForDayProvider = FutureProvider.family((ref) => null);
+
+// final filteredJournalProvider =
+//     FutureProvider.family<List<JournalEntry>, Pagination>(
+//         (ref, pagination) async {
+//   List<JournalEntry> journal =
+//       await ref.watch(journalProvider(pagination).future);
+//   JournalType? type = ref.watch(journalTypeFilterProvider);
+
+//   if (type == null) {
+//     return journal;
+//   }
+
+//   return journal.where((e) => e.type == type).toList();
+// });
+
 final journalTypeFilterProvider = StateProvider<JournalType?>((ref) => null);
 final bodyPartFilterProvider = StateProvider<BodyPart?>((ref) => null);
 
@@ -43,8 +75,13 @@ final pressureReleaseCountProvider =
 final uniqueEntriesProvider =
     FutureProvider.family<List<JournalEntry>, Pagination>(
         (ref, pagination) async {
-  List<JournalEntry> journal =
-      await ref.watch(journalProvider(pagination).future);
+  ref.watch(updateJournalProvider);
+  DateTime date = DateTime.now();
+  List<JournalEntry> journal = await Api().getJournal(
+    pagination.from(date),
+    pagination.to(date),
+    pagination.mode,
+  );
 
   List<JournalEntry> uniqueEntries = [];
   for (JournalEntry entry in journal.reversed) {
@@ -103,6 +140,13 @@ class JournalState extends StateNotifier<DateTime> {
         info = {
           'pressureUlcerType': pressureUlcerType.name,
           'location': location.name,
+        };
+        break;
+      case JournalType.bladderEmptying:
+        UrineType type = values['urineType'] as UrineType;
+        info = {
+          'urineType': type.name,
+          'smell': values['smell'] as bool,
         };
         break;
       default:
