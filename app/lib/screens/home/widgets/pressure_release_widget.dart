@@ -73,49 +73,35 @@ class PressureReleaseWidget extends ConsumerWidget {
   }
 
   Widget _emptyState(BuildContext context) {
-    return StatWidget.container(
-      Column(children: [
-        SizedBox(
-          width: 150,
-          child: Text(
-            AppLocalizations.of(context)!.pressureReleaseCreateGoal,
-            style: AppTheme.labelLarge,
-            textAlign: TextAlign.center,
-          ),
-        ),
-        SvgPicture.asset('assets/svg/set_goal.svg', height: 56),
-        AppTheme.spacer,
-        Button(
-          width: 140,
-          onPressed: () {},
-          size: ButtonSize.tiny,
-          title: AppLocalizations.of(context)!.getStarted,
-        ),
-      ]),
-      AppTheme.widgetDecoration.copyWith(
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
+    return StatWidget.container(Column(children: [
+      SizedBox(
+        width: 150,
+        child: Text(
+          AppLocalizations.of(context)!.pressureReleaseCreateGoal,
+          style: AppTheme.labelLarge,
+          textAlign: TextAlign.center,
         ),
       ),
-    );
+      SvgPicture.asset('assets/svg/set_goal.svg', height: 56),
+      AppTheme.spacer,
+      Button(
+        width: 140,
+        onPressed: () {},
+        size: ButtonSize.tiny,
+        title: AppLocalizations.of(context)!.getStarted,
+      ),
+    ]));
   }
 
   Widget _body(BuildContext context, JournalGoal? goal, bool isToday) {
-    return Column(
-      children: [
-        GestureDetector(
-          onTap: () {
-            String path = GoRouter.of(context).location;
-            context.go('$path${path.length > 1 ? '/' : ''}pressure-release');
-          },
-          child: goal != null
-              ? _withGoal(context, goal, isToday)
-              : _emptyState(context),
-        ),
-        AppTheme.spacerHalf,
-        const PressureUlcerWidget(),
-      ],
+    return GestureDetector(
+      onTap: () {
+        String path = GoRouter.of(context).location;
+        context.go('$path${path.length > 1 ? '/' : ''}pressure-release');
+      },
+      child: goal != null
+          ? _withGoal(context, goal, isToday)
+          : _emptyState(context),
     );
   }
 
@@ -163,64 +149,49 @@ class PressureReleaseWidget extends ConsumerWidget {
     Duration timeLeft = goal.reminder.difference(DateTime.now());
 
     if (timeLeft.inMinutes <= 0) {
-      return StatWidget.container(
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SvgPicture.asset(asset, height: 24),
-              AppTheme.spacer,
-              Text(
-                'Dags av avlasta',
-                style: AppTheme.labelMedium,
-              ),
-              Button(
-                onPressed: () {
-                  String path = GoRouter.of(context).location;
-                  context
-                      .go('$path${path.length > 1 ? '/' : ''}pressure-release');
-                },
-                title: 'Starta',
-                size: ButtonSize.tiny,
-                width: 100,
-              ),
-              AppTheme.spacer,
-              GoalProgress(goal: goal)
-            ],
+      return StatWidget.container(Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SvgPicture.asset(asset, height: 24),
+          AppTheme.spacer,
+          Text(
+            'Dags av avlasta',
+            style: AppTheme.labelMedium,
           ),
-          AppTheme.widgetDecoration.copyWith(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(24),
-              topRight: Radius.circular(24),
-            ),
-          ));
+          Button(
+            onPressed: () {
+              String path = GoRouter.of(context).location;
+              context.go('$path${path.length > 1 ? '/' : ''}pressure-release');
+            },
+            title: 'Starta',
+            size: ButtonSize.tiny,
+            width: 100,
+          ),
+          AppTheme.spacer,
+          GoalProgress(goal: goal)
+        ],
+      ));
     }
 
-    return StatWidget.container(
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+    return StatWidget.container(Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Row(
           children: [
-            Row(
-              children: [
-                SvgPicture.asset(asset, height: 18),
-                AppTheme.spacerHalf,
-                Text(
-                  AppLocalizations.of(context)!.pressureRelease,
-                  style: AppTheme.labelTiny,
-                ),
-              ],
+            SvgPicture.asset(asset, height: 18),
+            AppTheme.spacerHalf,
+            Text(
+              AppLocalizations.of(context)!.pressureRelease,
+              style: AppTheme.labelTiny,
             ),
-            RebuildOnTimer(
-              child: TimeUntilGoal(goal: goal),
-            ),
-            GoalProgress(goal: goal)
           ],
         ),
-        AppTheme.widgetDecoration.copyWith(
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(24),
-            topRight: Radius.circular(24),
-          ),
-        ));
+        RebuildOnTimer(
+          child: TimeUntilGoal(goal: goal),
+        ),
+        GoalProgress(goal: goal)
+      ],
+    ));
   }
 }
 

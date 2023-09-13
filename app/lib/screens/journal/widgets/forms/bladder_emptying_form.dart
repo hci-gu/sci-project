@@ -181,35 +181,41 @@ class RadioRow extends StatelessWidget {
             onTap: () {
               form.control(formKey).value = true;
             },
-            behavior: HitTestBehavior.opaque,
-            child: Row(
-              children: [
-                Radio(
-                  value: form.control(formKey).value as bool,
-                  groupValue: true,
-                  onChanged: (_) => {},
-                ),
-                AppTheme.spacer,
-                Text(yesText, style: AppTheme.paragraphMedium),
-              ],
+            behavior: HitTestBehavior.translucent,
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: AppTheme.basePadding),
+              child: Row(
+                children: [
+                  Radio(
+                    value: form.control(formKey).value as bool,
+                    groupValue: true,
+                    onChanged: (_) => {},
+                  ),
+                  AppTheme.spacer,
+                  Text(yesText, style: AppTheme.paragraphMedium),
+                ],
+              ),
             ),
           ),
           AppTheme.spacer,
           GestureDetector(
-            onTap: () => {},
-            behavior: HitTestBehavior.opaque,
-            child: Row(
-              children: [
-                Radio(
-                  value: form.control(formKey).value as bool,
-                  groupValue: false,
-                  onChanged: (_) {
-                    form.control(formKey).value = false;
-                  },
-                ),
-                AppTheme.spacer,
-                Text(noText, style: AppTheme.paragraphMedium),
-              ],
+            onTap: () {
+              form.control(formKey).value = false;
+            },
+            behavior: HitTestBehavior.translucent,
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: AppTheme.basePadding),
+              child: Row(
+                children: [
+                  Radio(
+                    value: form.control(formKey).value as bool,
+                    groupValue: false,
+                    onChanged: (_) {},
+                  ),
+                  AppTheme.spacer,
+                  Text(noText, style: AppTheme.paragraphMedium),
+                ],
+              ),
             ),
           ),
         ],

@@ -85,6 +85,15 @@ class Storage {
         .toList();
   }
 
+  Future storeHomeWidgetPage(int page) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setInt('homeWidgetPage', page);
+  }
+
+  int getHomeWidgetPage() {
+    return prefs.getInt('homeWidgetPage') ?? 0;
+  }
+
   static final Storage _instance = Storage._internal();
   factory Storage() {
     return _instance;
