@@ -89,13 +89,8 @@ final pressureReleaseCountProvider =
 final uniqueEntriesProvider =
     FutureProvider.family<List<JournalEntry>, Pagination>(
         (ref, pagination) async {
-  ref.watch(updateJournalProvider);
-  DateTime date = DateTime.now();
-  List<JournalEntry> journal = await Api().getJournal(
-    pagination.from(date),
-    pagination.to(date),
-    pagination.mode,
-  );
+  List<JournalEntry> journal =
+      await ref.watch(journalProvider(pagination).future);
 
   List<JournalEntry> uniqueEntries = [];
   for (JournalEntry entry in journal.reversed) {
@@ -171,6 +166,12 @@ class JournalState extends StateNotifier<DateTime> {
         info = {
           'urineType': type.name,
           'smell': values['smell'] as bool,
+        };
+        break;
+      case JournalType.urinaryTractInfection:
+        UTIType type = values['utiType'] as UTIType;
+        info = {
+          'utiType': type.name,
         };
         break;
       default:

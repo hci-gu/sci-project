@@ -38,7 +38,11 @@ class PressureReleaseExerciseSelect extends HookWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Sittande övningar:', style: AppTheme.labelMedium),
+                  Text(
+                    AppLocalizations.of(context)!
+                        .pressureReleaseSittingExercises,
+                    style: AppTheme.labelMedium,
+                  ),
                   AppTheme.spacer,
                   Row(
                     mainAxisSize: MainAxisSize.max,
@@ -58,7 +62,10 @@ class PressureReleaseExerciseSelect extends HookWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Liggande', style: AppTheme.labelMedium),
+                  Text(
+                    AppLocalizations.of(context)!.pressureReleaseExerciseLying,
+                    style: AppTheme.labelMedium,
+                  ),
                   AppTheme.spacer,
                   Row(
                     mainAxisSize: MainAxisSize.max,

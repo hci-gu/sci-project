@@ -381,9 +381,9 @@ extension JournalTypeDisplayAsString on JournalType {
       case JournalType.pressureUlcer:
         return AppLocalizations.of(context)!.pressureUlcer;
       case JournalType.bladderEmptying:
-        return 'Blåstömning';
+        return AppLocalizations.of(context)!.bladderEmptying;
       case JournalType.urinaryTractInfection:
-        return 'Urinvägsinfektion';
+        return AppLocalizations.of(context)!.urinaryTractInfection;
       default:
         return toString();
     }
@@ -453,22 +453,22 @@ extension UTITypeExtension on UTIType {
   String displayString(BuildContext context) {
     switch (this) {
       case UTIType.none:
-        return 'Ingen infektion';
+        return AppLocalizations.of(context)!.utiTypeNone;
       case UTIType.feeling:
-        return 'Känning';
+        return AppLocalizations.of(context)!.utiTypeFeeling;
       case UTIType.diagnosed:
-        return 'Diagnostiserad';
+        return AppLocalizations.of(context)!.utiTypeDiagnosed;
     }
   }
 
   String description(BuildContext context) {
     switch (this) {
       case UTIType.none:
-        return 'Du har inga symptom för en urinvägsinfektion.';
+        return AppLocalizations.of(context)!.utiTypeNoneDescription;
       case UTIType.feeling:
-        return 'Du misstänker att du har en urinvägsinfektion.';
+        return AppLocalizations.of(context)!.utiTypeFeelingDescription;
       case UTIType.diagnosed:
-        return 'Du har fått en diagnos på att du har en urinvägsinfektion.';
+        return AppLocalizations.of(context)!.utiTypeDiagnosedDescription;
     }
   }
 
@@ -515,7 +515,7 @@ class UTIEntry extends JournalEntry {
       time: DateTime.parse(json['t']),
       type: journalTypeFromString(json['type']),
       comment: json['comment'],
-      utiType: utiTypefromString(info['utiType']),
+      utiType: utiTypefromString(info['utiType'] ?? 'none'),
     );
   }
 
@@ -557,22 +557,11 @@ extension UrineTypeExtensions on UrineType {
   String displayString(BuildContext context) {
     switch (this) {
       case UrineType.normal:
-        return 'Normalt';
+        return AppLocalizations.of(context)!.urineTypeNormal;
       case UrineType.cloudy:
-        return 'Grumligt/Mjölkigt';
+        return AppLocalizations.of(context)!.urineTypeCloudy;
       case UrineType.bloody:
-        return 'Blodigt';
-    }
-  }
-
-  String description(BuildContext context) {
-    switch (this) {
-      case UrineType.normal:
-        return 'En beskrivning';
-      case UrineType.cloudy:
-        return 'En beskrivning';
-      case UrineType.bloody:
-        return 'En beskrivning';
+        return AppLocalizations.of(context)!.urineTypeBlood;
     }
   }
 }
@@ -640,7 +629,7 @@ class BladderEmptyingEntry extends JournalEntry {
 
   @override
   String title(BuildContext context) {
-    return 'Blåstömning';
+    return AppLocalizations.of(context)!.bladderEmptying;
   }
 
   @override
@@ -832,7 +821,7 @@ class PressureReleaseEntry extends JournalEntry {
 
   @override
   String title(BuildContext context) {
-    return 'Tryckavlastning';
+    return AppLocalizations.of(context)!.pressureRelease;
   }
 
   @override

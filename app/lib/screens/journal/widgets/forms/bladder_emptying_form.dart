@@ -24,11 +24,11 @@ class BladderEmptyingForm extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Urin',
+          AppLocalizations.of(context)!.urine,
           style: AppTheme.labelLarge,
         ),
         Text(
-          'Välj det alternativ som beskriver urinet.',
+          AppLocalizations.of(context)!.urineTypeHint,
           style: AppTheme.paragraphMedium,
         ),
         AppTheme.spacer,
@@ -37,18 +37,18 @@ class BladderEmptyingForm extends StatelessWidget {
         ),
         AppTheme.spacer2x,
         Text(
-          'Luktar det?',
+          AppLocalizations.of(context)!.urineSmellTitle,
           style: AppTheme.labelLarge,
         ),
         Text(
-          'Lukt kan vara ett tecken på en infektion.',
+          AppLocalizations.of(context)!.urineSmellDescription,
           style: AppTheme.paragraphMedium,
         ),
         AppTheme.spacer,
-        const RadioRow(
+        RadioRow(
           formKey: 'smell',
-          yesText: 'Ja det luktar',
-          noText: 'Nej det luktar inte',
+          yesText: AppLocalizations.of(context)!.urineSmellYes,
+          noText: AppLocalizations.of(context)!.urine,
         ),
         AppTheme.spacer2x,
       ],
@@ -149,12 +149,6 @@ class UrineTypeItem extends StatelessWidget {
           type.displayString(context),
           style: AppTheme.labelLarge,
         ),
-        if (!showDescription) AppTheme.spacer,
-        if (!showDescription)
-          Text(
-            type.description(context),
-            style: AppTheme.paragraphMedium,
-          ),
         if (!showDescription) AppTheme.separator,
       ],
     );

@@ -6,17 +6,20 @@ import 'package:scimovement/models/journal.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/condition_item.dart';
 import 'package:scimovement/widgets/condition_select.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 final pressureUlcerDisplayProvider =
     FutureProvider.family<ConditionDisplay, BuildContext>((ref, context) async {
   UTIEntry? entry = await ref.watch(utiProvider.future);
 
-  String title = entry?.title(context) ?? 'Ingen UVI';
+  String title = entry?.title(context) ?? AppLocalizations.of(context)!.noUti;
 
   return ConditionDisplay(
     title: title,
-    subtitle: entry != null ? timeago.format(entry.time) : 'ingen loggad UVI',
+    subtitle: entry != null
+        ? timeago.format(entry.time)
+        : AppLocalizations.of(context)!.noLoggedUti,
     color: entry?.utiType.color(),
   );
 });
@@ -30,7 +33,10 @@ class UTIWidget extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Urinvägsinfektion', style: AppTheme.labelLarge),
+          Text(
+            AppLocalizations.of(context)!.urinaryTractInfection,
+            style: AppTheme.labelLarge,
+          ),
           AppTheme.spacer,
           ConditionSelect(
             provider: pressureUlcerDisplayProvider(context),
