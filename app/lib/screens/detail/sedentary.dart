@@ -55,13 +55,11 @@ final sedentaryArcProvider =
     FutureProvider.family<SedentaryArcData, Pagination>(
         (ref, pagination) async {
   final bouts = await ref.watch(boutsProvider(pagination).future);
-  // TODO: fix this
-  // final journal = await ref.watch(journalProvider(pagination).future);
+  final journal = await ref.watch(journalProvider(pagination).future);
 
   return SedentaryArcData(
     bouts.where((e) => e.activity == Activity.sedentary).toList(),
-    [],
-    // journal.whereType<PressureReleaseEntry>().toList(),
+    journal.whereType<PressureReleaseEntry>().toList(),
   );
 });
 

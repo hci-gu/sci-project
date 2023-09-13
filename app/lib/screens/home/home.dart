@@ -10,6 +10,7 @@ import 'package:scimovement/screens/home/widgets/exercise_widget.dart';
 import 'package:scimovement/screens/home/widgets/pressure_release_widget.dart';
 import 'package:scimovement/screens/home/widgets/pressure_ulcer_widget.dart';
 import 'package:scimovement/screens/home/widgets/sedentary_widget.dart';
+import 'package:scimovement/screens/home/widgets/uti_widget.dart';
 import 'package:scimovement/screens/onboarding/widgets/onboarding_stepper.dart';
 import 'package:scimovement/storage.dart';
 import 'package:scimovement/theme/theme.dart';
@@ -96,7 +97,7 @@ class PagedWidgets extends HookConsumerWidget {
                                 children: [
                                   const PressureUlcerWidget(),
                                   AppTheme.spacer,
-                                  const PressureUlcerWidget(),
+                                  const UTIWidget(),
                                 ],
                               ),
                             ),
@@ -111,19 +112,21 @@ class PagedWidgets extends HookConsumerWidget {
                           padding: EdgeInsets.symmetric(
                             horizontal: AppTheme.basePadding * 2,
                           ),
-                          child: StaggeredGrid.count(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: AppTheme.basePadding * 2,
-                            mainAxisSpacing: AppTheme.basePadding * 2,
-                            children: const [
-                              StaggeredGridTile.count(
-                                crossAxisCellCount: 1,
-                                mainAxisCellCount: 2,
-                                child: ActivityWheel(),
-                              ),
-                              EnergyWidget(),
-                              SedentaryWidget(),
-                            ],
+                          child: Center(
+                            child: StaggeredGrid.count(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: AppTheme.basePadding * 2,
+                              mainAxisSpacing: AppTheme.basePadding * 2,
+                              children: const [
+                                StaggeredGridTile.count(
+                                  crossAxisCellCount: 1,
+                                  mainAxisCellCount: 2,
+                                  child: ActivityWheel(),
+                                ),
+                                EnergyWidget(),
+                                SedentaryWidget(),
+                              ],
+                            ),
                           ),
                         ),
                     ],

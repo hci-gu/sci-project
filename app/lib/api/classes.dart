@@ -471,6 +471,17 @@ extension UTITypeExtension on UTIType {
         return 'Du har fått en diagnos på att du har en urinvägsinfektion.';
     }
   }
+
+  Color color() {
+    switch (this) {
+      case UTIType.none:
+        return AppTheme.colors.error.withOpacity(0);
+      case UTIType.feeling:
+        return AppTheme.colors.error.withOpacity(0.33);
+      case UTIType.diagnosed:
+        return AppTheme.colors.error.withOpacity(0.66);
+    }
+  }
 }
 
 UTIType utiTypefromString(String type) {
