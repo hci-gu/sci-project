@@ -22,7 +22,7 @@ class PressureReleaseScreen extends ConsumerWidget {
     final pagination = ref.watch(paginationProvider);
 
     return DetailScreen(
-        title: 'Tryckavlastning',
+        title: AppLocalizations.of(context)!.pressureRelease,
         pageBuilder: (ctx, page) => pagination.mode == ChartMode.day
             ? SedentaryArc(Pagination(mode: pagination.mode, page: page))
             : SedentaryBarChart(Pagination(mode: pagination.mode, page: page)),
@@ -44,7 +44,7 @@ class PressureReleaseScreen extends ConsumerWidget {
                   'type': JournalType.pressureRelease,
                 },
               ),
-              title: 'Tryckavlasta nu',
+              title: AppLocalizations.of(context)!.pressureReleaseNow,
             )
           ],
         ));

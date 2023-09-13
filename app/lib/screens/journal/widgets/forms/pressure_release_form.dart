@@ -5,6 +5,7 @@ import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/screens/journal/widgets/forms/pressure_release_exercise_select.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class PressureReleaseForm extends StatelessWidget {
   final FormGroup form;
@@ -33,9 +34,12 @@ class PressureReleaseForm extends StatelessWidget {
           onPressed: () {
             callback(true);
           },
-          title: 'Spara',
+          title: AppLocalizations.of(context)!.save,
         ),
-        Text('Jag har redan tryckavlastat', style: AppTheme.paragraphSmall),
+        Text(
+          AppLocalizations.of(context)!.pressureReleaseAlreadyDone,
+          style: AppTheme.paragraphSmall,
+        ),
         AppTheme.spacer2x,
         Button(
           width: 200,
@@ -50,7 +54,7 @@ class PressureReleaseForm extends StatelessWidget {
 
             callback(false);
           },
-          title: 'Starta',
+          title: AppLocalizations.of(context)!.start,
         ),
       ],
     );

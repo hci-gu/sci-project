@@ -17,9 +17,9 @@ final pressureUlcerDisplayProvider =
       await ref.watch(pressureUlcerProvider.future);
 
   String title = pressureUlcers.isEmpty
-      ? 'Inget trycksår'
+      ? AppLocalizations.of(context)!.noPressureUlcer
       : pressureUlcers.length > 1
-          ? '${pressureUlcers.length} Trycksår'
+          ? '${pressureUlcers.length} ${AppLocalizations.of(context)!.pressureUlcers}'
           : pressureUlcers.first.pressureUlcerType.displayString(context);
   Color color = pressureUlcers.isEmpty
       ? AppTheme.colors.white
@@ -45,7 +45,10 @@ class PressureUlcerWidget extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Trycksår', style: AppTheme.labelLarge),
+          Text(
+            AppLocalizations.of(context)!.pressureUlcer,
+            style: AppTheme.labelLarge,
+          ),
           AppTheme.spacer,
           ConditionSelect(
             provider: pressureUlcerDisplayProvider(context),

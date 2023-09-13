@@ -67,17 +67,17 @@ class SelectJournalTypeScreen extends StatelessWidget {
                   Icons.water_drop_outlined,
                   size: 48,
                 ),
-                title: 'Blåstömning',
+                title: AppLocalizations.of(context)!.bladderEmptying,
               ),
-              // JournalEntryShortcut(
-              //   onTap: () =>
-              //       _navigate(context, JournalType.urinaryTractInfection),
-              //   icon: const Icon(
-              //     Icons.water,
-              //     size: 48,
-              //   ),
-              //   title: 'Urinvägsinfektion',
-              // ),
+              JournalEntryShortcut(
+                onTap: () =>
+                    _navigate(context, JournalType.urinaryTractInfection),
+                icon: const Icon(
+                  Icons.water,
+                  size: 48,
+                ),
+                title: AppLocalizations.of(context)!.urinaryTractInfection,
+              ),
             ],
           )
         ],
