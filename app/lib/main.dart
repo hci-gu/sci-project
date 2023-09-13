@@ -101,18 +101,18 @@ class App extends ConsumerWidget {
       }
     }
 
-    if (!kIsWeb) {
-      // Handle notification taps
-      Push.instance.onNotificationTap.listen((data) {
-        handleLaunchFromNotification(data);
-      });
+    // if (!kIsWeb) {
+    //   // Handle notification taps
+    //   Push.instance.onNotificationTap.listen((data) {
+    //     handleLaunchFromNotification(data);
+    //   });
 
-      Push.instance.notificationTapWhichLaunchedAppFromTerminated.then((data) {
-        if (data != null) {
-          handleLaunchFromNotification(data);
-        }
-      });
-    }
+    //   Push.instance.notificationTapWhichLaunchedAppFromTerminated.then((data) {
+    //     if (data != null) {
+    //       handleLaunchFromNotification(data);
+    //     }
+    //   });
+    // }
 
     return MaterialApp.router(
       title: 'RullaPå',

@@ -48,20 +48,29 @@ class PressureUlcerWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ref.watch(pressureUlcerProvider).when(
-          data: (data) => GestureDetector(
-            onTap: () {
-              _openModal(context, data);
-            },
-            child: _body(
-              _row(context, data),
-            ),
-          ),
-          error: (_, __) => _body(const Text('error')),
-          loading: () => _body(
-            const Center(child: CircularProgressIndicator()),
-          ),
-        );
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Trycksår', style: AppTheme.labelLarge),
+          AppTheme.spacer,
+          ref.watch(pressureUlcerProvider).when(
+                data: (data) => GestureDetector(
+                  onTap: () {
+                    _openModal(context, data);
+                  },
+                  child: _body(
+                    _row(context, data),
+                  ),
+                ),
+                error: (_, __) => _body(const Text('error')),
+                loading: () => _body(
+                  const Center(child: CircularProgressIndicator()),
+                ),
+              )
+        ],
+      ),
+    );
   }
 
   Widget _row(BuildContext context, List<PressureUlcerEntry> pressureUlcers) {
@@ -115,10 +124,7 @@ class PressureUlcerWidget extends ConsumerWidget {
       aspectRatio: 3,
       child: Container(
         decoration: AppTheme.widgetDecoration.copyWith(
-          borderRadius: const BorderRadius.only(
-            bottomLeft: Radius.circular(12),
-            bottomRight: Radius.circular(12),
-          ),
+          borderRadius: const BorderRadius.all(Radius.circular(12)),
         ),
         padding: const EdgeInsets.only(left: 8, top: 8, bottom: 0, right: 4),
         child: child,
