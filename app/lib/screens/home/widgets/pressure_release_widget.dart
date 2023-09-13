@@ -7,7 +7,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:scimovement/models/goals.dart';
 import 'package:scimovement/models/pagination.dart';
-import 'package:scimovement/screens/home/widgets/pressure_ulcer_widget.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/progress_indicator_around.dart';

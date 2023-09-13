@@ -7,6 +7,20 @@ final journalProvider = FutureProvider.family<List<JournalEntry>, Pagination>(
     (ref, pagination) async {
   ref.watch(updateJournalProvider);
   DateTime date = DateTime.now();
+
+  List<JournalEntry> journal = await Api().getJournal(
+    pagination.from(date),
+    pagination.to(date),
+    pagination.mode,
+  );
+  return journal;
+});
+
+final journalMonthlyProvider =
+    FutureProvider.family<List<JournalEntry>, Pagination>(
+        (ref, pagination) async {
+  ref.watch(updateJournalProvider);
+  DateTime date = DateTime.now();
   date = DateTime(date.year, date.month, 1);
 
   List<JournalEntry> journal = await Api().getJournal(
@@ -104,6 +118,16 @@ final pressureUlcerProvider =
       journal.whereType<PressureUlcerEntry>().toList();
   pressureUlcers.sort((a, b) => a.time.compareTo(b.time));
   return pressureUlcers;
+});
+
+final utiProvider = FutureProvider<UTIEntry?>((ref) async {
+  ref.watch(updateJournalProvider);
+  DateTime date = ref.watch(dateProvider);
+
+  List<JournalEntry> journal =
+      await Api().getJournalForType(JournalType.urinaryTractInfection, date);
+
+  return journal.isEmpty ? null : journal.first as UTIEntry;
 });
 
 class JournalState extends StateNotifier<DateTime> {

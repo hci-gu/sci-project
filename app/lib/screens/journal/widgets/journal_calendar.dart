@@ -20,9 +20,11 @@ class JournalCalendarDay extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     DateTime selectedDate = ref.watch(journalSelectedDateProvider);
+    bool isFuture = date.isAfter(DateTime.now());
 
     return GestureDetector(
       onTap: () {
+        if (isFuture) return;
         ref.read(journalSelectedDateProvider.notifier).state = date;
       },
       child: Container(
@@ -40,9 +42,11 @@ class JournalCalendarDay extends ConsumerWidget {
             Text(
               date.day.toString(),
               style: TextStyle(
-                // fontSize: 11,
-                color:
-                    isToday ? AppTheme.colors.primary : AppTheme.colors.black,
+                color: isToday
+                    ? AppTheme.colors.primary
+                    : isFuture
+                        ? AppTheme.colors.lightGray
+                        : AppTheme.colors.black,
                 fontWeight: isToday || selectedDate == date
                     ? FontWeight.bold
                     : FontWeight.normal,
@@ -99,7 +103,8 @@ class JournalCalendarMonth extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return ref
-        .watch(journalProvider(Pagination(page: page, mode: ChartMode.month)))
+        .watch(journalMonthlyProvider(
+            Pagination(page: page, mode: ChartMode.month)))
         .when(
           data: (data) => _body(context, data),
           error: (_, __) => Container(),

@@ -38,7 +38,7 @@ class PressureReleaseScreen extends ConsumerWidget {
             Button(
               icon: Icons.alarm,
               width: 200,
-              onPressed: () => context.goNamed(
+              onPressed: () => context.pushNamed(
                 'create-journal',
                 extra: {
                   'type': JournalType.pressureRelease,
