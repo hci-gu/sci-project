@@ -83,10 +83,13 @@ class JournalShortcutGrid extends ConsumerWidget {
       return const Icon(Icons.alarm, size: 48);
     }
     if (entry is BladderEmptyingEntry) {
-      return const Icon(Icons.water_drop_outlined, size: 48);
+      return const Icon(Icons.wc, size: 48);
     }
     if (entry is UTIEntry) {
       return const Icon(Icons.water, size: 48);
+    }
+    if (entry.type == JournalType.leakage) {
+      return const Icon(Icons.water_drop_outlined, size: 48);
     }
     return const Icon(Icons.album_outlined);
   }
