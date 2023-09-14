@@ -156,6 +156,8 @@ class ListBottomSheet extends HookConsumerWidget {
   }
 
   Widget _dateHeader(BuildContext context, WidgetRef ref, DateTime date) {
+    bool isTodayOrFuture = isToday(date) || date.isAfter(DateTime.now());
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -174,15 +176,19 @@ class ListBottomSheet extends HookConsumerWidget {
           textAlign: TextAlign.center,
           style: AppTheme.headLine3,
         ),
-        IconButton(
-          onPressed: () {
-            DateTime newdate = date.add(const Duration(days: 1));
-            ref.read(journalSelectedDateProvider.notifier).state = newdate;
-            if (newdate.month > date.month || newdate.year > date.year) {
-              onPageChanged(Direction.down);
-            }
-          },
-          icon: const Icon(Icons.chevron_right),
+        Opacity(
+          opacity: isTodayOrFuture ? 0.33 : 1,
+          child: IconButton(
+            onPressed: () {
+              if (isTodayOrFuture) return;
+              DateTime newdate = date.add(const Duration(days: 1));
+              ref.read(journalSelectedDateProvider.notifier).state = newdate;
+              if (newdate.month > date.month || newdate.year > date.year) {
+                onPageChanged(Direction.down);
+              }
+            },
+            icon: const Icon(Icons.chevron_right),
+          ),
         ),
       ],
     );
