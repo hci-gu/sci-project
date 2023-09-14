@@ -64,7 +64,7 @@ class SelectJournalTypeScreen extends StatelessWidget {
               JournalEntryShortcut(
                 onTap: () => _navigate(context, JournalType.bladderEmptying),
                 icon: const Icon(
-                  Icons.water_drop_outlined,
+                  Icons.wc,
                   size: 48,
                 ),
                 title: AppLocalizations.of(context)!.bladderEmptying,
@@ -77,6 +77,14 @@ class SelectJournalTypeScreen extends StatelessWidget {
                   size: 48,
                 ),
                 title: AppLocalizations.of(context)!.urinaryTractInfection,
+              ),
+              JournalEntryShortcut(
+                onTap: () => _navigate(context, JournalType.leakage),
+                icon: const Icon(
+                  Icons.water_drop_outlined,
+                  size: 48,
+                ),
+                title: AppLocalizations.of(context)!.leakage,
               ),
             ],
           )

@@ -193,6 +193,7 @@
     "urineSmellDescription": "Smell can be a sign of infection",
     "urineSmellNo": "No it does not smell",
     "urineSmellYes": "Yes it smells",
+    "leakage": "Leakage",
     "@_GOAL": {},
     "goal": "Goal",
     "goalPressureRelease": "Set your daily goal for pressure relief",

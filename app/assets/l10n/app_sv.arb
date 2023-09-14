@@ -193,6 +193,7 @@
     "urineSmellDescription": "Lukt kan vara ett tecken på infektion.",
     "urineSmellNo": "Nej det luktar inte",
     "urineSmellYes": "Ja det luktar",
+    "leakage": "Läckage",
     "@_GOAL": {},
     "goal": "Mål",
     "goalPressureRelease": "Sätt ditt dagliga mål för avlastning",

@@ -369,6 +369,7 @@ enum JournalType {
   pressureUlcer,
   urinaryTractInfection,
   bladderEmptying,
+  leakage,
 }
 
 extension JournalTypeDisplayAsString on JournalType {
@@ -384,6 +385,8 @@ extension JournalTypeDisplayAsString on JournalType {
         return AppLocalizations.of(context)!.bladderEmptying;
       case JournalType.urinaryTractInfection:
         return AppLocalizations.of(context)!.urinaryTractInfection;
+      case JournalType.leakage:
+        return AppLocalizations.of(context)!.leakage;
       default:
         return toString();
     }
@@ -402,6 +405,8 @@ JournalType journalTypeFromString(String type) {
       return JournalType.bladderEmptying;
     case 'urinaryTractInfection':
       return JournalType.urinaryTractInfection;
+    case 'leakage':
+      return JournalType.leakage;
     default:
       return JournalType.pain;
   }
@@ -435,6 +440,9 @@ class JournalEntry {
   }
 
   String title(BuildContext context) {
+    if (type == JournalType.leakage) {
+      return AppLocalizations.of(context)!.leakage;
+    }
     return '';
   }
 
