@@ -1,6 +1,7 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/models/goals.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
@@ -8,7 +9,9 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class GoalWidget extends StatelessWidget {
   final Goal goal;
-  const GoalWidget({required this.goal, super.key});
+  final JournalType type;
+
+  const GoalWidget({required this.goal, required this.type, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -75,9 +78,23 @@ class GoalWidget extends StatelessWidget {
               width: 100,
               title: AppLocalizations.of(context)!.editGoal,
               size: ButtonSize.small,
-              onPressed: () => context.goNamed('edit-goal', extra: {
-                'goal': goal,
-              }),
+              onPressed: () {
+                // current route
+                String path = GoRouter.of(context).location;
+
+                context.go('$path/goal', extra: {
+                  'goal': goal,
+                  'type': type,
+                });
+                // context.goNamed(
+                //     type == JournalType.bladderEmptying
+                //         ? 'edit-goal-bladder'
+                //         : 'edit-goal',
+                //     extra: {
+                //       'goal': goal,
+                //       'type': type,
+                //     });
+              },
             ),
           )
         ],
@@ -92,10 +109,14 @@ class GoalWidget extends StatelessWidget {
     if (goalFinished) {
       return AppLocalizations.of(context)!.reachedGoalMessage;
     }
-    String pressureRelease = amountLeft == 1
-        ? AppLocalizations.of(context)!.pressureRelease
-        : AppLocalizations.of(context)!.pressureReleases;
+    String description = type == JournalType.pressureRelease
+        ? amountLeft == 1
+            ? AppLocalizations.of(context)!.pressureRelease
+            : AppLocalizations.of(context)!.pressureReleases
+        : amountLeft == 1
+            ? AppLocalizations.of(context)!.bladderEmptying
+            : AppLocalizations.of(context)!.bladderEmptyings;
 
-    return '$amountLeft $pressureRelease ${AppLocalizations.of(context)!.leftToReachGoalMessage}';
+    return '$amountLeft $description ${AppLocalizations.of(context)!.leftToReachGoalMessage}';
   }
 }

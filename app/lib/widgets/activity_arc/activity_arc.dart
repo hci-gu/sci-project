@@ -213,7 +213,7 @@ class ArcPainter extends CustomPainter {
     _paintText(canvas, size, '16:00', _timeOffset(16 * 60, size.width));
     _paintText(canvas, size, '20:00', _timeOffset(20 * 60, size.width));
 
-    if (dragOffset > 0) {
+    if (dragOffset != 0) {
       _painCenterText(canvas, size, _timeAtOffset(dragOffset));
     }
   }
@@ -253,8 +253,8 @@ class ArcPainter extends CustomPainter {
       style: AppTheme.paragraphSmall,
     );
     _textPainter.layout(
-      minWidth: 0,
-      maxWidth: double.maxFinite,
+      minWidth: 10,
+      maxWidth: 100,
     );
     _textPainter.paint(canvas,
         Offset(offset - _textPainter.width, size.height - _textPainter.height));
@@ -266,8 +266,8 @@ class ArcPainter extends CustomPainter {
       style: AppTheme.labelXLarge,
     );
     _textPainter.layout(
-      minWidth: 0,
-      maxWidth: double.maxFinite,
+      minWidth: 1,
+      maxWidth: 100,
     );
     _textPainter.paint(
         canvas,

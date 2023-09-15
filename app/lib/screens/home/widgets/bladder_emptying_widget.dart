@@ -1,12 +1,10 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:scimovement/models/goals.dart';
 import 'package:scimovement/models/pagination.dart';
+import 'package:scimovement/screens/home/widgets/pressure_release_widget.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/progress_indicator_around.dart';
@@ -14,57 +12,15 @@ import 'package:scimovement/widgets/stat_widget.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class GoalProgress extends StatelessWidget {
-  final Goal goal;
-
-  const GoalProgress({super.key, required this.goal});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Text(
-              '${goal.progress}/${goal.value}',
-              style: AppTheme.labelLarge.copyWith(fontSize: 12),
-            ),
-            Text(
-              ' ${AppLocalizations.of(context)!.ofDailyGoal}',
-              style: AppTheme.paragraphSmall.copyWith(fontSize: 10),
-            ),
-          ],
-        ),
-        Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(5),
-            border: Border.all(color: AppTheme.colors.black.withOpacity(0.1)),
-          ),
-          clipBehavior: Clip.antiAlias,
-          width: 100,
-          height: 8,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(5),
-            child: LinearProgressIndicator(
-              value: goal.progress / goal.value,
-              backgroundColor: Colors.transparent,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class PressureReleaseWidget extends ConsumerWidget {
-  const PressureReleaseWidget({Key? key}) : super(key: key);
+class BladderEmptyingWidget extends ConsumerWidget {
+  const BladderEmptyingWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     Pagination pagination = ref.watch(paginationProvider);
     bool isToday = ref.watch(isTodayProvider);
-    String asset = 'assets/svg/alarm.svg';
-    return ref.watch(pressureReleaseGoalProvider(pagination)).when(
+    String asset = 'assets/svg/toilet.svg';
+    return ref.watch(bladderEmptyingGoalProvider(pagination)).when(
           data: (goal) => _body(context, goal, isToday),
           error: (_, __) => StatWidget.error(asset),
           loading: () => StatWidget.loading(asset),
@@ -76,7 +32,7 @@ class PressureReleaseWidget extends ConsumerWidget {
       SizedBox(
         width: 150,
         child: Text(
-          AppLocalizations.of(context)!.pressureReleaseCreateGoal,
+          AppLocalizations.of(context)!.bladderEmptyingCreateGoal,
           style: AppTheme.labelLarge,
           textAlign: TextAlign.center,
         ),
@@ -96,7 +52,7 @@ class PressureReleaseWidget extends ConsumerWidget {
     return GestureDetector(
       onTap: () {
         String path = GoRouter.of(context).location;
-        context.go('$path${path.length > 1 ? '/' : ''}pressure-release');
+        context.go('$path${path.length > 1 ? '/' : ''}bladder-emptying');
       },
       child: goal != null
           ? _withGoal(context, goal, isToday)
@@ -105,7 +61,7 @@ class PressureReleaseWidget extends ConsumerWidget {
   }
 
   Widget _oldProgress(BuildContext context, Goal goal) {
-    String asset = 'assets/svg/alarm.svg';
+    String asset = 'assets/svg/toilet.svg';
     bool finishedGoal = goal.progress >= goal.value;
     return StatWidget.container(
         Column(
@@ -116,7 +72,7 @@ class PressureReleaseWidget extends ConsumerWidget {
                 SvgPicture.asset(asset, height: 18),
                 AppTheme.spacerHalf,
                 Text(
-                  AppLocalizations.of(context)!.pressureRelease,
+                  AppLocalizations.of(context)!.bladderEmptying,
                   style: AppTheme.labelTiny,
                 ),
               ],
@@ -144,7 +100,7 @@ class PressureReleaseWidget extends ConsumerWidget {
       return _oldProgress(context, goal);
     }
 
-    String asset = 'assets/svg/alarm.svg';
+    String asset = 'assets/svg/toilet.svg';
     Duration timeLeft = goal.reminder.difference(DateTime.now());
 
     if (timeLeft.inMinutes <= 0) {
@@ -154,15 +110,15 @@ class PressureReleaseWidget extends ConsumerWidget {
           SvgPicture.asset(asset, height: 24),
           AppTheme.spacer,
           Text(
-            AppLocalizations.of(context)!.pressureReleaseTimeToDoIt,
+            AppLocalizations.of(context)!.bladderEmptyingTimeToDoIt,
             style: AppTheme.labelMedium,
           ),
           Button(
             onPressed: () {
               String path = GoRouter.of(context).location;
-              context.go('$path${path.length > 1 ? '/' : ''}pressure-release');
+              context.go('$path${path.length > 1 ? '/' : ''}bladder-emptying');
             },
-            title: 'Starta',
+            title: AppLocalizations.of(context)!.start,
             size: ButtonSize.tiny,
             width: 100,
           ),
@@ -180,7 +136,7 @@ class PressureReleaseWidget extends ConsumerWidget {
             SvgPicture.asset(asset, height: 18),
             AppTheme.spacerHalf,
             Text(
-              AppLocalizations.of(context)!.pressureRelease,
+              AppLocalizations.of(context)!.bladderEmptying,
               style: AppTheme.labelTiny,
             ),
           ],
@@ -244,30 +200,5 @@ class TimeUntilGoal extends StatelessWidget {
         ],
       ),
     );
-  }
-}
-
-class RebuildOnTimer extends HookWidget {
-  final Widget child;
-  final Duration duration;
-
-  const RebuildOnTimer({
-    super.key,
-    required this.child,
-    this.duration = const Duration(seconds: 1),
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    var state = useState(DateTime.now());
-
-    useEffect(() {
-      Timer timer = Timer.periodic(duration, (_) {
-        state.value = DateTime.now();
-      });
-      return () => timer.cancel();
-    }, []);
-
-    return Container(key: UniqueKey(), child: child);
   }
 }

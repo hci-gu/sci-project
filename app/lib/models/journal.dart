@@ -86,6 +86,14 @@ final pressureReleaseCountProvider =
   return journal.whereType<PressureReleaseEntry>().length;
 });
 
+final bladderEmptyingCountProvider =
+    FutureProvider.family<num, Pagination>((ref, pagination) async {
+  List<JournalEntry> journal =
+      await ref.watch(journalProvider(pagination).future);
+
+  return journal.whereType<BladderEmptyingEntry>().length;
+});
+
 final uniqueEntriesProvider =
     FutureProvider.family<List<JournalEntry>, Pagination>(
         (ref, pagination) async {

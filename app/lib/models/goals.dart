@@ -108,7 +108,7 @@ final journalGoalsProvider =
   return goals.whereType<JournalGoal>().toList();
 });
 
-final journalGoalProvider =
+final pressureReleaseGoalProvider =
     FutureProvider.family<JournalGoal?, Pagination>((ref, pagination) async {
   List<JournalGoal> goals =
       await ref.watch(journalGoalsProvider(pagination).future);
@@ -116,14 +116,22 @@ final journalGoalProvider =
   return goals.firstWhereOrNull((e) => e.type == JournalType.pressureRelease);
 });
 
+final bladderEmptyingGoalProvider =
+    FutureProvider.family<JournalGoal?, Pagination>((ref, pagination) async {
+  List<JournalGoal> goals =
+      await ref.watch(journalGoalsProvider(pagination).future);
+
+  return goals.firstWhereOrNull((e) => e.type == JournalType.bladderEmptying);
+});
+
 class GoalState extends StateNotifier<DateTime> {
   GoalState() : super(DateTime.now());
 
-  Future createGoal(Map<String, dynamic> values) async {
+  Future createGoal(Map<String, dynamic> values, JournalType type) async {
     Duration start = values['start'] as Duration;
     await Api().createGoal({
       'type': 'journal',
-      'journalType': 'pressureRelease',
+      'journalType': type.name,
       'timeFrame': 'day',
       'value': values['value'] as int,
       'start': startToString(start),

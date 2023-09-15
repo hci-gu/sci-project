@@ -46,7 +46,7 @@ class BladderEmptyingForm extends StatelessWidget {
         RadioRow(
           formKey: 'smell',
           yesText: AppLocalizations.of(context)!.urineSmellYes,
-          noText: AppLocalizations.of(context)!.urine,
+          noText: AppLocalizations.of(context)!.urineSmellNo,
         ),
         AppTheme.spacer2x,
       ],

@@ -34,6 +34,27 @@ export const getCurrentPressureUlcers = async (userId: string, to?: Date) => {
   return Object.values(lastEntries)
 }
 
+export const getCurrentUTI = async (userId: string, to?: Date) => {
+  const dateTo = moment(to).endOf('day').toDate()
+  const entries = await Journal.find(
+    {
+      userId,
+    },
+    {
+      type: JournalType.urinaryTractInfection,
+      t: {
+        [Op.lte]: dateTo,
+      },
+    }
+  )
+
+  // sort by timestamp and return latest entry
+  const sortedEntries = entries.sort((a: any, b: any) =>
+    moment(a.t).isAfter(b.t) ? -1 : 1
+  )
+  return [sortedEntries[0]]
+}
+
 export const fillMockData = async (userId: string, days = 90) => {
   let pressureReleases = []
 
