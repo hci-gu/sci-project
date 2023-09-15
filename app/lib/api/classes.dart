@@ -550,7 +550,14 @@ class UTIEntry extends JournalEntry {
 
   @override
   String title(BuildContext context) {
-    return 'Urinvägsinfektion';
+    switch (utiType) {
+      case UTIType.none:
+        return AppLocalizations.of(context)!.utiTypeNone;
+      case UTIType.feeling:
+        return AppLocalizations.of(context)!.utiTypeFeeling;
+      case UTIType.diagnosed:
+        return AppLocalizations.of(context)!.utiTypeDiagnosed;
+    }
   }
 
   @override

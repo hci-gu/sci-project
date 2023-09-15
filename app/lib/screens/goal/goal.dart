@@ -5,6 +5,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:reactive_forms/reactive_forms.dart';
+import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/models/goals.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
@@ -13,8 +14,9 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class GoalScreen extends ConsumerWidget {
   final Goal? goal;
+  final JournalType type;
 
-  const GoalScreen({this.goal, super.key});
+  const GoalScreen({this.goal, required this.type, super.key});
 
   FormGroup buildForm() => fb.group({
         'value': FormControl<int>(
@@ -48,7 +50,9 @@ class GoalScreen extends ConsumerWidget {
                 ),
               ),
               Text(
-                AppLocalizations.of(context)!.goalPressureRelease,
+                type == JournalType.bladderEmptying
+                    ? AppLocalizations.of(context)!.goalBladderEmptying
+                    : AppLocalizations.of(context)!.goalPressureRelease,
                 textAlign: TextAlign.center,
                 style: AppTheme.headLine3,
               ),
@@ -113,7 +117,7 @@ class GoalScreen extends ConsumerWidget {
             } else {
               await ref
                   .read(updateGoalProvider.notifier)
-                  .createGoal(form.value);
+                  .createGoal(form.value, type);
             }
             if (context.mounted) {
               context.pop();

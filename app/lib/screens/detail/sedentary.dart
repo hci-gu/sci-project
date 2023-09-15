@@ -47,8 +47,10 @@ class SedentaryScreen extends ConsumerWidget {
 class SedentaryArcData {
   final List<Bout> bouts;
   final List<PressureReleaseEntry> pressureReleases;
+  final List<BladderEmptyingEntry> bladderEmptyings;
 
-  const SedentaryArcData(this.bouts, this.pressureReleases);
+  const SedentaryArcData(
+      this.bouts, this.pressureReleases, this.bladderEmptyings);
 }
 
 final sedentaryArcProvider =
@@ -60,20 +62,26 @@ final sedentaryArcProvider =
   return SedentaryArcData(
     bouts.where((e) => e.activity == Activity.sedentary).toList(),
     journal.whereType<PressureReleaseEntry>().toList(),
+    journal.whereType<BladderEmptyingEntry>().toList(),
   );
 });
 
 class SedentaryArc extends ConsumerWidget {
   final Pagination pagination;
+  final JournalType? type;
 
-  const SedentaryArc(this.pagination, {Key? key}) : super(key: key);
+  const SedentaryArc(this.pagination, {this.type, super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return ref.watch(sedentaryArcProvider(pagination)).when(
           data: (data) => ActivityArc(
             bouts: data.bouts,
-            journalEntries: data.pressureReleases,
+            journalEntries: type != null
+                ? type == JournalType.pressureRelease
+                    ? data.pressureReleases
+                    : data.bladderEmptyings
+                : [],
             activities: const [Activity.sedentary],
           ),
           error: (e, stacktrace) => ChartWrapper.error(e.toString()),

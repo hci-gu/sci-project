@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:scimovement/models/app_features.dart';
 import 'package:scimovement/models/pagination.dart';
+import 'package:scimovement/screens/home/widgets/bladder_emptying_widget.dart';
 import 'package:scimovement/screens/home/widgets/energy_widget.dart';
 import 'package:scimovement/screens/home/widgets/exercise_widget.dart';
 import 'package:scimovement/screens/home/widgets/pressure_release_widget.dart';
@@ -180,6 +181,8 @@ class HomeScreen extends HookConsumerWidget {
                   const ExerciseWidget(),
                 if (features.contains(AppFeature.pressureRelease))
                   const PressureReleaseWidget(),
+                if (features.contains(AppFeature.pressureRelease))
+                  const BladderEmptyingWidget(),
               ],
             ),
           ),

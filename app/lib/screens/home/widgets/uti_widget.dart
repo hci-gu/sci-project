@@ -57,7 +57,7 @@ class UTIModal extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Ändra status på urinvägsinfektion',
+          AppLocalizations.of(context)!.utiChangeStatus,
           style: AppTheme.paragraphSmall,
         ),
         AppTheme.separator,

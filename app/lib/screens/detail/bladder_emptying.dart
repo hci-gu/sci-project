@@ -14,23 +14,23 @@ import 'package:scimovement/widgets/stat_header.dart';
 import 'package:scimovement/widgets/stat_widget.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class PressureReleaseScreen extends ConsumerWidget {
-  const PressureReleaseScreen({super.key});
+class BladderEmptyingScreen extends ConsumerWidget {
+  const BladderEmptyingScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final pagination = ref.watch(paginationProvider);
 
     return DetailScreen(
-        title: AppLocalizations.of(context)!.pressureRelease,
+        title: AppLocalizations.of(context)!.bladderEmptying,
         pageBuilder: (ctx, page) => pagination.mode == ChartMode.day
             ? SedentaryArc(
                 Pagination(mode: pagination.mode, page: page),
-                type: JournalType.pressureRelease,
+                type: JournalType.bladderEmptying,
               )
             : SedentaryBarChart(Pagination(mode: pagination.mode, page: page)),
         header: StatHeader(
-          provider: pressureReleaseCountProvider(pagination),
+          provider: bladderEmptyingCountProvider(pagination),
           unit: Unit.amount,
           isAverage: false,
         ),
@@ -44,27 +44,27 @@ class PressureReleaseScreen extends ConsumerWidget {
               onPressed: () => context.pushNamed(
                 'create-journal',
                 extra: {
-                  'type': JournalType.pressureRelease,
+                  'type': JournalType.bladderEmptying,
                 },
               ),
-              title: AppLocalizations.of(context)!.pressureReleaseNow,
+              title: AppLocalizations.of(context)!.bladderEmptying,
             )
           ],
         ));
   }
 
   Widget _goalWidget(BuildContext context, WidgetRef ref, pagination) {
-    return ref.watch(pressureReleaseGoalProvider(pagination)).when(
+    return ref.watch(bladderEmptyingGoalProvider(pagination)).when(
           data: (goal) {
             if (goal != null) {
-              return GoalWidget(goal: goal, type: JournalType.pressureRelease);
+              return GoalWidget(goal: goal, type: JournalType.bladderEmptying);
             }
             return Column(
               children: [
                 Button(
                   width: 160,
-                  onPressed: () => context.goNamed('edit-goal', extra: {
-                    'type': JournalType.pressureRelease,
+                  onPressed: () => context.goNamed('edit-goal-bladder', extra: {
+                    'type': JournalType.bladderEmptying,
                   }),
                   title: AppLocalizations.of(context)!.createYourGoal,
                 ),

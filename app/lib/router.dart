@@ -7,6 +7,7 @@ import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/models/onboarding.dart';
 import 'package:scimovement/screens/detail/activity.dart';
+import 'package:scimovement/screens/detail/bladder_emptying.dart';
 import 'package:scimovement/screens/detail/calories.dart';
 import 'package:scimovement/screens/detail/pressure_release.dart';
 import 'package:scimovement/screens/detail/sedentary.dart';
@@ -179,6 +180,24 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
                         builder: (_, state) {
                           return GoalScreen(
                             goal: (state.extra as Map?)?['goal'],
+                            type: (state.extra as Map?)?['type'],
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  GoRoute(
+                    name: 'bladder-emptying',
+                    path: 'bladder-emptying',
+                    builder: (_, __) => const BladderEmptyingScreen(),
+                    routes: [
+                      GoRoute(
+                        path: 'goal',
+                        name: 'edit-goal-bladder',
+                        builder: (_, state) {
+                          return GoalScreen(
+                            goal: (state.extra as Map?)?['goal'],
+                            type: (state.extra as Map?)?['type'],
                           );
                         },
                       ),
