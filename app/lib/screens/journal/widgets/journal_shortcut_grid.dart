@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api/classes.dart';
@@ -83,7 +84,7 @@ class JournalShortcutGrid extends ConsumerWidget {
       return const Icon(Icons.alarm, size: 48);
     }
     if (entry is BladderEmptyingEntry) {
-      return const Icon(Icons.wc, size: 48);
+      return SvgPicture.asset('assets/svg/toilet.svg', height: 48);
     }
     if (entry is UTIEntry) {
       return const Icon(Icons.water, size: 48);
