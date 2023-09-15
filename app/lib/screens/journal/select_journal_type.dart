@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/screens/journal/widgets/body_part_icon.dart';
@@ -63,10 +64,7 @@ class SelectJournalTypeScreen extends StatelessWidget {
               ),
               JournalEntryShortcut(
                 onTap: () => _navigate(context, JournalType.bladderEmptying),
-                icon: const Icon(
-                  Icons.wc,
-                  size: 48,
-                ),
+                icon: SvgPicture.asset('assets/svg/toilet.svg', height: 48),
                 title: AppLocalizations.of(context)!.bladderEmptying,
               ),
               JournalEntryShortcut(
