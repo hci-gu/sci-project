@@ -6,6 +6,7 @@ import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/models/onboarding.dart';
+import 'package:scimovement/screens/demo/demo.dart';
 import 'package:scimovement/screens/detail/activity.dart';
 import 'package:scimovement/screens/detail/bladder_emptying.dart';
 import 'package:scimovement/screens/detail/calories.dart';
@@ -286,79 +287,6 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
         path: '/onboarding',
         builder: (_, __) => const OnboardingScreen(),
       ),
-      // GoRoute(
-      //   name: 'demo',
-      //   path: '/demo',
-      //   builder: (context, state) => const DemoWrapper(
-      //     child: TabScreen(
-      //       routes: [
-      //         '/demo',
-      //         '/demo/journal',
-      //         '/demo/profile',
-      //       ],
-      //     ),
-      //   ),
-      //   routes: [
-      //     GoRoute(
-      //       name: 'demo-calories',
-      //       path: 'calories',
-      //       builder: (_, __) => const DemoWrapper(
-      //         child: CaloriesScreen(),
-      //       ),
-      //     ),
-      //     GoRoute(
-      //       name: 'demo-activity',
-      //       path: 'activity',
-      //       builder: (_, __) => const DemoWrapper(
-      //         child: ActivityScreen(),
-      //       ),
-      //     ),
-      //     GoRoute(
-      //       name: 'demo-sedentary',
-      //       path: 'sedentary',
-      //       builder: (_, __) => const DemoWrapper(
-      //         child: SedentaryScreen(),
-      //       ),
-      //     ),
-      //     GoRoute(
-      //       name: 'demo-exercise',
-      //       path: 'exercise',
-      //       builder: (_, __) => const DemoWrapper(
-      //         child: ExcerciseScreen(),
-      //       ),
-      //     ),
-      //   ],
-      // ),
-      // GoRoute(
-      //   name: 'demo-profile',
-      //   path: '/demo/profile',
-      //   pageBuilder: (context, state) => const NoTransitionPage(
-      //     child: DemoWrapper(
-      //       child: TabScreen(
-      //         routes: [
-      //           '/demo',
-      //           '/demo/journal',
-      //           '/demo/profile',
-      //         ],
-      //       ),
-      //     ),
-      //   ),
-      // ),
-      // GoRoute(
-      //   name: 'demo-journal',
-      //   path: '/demo/journal',
-      //   pageBuilder: (context, state) => const NoTransitionPage(
-      //     child: DemoWrapper(
-      //       child: TabScreen(
-      //         routes: [
-      //           '/demo',
-      //           '/demo/journal',
-      //           '/demo/profile',
-      //         ],
-      //       ),
-      //     ),
-      //   ),
-      // ),
       GoRoute(
         name: 'watch-login',
         path: '/watch-login',

@@ -219,9 +219,7 @@ class DemoWrapper extends ConsumerWidget {
         uniqueEntriesProvider,
         updateJournalProvider
       ],
-      child: Scaffold(
-        body: child,
-      ),
+      child: child,
     );
   }
 }

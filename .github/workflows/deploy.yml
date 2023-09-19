@@ -17,6 +17,7 @@ jobs:
           channel: 'stable'
       - run: |
           cd app
+          ./build-demo.sh
           flutter pub get
           flutter build web --release --base-href /sci-project/
       - name: Deploy
