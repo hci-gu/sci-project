@@ -4,10 +4,11 @@ import * as redis from './adapters/redis'
 import UserModel from './db/models/User'
 import * as push from './push'
 import AccelCount from './db/models/AccelCount'
-import { NotificationSettings, User } from './db/classes'
+import { Goal, NotificationSettings, User } from './db/classes'
 import JournalModel from './db/models/Journal'
 import GoalModel from './db/models/Goal'
 import { getGoalInfo } from './routes/goals/utils'
+import { JournalType } from './constants'
 
 const CronJob = require('cron').CronJob
 
@@ -74,40 +75,72 @@ const checkForDataAndSendMessage = async (user: User) => {
   return counts.length > 0
 }
 
+const sendPressureReleaseReminder = async (user: User, goal: Goal) => {
+  const userHasData = await AccelCount.hasData(user.id)
+
+  if (userHasData) {
+    const activity = await activityForPeriod({
+      from: moment().subtract(10, 'minutes').toDate(),
+      to: new Date(),
+      id: user.id,
+    })
+    if (activity.minutesInactive <= 5) {
+      // user has been active in the last 5 minutes, no need to send a reminder
+      return
+    }
+  }
+
+  const cacheKey =
+    cacheKeyForType(MessageType.Goal, user) + '-' + goal.journalType
+  const notification = await redis.get(cacheKey)
+  if (!notification) {
+    const message = {
+      title: 'Påminnelse att tryckavlasta',
+      body: `Nu är det dags att tryckavlasta!`,
+    }
+    await redis.set(cacheKey, message, 60 * 45)
+    push.send({
+      deviceId: user.deviceId,
+      message,
+      action: 'create-journal?type=' + goal.journalType,
+    })
+  }
+}
+
+const sendBladderEmptyingReminder = async (user: User, goal: Goal) => {
+  const cacheKey =
+    cacheKeyForType(MessageType.Goal, user) + '-' + goal.journalType
+  const notification = await redis.get(cacheKey)
+  if (!notification) {
+    const message = {
+      title: 'Påminnelse för blåstömning',
+      body: `Nu är det dags för blåstömning`,
+    }
+    await redis.set(cacheKey, message, 60 * 45)
+    push.send({
+      deviceId: user.deviceId,
+      message,
+      action: 'create-journal?type=' + goal.journalType,
+    })
+  }
+}
+
 const fetchGoalsAndCheckReminders = async (user: User) => {
   const goals = await GoalModel.find({ userId: user.id })
-
-  const userHasData = await AccelCount.hasData(user.id)
 
   for (const goal of goals) {
     const goalInfo = await getGoalInfo(user.id, goal)
 
     if (goalInfo.reminder && moment(goalInfo.reminder).isBefore(moment())) {
-      if (userHasData) {
-        const activity = await activityForPeriod({
-          from: moment().subtract(10, 'minutes').toDate(),
-          to: new Date(),
-          id: user.id,
-        })
-        if (activity.minutesInactive <= 5) {
-          // user has been active in the last 5 minutes, no need to send a reminder
-          continue
-        }
-      }
-
-      const cacheKey = cacheKeyForType(MessageType.Goal, user)
-      const notification = await redis.get(cacheKey)
-      if (!notification) {
-        const message = {
-          title: 'Påminnelse att tryckavlasta',
-          body: `Nu är det dags att tryckavlasta!`,
-        }
-        await redis.set(cacheKey, message, 60 * 45)
-        push.send({
-          deviceId: user.deviceId,
-          message,
-          action: 'create-journal?type=pressureRelease',
-        })
+      switch (goal.journalType) {
+        case JournalType.pressureRelease:
+          await sendPressureReleaseReminder(user, goal)
+          break
+        case JournalType.bladderEmptying:
+          await sendBladderEmptyingReminder(user, goal)
+          break
+        default:
+          break
       }
     }
   }
@@ -163,7 +196,7 @@ const sendJournalMessages = async (user: User) => {
   if (sendPush) {
     const message = {
       title: 'Hur känner du dig idag?',
-      body: `Här kommer en påminnelse att uppdatera din journal.`,
+      body: `Här kommer en påminnelse att uppdatera din loggbok.`,
     }
     await redis.set(cacheKey, message, 60 * 60 * 12)
     push.send({
