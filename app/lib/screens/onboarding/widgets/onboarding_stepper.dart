@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/models/onboarding.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class StepIndicator extends StatelessWidget {
   final int index;
@@ -60,9 +62,13 @@ class OnboardingStepper extends ConsumerWidget {
                       onTap: () {
                         ref.read(onboardingStepProvider.notifier).state =
                             onboardingStepCount;
+                        if (ref.watch(onboardingStepProvider) ==
+                            onboardingStepCount) {
+                          context.goNamed('home');
+                        }
                       },
                       child: Text(
-                        'Hoppa över',
+                        AppLocalizations.of(context)!.skip,
                         style: AppTheme.labelLarge.copyWith(
                           decoration: TextDecoration.underline,
                         ),
@@ -70,7 +76,7 @@ class OnboardingStepper extends ConsumerWidget {
                     )
                   : Button(
                       width: 100,
-                      title: 'Tillbaka',
+                      title: AppLocalizations.of(context)!.back,
                       secondary: true,
                       onPressed: () =>
                           ref.read(onboardingStepProvider.notifier).state--,
@@ -79,10 +85,15 @@ class OnboardingStepper extends ConsumerWidget {
                 width: 100,
                 title:
                     ref.watch(onboardingStepProvider) == onboardingStepCount - 1
-                        ? 'Avsluta'
-                        : 'Nästa',
-                onPressed: () =>
-                    ref.read(onboardingStepProvider.notifier).state++,
+                        ? AppLocalizations.of(context)!.finish
+                        : AppLocalizations.of(context)!.next,
+                onPressed: () {
+                  ref.read(onboardingStepProvider.notifier).state++;
+                  if (ref.watch(onboardingStepProvider) ==
+                      onboardingStepCount) {
+                    context.goNamed('home');
+                  }
+                },
               )
             ],
           ),

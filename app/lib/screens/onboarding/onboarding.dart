@@ -28,7 +28,7 @@ class OnboardingScreen extends ConsumerWidget {
                 left: AppTheme.basePadding * 2,
                 right: AppTheme.basePadding * 2,
               ),
-              children: [
+              children: const [
                 OnboardingStep(),
               ],
             ),

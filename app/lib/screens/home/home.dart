@@ -186,6 +186,7 @@ class HomeScreen extends HookConsumerWidget {
               ],
             ),
           ),
+          AppTheme.spacer2x,
         ],
       ),
     );
