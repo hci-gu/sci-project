@@ -48,16 +48,16 @@ const RESOURCES = {"canvaskit/chromium/canvaskit.js": "96ae916cd2d1b7320fff853ee
 "assets/packages/cupertino_icons/assets/CupertinoIcons.ttf": "89ed8f4e49bcdfc0b5bfc9b24591e347",
 "assets/fonts/MaterialIcons-Regular.otf": "f1eeb67a131b43039da232b4a768a3f0",
 "assets/FontManifest.json": "eda3f246271a3a4de7fa1c70eb5fc7a7",
-"version.json": "f0986bf98b35ac107e312af126e94c61",
+"version.json": "46bdefdd663442760944d61b98cf33e7",
 "icons/Icon-maskable-192.png": "c457ef57daa1d16f64b27b786ec2ea3c",
 "icons/Icon-192.png": "ac9a721a12bbc803b44f645561ecb1e1",
 "icons/Icon-maskable-512.png": "301a7604d45b3e739efc881eb04896ea",
 "icons/Icon-512.png": "96e752610906ba2a93c65f8abe1645f1",
 "flutter.js": "6fef97aeca90b426343ba6c5c9dc5d4a",
-"index.html": "32b1c8c0d5f342fde8775a0042238df7",
-"/": "32b1c8c0d5f342fde8775a0042238df7",
+"index.html": "324586f95b7372c2ffcb520927593492",
+"/": "324586f95b7372c2ffcb520927593492",
 "favicon.png": "5dcef449791fa27946b3d35ad8803796",
-"main.dart.js": "e525ab0d608b399685938bf13e543b65",
+"main.dart.js": "d7887f8e3f477a843aa437710f7225a3",
 "manifest.json": "60cf0e8a29d91fc890f252903819f5ae"};
 // The application shell files that are downloaded before a service worker can
 // start.
