@@ -16,48 +16,67 @@ class TabScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnnotatedRegion(
-      value: SystemUiOverlayStyle.dark,
-      child: Scaffold(
-        body: navigationShell.currentIndex == 1
-            ? navigationShell
-            : SafeArea(
-                child: navigationShell,
-              ),
-        bottomNavigationBar: Container(
-          decoration: BoxDecoration(
-            border: Border(
-              top: BorderSide(
-                color: AppTheme.colors.black.withOpacity(0.1),
-                width: 1,
-              ),
-            ),
-          ),
-          child: BottomNavigationBar(
-            elevation: 0,
-            backgroundColor: AppTheme.colors.white,
-            items: [
-              BottomNavigationBarItem(
-                icon: const Icon(Icons.home_outlined),
-                label: AppLocalizations.of(context)!.home,
-              ),
-              BottomNavigationBarItem(
-                icon: const Icon(Icons.menu_book_sharp),
-                label: AppLocalizations.of(context)!.logbook,
-              ),
-              BottomNavigationBarItem(
-                icon: const Icon(Icons.person_outline),
-                label: AppLocalizations.of(context)!.profile,
-              ),
-            ],
-            currentIndex: navigationShell.currentIndex,
-            selectedItemColor: AppTheme.colors.primary,
-            onTap: (index) {
-              navigationShell.goBranch(index,
-                  initialLocation: index == navigationShell.currentIndex);
-              // GoRouter.of(context).go(routes[index]);
-            },
-          ),
+    return OrientationBuilder(
+      builder: (context, orientation) => AnnotatedRegion(
+        value: SystemUiOverlayStyle.dark,
+        child: Scaffold(
+          body: navigationShell.currentIndex == 1
+              ? navigationShell
+              : SafeArea(
+                  child: navigationShell,
+                ),
+          bottomNavigationBar: orientation == Orientation.portrait
+              ? Container(
+                  decoration: BoxDecoration(
+                    border: Border(
+                      top: BorderSide(
+                        color: AppTheme.colors.black.withOpacity(0.1),
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                  child: BottomNavigationBar(
+                    elevation: 0,
+                    backgroundColor: AppTheme.colors.white,
+                    items: [
+                      BottomNavigationBarItem(
+                        icon: const Icon(Icons.home_outlined),
+                        label: AppLocalizations.of(context)!.home,
+                      ),
+                      BottomNavigationBarItem(
+                        icon: const Icon(Icons.menu_book_sharp),
+                        label: AppLocalizations.of(context)!.logbook,
+                      ),
+                      BottomNavigationBarItem(
+                        icon: const Icon(Icons.person_outline),
+                        label: AppLocalizations.of(context)!.profile,
+                      ),
+                    ],
+                    currentIndex: navigationShell.currentIndex,
+                    selectedItemColor: AppTheme.colors.primary,
+                    onTap: (index) {
+                      if (index == 1) {
+                        SystemChrome.setPreferredOrientations([
+                          DeviceOrientation.portraitUp,
+                          DeviceOrientation.portraitDown,
+                          DeviceOrientation.landscapeLeft,
+                          DeviceOrientation.landscapeRight,
+                        ]);
+                      } else {
+                        SystemChrome.setPreferredOrientations([
+                          DeviceOrientation.portraitUp,
+                          DeviceOrientation.portraitDown,
+                        ]);
+                      }
+
+                      navigationShell.goBranch(index,
+                          initialLocation:
+                              index == navigationShell.currentIndex);
+                      // GoRouter.of(context).go(routes[index]);
+                    },
+                  ),
+                )
+              : null,
         ),
       ),
     );

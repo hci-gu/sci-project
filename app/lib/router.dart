@@ -6,7 +6,6 @@ import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/models/onboarding.dart';
-import 'package:scimovement/screens/demo/demo.dart';
 import 'package:scimovement/screens/detail/activity.dart';
 import 'package:scimovement/screens/detail/bladder_emptying.dart';
 import 'package:scimovement/screens/detail/calories.dart';
@@ -31,7 +30,8 @@ List<String> detailRoutes = [
   'calories',
   'activity',
   'sedentary',
-  'pressure-release'
+  'pressure-release',
+  'bladder-emptying'
 ];
 String landingRoute = '/';
 

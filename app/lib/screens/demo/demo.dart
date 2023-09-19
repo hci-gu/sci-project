@@ -6,6 +6,7 @@ import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/models/bouts.dart';
 import 'package:scimovement/models/chart.dart';
+import 'package:scimovement/models/goals.dart';
 import 'package:scimovement/models/journal.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/models/energy.dart';
@@ -199,9 +200,44 @@ class DemoWrapper extends ConsumerWidget {
           ),
         ),
         journalProvider.overrideWith((ref, _) => []),
+        journalMonthlyProvider.overrideWith((ref, _) => []),
+        journalForDayProvider.overrideWith((ref, _) => []),
+        pressureUlcerProvider.overrideWith((ref) => [
+              PressureUlcerEntry(
+                id: 0,
+                time: DateTime.now(),
+                type: JournalType.pressureUlcer,
+                comment: '',
+                pressureUlcerType: PressureUlcerType.category2,
+                location: PressureUlcerLocation.ancle,
+              )
+            ]),
+        utiProvider.overrideWith((ref) => null),
+        pressureReleaseCountProvider.overrideWith((ref, arg) => 0),
+        bladderEmptyingCountProvider.overrideWith((ref, arg) => 0),
         movementBarChartProvider,
         notificationsEnabledProvider.overrideWithValue(false),
         userHasDataProvider.overrideWithValue(true),
+        goalsProvider.overrideWith((ref, arg) => [
+              JournalGoal(
+                id: 0,
+                value: 8,
+                progress: 2,
+                reminder: DateTime.now().add(Duration(hours: 1)),
+                start: Duration.zero,
+                recurrence: Duration(hours: 1),
+                type: JournalType.pressureRelease,
+              ),
+              JournalGoal(
+                id: 1,
+                value: 6,
+                progress: 4,
+                reminder: DateTime.now().add(Duration(minutes: 30)),
+                start: Duration.zero,
+                recurrence: Duration(hours: 1),
+                type: JournalType.bladderEmptying,
+              ),
+            ]),
         exerciseWidgetProvider,
         averageSedentaryBout,
         totalEnergyProvider,

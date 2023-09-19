@@ -1,10 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:scimovement/app.dart';
-import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/screens/demo/demo.dart';
 import 'package:scimovement/storage.dart';
 import 'package:timezone/data/latest.dart' as tz;
@@ -30,6 +28,10 @@ void main() async {
         await rootBundle.loadString('assets/licenses/icon_license.txt');
     yield LicenseEntryWithLineBreaks(['thenounproject'], license);
   });
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
 
   runApp(
     const DemoWrapper(

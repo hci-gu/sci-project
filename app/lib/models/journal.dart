@@ -1,7 +1,18 @@
+import 'package:collection/collection.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api/api.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/models/pagination.dart';
+
+class JournalEvents {
+  final JournalType type;
+  final List<JournalEntry> entries;
+
+  JournalEvents({
+    required this.type,
+    required this.entries,
+  });
+}
 
 final journalProvider = FutureProvider.family<List<JournalEntry>, Pagination>(
     (ref, pagination) async {
@@ -14,6 +25,27 @@ final journalProvider = FutureProvider.family<List<JournalEntry>, Pagination>(
     pagination.mode,
   );
   return journal;
+});
+
+final journalEventsProvider =
+    FutureProviderFamily<List<JournalEvents>, Pagination>(
+        (ref, pagination) async {
+  List<JournalEntry> journal =
+      await ref.watch(journalProvider(pagination).future);
+
+  List<JournalEvents> events = [];
+
+  for (JournalEntry entry in journal) {
+    if (!events.any((e) => e.type == entry.type)) {
+      events.add(JournalEvents(type: entry.type, entries: []));
+    }
+    JournalEvents? event = events.firstWhereOrNull((e) => e.type == entry.type);
+    if (event != null) {
+      event.entries.add(entry);
+    }
+  }
+
+  return events;
 });
 
 final journalMonthlyProvider =
@@ -58,22 +90,6 @@ final journalSelectedDateProvider = StateProvider<DateTime>((ref) {
   DateTime now = DateTime.now();
   return DateTime(now.year, now.month, now.day);
 });
-
-// final journalForDayProvider = FutureProvider.family((ref) => null);
-
-// final filteredJournalProvider =
-//     FutureProvider.family<List<JournalEntry>, Pagination>(
-//         (ref, pagination) async {
-//   List<JournalEntry> journal =
-//       await ref.watch(journalProvider(pagination).future);
-//   JournalType? type = ref.watch(journalTypeFilterProvider);
-
-//   if (type == null) {
-//     return journal;
-//   }
-
-//   return journal.where((e) => e.type == type).toList();
-// });
 
 final journalTypeFilterProvider = StateProvider<JournalType?>((ref) => null);
 final bodyPartFilterProvider = StateProvider<BodyPart?>((ref) => null);
