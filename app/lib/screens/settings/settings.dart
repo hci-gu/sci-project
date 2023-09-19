@@ -161,10 +161,9 @@ class OnboardingButton extends ConsumerWidget {
       title: AppLocalizations.of(context)!.redoIntro,
       width: 220,
       secondary: true,
-      onPressed: () async {
-        await Storage().storeOnboardingDone(false);
+      onPressed: () {
+        Storage().storeOnboardingDone(false);
         ref.read(onboardingStepProvider.notifier).state = 0;
-        await Future.delayed(const Duration(milliseconds: 100));
         context.goNamed('onboarding');
       },
     );

@@ -78,11 +78,6 @@ class RouterNotifier extends ChangeNotifier {
       return landingRoute;
     }
 
-    // redirect from onboarding to home when done
-    if (state.matchedLocation == '/onboarding' && onboardingDone) {
-      return landingRoute;
-    }
-
     // redirect from login screen to home or onboarding after login
     if (loggedIn && _isLoginRoute(state.matchedLocation)) {
       if (onboardingDone) {
