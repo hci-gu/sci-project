@@ -21,6 +21,7 @@
     "createAccount": "Create account",
     "deleteAccount": "Delete account",
     "deleteAccountConfirmation": "Are you sure you want to delete your account? You cannot undo and your data will disappear after you delete your account.",
+    "close": "Close",
     "cancel": "Cancel",
     "save": "Save",
     "about": "About",

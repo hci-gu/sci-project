@@ -165,7 +165,7 @@ class EditJournalEntryScreen extends ConsumerWidget {
         context.pop();
       }
     }
-    form.reset();
+    form.dispose();
   }
 
   Widget _submitButton(WidgetRef ref) {

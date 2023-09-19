@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class DurationPicker extends HookWidget {
   final String? title;
@@ -22,60 +23,43 @@ class DurationPicker extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    FocusNode _focusNode = useFocusNode();
-
-    return Focus(
-      focusNode: _focusNode,
-      onFocusChange: (focused) {
-        if (focused && !readOnly) {
-          _showDurationPicker(context);
-          onChange(value);
-          Scrollable.ensureVisible(
-            _focusNode.context!,
-            duration: const Duration(milliseconds: 250),
-          );
-        }
-      },
-      child: Padding(
-        padding: EdgeInsets.only(top: AppTheme.basePadding * 2),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            if (title != null) _title(context),
-            Button(
-              width: 34,
-              icon: Icons.remove,
-              onPressed: () {
-                if (value.inMinutes >= 15) {
-                  onChange(Duration(minutes: value.inMinutes - 15));
-                }
-              },
-              disabled: readOnly,
-              size: ButtonSize.small,
+    return Padding(
+      padding: EdgeInsets.only(top: AppTheme.basePadding * 2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          if (title != null) _title(context),
+          Button(
+            width: 34,
+            icon: Icons.remove,
+            onPressed: () {
+              if (value.inMinutes >= 15) {
+                onChange(Duration(minutes: value.inMinutes - 15));
+              }
+            },
+            disabled: readOnly,
+            size: ButtonSize.small,
+          ),
+          AppTheme.spacer,
+          GestureDetector(
+            onTap: () {
+              _showDurationPicker(context);
+            },
+            child: DurationDisplay(
+              duration: value,
             ),
-            AppTheme.spacer,
-            GestureDetector(
-              onTap: () {
-                if (readOnly) return;
-                _focusNode.requestFocus();
-              },
-              child: DurationDisplay(
-                duration: value,
-                highlighted: _focusNode.hasFocus,
-              ),
-            ),
-            AppTheme.spacer,
-            Button(
-              width: 34,
-              icon: Icons.add,
-              onPressed: () {
-                onChange(Duration(minutes: value.inMinutes + 15));
-              },
-              size: ButtonSize.small,
-              disabled: readOnly,
-            ),
-          ],
-        ),
+          ),
+          AppTheme.spacer,
+          Button(
+            width: 34,
+            icon: Icons.add,
+            onPressed: () {
+              onChange(Duration(minutes: value.inMinutes + 15));
+            },
+            size: ButtonSize.small,
+            disabled: readOnly,
+          ),
+        ],
       ),
     );
   }
@@ -102,7 +86,7 @@ class DurationPicker extends HookWidget {
   }
 
   void _showDurationPicker(BuildContext context) {
-    showBottomSheet(
+    showModalBottomSheet(
       elevation: 24,
       context: context,
       builder: (BuildContext ctx) {
@@ -123,7 +107,7 @@ class DurationPicker extends HookWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Button(
-                      title: 'Stäng',
+                      title: AppLocalizations.of(context)!.close,
                       onPressed: () {
                         Navigator.pop(ctx);
                       },
