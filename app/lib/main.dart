@@ -31,6 +31,10 @@ void main() async {
         await rootBundle.loadString('assets/licenses/icon_license.txt');
     yield LicenseEntryWithLineBreaks(['thenounproject'], license);
   });
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
 
   runApp(
     ProviderScope(

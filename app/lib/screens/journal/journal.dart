@@ -8,6 +8,7 @@ import 'package:scimovement/models/journal.dart';
 import 'package:scimovement/screens/journal/widgets/journal_calendar.dart';
 import 'package:scimovement/screens/journal/widgets/journal_list.dart';
 import 'package:scimovement/screens/journal/widgets/journal_shortcut_grid.dart';
+import 'package:scimovement/screens/journal/widgets/journal_timeline.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:scimovement/widgets/button.dart';
@@ -17,25 +18,34 @@ class JournalScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      appBar: AppTheme.appBar(AppLocalizations.of(context)!.logbook),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          return JournalScroller(height: constraints.maxHeight - 18);
-        },
-      ),
-      floatingActionButton: isToday(ref.watch(journalSelectedDateProvider))
-          ? null
-          : FloatingActionButton(
-              onPressed: () => GoRouter.of(context).goNamed(
-                'select-journal-type',
-                extra: {
-                  'date': ref.watch(journalSelectedDateProvider),
-                },
-              ),
-              child: const Icon(Icons.add),
-            ),
-    );
+    return OrientationBuilder(builder: (context, orientation) {
+      return Scaffold(
+          appBar: orientation == Orientation.portrait
+              ? AppTheme.appBar(AppLocalizations.of(context)!.logbook)
+              : null,
+          body: LayoutBuilder(
+            builder: (context, constraints) {
+              return JournalScroller(
+                  height: constraints.maxHeight - 18, orientation: orientation);
+            },
+          ),
+          floatingActionButton: orientation == Orientation.portrait
+              ? isToday(ref.watch(journalSelectedDateProvider))
+                  ? null
+                  : FloatingActionButton(
+                      onPressed: () => GoRouter.of(context).goNamed(
+                        'select-journal-type',
+                        extra: {
+                          'date': ref.watch(journalSelectedDateProvider),
+                        },
+                      ),
+                      child: const Icon(Icons.add),
+                    )
+              : FloatingActionButton(
+                  onPressed: () {},
+                  child: const Icon(Icons.undo),
+                ));
+    });
   }
 
   bool isToday(DateTime date) {
@@ -48,8 +58,13 @@ class JournalScreen extends ConsumerWidget {
 
 class JournalScroller extends HookConsumerWidget {
   final double height;
+  final Orientation orientation;
 
-  const JournalScroller({super.key, required this.height});
+  const JournalScroller({
+    super.key,
+    required this.height,
+    required this.orientation,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -72,6 +87,11 @@ class JournalScroller extends HookConsumerWidget {
 
     double listHeight =
         height - JournalCalendar.heightForPage(context, currentPage.value);
+
+    if (orientation == Orientation.landscape) {
+      return JournalTimeline(initialPage: currentPage.value);
+    }
+
     return Column(
       children: [
         const WeekdayRow(),
