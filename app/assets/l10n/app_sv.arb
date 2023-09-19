@@ -21,6 +21,7 @@
     "createAccount": "Skapa konto",
     "deleteAccount": "Radera konto",
     "deleteAccountConfirmation": "Är du säker att du vill radera ditt konto? Du kan inte ångra dig och din data försvinner efter du har raderat ditt konto.",
+    "close": "Stäng",
     "cancel": "Avbryt",
     "save": "Spara",
     "about": "Om",
