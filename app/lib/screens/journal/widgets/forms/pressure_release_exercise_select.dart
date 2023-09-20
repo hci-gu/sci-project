@@ -109,31 +109,34 @@ class PressureReleaseExerciseSelect extends HookWidget {
   Widget _exerciseItem(
       BuildContext context, state, PressureReleaseExercise exercise) {
     bool selected = state.value.contains(exercise);
-    return GestureDetector(
-      onTap: () {
-        _onTap(state, exercise);
-      },
-      child: Column(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: selected
-                    ? AppTheme.colors.success
-                    : AppTheme.colors.lightGray,
-                width: 4,
-                strokeAlign: BorderSide.strokeAlignOutside,
+    return Opacity(
+      opacity: selected ? 1 : 0.5,
+      child: GestureDetector(
+        onTap: () {
+          _onTap(state, exercise);
+        },
+        child: Column(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: selected
+                      ? AppTheme.colors.success
+                      : AppTheme.colors.lightGray,
+                  width: 4,
+                  strokeAlign: BorderSide.strokeAlignOutside,
+                ),
+                borderRadius: BorderRadius.circular(12),
               ),
-              borderRadius: BorderRadius.circular(12),
+              clipBehavior: Clip.antiAlias,
+              width: 90,
+              height: 90,
+              child: Image.asset(exercise.asset),
             ),
-            clipBehavior: Clip.antiAlias,
-            width: 90,
-            height: 90,
-            child: Image.asset(exercise.asset),
-          ),
-          AppTheme.spacer,
-          Text(exercise.displayString(context)),
-        ],
+            AppTheme.spacer,
+            Text(exercise.displayString(context)),
+          ],
+        ),
       ),
     );
   }
