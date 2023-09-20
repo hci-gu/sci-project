@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api/classes.dart';
+import 'package:scimovement/api/classes/journal/journal.dart';
 import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/models/bouts.dart';
 import 'package:scimovement/models/chart.dart';
@@ -223,18 +224,18 @@ class DemoWrapper extends ConsumerWidget {
                 id: 0,
                 value: 8,
                 progress: 2,
-                reminder: DateTime.now().add(Duration(hours: 1)),
+                reminder: DateTime.now().add(const Duration(hours: 1)),
                 start: Duration.zero,
-                recurrence: Duration(hours: 1),
+                recurrence: const Duration(hours: 1),
                 type: JournalType.pressureRelease,
               ),
               JournalGoal(
                 id: 1,
                 value: 6,
                 progress: 4,
-                reminder: DateTime.now().add(Duration(minutes: 30)),
+                reminder: DateTime.now().add(const Duration(minutes: 30)),
                 start: Duration.zero,
-                recurrence: Duration(hours: 1),
+                recurrence: const Duration(hours: 1),
                 type: JournalType.bladderEmptying,
               ),
             ]),
