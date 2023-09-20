@@ -39,11 +39,13 @@ class BladderEmptyingWidget extends ConsumerWidget {
       ),
       SvgPicture.asset('assets/svg/set_goal.svg', height: 56),
       AppTheme.spacer,
-      Button(
-        width: 140,
-        onPressed: () {},
-        size: ButtonSize.tiny,
-        title: AppLocalizations.of(context)!.getStarted,
+      IgnorePointer(
+        child: Button(
+          width: 140,
+          onPressed: () {},
+          size: ButtonSize.tiny,
+          title: AppLocalizations.of(context)!.getStarted,
+        ),
       ),
     ]));
   }
@@ -113,14 +115,13 @@ class BladderEmptyingWidget extends ConsumerWidget {
             AppLocalizations.of(context)!.bladderEmptyingTimeToDoIt,
             style: AppTheme.labelMedium,
           ),
-          Button(
-            onPressed: () {
-              String path = GoRouter.of(context).location;
-              context.go('$path${path.length > 1 ? '/' : ''}bladder-emptying');
-            },
-            title: AppLocalizations.of(context)!.start,
-            size: ButtonSize.tiny,
-            width: 100,
+          IgnorePointer(
+            child: Button(
+              onPressed: () {},
+              title: AppLocalizations.of(context)!.start,
+              size: ButtonSize.tiny,
+              width: 100,
+            ),
           ),
           AppTheme.spacer,
           GoalProgress(goal: goal)
