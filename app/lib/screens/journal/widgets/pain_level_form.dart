@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import 'package:scimovement/api/classes.dart';
+import 'package:scimovement/api/classes/journal/journal.dart';
 import 'package:scimovement/screens/journal/widgets/body_part_select.dart';
 import 'package:scimovement/screens/journal/widgets/pain_slider.dart';
 import 'package:scimovement/theme/theme.dart';

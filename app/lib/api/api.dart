@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:scimovement/api/classes.dart';
+import 'package:scimovement/api/classes/journal/journal.dart';
 import 'package:scimovement/models/goals.dart';
 import 'package:scimovement/models/pagination.dart';
 

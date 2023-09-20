@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:reactive_forms/reactive_forms.dart';
-import 'package:scimovement/api/classes.dart';
+import 'package:scimovement/api/classes/journal/journal.dart';
 import 'package:scimovement/models/journal.dart';
 import 'package:scimovement/screens/journal/widgets/forms/bladder_emptying_form.dart';
 import 'package:scimovement/screens/journal/widgets/forms/uti_form.dart';
