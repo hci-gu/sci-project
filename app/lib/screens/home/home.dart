@@ -186,7 +186,7 @@ class HomeScreen extends HookConsumerWidget {
                   const ExerciseWidget(),
                 if (features.contains(AppFeature.pressureRelease))
                   const PressureReleaseWidget(),
-                if (features.contains(AppFeature.pressureRelease))
+                if (features.contains(AppFeature.bladder))
                   const BladderEmptyingWidget(),
               ],
             ),

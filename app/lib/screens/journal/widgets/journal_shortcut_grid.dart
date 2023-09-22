@@ -62,7 +62,8 @@ class JournalShortcutGrid extends ConsumerWidget {
                         'create-journal',
                         extra: {'entry': e},
                       ),
-                      icon: _iconForEntry(e),
+                      icon: AppTheme.iconForJournalType(
+                          e.type, e is PainLevelEntry ? e.bodyPart : null),
                       title: e.shortcutTitle(context),
                       subtitle: timeago.format(e.time),
                     ),
@@ -86,27 +87,5 @@ class JournalShortcutGrid extends ConsumerWidget {
         ],
       ),
     );
-  }
-
-  Widget _iconForEntry(JournalEntry entry) {
-    if (entry is PainLevelEntry) {
-      return BodyPartIcon(
-        bodyPart: entry.bodyPart,
-        size: 48,
-      );
-    }
-    if (entry is PressureReleaseEntry) {
-      return const Icon(Icons.alarm, size: 48);
-    }
-    if (entry is BladderEmptyingEntry) {
-      return SvgPicture.asset('assets/svg/toilet.svg', height: 48);
-    }
-    if (entry is UTIEntry) {
-      return const Icon(Icons.water, size: 48);
-    }
-    if (entry.type == JournalType.leakage) {
-      return const Icon(Icons.water_drop_outlined, size: 48);
-    }
-    return const Icon(Icons.album_outlined);
   }
 }

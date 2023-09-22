@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:scimovement/api/classes/journal/journal.dart';
 import 'package:scimovement/models/app_features.dart';
 import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/models/onboarding.dart';
@@ -60,6 +61,8 @@ class OnboardingStep extends ConsumerWidget {
       case 3:
         return const PainFunctions();
       case 4:
+        return const BladderFunctions();
+      case 5:
         return const PushNotifications();
       default:
         return Container();
@@ -198,6 +201,53 @@ class PainFunctions extends ConsumerWidget {
   }
 }
 
+class BladderFunctions extends ConsumerWidget {
+  const BladderFunctions({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Column(
+      children: [
+        Text(AppLocalizations.of(context)!.onboardingBladderFunctions,
+            style: AppTheme.headLine3),
+        SizedBox(
+          height: 200,
+          child: Center(
+            child: SvgPicture.asset('assets/svg/scapula.svg', height: 100),
+          ),
+        ),
+        AppFeatureWidget(
+          icon: AppTheme.iconForJournalType(
+              JournalType.urinaryTractInfection, null, 24),
+          title: AppLocalizations.of(context)!.urinaryTractInfection,
+          description: AppLocalizations.of(context)!.onboardingUtiDescription,
+        ),
+        AppTheme.spacer,
+        AppFeatureWidget(
+          icon: AppTheme.iconForJournalType(
+              JournalType.bladderEmptying, null, 24),
+          title: AppLocalizations.of(context)!.bladderEmptying,
+          description: AppLocalizations.of(context)!
+              .onboardingBladderEmptyingDescription,
+        ),
+        AppTheme.spacer,
+        AppFeatureWidget(
+          icon: AppTheme.iconForJournalType(JournalType.leakage, null, 24),
+          title: AppLocalizations.of(context)!.leakage,
+          description:
+              AppLocalizations.of(context)!.onboardingLeakageDescription,
+        ),
+        AppTheme.spacer4x,
+        FeatureToggle(
+          feature: AppFeature.bladder,
+          addText: AppLocalizations.of(context)!.onboardingWantFunctions,
+          removeText: AppLocalizations.of(context)!.onboardingNotInterested,
+        ),
+      ],
+    );
+  }
+}
+
 class PushNotifications extends ConsumerWidget {
   const PushNotifications({super.key});
 
@@ -236,7 +286,8 @@ class PushNotifications extends ConsumerWidget {
                   await ref
                       .read(userProvider.notifier)
                       .requestNotificationPermission();
-                  if (!ref.read(notificationsEnabledProvider)) {
+                  if (!ref.read(notificationsEnabledProvider) &&
+                      context.mounted) {
                     _displayNotificationPermissionDialog(context);
                   }
                 } else {
@@ -270,12 +321,14 @@ class PushNotifications extends ConsumerWidget {
 
 class AppFeatureWidget extends StatelessWidget {
   final String asset;
+  final Widget? icon;
   final String title;
   final String description;
 
   const AppFeatureWidget({
     super.key,
-    required this.asset,
+    this.asset = '',
+    this.icon,
     required this.title,
     required this.description,
   });
@@ -283,16 +336,20 @@ class AppFeatureWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            SvgPicture.asset(asset, width: 24),
+            icon != null ? icon! : SvgPicture.asset(asset, width: 24),
             AppTheme.spacer,
             Text(title, style: AppTheme.headLine3),
           ],
         ),
         AppTheme.spacer,
-        Text(description, style: AppTheme.paragraphMedium),
+        Text(
+          description,
+          style: AppTheme.paragraphMedium,
+        ),
       ],
     );
   }
