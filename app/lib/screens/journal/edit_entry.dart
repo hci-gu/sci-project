@@ -12,6 +12,7 @@ import 'package:scimovement/screens/journal/widgets/forms/pressure_release_form.
 import 'package:scimovement/screens/journal/widgets/forms/pressure_ulcer_form.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
+import 'package:scimovement/widgets/snackbar_message.dart';
 import 'package:scimovement/widgets/text_field.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -165,6 +166,18 @@ class EditJournalEntryScreen extends ConsumerWidget {
         context.pop();
       }
     }
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackbarMessage(
+          context: context,
+          message:
+              '${_appBarTitle(context)} ${AppLocalizations.of(context)!.saved.toLowerCase()}',
+          type: SnackbarType.success,
+        ),
+      );
+    }
+
     form.dispose();
   }
 

@@ -50,25 +50,40 @@ class JournalShortcutGrid extends ConsumerWidget {
       height: 148,
       child: ListView(
         scrollDirection: Axis.horizontal,
-        children: data
-            .map(
-              (e) => Padding(
-                padding: EdgeInsets.only(right: AppTheme.basePadding * 2),
-                child: SizedBox(
-                  width: 148,
-                  child: JournalEntryShortcut(
-                    onTap: () => context.goNamed(
-                      'create-journal',
-                      extra: {'entry': e},
+        children: [
+          ...data
+              .map(
+                (e) => Padding(
+                  padding: EdgeInsets.only(right: AppTheme.basePadding * 2),
+                  child: SizedBox(
+                    width: 148,
+                    child: JournalEntryShortcut(
+                      onTap: () => context.goNamed(
+                        'create-journal',
+                        extra: {'entry': e},
+                      ),
+                      icon: _iconForEntry(e),
+                      title: e.shortcutTitle(context),
+                      subtitle: timeago.format(e.time),
                     ),
-                    icon: _iconForEntry(e),
-                    title: e.shortcutTitle(context),
-                    subtitle: timeago.format(e.time),
                   ),
                 ),
+              )
+              .toList(),
+          Padding(
+            padding: EdgeInsets.only(right: AppTheme.basePadding * 2),
+            child: SizedBox(
+              width: 148,
+              child: JournalEntryShortcut(
+                onTap: () => context.goNamed(
+                  'select-journal-type',
+                ),
+                icon: const Icon(Icons.add),
+                title: AppLocalizations.of(context)!.newEntry,
               ),
-            )
-            .toList(),
+            ),
+          )
+        ],
       ),
     );
   }

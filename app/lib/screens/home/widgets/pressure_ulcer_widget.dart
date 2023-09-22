@@ -15,11 +15,14 @@ final pressureUlcerDisplayProvider =
   List<PressureUlcerEntry> pressureUlcers =
       await ref.watch(pressureUlcerProvider.future);
 
-  String title = pressureUlcers.isEmpty
-      ? AppLocalizations.of(context)!.noPressureUlcer
-      : pressureUlcers.length > 1
-          ? '${pressureUlcers.length} ${AppLocalizations.of(context)!.pressureUlcers}'
-          : pressureUlcers.first.pressureUlcerType.displayString(context);
+  String title = '';
+  if (context.mounted) {
+    title = pressureUlcers.isEmpty
+        ? AppLocalizations.of(context)!.noPressureUlcer
+        : pressureUlcers.length > 1
+            ? '${pressureUlcers.length} ${AppLocalizations.of(context)!.pressureUlcers}'
+            : pressureUlcers.first.pressureUlcerType.displayString(context);
+  }
   Color color = pressureUlcers.isEmpty
       ? AppTheme.colors.white
       : pressureUlcers.length > 1

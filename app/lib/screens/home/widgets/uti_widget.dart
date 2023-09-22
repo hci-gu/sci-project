@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -13,13 +14,18 @@ final pressureUlcerDisplayProvider =
     FutureProvider.family<ConditionDisplay, BuildContext>((ref, context) async {
   UTIEntry? entry = await ref.watch(utiProvider.future);
 
-  String title = entry?.title(context) ?? AppLocalizations.of(context)!.noUti;
+  String title = '';
+  String subtitle = '';
+  if (context.mounted) {
+    title = entry?.title(context) ?? AppLocalizations.of(context)!.noUti;
+    subtitle = entry != null
+        ? timeago.format(entry.time)
+        : AppLocalizations.of(context)!.noLoggedUti;
+  }
 
   return ConditionDisplay(
     title: title,
-    subtitle: entry != null
-        ? timeago.format(entry.time)
-        : AppLocalizations.of(context)!.noLoggedUti,
+    subtitle: subtitle,
     color: entry?.utiType.color(),
   );
 });
@@ -33,9 +39,10 @@ class UTIWidget extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          AutoSizeText(
             AppLocalizations.of(context)!.urinaryTractInfection,
             style: AppTheme.labelLarge,
+            maxLines: 1,
           ),
           AppTheme.spacer,
           ConditionSelect(

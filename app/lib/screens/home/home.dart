@@ -17,6 +17,7 @@ import 'package:scimovement/storage.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/activity_wheel/activity_wheel.dart';
 import 'package:scimovement/widgets/date_select.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 final homeWidgetPageProvider = StateProvider<int>((ref) {
   ref.listenSelf((previous, next) {
@@ -103,7 +104,8 @@ class PagedWidgets extends HookConsumerWidget {
                               ),
                             ),
                             AppTheme.spacer,
-                            Text('Utrustning & Medicin',
+                            Text(
+                                '${AppLocalizations.of(context)!.gear} & ${AppLocalizations.of(context)!.medicin}',
                                 style: AppTheme.labelLarge),
                           ],
                         ),
@@ -114,19 +116,22 @@ class PagedWidgets extends HookConsumerWidget {
                             horizontal: AppTheme.basePadding * 2,
                           ),
                           child: Center(
-                            child: StaggeredGrid.count(
-                              crossAxisCount: 2,
-                              crossAxisSpacing: AppTheme.basePadding * 2,
-                              mainAxisSpacing: AppTheme.basePadding * 2,
-                              children: const [
-                                StaggeredGridTile.count(
-                                  crossAxisCellCount: 1,
-                                  mainAxisCellCount: 2,
-                                  child: ActivityWheel(),
-                                ),
-                                EnergyWidget(),
-                                SedentaryWidget(),
-                              ],
+                            child: AspectRatio(
+                              aspectRatio: 1,
+                              child: StaggeredGrid.count(
+                                crossAxisCount: 2,
+                                crossAxisSpacing: AppTheme.basePadding * 2,
+                                mainAxisSpacing: AppTheme.basePadding * 2,
+                                children: const [
+                                  StaggeredGridTile.count(
+                                    crossAxisCellCount: 1,
+                                    mainAxisCellCount: 2,
+                                    child: ActivityWheel(),
+                                  ),
+                                  EnergyWidget(),
+                                  SedentaryWidget(),
+                                ],
+                              ),
                             ),
                           ),
                         ),

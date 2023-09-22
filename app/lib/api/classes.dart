@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:scimovement/api/api.dart';
 import 'package:intl/intl.dart';
-import 'package:scimovement/theme/theme.dart';
 import 'package:timezone/standalone.dart' as tz;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -363,4 +362,3 @@ class Bout {
     return '${from.hour.toString().padLeft(2, '0')}:${from.minute.toString().padLeft(2, '0')} - ${to.hour.toString().padLeft(2, '0')}:${to.minute.toString().padLeft(2, '0')}, ${DateFormat(DateFormat.YEAR_ABBR_MONTH_DAY).format(time)}';
   }
 }
-
