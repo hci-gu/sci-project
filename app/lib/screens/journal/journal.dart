@@ -12,7 +12,6 @@ import 'package:scimovement/screens/journal/widgets/journal_timeline.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:scimovement/widgets/button.dart';
-import 'dart:math' as math;
 
 class JournalScreen extends ConsumerWidget {
   const JournalScreen({Key? key}) : super(key: key);

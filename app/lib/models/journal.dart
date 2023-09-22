@@ -123,7 +123,11 @@ final journalForDayProvider =
     pagination.to(date),
     pagination.mode,
   );
-  return journal.where((element) => element.time.day == date.day).toList();
+  return journal
+      .where((element) => element.time.day == date.day)
+      .toList()
+      .reversed
+      .toList();
 });
 
 final paginatedJournalProvider = FutureProvider((ref) async {
