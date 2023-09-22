@@ -16,7 +16,26 @@ class JournalListItem extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Dismissible(
       key: ValueKey(entry.id),
-      background: Container(color: AppTheme.colors.error),
+      background: Container(
+        color: AppTheme.colors.error,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Text(
+              AppLocalizations.of(context)!.remove,
+              style: AppTheme.labelLarge.copyWith(color: Colors.white),
+            ),
+            AppTheme.spacer,
+            Padding(
+              padding: EdgeInsets.only(right: AppTheme.basePadding * 2),
+              child: const Icon(
+                Icons.delete,
+                color: Colors.white,
+              ),
+            )
+          ],
+        ),
+      ),
       confirmDismiss: (direction) async {
         if (direction == DismissDirection.endToStart) {
           onDelete(context, ref);
@@ -33,6 +52,18 @@ class JournalListItem extends ConsumerWidget {
             ),
           )),
           child: ListTile(
+            leading: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: AppTheme.iconForJournalType(
+                entry.type,
+                entry is PainLevelEntry
+                    ? (entry as PainLevelEntry).bodyPart
+                    : null,
+                24,
+              ),
+            ),
+            horizontalTitleGap: AppTheme.basePadding,
+            contentPadding: const EdgeInsets.all(0),
             title: Text(entry.title(context)),
             subtitle: Text(subtitle),
             trailing: IconButton(
