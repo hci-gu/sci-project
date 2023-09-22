@@ -12,6 +12,7 @@ import 'package:scimovement/screens/journal/widgets/journal_timeline.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:scimovement/widgets/button.dart';
+import 'dart:math' as math;
 
 class JournalScreen extends ConsumerWidget {
   const JournalScreen({Key? key}) : super(key: key);
@@ -33,12 +34,21 @@ class JournalScreen extends ConsumerWidget {
               ? isToday(ref.watch(journalSelectedDateProvider))
                   ? null
                   : FloatingActionButton(
-                      onPressed: () => GoRouter.of(context).goNamed(
-                        'select-journal-type',
-                        extra: {
-                          'date': ref.watch(journalSelectedDateProvider),
-                        },
-                      ),
+                      onPressed: () {
+                        DateTime selectedDate =
+                            ref.watch(journalSelectedDateProvider);
+                        GoRouter.of(context).goNamed(
+                          'select-journal-type',
+                          extra: {
+                            'date': DateTime(
+                              selectedDate.year,
+                              selectedDate.month,
+                              selectedDate.day,
+                              12,
+                            ),
+                          },
+                        );
+                      },
                       child: const Icon(Icons.add),
                     )
               : FloatingActionButton(
@@ -88,7 +98,8 @@ class JournalScroller extends HookConsumerWidget {
     double listHeight =
         height - JournalCalendar.heightForPage(context, currentPage.value);
 
-    if (orientation == Orientation.landscape) {
+    if (orientation == Orientation.landscape ||
+        height < MediaQuery.of(context).size.width) {
       return JournalTimeline(initialPage: currentPage.value);
     }
 
@@ -104,22 +115,19 @@ class JournalScroller extends HookConsumerWidget {
               ),
               Positioned(
                 top: JournalCalendar.heightForPage(context, currentPage.value),
-                child: AnimatedSize(
-                  duration: const Duration(milliseconds: 300),
-                  child: SizedBox(
-                    width: MediaQuery.of(context).size.width,
-                    height: listHeight,
-                    child: ListBottomSheet(
-                      onPageChanged: (Direction dir) {
-                        currentPage.value += dir == Direction.up ? -1 : 1;
-                        scrollController.animateTo(
-                          scrollController.offset +
-                              (dir == Direction.up ? -height : height),
-                          duration: const Duration(milliseconds: 400),
-                          curve: Curves.decelerate,
-                        );
-                      },
-                    ),
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  height: listHeight,
+                  child: ListBottomSheet(
+                    onPageChanged: (Direction dir) {
+                      currentPage.value += dir == Direction.up ? -1 : 1;
+                      scrollController.animateTo(
+                        scrollController.offset +
+                            (dir == Direction.up ? -height : height),
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.decelerate,
+                      );
+                    },
                   ),
                 ),
               ),

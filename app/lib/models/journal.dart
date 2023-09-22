@@ -1,9 +1,12 @@
 import 'package:collection/collection.dart';
+import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api/api.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/api/classes/journal/journal.dart';
 import 'package:scimovement/models/pagination.dart';
+
+enum TimelineDisplayType { events, periods, chart }
 
 class JournalEvents {
   final JournalType type;
@@ -12,7 +15,51 @@ class JournalEvents {
   JournalEvents({
     required this.type,
     required this.entries,
-  });
+  }) {
+    entries.sort((a, b) => a.time.compareTo(b.time));
+  }
+
+  String title(BuildContext context) {
+    return type.displayString(context);
+  }
+
+  DateTime get start {
+    return entries.first.time;
+  }
+
+  DateTime get end {
+    switch (type) {
+      case JournalType.pressureUlcer:
+        if ((entries.last as PressureUlcerEntry).pressureUlcerType !=
+            PressureUlcerType.none) {
+          return DateTime.now();
+        }
+        break;
+      case JournalType.urinaryTractInfection:
+        if ((entries.last as UTIEntry).utiType != UTIType.none) {
+          return DateTime.now();
+        }
+        break;
+      default:
+    }
+    return entries.last.time;
+  }
+
+  Duration get duration {
+    return end.difference(start);
+  }
+
+  TimelineDisplayType get displayType {
+    switch (type) {
+      case JournalType.pain:
+        return TimelineDisplayType.chart;
+      case JournalType.pressureUlcer:
+      case JournalType.urinaryTractInfection:
+        return TimelineDisplayType.periods;
+      default:
+        return TimelineDisplayType.events;
+    }
+  }
 }
 
 final journalProvider = FutureProvider.family<List<JournalEntry>, Pagination>(
