@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:scimovement/api/classes.dart';
+import 'package:scimovement/api/classes/journal/journal.dart';
+import 'package:scimovement/screens/journal/widgets/body_part_icon.dart';
 import 'package:scimovement/theme/utils.dart';
 import 'package:scimovement/widgets/button.dart';
 
@@ -237,4 +240,27 @@ class AppTheme {
     color: AppTheme.colors.white,
     borderRadius: BorderRadius.circular(16),
   );
+
+  static Widget iconForJournalType(JournalType type,
+      [BodyPart? bodyPart, double size = 48]) {
+    switch (type) {
+      case JournalType.pain:
+        return BodyPartIcon(
+          bodyPart: bodyPart ?? BodyPart(BodyPartType.scapula, null),
+          size: size,
+        );
+      case JournalType.pressureRelease:
+        return Icon(Icons.alarm, size: size);
+      case JournalType.pressureUlcer:
+        return Icon(Icons.album_outlined, size: size);
+      case JournalType.bladderEmptying:
+        return SvgPicture.asset('assets/svg/toilet.svg', height: size);
+      case JournalType.urinaryTractInfection:
+        return Icon(Icons.water, size: size);
+      case JournalType.leakage:
+        return Icon(Icons.water_drop_outlined, size: size);
+      default:
+        return Icon(Icons.album_outlined, size: size);
+    }
+  }
 }

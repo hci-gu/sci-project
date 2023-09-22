@@ -57,10 +57,12 @@ class SettingsScreen extends ConsumerWidget {
           GestureDetector(
             onTap: () async {
               await Clipboard.setData(ClipboardData(text: user.id));
-              ScaffoldMessenger.of(context).showSnackBar(SnackbarMessage(
-                context: context,
-                message: AppLocalizations.of(context)!.userIdCopyMessage,
-              ));
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(SnackbarMessage(
+                  context: context,
+                  message: AppLocalizations.of(context)!.userIdCopyMessage,
+                ));
+              }
             },
             child: Column(
               children: [

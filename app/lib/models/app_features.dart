@@ -6,6 +6,7 @@ enum AppFeature {
   pressureRelease,
   pain,
   exercise,
+  bladder,
 }
 
 final appFeaturesProvider = StateProvider<List<AppFeature>>((ref) {

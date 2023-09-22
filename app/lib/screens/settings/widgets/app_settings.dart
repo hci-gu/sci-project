@@ -1,7 +1,9 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api/classes.dart';
+import 'package:scimovement/models/app_features.dart';
 import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/locale_select.dart';
@@ -30,7 +32,8 @@ class AppSettings extends ConsumerWidget {
                   await ref
                       .read(userProvider.notifier)
                       .requestNotificationPermission();
-                  if (!ref.read(notificationsEnabledProvider)) {
+                  if (!ref.read(notificationsEnabledProvider) &&
+                      context.mounted) {
                     _displayNotificationPermissionDialog(context);
                   }
                 } else {
@@ -42,6 +45,8 @@ class AppSettings extends ConsumerWidget {
         ),
         if (ref.watch(notificationsEnabledProvider))
           const NotificationToggles(),
+        AppTheme.spacer2x,
+        const AppFeatureToggles(),
         AppTheme.spacer2x,
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -62,10 +67,76 @@ class AppSettings extends ConsumerWidget {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackbarMessage(
         context: context,
-        message:
-            'Du måste slå på notifikationer i telefonens appinställningar.',
+        message: AppLocalizations.of(context)!.pushPermissionsErrorMessage,
         type: SnackbarType.error,
       ),
+    );
+  }
+}
+
+class AppFeatureToggles extends ConsumerWidget {
+  const AppFeatureToggles({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          AppLocalizations.of(context)!.enableDisableFeatures,
+          style: AppTheme.labelLarge,
+        ),
+        AppTheme.spacer,
+        _row(
+          AppLocalizations.of(context)!.watchFunctions,
+          AppFeature.watch,
+          ref,
+        ),
+        _row(
+          AppLocalizations.of(context)!.onboardingPainFeature,
+          AppFeature.pain,
+          ref,
+        ),
+        _row(
+          AppLocalizations.of(context)!.onboardingPressureReleaseAndUlcerTitle,
+          AppFeature.pressureRelease,
+          ref,
+        ),
+        _row(
+          AppLocalizations.of(context)!.onboardingBladderFunctions,
+          AppFeature.bladder,
+          ref,
+        ),
+      ],
+    );
+  }
+
+  Widget _row(String title, AppFeature feature, WidgetRef ref) {
+    List<AppFeature> features = ref.watch(appFeaturesProvider);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: AppTheme.paragraphMedium,
+        ),
+        CupertinoSwitch(
+          thumbColor: AppTheme.colors.white,
+          activeColor: AppTheme.colors.primary,
+          value: features.contains(feature),
+          onChanged: (add) async {
+            if (add) {
+              ref.read(appFeaturesProvider.notifier).state = [
+                ...features,
+                feature
+              ];
+            } else {
+              ref.read(appFeaturesProvider.notifier).state =
+                  features.whereNot((e) => e == feature).toList();
+            }
+          },
+        ),
+      ],
     );
   }
 }
