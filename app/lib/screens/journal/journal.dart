@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:infinite_listview/infinite_listview.dart';
 import 'package:intl/intl.dart';
-import 'package:scimovement/models/journal.dart';
+import 'package:scimovement/models/journal/journal.dart';
 import 'package:scimovement/screens/journal/widgets/journal_calendar.dart';
 import 'package:scimovement/screens/journal/widgets/journal_list.dart';
 import 'package:scimovement/screens/journal/widgets/journal_shortcut_grid.dart';
@@ -114,19 +114,22 @@ class JournalScroller extends HookConsumerWidget {
               ),
               Positioned(
                 top: JournalCalendar.heightForPage(context, currentPage.value),
-                child: SizedBox(
-                  width: MediaQuery.of(context).size.width,
-                  height: listHeight,
-                  child: ListBottomSheet(
-                    onPageChanged: (Direction dir) {
-                      currentPage.value += dir == Direction.up ? -1 : 1;
-                      scrollController.animateTo(
-                        scrollController.offset +
-                            (dir == Direction.up ? -height : height),
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.decelerate,
-                      );
-                    },
+                child: AnimatedSize(
+                  duration: const Duration(milliseconds: 300),
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width,
+                    height: listHeight,
+                    child: ListBottomSheet(
+                      onPageChanged: (Direction dir) {
+                        currentPage.value += dir == Direction.up ? -1 : 1;
+                        scrollController.animateTo(
+                          scrollController.offset +
+                              (dir == Direction.up ? -height : height),
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.decelerate,
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),

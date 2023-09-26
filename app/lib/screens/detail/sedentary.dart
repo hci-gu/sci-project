@@ -4,7 +4,7 @@ import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/api/classes/journal/journal.dart';
 import 'package:scimovement/models/bouts.dart';
 import 'package:scimovement/models/chart.dart';
-import 'package:scimovement/models/journal.dart';
+import 'package:scimovement/models/journal/journal.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/screens/detail/screen.dart';
 import 'package:scimovement/widgets/activity_arc/activity_arc.dart';

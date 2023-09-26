@@ -8,7 +8,7 @@ import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/models/bouts.dart';
 import 'package:scimovement/models/chart.dart';
 import 'package:scimovement/models/goals.dart';
-import 'package:scimovement/models/journal.dart';
+import 'package:scimovement/models/journal/journal.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/models/energy.dart';
 import 'package:scimovement/screens/home/widgets/energy_widget.dart';

@@ -7,6 +7,7 @@ import 'package:scimovement/models/bouts.dart';
 import 'package:scimovement/models/energy.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/screens/exercise/add_exercise.dart';
+import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/editable_list_item.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -23,9 +24,7 @@ class ExcerciseScreen extends HookConsumerWidget {
     ValueNotifier<bool> isOpened = useState(startWithAdd);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.exercise),
-      ),
+      appBar: AppTheme.appBar(AppLocalizations.of(context)!.exercise),
       floatingActionButton: Builder(builder: (context) {
         return AddExerciseButton(
           isOpened: isOpened.value,

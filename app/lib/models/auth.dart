@@ -56,7 +56,7 @@ class UserState extends StateNotifier<User?> {
     try {
       await Api().deleteAccount();
       logout();
-    } catch (e) {}
+    } catch (_) {}
   }
 
   Future<void> logout() async {
