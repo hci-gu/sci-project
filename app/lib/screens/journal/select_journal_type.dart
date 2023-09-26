@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/api/classes/journal/journal.dart';
 import 'package:scimovement/models/app_features.dart';
-import 'package:scimovement/screens/journal/widgets/body_part_icon.dart';
 import 'package:scimovement/screens/journal/widgets/entry_shortcut.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';

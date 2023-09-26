@@ -106,18 +106,18 @@ class Button extends StatelessWidget {
 
     ButtonStyle style = AppTheme.buttonStyle(
         rounded: rounded, secondary: secondary, size: size, color: color);
-    Widget _text = Text(
+    Widget text = Text(
       title ?? '',
       style: AppTheme.buttonTextStyle(secondary, color, size),
     );
     if (subtitle != null) {
-      _text = FittedBox(
+      text = FittedBox(
         fit: BoxFit.contain,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _text,
+            text,
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Text(
@@ -131,13 +131,13 @@ class Button extends StatelessWidget {
     }
 
     if (icon != null) {
-      Widget _icon =
+      Widget iconToUse =
           Icon(icon, color: secondary ? color : AppTheme.colors.white);
       if (title == null) {
         button = TextButton(
           style: style,
           onPressed: onPressed,
-          child: loading ? loadingIndicator : _icon,
+          child: loading ? loadingIndicator : iconToUse,
         );
       } else {
         button = TextButton.icon(
@@ -146,21 +146,23 @@ class Button extends StatelessWidget {
           icon: loading
               ? loadingIndicator
               : flipIcon
-                  ? _text
-                  : _icon,
-          label: flipIcon ? _icon : _text,
+                  ? text
+                  : iconToUse,
+          label: flipIcon ? iconToUse : text,
         );
       }
     } else {
       button = TextButton(
         style: style,
         onPressed: onPressed,
-        child: loading ? loadingIndicator : _text,
+        child: loading ? loadingIndicator : text,
       );
     }
 
-    double buttonScaleFactor =
-        min(1.5, max(1, MediaQuery.of(context).textScaleFactor));
+    double buttonScaleFactor = min(
+      1.5,
+      max(1, MediaQuery.of(context).textScaleFactor),
+    );
 
     return AbsorbPointer(
       absorbing: disabled || loading,
