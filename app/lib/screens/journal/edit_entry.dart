@@ -4,7 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import 'package:scimovement/api/classes/journal/journal.dart';
-import 'package:scimovement/models/journal.dart';
+import 'package:scimovement/models/journal/journal.dart';
 import 'package:scimovement/screens/journal/widgets/forms/bladder_emptying_form.dart';
 import 'package:scimovement/screens/journal/widgets/forms/uti_form.dart';
 import 'package:scimovement/screens/journal/widgets/pain_level_form.dart';
@@ -168,11 +168,14 @@ class EditJournalEntryScreen extends ConsumerWidget {
     }
 
     if (context.mounted) {
+      String typeTitle = entry?.type.displayString(context) ??
+          type?.displayString(context) ??
+          '';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackbarMessage(
           context: context,
           message:
-              '${_appBarTitle(context)} ${AppLocalizations.of(context)!.saved.toLowerCase()}',
+              '$typeTitle ${AppLocalizations.of(context)!.saved.toLowerCase()}',
           type: SnackbarType.success,
         ),
       );

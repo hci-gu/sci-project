@@ -95,20 +95,22 @@ String displayDate(BuildContext context, DateTime date) {
   return weekday[0].toUpperCase() + weekday.substring(1);
 }
 
-String displayDateSubtitle(BuildContext context, DateTime date) {
+String displayDateSubtitle(BuildContext context, DateTime date, Locale locale) {
   DateTime now = DateTime.now();
   DateTime today = DateTime(now.year, now.month, now.day);
   DateTime yesterday = today.subtract(const Duration(days: 1));
 
   if (!date.isBefore(today) || !date.isBefore(yesterday)) {
     // weekday, dd M
-    String weekday = DateFormat(DateFormat.WEEKDAY).format(date);
+    String weekday =
+        DateFormat(DateFormat.WEEKDAY, locale.languageCode).format(date);
     weekday = weekday[0].toUpperCase() + weekday.substring(1);
 
-    return '$weekday, ${DateFormat(DateFormat.MONTH_DAY).format(date)}';
+    return '$weekday, ${DateFormat(DateFormat.MONTH_DAY, locale.languageCode).format(date)}';
   }
 
-  return DateFormat(DateFormat.YEAR_ABBR_MONTH_DAY).format(date);
+  return DateFormat(DateFormat.YEAR_ABBR_MONTH_DAY, locale.languageCode)
+      .format(date);
 }
 
 final dateDisplayProvider =
@@ -120,10 +122,11 @@ final dateDisplayProvider =
 });
 final subtitleDateDisplayProvider =
     Provider.family<String, BuildContext>((ref, context) {
+  Locale locale = Localizations.localeOf(context);
   Pagination pagination = ref.watch(paginationProvider);
   DateTime date =
       ref.watch(dateProvider).subtract(pagination.duration * pagination.page);
-  return displayDateSubtitle(context, date);
+  return displayDateSubtitle(context, date, locale);
 });
 
 final previousDateDisplayProvider =
@@ -139,5 +142,7 @@ final isTodayProvider = Provider<bool>((ref) {
   DateTime date = ref.watch(dateProvider);
   DateTime now = DateTime.now();
   DateTime today = DateTime(now.year, now.month, now.day);
-  return !date.isBefore(today);
+  return date.year == today.year &&
+      date.month == today.month &&
+      date.day == today.day;
 });

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/models/pagination.dart';
@@ -28,38 +29,41 @@ class DetailScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     PageController pageController = usePageController();
 
-    return Scaffold(
-      appBar: AppTheme.appBar(title),
-      body: ListView(
-        padding: AppTheme.screenPadding,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [header, const ChartModeSelect()],
-          ),
-          AppTheme.separator,
-          AnimatedSize(
-            duration: const Duration(milliseconds: 400),
-            curve: Curves.easeOutCubic,
-            child: SizedBox(
-              height: height,
-              child: PageView.builder(
-                controller: pageController,
-                reverse: true,
-                onPageChanged: (int page) {
-                  ref.read(paginationProvider.notifier).state = Pagination(
-                    page: page,
-                    mode: ref.watch(paginationProvider).mode,
-                  );
-                },
-                itemBuilder: pageBuilder,
+    return AnnotatedRegion(
+      value: SystemUiOverlayStyle.light,
+      child: Scaffold(
+        appBar: AppTheme.appBar(title),
+        body: ListView(
+          padding: AppTheme.screenPadding,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [header, const ChartModeSelect()],
+            ),
+            AppTheme.separator,
+            AnimatedSize(
+              duration: const Duration(milliseconds: 400),
+              curve: Curves.easeOutCubic,
+              child: SizedBox(
+                height: height,
+                child: PageView.builder(
+                  controller: pageController,
+                  reverse: true,
+                  onPageChanged: (int page) {
+                    ref.read(paginationProvider.notifier).state = Pagination(
+                      page: page,
+                      mode: ref.watch(paginationProvider).mode,
+                    );
+                  },
+                  itemBuilder: pageBuilder,
+                ),
               ),
             ),
-          ),
-          AppTheme.separator,
-          content,
-        ],
+            AppTheme.separator,
+            content,
+          ],
+        ),
       ),
     );
   }

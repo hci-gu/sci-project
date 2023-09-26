@@ -20,11 +20,7 @@ class TabScreen extends StatelessWidget {
       builder: (context, orientation) => AnnotatedRegion(
         value: SystemUiOverlayStyle.dark,
         child: Scaffold(
-          body: navigationShell.currentIndex == 1
-              ? navigationShell
-              : SafeArea(
-                  child: navigationShell,
-                ),
+          body: navigationShell,
           bottomNavigationBar: orientation == Orientation.portrait
               ? Container(
                   decoration: BoxDecoration(

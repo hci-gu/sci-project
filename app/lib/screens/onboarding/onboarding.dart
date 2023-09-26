@@ -142,10 +142,15 @@ class PressureReleaseFunctions extends ConsumerWidget {
     return Column(
       children: [
         Text(
-            AppLocalizations.of(context)!
-                .onboardingPressureReleaseAndUlcerTitle,
-            style: AppTheme.headLine3),
-        Image.asset('assets/images/fitbit.png', width: 200),
+          AppLocalizations.of(context)!.onboardingPressureReleaseAndUlcerTitle,
+          style: AppTheme.headLine3,
+        ),
+        const SizedBox(
+          height: 200,
+          child: Center(
+            child: Icon(Icons.airline_seat_legroom_extra_outlined, size: 64),
+          ),
+        ),
         AppFeatureWidget(
           asset: 'assets/svg/alarm.svg',
           title: AppLocalizations.of(context)!.pressureRelease,
@@ -210,10 +215,10 @@ class BladderFunctions extends ConsumerWidget {
       children: [
         Text(AppLocalizations.of(context)!.onboardingBladderFunctions,
             style: AppTheme.headLine3),
-        SizedBox(
+        const SizedBox(
           height: 200,
           child: Center(
-            child: SvgPicture.asset('assets/svg/scapula.svg', height: 100),
+            child: Icon(Icons.water_drop_outlined, size: 64),
           ),
         ),
         AppFeatureWidget(

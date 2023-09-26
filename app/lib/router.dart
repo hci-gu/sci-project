@@ -149,7 +149,7 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
               GoRoute(
                 path: '/',
                 name: 'home',
-                builder: (context, state) => HomeScreen(),
+                builder: (context, state) => SafeArea(child: HomeScreen()),
                 routes: [
                   GoRoute(
                     name: 'calories',
@@ -272,7 +272,8 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
               GoRoute(
                 path: '/settings',
                 name: 'settings',
-                builder: (context, state) => const SettingsScreen(),
+                builder: (context, state) =>
+                    const SafeArea(child: SettingsScreen()),
               )
             ],
           ),
