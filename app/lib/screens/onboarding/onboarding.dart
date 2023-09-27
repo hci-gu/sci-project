@@ -404,7 +404,13 @@ class FeatureToggle extends ConsumerWidget {
                 onChanged: (_) => didChange(false),
               ),
               AppTheme.spacer,
-              Text(addText, style: AppTheme.paragraphMedium),
+              Expanded(
+                child: Text(
+                  addText,
+                  style: AppTheme.paragraphMedium,
+                  maxLines: 2,
+                ),
+              ),
             ],
           ),
         ),
@@ -420,7 +426,13 @@ class FeatureToggle extends ConsumerWidget {
                 onChanged: (_) => didChange(true),
               ),
               AppTheme.spacer,
-              Text(removeText, style: AppTheme.paragraphMedium),
+              Expanded(
+                child: Text(
+                  removeText,
+                  style: AppTheme.paragraphMedium,
+                  maxLines: 2,
+                ),
+              ),
             ],
           ),
         ),

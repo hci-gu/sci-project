@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:push/push.dart';
 import 'package:scimovement/api/classes/journal/journal.dart';
@@ -30,65 +31,97 @@ class App extends ConsumerWidget {
       ),
     );
 
-    handleRoute(String route) {
-      String routeName = route.split('?').first;
-      Map<String, String> query = Uri.splitQueryString(route.split('?').last);
+    return NotificationLauncherWrapper(
+      router: router,
+      child: MaterialApp.router(
+        title: 'RullaPå',
+        theme: AppTheme.theme,
+        routerConfig: router,
+        debugShowCheckedModeBanner: false,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        localeResolutionCallback: (Locale? locale, _) {
+          Locale? resolvedLocale = AppLocalizations.supportedLocales
+              .firstWhereOrNull((Locale supportedLocale) =>
+                  supportedLocale.languageCode == locale?.languageCode);
+          return resolvedLocale ?? const Locale('en');
+        },
+        locale: ref.watch(localeProvider),
+        builder: (_, child) {
+          return child ?? const SizedBox.shrink();
+        },
+      ),
+    );
+  }
+}
 
-      if (routeName == 'create-journal') {
-        Map<String, dynamic> extra = {};
-        if (query['type'] != null) {
-          extra = {
-            'type': journalTypeFromString(query['type']!),
-          };
-        }
-        router.goNamed(routeName, extra: extra);
-      }
+class NotificationLauncherWrapper extends StatefulWidget {
+  final GoRouter router;
+  final Widget child;
+
+  const NotificationLauncherWrapper(
+      {required this.router, required this.child, super.key});
+
+  @override
+  _NotificationLauncherWrapperState createState() =>
+      _NotificationLauncherWrapperState();
+}
+
+class _NotificationLauncherWrapperState
+    extends State<NotificationLauncherWrapper> {
+  @override
+  void initState() {
+    super.initState();
+    if (!kIsWeb) {
+      setupNotificationListener();
     }
+  }
 
-    handleLaunchFromNotification(data) {
-      Map<Object?, Object?>? aps = data?['aps'] as Map<Object?, Object?>?;
-
-      if (aps != null) {
-        Map<Object?, Object?>? alert = aps['alert'] as Map<Object?, Object?>?;
-        if (alert != null) {
-          String? action = alert['action'] as String?;
-          if (action != null) {
-            handleRoute(action);
-          }
-        }
-      }
-    }
-
-    if (!kIsWeb && !kDebugMode) {
-      // Handle notification taps
+  setupNotificationListener() async {
+    if (await Push.instance.onNotificationTap.isEmpty) {
       Push.instance.onNotificationTap.listen((data) {
         handleLaunchFromNotification(data);
       });
-
-      Push.instance.notificationTapWhichLaunchedAppFromTerminated.then((data) {
-        if (data != null) {
-          handleLaunchFromNotification(data);
-        }
-      });
     }
 
-    return MaterialApp.router(
-      title: 'RullaPå',
-      theme: AppTheme.theme,
-      routerConfig: router,
-      debugShowCheckedModeBanner: false,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      localeResolutionCallback: (Locale? locale, _) {
-        Locale? resolvedLocale = AppLocalizations.supportedLocales
-            .firstWhereOrNull((Locale supportedLocale) =>
-                supportedLocale.languageCode == locale?.languageCode);
-        return resolvedLocale ?? const Locale('en');
-      },
-      locale: ref.watch(localeProvider),
-      builder: (_, child) {
-        return child ?? const SizedBox.shrink();
-      },
-    );
+    Push.instance.notificationTapWhichLaunchedAppFromTerminated.then((data) {
+      if (data != null) {
+        handleLaunchFromNotification(data);
+      }
+    });
+  }
+
+  handleRoute(String route) {
+    String routeName = route.split('?').first;
+    Map<String, String> query = Uri.splitQueryString(route.split('?').last);
+
+    if (routeName == 'create-journal') {
+      Map<String, dynamic> extra = {};
+      if (query['type'] != null) {
+        extra = {
+          'type': journalTypeFromString(query['type']!),
+        };
+      }
+      widget.router.goNamed('/journals/create', extra: extra);
+    }
+  }
+
+  handleLaunchFromNotification(data) {
+    Map<Object?, Object?>? aps = data?['aps'] as Map<Object?, Object?>?;
+
+    if (aps != null) {
+      Map<Object?, Object?>? alert = aps['alert'] as Map<Object?, Object?>?;
+      if (alert != null) {
+        String? action = alert['action'] as String?;
+        if (action != null) {
+          handleRoute(action);
+        }
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
   }
 }
