@@ -68,7 +68,7 @@ class PressureUlcerModal extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return ref.watch(pressureUlcerProvider).when(
-          data: (data) => ListView(
+          data: (data) => Column(
             children: [
               Text(
                 AppLocalizations.of(context)!.pressureUlcerChangeStatus,
