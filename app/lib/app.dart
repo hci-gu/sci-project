@@ -9,6 +9,7 @@ import 'package:scimovement/router.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 class App extends ConsumerWidget {
   final bool onboardingDone;
@@ -41,10 +42,12 @@ class App extends ConsumerWidget {
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         localeResolutionCallback: (Locale? locale, _) {
-          Locale? resolvedLocale = AppLocalizations.supportedLocales
-              .firstWhereOrNull((Locale supportedLocale) =>
-                  supportedLocale.languageCode == locale?.languageCode);
-          return resolvedLocale ?? const Locale('en');
+          Locale resolvedLocale = AppLocalizations.supportedLocales
+                  .firstWhereOrNull((Locale supportedLocale) =>
+                      supportedLocale.languageCode == locale?.languageCode) ??
+              const Locale('en');
+          timeago.setDefaultLocale(resolvedLocale.languageCode);
+          return resolvedLocale;
         },
         locale: ref.watch(localeProvider),
         builder: (_, child) {

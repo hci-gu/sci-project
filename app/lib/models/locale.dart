@@ -13,6 +13,7 @@ final localeProvider = StateProvider<Locale?>((ref) {
 
   String? languageCode = Storage().getLanguageCode();
   if (languageCode != null) {
+    timeago.setDefaultLocale(languageCode);
     return Locale(languageCode);
   }
 

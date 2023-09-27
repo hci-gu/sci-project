@@ -108,10 +108,15 @@ class ConditionSelect extends ConsumerWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
       ),
       elevation: 4,
+      isScrollControlled: true,
       clipBehavior: Clip.hardEdge,
-      builder: (context) => Padding(
-        padding: AppTheme.elementPadding,
-        child: modal,
+      builder: (context) => Wrap(
+        children: [
+          Padding(
+            padding: AppTheme.elementPadding,
+            child: modal,
+          )
+        ],
       ),
     );
   }
