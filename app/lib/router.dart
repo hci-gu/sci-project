@@ -244,23 +244,25 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
                     ),
                   ),
                   GoRoute(
+                    path: 'perform-pressure-release',
+                    name: 'perform-pressure-release',
+                    builder: (_, state) {
+                      return PerformPressureReleaseScreen(
+                        exercises: (state.extra as Map?)?['exercises'] ??
+                            [
+                              PressureReleaseExercise.forwards,
+                              PressureReleaseExercise.rightSide,
+                              PressureReleaseExercise.leftSide,
+                            ],
+                      );
+                    },
+                  ),
+                  GoRoute(
                     name: 'update-journal',
                     path: ':id',
                     builder: (_, state) => EditJournalEntryScreen(
                       shouldCreateEntry: false,
                       entry: (state.extra as Map?)?['entry'],
-                    ),
-                  ),
-                  GoRoute(
-                    path: 'perform-pressure-release',
-                    name: 'perform-pressure-release',
-                    builder: (_, state) => PerformPressureReleaseScreen(
-                      exercises: (state.extra as Map?)?['exercises'] ??
-                          [
-                            PressureReleaseExercise.forwards,
-                            PressureReleaseExercise.rightSide,
-                            PressureReleaseExercise.leftSide,
-                          ],
                     ),
                   ),
                 ],

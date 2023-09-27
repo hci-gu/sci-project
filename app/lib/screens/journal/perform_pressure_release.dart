@@ -48,8 +48,8 @@ class PerformPressureReleaseScreen extends HookWidget {
                         currentExercise.value++;
                       },
                     ),
-              AppTheme.spacer2x,
-              if (!isDone)
+              if (!isDone && exercises.length > 1) AppTheme.spacer2x,
+              if (!isDone && exercises.length > 1)
                 StepIndicator(
                   count: exercises.length,
                   index: currentExercise.value,

@@ -34,10 +34,7 @@ class SettingsScreen extends ConsumerWidget {
         children: [
           Text(
             AppLocalizations.of(context)!.profile,
-            style: const TextStyle(
-              fontSize: 36,
-              fontWeight: FontWeight.bold,
-            ),
+            style: AppTheme.headLine1,
           ),
           AppTheme.spacer2x,
           UserSettings(user: user),

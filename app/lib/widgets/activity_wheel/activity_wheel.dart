@@ -47,10 +47,7 @@ class ActivityWheel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return GestureDetector(
-      onTap: () {
-        String path = GoRouter.of(context).location;
-        context.go('$path${path.length > 1 ? '/' : ''}activity');
-      },
+      onTap: () => context.goNamed('activity'),
       child: ref.watch(activityProvider).when(
             error: _error,
             loading: _loading,
