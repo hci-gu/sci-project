@@ -28,16 +28,18 @@ final homeWidgetPageProvider = StateProvider<int>((ref) {
 });
 
 class PagedWidgets extends HookConsumerWidget {
-  final bool hasWatchFeatures;
-
   const PagedWidgets({
     super.key,
-    this.hasWatchFeatures = false,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    List<AppFeature> features = ref.watch(appFeaturesProvider);
+    bool hasWatchFeatures = features.contains(AppFeature.watch);
+    bool hasLogFeatures = features.contains(AppFeature.bladder) ||
+        features.contains(AppFeature.pressureRelease);
     int page = ref.watch(homeWidgetPageProvider);
+    bool centerAlignDate = page == 0 && hasLogFeatures;
     PageController controller =
         useMemoized(() => PageController(initialPage: page), [page]);
 
@@ -53,7 +55,7 @@ class PagedWidgets extends HookConsumerWidget {
                 child: const DateSelectButton(),
               ),
               AnimatedPositioned(
-                top: page == 0 ? 90 : 0,
+                top: centerAlignDate ? 90 : 0,
                 duration: const Duration(milliseconds: 250),
                 curve: Curves.decelerate,
                 child: SizedBox(
@@ -64,7 +66,7 @@ class PagedWidgets extends HookConsumerWidget {
                       horizontal: AppTheme.basePadding * 2,
                     ),
                     child: SelectedDateText(
-                      centerAlign: page == 0,
+                      centerAlign: centerAlignDate,
                     ),
                   ),
                 ),
@@ -81,35 +83,49 @@ class PagedWidgets extends HookConsumerWidget {
                     },
                     scrollDirection: Axis.horizontal,
                     children: [
-                      Padding(
-                        padding: EdgeInsets.only(
-                          top: 120,
-                          left: AppTheme.basePadding * 2,
-                          right: AppTheme.basePadding * 2,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(
-                              height: 90,
-                              child: Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const PressureUlcerWidget(),
-                                  AppTheme.spacer,
-                                  const UTIWidget(),
-                                ],
+                      if (hasLogFeatures)
+                        Padding(
+                          padding: EdgeInsets.only(
+                            top: 120,
+                            left: AppTheme.basePadding * 2,
+                            right: AppTheme.basePadding * 2,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                height: 90,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  children: [
+                                    features.contains(
+                                            AppFeature.pressureRelease)
+                                        ? const PressureUlcerWidget()
+                                        : const SizedBox.shrink(),
+                                    if (features.contains(AppFeature.bladder) &&
+                                        features.contains(
+                                            AppFeature.pressureRelease))
+                                      AppTheme.spacer,
+                                    features.contains(AppFeature.bladder)
+                                        ? const UTIWidget()
+                                        : const Expanded(
+                                            child: SizedBox.shrink()),
+                                    if (features.contains(AppFeature.bladder) &&
+                                        !features.contains(
+                                            AppFeature.pressureRelease))
+                                      const Expanded(child: SizedBox.shrink())
+                                  ],
+                                ),
                               ),
-                            ),
-                            AppTheme.spacer,
-                            Text(
-                                '${AppLocalizations.of(context)!.gear} & ${AppLocalizations.of(context)!.medicin}',
-                                style: AppTheme.labelLarge),
-                          ],
+                              AppTheme.spacer,
+                              Text(
+                                  '${AppLocalizations.of(context)!.gear} & ${AppLocalizations.of(context)!.medicin}',
+                                  style: AppTheme.labelLarge),
+                            ],
+                          ),
                         ),
-                      ),
                       if (hasWatchFeatures)
                         Padding(
                           padding: EdgeInsets.symmetric(
@@ -142,8 +158,8 @@ class PagedWidgets extends HookConsumerWidget {
             ],
           ),
         ),
-        if (hasWatchFeatures) AppTheme.spacer2x,
-        if (hasWatchFeatures)
+        if (hasWatchFeatures && hasLogFeatures) AppTheme.spacer2x,
+        if (hasWatchFeatures && hasLogFeatures)
           StepIndicator(
             index: page,
             count: 2,
@@ -163,15 +179,13 @@ class HomeScreen extends HookConsumerWidget {
 
     return SmartRefresher(
       controller: _refreshController,
-      onRefresh: () async {
+      onRefresh: () {
         ref.read(dateProvider.notifier).state = DateTime.now();
         _refreshController.refreshCompleted();
       },
       child: ListView(
         children: [
-          PagedWidgets(
-            hasWatchFeatures: features.contains(AppFeature.watch),
-          ),
+          const PagedWidgets(),
           AppTheme.spacer2x,
           Padding(
             padding: EdgeInsets.symmetric(

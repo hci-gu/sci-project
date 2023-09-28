@@ -168,49 +168,44 @@ class RadioRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return ReactiveFormConsumer(
       builder: (BuildContext context, form, _) => Row(
+        mainAxisSize: MainAxisSize.max,
         children: [
-          GestureDetector(
-            onTap: () {
-              form.control(formKey).value = true;
-            },
-            behavior: HitTestBehavior.translucent,
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: AppTheme.basePadding),
-              child: Row(
-                children: [
-                  Radio(
-                    value: form.control(formKey).value as bool,
-                    groupValue: true,
-                    onChanged: (_) => {},
-                  ),
-                  AppTheme.spacer,
-                  Text(yesText, style: AppTheme.paragraphMedium),
-                ],
-              ),
-            ),
-          ),
-          AppTheme.spacer,
-          GestureDetector(
-            onTap: () {
-              form.control(formKey).value = false;
-            },
-            behavior: HitTestBehavior.translucent,
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: AppTheme.basePadding),
-              child: Row(
-                children: [
-                  Radio(
-                    value: form.control(formKey).value as bool,
-                    groupValue: false,
-                    onChanged: (_) {},
-                  ),
-                  AppTheme.spacer,
-                  Text(noText, style: AppTheme.paragraphMedium),
-                ],
-              ),
-            ),
-          ),
+          _item(context, form, true, yesText),
+          _item(context, form, false, noText),
         ],
+      ),
+    );
+  }
+
+  Widget _item(BuildContext context, FormGroup form, bool value, String text) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          form.control(formKey).value = value;
+        },
+        behavior: HitTestBehavior.translucent,
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: AppTheme.basePadding),
+          child: Row(
+            children: [
+              Radio(
+                value: form.control(formKey).value as bool,
+                groupValue: value,
+                onChanged: (_) {
+                  form.control(formKey).value = value;
+                },
+              ),
+              AppTheme.spacer,
+              Expanded(
+                child: Text(
+                  text,
+                  style: AppTheme.paragraphMedium,
+                  maxLines: 2,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

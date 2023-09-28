@@ -8,6 +8,7 @@ import 'package:scimovement/screens/home/widgets/pressure_release_widget.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/progress_indicator_around.dart';
+import 'package:scimovement/widgets/shake.dart';
 import 'package:scimovement/widgets/stat_widget.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -109,22 +110,43 @@ class BladderEmptyingWidget extends ConsumerWidget {
       return StatWidget.container(Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          SvgPicture.asset(asset, height: 24),
+          Row(
+            children: [
+              SvgPicture.asset(asset, height: 18),
+              AppTheme.spacerHalf,
+              Text(
+                AppLocalizations.of(context)!.bladderEmptying,
+                style: AppTheme.labelTiny,
+              ),
+            ],
+          ),
+          ProgressIndicatorAround(
+            size: 50,
+            value: 0,
+            strokeWidth: 2.5,
+            duration: 1,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const ShakeWidget(
+                  child: Icon(
+                    Icons.notifications_active_outlined,
+                    size: 16,
+                  ),
+                ),
+                Text(
+                  '00:00',
+                  style: AppTheme.labelLarge.copyWith(fontSize: 12),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
           AppTheme.spacer,
           Text(
             AppLocalizations.of(context)!.bladderEmptyingTimeToDoIt,
             style: AppTheme.labelMedium,
           ),
-          IgnorePointer(
-            child: Button(
-              onPressed: () {},
-              title: AppLocalizations.of(context)!.start,
-              size: ButtonSize.tiny,
-              width: 100,
-            ),
-          ),
-          AppTheme.spacer,
-          GoalProgress(goal: goal)
         ],
       ));
     }
