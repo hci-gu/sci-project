@@ -393,26 +393,26 @@ packages:
     dependency: "direct main"
     description:
       name: push
-      sha256: "21bf65a49f8c3cd6beab70ad3df55d9724b4fcff348d695f05051d1a124be8d4"
+      sha256: "7de94d9f956e8b2f6a7a8d5adc3ab69ffcea4cf8ac120bce083f531bc9f44750"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0"
+    version: "1.0.5"
   push_android:
     dependency: transitive
     description:
       name: push_android
-      sha256: c9866cfff72be6e7a15108bcc26f114efd9dcd1786206b895ca6cbe84c0b5ce1
+      sha256: "1ae53ceee5d2c489102f7ae53ec1331e949dbba787cc4ff191ffe8b7b0965c17"
       url: "https://pub.dev"
     source: hosted
-    version: "0.1.0"
+    version: "0.1.1"
   push_ios:
     dependency: transitive
     description:
       name: push_ios
-      sha256: "7a9104a8ac9332331654bcad016d37c5e5357472be8464fd87eaeacc11834998"
+      sha256: "3c57bdcedc3fef55e827fbfb88ffbf69f3603432c0a13cf282e294aa92246913"
       url: "https://pub.dev"
     source: hosted
-    version: "0.1.0"
+    version: "0.1.4"
   push_macos:
     dependency: transitive
     description:

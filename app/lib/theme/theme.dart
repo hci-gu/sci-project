@@ -250,17 +250,37 @@ class AppTheme {
           size: size,
         );
       case JournalType.pressureRelease:
-        return Icon(Icons.alarm, size: size);
+        return Icon(
+          Icons.alarm,
+          size: size,
+          color: AppTheme.colors.black,
+        );
       case JournalType.pressureUlcer:
-        return Icon(Icons.album_outlined, size: size);
+        return Icon(
+          Icons.album_outlined,
+          size: size,
+          color: AppTheme.colors.black,
+        );
       case JournalType.bladderEmptying:
         return SvgPicture.asset('assets/svg/toilet.svg', height: size);
       case JournalType.urinaryTractInfection:
-        return Icon(Icons.water, size: size);
+        return Icon(
+          Icons.water,
+          size: size,
+          color: AppTheme.colors.black,
+        );
       case JournalType.leakage:
-        return Icon(Icons.water_drop_outlined, size: size);
+        return Icon(
+          Icons.water_drop_outlined,
+          size: size,
+          color: AppTheme.colors.black,
+        );
       default:
-        return Icon(Icons.album_outlined, size: size);
+        return Icon(
+          Icons.album_outlined,
+          size: size,
+          color: AppTheme.colors.black,
+        );
     }
   }
 }

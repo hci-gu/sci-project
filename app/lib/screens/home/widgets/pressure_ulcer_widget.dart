@@ -16,24 +16,26 @@ final pressureUlcerDisplayProvider =
       await ref.watch(pressureUlcerProvider.future);
 
   String title = '';
+  String subtitle = '';
   if (context.mounted) {
     title = pressureUlcers.isEmpty
         ? AppLocalizations.of(context)!.noPressureUlcer
         : pressureUlcers.length > 1
             ? '${pressureUlcers.length} ${AppLocalizations.of(context)!.pressureUlcers}'
             : pressureUlcers.first.pressureUlcerType.displayString(context);
+    subtitle = pressureUlcers.isEmpty
+        ? AppLocalizations.of(context)!.noLoggedPressureUlcer
+        : timeago.format(pressureUlcers.last.time);
   }
-  Color color = pressureUlcers.isEmpty
-      ? AppTheme.colors.white
+  Color? color = pressureUlcers.isEmpty
+      ? null
       : pressureUlcers.length > 1
           ? AppTheme.colors.error
           : pressureUlcers.first.pressureUlcerType.color;
 
   return ConditionDisplay(
     title: title,
-    subtitle: pressureUlcers.isEmpty
-        ? null
-        : timeago.format(pressureUlcers.last.time),
+    subtitle: subtitle,
     color: color,
   );
 });

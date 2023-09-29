@@ -225,6 +225,7 @@
     "@_PRESSURE_ULCER": {},
     "pressureUlcer": "Pressure ulcer",
     "pressureUlcers": "Pressure ulcers",
+    "noLoggedPressureUlcer": "No logged pressure ulcer",
     "pressureUlcerChangeStatus": "Change pressure ulcer status",
     "pressureUlcerAdd": "Add pressure ulcer",
     "pressureUlcerViewHistory": "See pressure ulcer history",

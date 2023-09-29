@@ -44,31 +44,42 @@ class JournalListItem extends ConsumerWidget {
       },
       child: GestureDetector(
         onTap: () => onTap(context),
-        child: Container(
-          decoration: BoxDecoration(
-              border: Border.symmetric(
-            horizontal: BorderSide(
-              color: Colors.grey.shade300,
-            ),
-          )),
-          child: ListTile(
-            leading: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: AppTheme.iconForJournalType(
-                entry.type,
-                entry is PainLevelEntry
-                    ? (entry as PainLevelEntry).bodyPart
-                    : null,
-                24,
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: AppTheme.basePadding * 0,
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: Colors.grey.shade300,
+                ),
               ),
             ),
-            horizontalTitleGap: AppTheme.basePadding,
-            contentPadding: const EdgeInsets.all(0),
-            title: Text(entry.title(context)),
-            subtitle: Text(subtitle),
-            trailing: IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: () {},
+            child: ListTile(
+              leading: SizedBox(
+                width: 40,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    AppTheme.iconForJournalType(
+                      entry.type,
+                      entry is PainLevelEntry
+                          ? (entry as PainLevelEntry).bodyPart
+                          : null,
+                      32,
+                    )
+                  ],
+                ),
+              ),
+              horizontalTitleGap: AppTheme.basePadding * 2,
+              title: Text(entry.title(context), style: AppTheme.labelLarge),
+              subtitle: Text(subtitle),
+              trailing: IconButton(
+                icon: const Icon(Icons.edit),
+                onPressed: () {},
+              ),
             ),
           ),
         ),
@@ -100,7 +111,7 @@ class JournalListItem extends ConsumerWidget {
   }
 
   String get subtitle =>
-      '${entry.time.hour.toString()}:${entry.time.minute.toString().padLeft(2, '0')}';
+      '${entry.time.hour.toString().padLeft(2, '0')}:${entry.time.minute.toString().padLeft(2, '0')}';
 }
 
 class JournalList extends ConsumerWidget {
@@ -121,10 +132,20 @@ class JournalList extends ConsumerWidget {
               );
             }
 
-            return Column(
-              children: [
-                for (JournalEntry entry in data) JournalListItem(entry: entry),
-              ],
+            return Container(
+              decoration: BoxDecoration(
+                border: Border(
+                  top: BorderSide(
+                    color: Colors.grey.shade300,
+                  ),
+                ),
+              ),
+              child: Column(
+                children: [
+                  for (JournalEntry entry in data)
+                    JournalListItem(entry: entry),
+                ],
+              ),
             );
           },
           error: (_, __) => Container(),

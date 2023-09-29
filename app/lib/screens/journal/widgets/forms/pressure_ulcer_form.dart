@@ -39,21 +39,9 @@ class PressureUlcerForm extends StatelessWidget {
           formKey: 'pressureUlcerType',
           hint: AppLocalizations.of(context)!.pressureUlcerClassificationHint,
           items: PressureUlcerType.values
-              .where((e) {
-                if (entry != null || !shouldCreateEntry) {
-                  return e != PressureUlcerType.none;
-                }
-                return true;
-              })
               .map((e) => _dropdownItem(context, e))
               .toList(),
           selectedItemBuilder: (context) => PressureUlcerType.values
-              .where((e) {
-                if (entry != null || !shouldCreateEntry) {
-                  return e != PressureUlcerType.none;
-                }
-                return true;
-              })
               .map((e) => _dropdownItem(context, e, true))
               .toList(),
         ),
