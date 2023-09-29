@@ -225,6 +225,7 @@
     "@_PRESSURE_ULCER": {},
     "pressureUlcer": "Trycksår",
     "pressureUlcers": "Trycksår",
+    "noLoggedPressureUlcer": "Inget loggat trycksår",
     "pressureUlcerChangeStatus": "Ändra status på trycksår",
     "pressureUlcerAdd": "Lägg till trycksår",
     "pressureUlcerViewHistory": "Se trycksårshistorik",

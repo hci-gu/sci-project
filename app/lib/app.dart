@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:push/push.dart';
@@ -58,40 +59,48 @@ class App extends ConsumerWidget {
   }
 }
 
-class NotificationLauncherWrapper extends StatefulWidget {
+class NotificationLauncherWrapper extends HookWidget {
   final GoRouter router;
   final Widget child;
 
-  const NotificationLauncherWrapper(
-      {required this.router, required this.child, super.key});
+  const NotificationLauncherWrapper({
+    super.key,
+    required this.router,
+    required this.child,
+  });
 
   @override
-  _NotificationLauncherWrapperState createState() =>
-      _NotificationLauncherWrapperState();
-}
+  Widget build(BuildContext context) {
+    useEffect(() {
+      if (kIsWeb) return () => {};
 
-class _NotificationLauncherWrapperState
-    extends State<NotificationLauncherWrapper> {
-  @override
-  void initState() {
-    super.initState();
-    if (!kIsWeb) {
-      setupNotificationListener();
-    }
-  }
-
-  setupNotificationListener() async {
-    if (await Push.instance.onNotificationTap.isEmpty) {
-      Push.instance.onNotificationTap.listen((data) {
+      final onNotificationTap = Push.instance.onNotificationTap.listen((data) {
         handleLaunchFromNotification(data);
       });
-    }
 
-    Push.instance.notificationTapWhichLaunchedAppFromTerminated.then((data) {
-      if (data != null) {
-        handleLaunchFromNotification(data);
-      }
-    });
+      final onBackgroundMessageSubscription =
+          Push.instance.onBackgroundMessage.listen((message) {
+        handleLaunchFromNotification(message);
+      });
+
+      final onMessageSubscription = Push.instance.onMessage.listen((message) {
+        handleLaunchFromNotification(message);
+      });
+
+      Push.instance.notificationTapWhichLaunchedAppFromTerminated.then((data) {
+        if (data != null) {
+          handleLaunchFromNotification(data);
+        }
+      });
+
+      return () {
+        onNotificationTap.cancel();
+        onBackgroundMessageSubscription.cancel();
+        onMessageSubscription.cancel();
+      };
+    }, []);
+
+    return child;
   }
 
   handleRoute(String route) {
@@ -105,7 +114,7 @@ class _NotificationLauncherWrapperState
           'type': journalTypeFromString(query['type']!),
         };
       }
-      widget.router.goNamed('/journals/create', extra: extra);
+      router.goNamed('create-journal-from-type', extra: extra);
     }
   }
 
@@ -121,10 +130,5 @@ class _NotificationLauncherWrapperState
         }
       }
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return widget.child;
   }
 }

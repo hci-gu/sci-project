@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -125,13 +127,12 @@ class TimelineEvent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // var offset = 0;
     if (events.end.isBefore(periodStart) || events.start.isAfter(periodEnd)) {
       return const SizedBox();
     }
 
     final daysInPeriod = periodEnd.difference(periodStart).inDays;
-    final dayLength = pageWidth(context) / daysInPeriod;
+    final dayLength = (pageWidth(context) - 32) / daysInPeriod;
 
     final offset = events.start.difference(periodStart).inDays;
     final width = events.duration.inDays + 1;
@@ -142,12 +143,15 @@ class TimelineEvent extends StatelessWidget {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
+          // if (events.displayType == TimelineDisplayType.events)
           Padding(
             padding: EdgeInsets.only(top: (headerHeight / 2) - 2),
             child: Container(
               width: dayLength * width,
               height: 1,
-              color: AppTheme.colors.black.withOpacity(0.2),
+              color: events.displayType == TimelineDisplayType.events
+                  ? AppTheme.colors.black.withOpacity(0.2)
+                  : Colors.transparent,
             ),
           ),
           ..._body(context),
@@ -161,7 +165,7 @@ class TimelineEvent extends StatelessWidget {
       case TimelineDisplayType.events:
         return _events(context);
       case TimelineDisplayType.periods:
-        break;
+        return _periods(context);
       default:
     }
     return [const SizedBox.shrink()];
@@ -173,6 +177,33 @@ class TimelineEvent extends StatelessWidget {
           (e) => _dot(context, e),
         )
         .toList();
+  }
+
+  List<Widget> _periods(BuildContext context) {
+    return events.periods.map((e) => _period(context, e)).toList();
+  }
+
+  Widget _period(BuildContext context, Period period) {
+    if (period.end.isBefore(periodStart) || period.start.isAfter(periodEnd)) {
+      return const SizedBox();
+    }
+
+    final daysInPeriod = periodEnd.difference(periodStart).inDays;
+    final dayLength = (pageWidth(context) - 32) / daysInPeriod;
+    final offset = period.start.difference(events.start).inDays;
+
+    return Positioned(
+      top: (headerHeight / 2) - 5,
+      left: offset * dayLength,
+      child: Container(
+        width: math.max(period.duration.inDays * dayLength - 8, 8),
+        height: 8,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(4),
+          color: period.color,
+        ),
+      ),
+    );
   }
 
   Widget _dot(BuildContext context, JournalEntry entry) {
@@ -315,7 +346,7 @@ class EventHandles extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedList(
-      // key: listKey,
+      key: listKey,
       physics: const NeverScrollableScrollPhysics(),
       initialItemCount: events.length,
       itemBuilder: (context, index, animation) {
@@ -332,6 +363,8 @@ class EventHandles extends StatelessWidget {
     );
   }
 }
+
+GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
 
 class JournalTimelineWithEvents extends HookWidget {
   final int initialPage;
@@ -371,15 +404,15 @@ class JournalTimelineWithEvents extends HookWidget {
               events.where((e) => e.start.isBefore(displayDate)).toList();
           if (visibleEvents.length != visibleItems.value) {
             visibleItems.value = visibleEvents.length;
-            // listKey.currentState?.removeAllItems(
-            //   (context, animation) => const EventHandleItem(null),
-            //   duration: const Duration(milliseconds: 250),
-            // );
-            // listKey.currentState?.insertAllItems(
-            //   events.indexOf(visibleEvents.first),
-            //   visibleEvents.length,
-            //   duration: const Duration(milliseconds: 250),
-            // );
+            listKey.currentState?.removeAllItems(
+              (context, animation) => const EventHandleItem(null),
+              duration: const Duration(milliseconds: 0),
+            );
+            listKey.currentState?.insertAllItems(
+              events.indexOf(visibleEvents.first),
+              visibleEvents.length,
+              duration: const Duration(milliseconds: 250),
+            );
           }
         }
       });

@@ -2,7 +2,6 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api/api.dart';
-import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/api/classes/journal/journal.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/models/journal/journal-form.dart';
@@ -11,12 +10,30 @@ export 'package:scimovement/models/journal/journal-form.dart';
 
 enum TimelineDisplayType { events, periods, chart }
 
+class Period {
+  final DateTime start;
+  final DateTime end;
+  final Color color;
+
+  Period({
+    required this.start,
+    required this.end,
+    required this.color,
+  });
+
+  Duration get duration {
+    return end.difference(start);
+  }
+}
+
 class JournalEvents {
   final JournalType type;
+  final String identifier;
   final List<JournalEntry> entries;
 
   JournalEvents({
     required this.type,
+    required this.identifier,
     required this.entries,
   }) {
     entries.sort((a, b) => a.time.compareTo(b.time));
@@ -63,6 +80,65 @@ class JournalEvents {
         return TimelineDisplayType.events;
     }
   }
+
+  List<Period> get periods {
+    List<Period> periods = [];
+
+    if (entries.length == 1) {
+      return [
+        Period(
+            start: entries.first.time,
+            end: DateTime.now(),
+            color: periodColorForEntry(entries.first)),
+      ];
+    }
+
+    // [
+    //   2023-07-01,
+    //   2023-08-02,
+    //   2023-09-03
+    // ]
+
+    for (JournalEntry entry in entries) {
+      // skip first
+      if (entry == entries.first) {
+        continue;
+      }
+      JournalEntry previousEntry = entries[entries.indexOf(entry) - 1];
+
+      // add entry and set start time as end time of previous entry
+      periods.add(Period(
+        start: previousEntry.time,
+        end: entry.time,
+        color: periodColorForEntry(entry),
+      ));
+    }
+
+    JournalEntry lastEntry = entries.last;
+    if ((lastEntry is PressureUlcerEntry &&
+            lastEntry.pressureUlcerType != PressureUlcerType.none ||
+        lastEntry is UTIEntry && lastEntry.utiType != UTIType.none)) {
+      periods.add(
+        Period(
+          start: lastEntry.time,
+          end: DateTime.now(),
+          color: periodColorForEntry(lastEntry),
+        ),
+      );
+    }
+
+    return periods;
+  }
+
+  Color periodColorForEntry(JournalEntry entry) {
+    Color color = Colors.transparent;
+    if (entry is PressureUlcerEntry) {
+      color = entry.pressureUlcerType.color;
+    } else if (entry is UTIEntry) {
+      color = entry.utiType.color();
+    }
+    return color;
+  }
 }
 
 final journalProvider = FutureProvider.family<List<JournalEntry>, Pagination>(
@@ -87,10 +163,15 @@ final journalEventsProvider =
   List<JournalEvents> events = [];
 
   for (JournalEntry entry in journal) {
-    if (!events.any((e) => e.type == entry.type)) {
-      events.add(JournalEvents(type: entry.type, entries: []));
+    if (entry.type == JournalType.pain) {
+      continue;
     }
-    JournalEvents? event = events.firstWhereOrNull((e) => e.type == entry.type);
+    if (!events.any((e) => e.identifier == entry.identifier)) {
+      events.add(JournalEvents(
+          type: entry.type, identifier: entry.identifier, entries: []));
+    }
+    JournalEvents? event =
+        events.firstWhereOrNull((e) => e.identifier == entry.identifier);
     if (event != null) {
       event.entries.add(entry);
     }

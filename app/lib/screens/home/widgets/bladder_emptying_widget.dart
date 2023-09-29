@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -143,9 +144,14 @@ class BladderEmptyingWidget extends ConsumerWidget {
             ),
           ),
           AppTheme.spacer,
-          Text(
-            AppLocalizations.of(context)!.bladderEmptyingTimeToDoIt,
-            style: AppTheme.labelMedium,
+          SizedBox(
+            width: MediaQuery.of(context).size.width / 4,
+            child: AutoSizeText(
+              AppLocalizations.of(context)!.bladderEmptyingTimeToDoIt,
+              textAlign: TextAlign.center,
+              style: AppTheme.labelMedium,
+              maxLines: 2,
+            ),
           ),
         ],
       ));

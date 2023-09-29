@@ -163,12 +163,11 @@ class ListBottomSheet extends HookConsumerWidget {
         color: AppTheme.colors.background,
       ),
       child: ListView(
-        padding: AppTheme.elementPadding,
         children: [
           _dateHeader(context, ref, date),
           AppTheme.spacer2x,
           if (isToday(date)) _createEntry(context),
-          const JournalList()
+          const JournalList(),
         ],
       ),
     );
@@ -188,39 +187,42 @@ class ListBottomSheet extends HookConsumerWidget {
   Widget _dateHeader(BuildContext context, WidgetRef ref, DateTime date) {
     bool isTodayOrFuture = isToday(date) || date.isAfter(DateTime.now());
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        IconButton(
-          onPressed: () {
-            DateTime newdate = date.subtract(const Duration(days: 1));
-            ref.read(journalSelectedDateProvider.notifier).state = newdate;
-            if (newdate.month < date.month || newdate.year < date.year) {
-              onPageChanged(Direction.up);
-            }
-          },
-          icon: const Icon(Icons.chevron_left),
-        ),
-        Text(
-          DateFormat.MMMMd('sv').format(date),
-          textAlign: TextAlign.center,
-          style: AppTheme.headLine3,
-        ),
-        Opacity(
-          opacity: isTodayOrFuture ? 0.33 : 1,
-          child: IconButton(
+    return Padding(
+      padding: AppTheme.elementPadding,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
             onPressed: () {
-              if (isTodayOrFuture) return;
-              DateTime newdate = date.add(const Duration(days: 1));
+              DateTime newdate = date.subtract(const Duration(days: 1));
               ref.read(journalSelectedDateProvider.notifier).state = newdate;
-              if (newdate.month > date.month || newdate.year > date.year) {
-                onPageChanged(Direction.down);
+              if (newdate.month < date.month || newdate.year < date.year) {
+                onPageChanged(Direction.up);
               }
             },
-            icon: const Icon(Icons.chevron_right),
+            icon: const Icon(Icons.chevron_left),
           ),
-        ),
-      ],
+          Text(
+            DateFormat.MMMMd('sv').format(date),
+            textAlign: TextAlign.center,
+            style: AppTheme.headLine3,
+          ),
+          Opacity(
+            opacity: isTodayOrFuture ? 0.33 : 1,
+            child: IconButton(
+              onPressed: () {
+                if (isTodayOrFuture) return;
+                DateTime newdate = date.add(const Duration(days: 1));
+                ref.read(journalSelectedDateProvider.notifier).state = newdate;
+                if (newdate.month > date.month || newdate.year > date.year) {
+                  onPageChanged(Direction.down);
+                }
+              },
+              icon: const Icon(Icons.chevron_right),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

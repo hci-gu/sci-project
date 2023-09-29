@@ -49,6 +49,7 @@ class JournalShortcutGrid extends ConsumerWidget {
       child: ListView(
         scrollDirection: Axis.horizontal,
         children: [
+          AppTheme.spacer2x,
           ...data
               .map(
                 (e) => Padding(
