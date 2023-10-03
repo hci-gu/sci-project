@@ -98,6 +98,7 @@ export const saveBout = async (
 }
 
 export const removeBout = async (userId: string, id: string) => {
+  console.log('removeBout', userId, id)
   const user = await UserModel.get(userId)
   if (!user) {
     throw new Error('User not found')

@@ -5,12 +5,21 @@ import Journal from '../../db/models/Journal'
 import { getQuery, GetQuerySchema } from '../validation'
 import { JournalType } from '../../constants'
 import { fillMockData, getCurrentPressureUlcers, getCurrentUTI } from './utils'
+import { removeBout, saveBout } from '../bouts/utils'
 
 const router = express.Router()
 
 router.post('/:userId', async (req, res) => {
   const { userId } = req.params
   try {
+    if (req.body.type == JournalType.exercise) {
+      const bout = await saveBout(userId, {
+        ...req.body.info,
+        t: req.body.t,
+      })
+      req.body.info.bout = bout.id
+    }
+
     const response = await Journal.save(
       {
         ...req.body,
@@ -26,12 +35,17 @@ router.post('/:userId', async (req, res) => {
 })
 
 router.delete('/:userId/:id', async (req, res) => {
-  const { id } = req.params
+  const { id, userId } = req.params
 
   try {
-    await Journal.delete(id)
+    const journalEntry = await Journal.delete(id)
+    console.log('deleted.journalEntry', journalEntry)
+    if (journalEntry?.type == JournalType.exercise) {
+      await removeBout(userId, (journalEntry.info as any).bout.toString())
+    }
     res.sendStatus(200)
   } catch (e) {
+    console.log(e)
     res.sendStatus(500)
   }
 })
