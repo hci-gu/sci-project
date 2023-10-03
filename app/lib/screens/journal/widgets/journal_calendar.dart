@@ -6,6 +6,7 @@ import 'package:scimovement/api/classes/journal/journal.dart';
 import 'package:scimovement/models/journal/journal.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/theme/theme.dart';
+import 'package:scimovement/widgets/tappable.dart';
 
 class JournalCalendarDay extends ConsumerWidget {
   final DateTime date;
@@ -22,7 +23,7 @@ class JournalCalendarDay extends ConsumerWidget {
     DateTime selectedDate = ref.watch(journalSelectedDateProvider);
     bool isFuture = date.isAfter(DateTime.now());
 
-    return GestureDetector(
+    return TappableCircular(
       onTap: () {
         if (isFuture) return;
         ref.read(journalSelectedDateProvider.notifier).state = date;

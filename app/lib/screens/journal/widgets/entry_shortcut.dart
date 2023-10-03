@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:scimovement/theme/theme.dart';
+import 'package:scimovement/widgets/tappable.dart';
 
 class JournalEntryShortcut extends StatelessWidget {
   final Function onTap;
@@ -17,34 +18,32 @@ class JournalEntryShortcut extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Tappable(
+      withDecoration: true,
       onTap: () => onTap(),
-      child: Container(
-        decoration: AppTheme.widgetDecoration,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              icon,
-              AppTheme.spacer,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            icon,
+            AppTheme.spacer,
+            FittedBox(
+              child: Text(
+                title,
+                style: AppTheme.labelMedium,
+                textAlign: TextAlign.center,
+              ),
+            ),
+            if (subtitle != null)
               FittedBox(
                 child: Text(
-                  title,
-                  style: AppTheme.labelMedium,
+                  subtitle!,
+                  style: AppTheme.paragraphSmall,
                   textAlign: TextAlign.center,
                 ),
               ),
-              if (subtitle != null)
-                FittedBox(
-                  child: Text(
-                    subtitle!,
-                    style: AppTheme.paragraphSmall,
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-            ],
-          ),
+          ],
         ),
       ),
     );

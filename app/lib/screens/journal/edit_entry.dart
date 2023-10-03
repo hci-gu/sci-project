@@ -22,13 +22,13 @@ class EditJournalEntryScreen extends ConsumerWidget {
   final JournalType? type;
   final JournalEntry? entry;
 
-  const EditJournalEntryScreen(
-      {Key? key,
-      this.entry,
-      this.type,
-      this.initialDate,
-      this.shouldCreateEntry = true})
-      : super(key: key);
+  const EditJournalEntryScreen({
+    super.key,
+    this.entry,
+    this.type,
+    this.initialDate,
+    this.shouldCreateEntry = true,
+  });
 
   FormGroup buildForm() {
     Map<String, FormControl> defaultFields = {
@@ -107,7 +107,8 @@ class EditJournalEntryScreen extends ConsumerWidget {
 
   Widget _actions(BuildContext context, WidgetRef ref, FormGroup form) {
     if (type == JournalType.pressureRelease ||
-        (entry != null && entry!.type == JournalType.pressureRelease)) {
+        (entry != null && entry!.type == JournalType.pressureRelease) &&
+            shouldCreateEntry) {
       return PressureReleaseForm.actions(
         context,
         form,
@@ -123,7 +124,10 @@ class EditJournalEntryScreen extends ConsumerWidget {
       return PainLevelForm(form: form, entry: entry as PainLevelEntry?);
     }
     if (entry is PressureReleaseEntry || type == JournalType.pressureRelease) {
-      return PressureReleaseForm(form: form);
+      return PressureReleaseForm(
+        form: form,
+        shouldCreateEntry: shouldCreateEntry,
+      );
     }
     if (entry is PressureUlcerEntry || type == JournalType.pressureUlcer) {
       return PressureUlcerForm(

@@ -9,10 +9,12 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class PressureReleaseForm extends StatelessWidget {
   final FormGroup form;
+  final bool shouldCreateEntry;
 
   const PressureReleaseForm({
     super.key,
     required this.form,
+    this.shouldCreateEntry = true,
   });
 
   @override

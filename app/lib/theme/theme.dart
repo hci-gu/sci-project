@@ -190,9 +190,9 @@ class AppTheme {
         (Set<MaterialState> states) {
           if (secondary) return colors.white;
           if (states.contains(MaterialState.pressed)) {
-            return color ?? primarySwatch.shade800;
+            return colors.primaryDark;
           }
-          return color ?? primarySwatch.shade700;
+          return colors.primary;
         },
       ),
       textStyle: MaterialStateProperty.all<TextStyle>(
@@ -240,6 +240,7 @@ class AppTheme {
     color: AppTheme.colors.white,
     borderRadius: BorderRadius.circular(16),
   );
+  static BorderRadius borderRadius = BorderRadius.circular(16);
 
   static Widget iconForJournalType(JournalType type,
       [BodyPart? bodyPart, double size = 48]) {

@@ -6,6 +6,7 @@ import 'package:scimovement/models/journal/journal.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:scimovement/widgets/confirm_dialog.dart';
+import 'package:scimovement/widgets/tappable.dart';
 
 class JournalListItem extends ConsumerWidget {
   final JournalEntry entry;
@@ -42,7 +43,7 @@ class JournalListItem extends ConsumerWidget {
         }
         return false;
       },
-      child: GestureDetector(
+      child: Tappable(
         onTap: () => onTap(context),
         child: Padding(
           padding: EdgeInsets.symmetric(
@@ -76,10 +77,7 @@ class JournalListItem extends ConsumerWidget {
               horizontalTitleGap: AppTheme.basePadding * 2,
               title: Text(entry.title(context), style: AppTheme.labelLarge),
               subtitle: Text(subtitle),
-              trailing: IconButton(
-                icon: const Icon(Icons.edit),
-                onPressed: () {},
-              ),
+              trailing: const Icon(Icons.edit),
             ),
           ),
         ),
