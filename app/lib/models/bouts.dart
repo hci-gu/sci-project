@@ -29,6 +29,15 @@ final excerciseBoutsProvider =
   return bouts.where((e) => e.activity.isExercise).toList().reversed.toList();
 });
 
+final exerciseCountProvider =
+    FutureProvider.family<int, Pagination>((ref, pagination) async {
+  List<Bout> bouts = (await ref.watch(boutsProvider(pagination).future))
+      .where((e) => e.activity.isExercise)
+      .toList();
+
+  return bouts.length;
+});
+
 final averageSedentaryBout =
     FutureProvider.family<double, Pagination>((ref, pagination) async {
   List<Bout> bouts = (await ref.watch(boutsProvider(pagination).future))

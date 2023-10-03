@@ -10,9 +10,9 @@ import 'package:scimovement/models/onboarding.dart';
 import 'package:scimovement/screens/detail/activity.dart';
 import 'package:scimovement/screens/detail/bladder_emptying.dart';
 import 'package:scimovement/screens/detail/calories.dart';
+import 'package:scimovement/screens/detail/exercise.dart';
 import 'package:scimovement/screens/detail/pressure_release.dart';
 import 'package:scimovement/screens/detail/sedentary.dart';
-import 'package:scimovement/screens/exercise/exercise.dart';
 import 'package:scimovement/screens/goal/goal.dart';
 import 'package:scimovement/screens/home/home.dart';
 import 'package:scimovement/screens/introduction.dart';
@@ -203,9 +203,7 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
                   GoRoute(
                     path: 'exercise',
                     name: 'exercise',
-                    builder: (_, state) => ExcerciseScreen(
-                      startWithAdd: state.extra as bool? ?? false,
-                    ),
+                    builder: (_, state) => const ExerciseScreen(),
                   ),
                 ],
               )

@@ -23,9 +23,7 @@ class ExerciseWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     String asset = 'assets/svg/exercise.svg';
     return GestureDetector(
-      onTap: () {
-        context.go('exercise');
-      },
+      onTap: () => context.goNamed('exercise'),
       child: ref.watch(exerciseWidgetProvider).when(
             data: (WidgetValues values) => StatWidget(
               title: AppLocalizations.of(context)!.workout,
@@ -33,18 +31,6 @@ class ExerciseWidget extends ConsumerWidget {
               unit: Unit.amount,
               asset: asset,
               mode: StatWidgetMode.week,
-              action: Button(
-                width: 100,
-                icon: Icons.add,
-                onPressed: () {
-                  context.go(
-                    'exercise',
-                    extra: true,
-                  );
-                },
-                size: ButtonSize.tiny,
-                title: AppLocalizations.of(context)!.add,
-              ),
             ),
             error: (_, __) => StatWidget.error(asset),
             loading: () => StatWidget.loading(asset),
