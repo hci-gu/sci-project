@@ -52,6 +52,14 @@ class JournalState extends StateNotifier<DateTime> {
           'utiType': type.name,
         };
         break;
+      case JournalType.exercise:
+        Activity activity = values['activity'] as Activity;
+        int minutes = values['minutes'] as int;
+        info = {
+          'activity': activity.name,
+          'minutes': minutes,
+        };
+        break;
       default:
     }
 

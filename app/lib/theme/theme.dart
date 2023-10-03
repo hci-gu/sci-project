@@ -276,6 +276,12 @@ class AppTheme {
           size: size,
           color: AppTheme.colors.black,
         );
+      case JournalType.exercise:
+        return Icon(
+          Icons.offline_bolt_outlined,
+          size: size,
+          color: AppTheme.colors.black,
+        );
       default:
         return Icon(
           Icons.album_outlined,

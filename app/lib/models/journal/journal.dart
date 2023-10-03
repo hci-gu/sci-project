@@ -93,12 +93,6 @@ class JournalEvents {
       ];
     }
 
-    // [
-    //   2023-07-01,
-    //   2023-08-02,
-    //   2023-09-03
-    // ]
-
     for (JournalEntry entry in entries) {
       // skip first
       if (entry == entries.first) {

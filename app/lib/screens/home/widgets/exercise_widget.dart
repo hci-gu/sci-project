@@ -24,8 +24,7 @@ class ExerciseWidget extends ConsumerWidget {
     String asset = 'assets/svg/exercise.svg';
     return GestureDetector(
       onTap: () {
-        String path = GoRouter.of(context).location;
-        context.go('$path${path.length > 1 ? '/' : ''}exercise');
+        context.go('exercise');
       },
       child: ref.watch(exerciseWidgetProvider).when(
             data: (WidgetValues values) => StatWidget(
@@ -38,9 +37,8 @@ class ExerciseWidget extends ConsumerWidget {
                 width: 100,
                 icon: Icons.add,
                 onPressed: () {
-                  String path = GoRouter.of(context).location;
                   context.go(
-                    '$path${path.length > 1 ? '/' : ''}exercise',
+                    'exercise',
                     extra: true,
                   );
                 },
