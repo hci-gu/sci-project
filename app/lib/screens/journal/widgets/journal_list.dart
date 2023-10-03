@@ -142,6 +142,7 @@ class JournalList extends ConsumerWidget {
                 children: [
                   for (JournalEntry entry in data)
                     JournalListItem(entry: entry),
+                  AppTheme.spacer4x,
                 ],
               ),
             );

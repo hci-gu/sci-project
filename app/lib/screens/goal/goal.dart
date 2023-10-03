@@ -20,7 +20,11 @@ class GoalScreen extends ConsumerWidget {
 
   FormGroup buildForm() => fb.group({
         'value': FormControl<int>(
-          value: goal?.value ?? 0,
+          value: goal != null
+              ? goal!.value
+              : type == JournalType.bladderEmptying
+                  ? 5
+                  : 8,
           validators: [
             Validators.required,
             Validators.min(0),
@@ -28,7 +32,9 @@ class GoalScreen extends ConsumerWidget {
           ],
         ),
         'start': FormControl<Duration>(
-          value: goal?.start != null ? goal!.start : Duration.zero,
+          value: goal?.start != null
+              ? goal!.start
+              : const Duration(minutes: 60 * 7),
           validators: [Validators.required],
         ),
       });
@@ -59,7 +65,10 @@ class GoalScreen extends ConsumerWidget {
               AppTheme.spacer2x,
               _textSection(
                 AppLocalizations.of(context)!.goalTimePerDay,
-                AppLocalizations.of(context)!.goalTimePerDayDescription,
+                type == JournalType.bladderEmptying
+                    ? AppLocalizations.of(context)!
+                        .bladderGoalTimePerDayDescription
+                    : AppLocalizations.of(context)!.goalTimePerDayDescription,
               ),
               AppTheme.spacer2x,
               StyledTextField(

@@ -15,6 +15,7 @@ class DetailScreen extends HookConsumerWidget {
   final StatHeader header;
   final Widget content;
   final double height;
+  final bool showModeSelect;
 
   const DetailScreen({
     Key? key,
@@ -23,6 +24,7 @@ class DetailScreen extends HookConsumerWidget {
     required this.header,
     required this.content,
     this.height = 200,
+    this.showModeSelect = true,
   }) : super(key: key);
 
   @override
@@ -39,7 +41,7 @@ class DetailScreen extends HookConsumerWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [header, const ChartModeSelect()],
+              children: [header, if (showModeSelect) const ChartModeSelect()],
             ),
             AppTheme.separator,
             AnimatedSize(

@@ -34,6 +34,7 @@ class PressureReleaseScreen extends ConsumerWidget {
           unit: Unit.amount,
           isAverage: false,
         ),
+        showModeSelect: false,
         content: Column(
           children: [
             _goalWidget(context, ref, pagination),
