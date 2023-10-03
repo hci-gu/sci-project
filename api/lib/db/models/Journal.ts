@@ -112,7 +112,14 @@ export default {
       order: [['t', 'DESC']],
     })
   },
-  delete: (id: string) => JournalModel.destroy({ where: { id } }),
+  delete: async (id: string) => {
+    const journalEntry = await JournalModel.findOne({
+      attributes: ['id', 't', 'type', 'comment', 'info'],
+      where: { id },
+    })
+    await JournalModel.destroy({ where: { id } })
+    return journalEntry
+  },
   update: (id: string, data: any) =>
     JournalModel.update(data, { where: { id } }),
 }

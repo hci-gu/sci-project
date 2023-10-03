@@ -27,6 +27,7 @@ export enum JournalType {
   bodyTemperature = 'bodyTemperature',
   urinaryTractInfection = 'urinaryTractInfection',
   bladderEmptying = 'bladderEmptying',
+  exercise = 'exercise',
 }
 
 export enum GoalType {
