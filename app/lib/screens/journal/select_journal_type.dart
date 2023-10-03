@@ -82,6 +82,11 @@ class SelectJournalTypeScreen extends ConsumerWidget {
                   icon: AppTheme.iconForJournalType(JournalType.leakage),
                   title: AppLocalizations.of(context)!.leakage,
                 ),
+              JournalEntryShortcut(
+                onTap: () => _navigate(context, JournalType.exercise),
+                icon: AppTheme.iconForJournalType(JournalType.exercise),
+                title: AppLocalizations.of(context)!.exercise,
+              ),
             ],
           )
         ],

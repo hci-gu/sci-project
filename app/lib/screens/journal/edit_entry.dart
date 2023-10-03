@@ -3,9 +3,11 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:reactive_forms/reactive_forms.dart';
+import 'package:scimovement/api/classes/journal/exercise.dart';
 import 'package:scimovement/api/classes/journal/journal.dart';
 import 'package:scimovement/models/journal/journal.dart';
 import 'package:scimovement/screens/journal/widgets/forms/bladder_emptying_form.dart';
+import 'package:scimovement/screens/journal/widgets/forms/exercise_form.dart';
 import 'package:scimovement/screens/journal/widgets/forms/uti_form.dart';
 import 'package:scimovement/screens/journal/widgets/pain_level_form.dart';
 import 'package:scimovement/screens/journal/widgets/forms/pressure_release_form.dart';
@@ -57,7 +59,9 @@ class EditJournalEntryScreen extends ConsumerWidget {
         ...BladderEmptyingForm.buildForm(
             entry as BladderEmptyingEntry?, shouldCreateEntry),
       if (entry is UTIEntry || type == JournalType.urinaryTractInfection)
-        ...UTIForm.buildForm(entry as UTIEntry?, shouldCreateEntry)
+        ...UTIForm.buildForm(entry as UTIEntry?, shouldCreateEntry),
+      if (entry is ExerciseEntry || type == JournalType.exercise)
+        ...ExerciseForm.buildForm(entry as ExerciseEntry?, shouldCreateEntry)
     });
   }
 
@@ -147,6 +151,13 @@ class EditJournalEntryScreen extends ConsumerWidget {
       return UTIForm(
         form: form,
         entry: entry as UTIEntry?,
+        shouldCreateEntry: shouldCreateEntry,
+      );
+    }
+    if (entry is ExerciseEntry || type == JournalType.exercise) {
+      return ExerciseForm(
+        form: form,
+        entry: entry as ExerciseEntry?,
         shouldCreateEntry: shouldCreateEntry,
       );
     }
