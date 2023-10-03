@@ -119,10 +119,6 @@ class PagedWidgets extends HookConsumerWidget {
                                   ],
                                 ),
                               ),
-                              AppTheme.spacer,
-                              Text(
-                                  '${AppLocalizations.of(context)!.gear} & ${AppLocalizations.of(context)!.medicin}',
-                                  style: AppTheme.labelLarge),
                             ],
                           ),
                         ),
@@ -196,12 +192,12 @@ class HomeScreen extends HookConsumerWidget {
               crossAxisSpacing: AppTheme.basePadding * 2,
               mainAxisSpacing: AppTheme.basePadding * 2,
               children: [
-                if (features.contains(AppFeature.exercise))
-                  const ExerciseWidget(),
                 if (features.contains(AppFeature.pressureRelease))
                   const PressureReleaseWidget(),
                 if (features.contains(AppFeature.bladder))
                   const BladderEmptyingWidget(),
+                if (features.contains(AppFeature.exercise))
+                  const ExerciseWidget(),
               ],
             ),
           ),
