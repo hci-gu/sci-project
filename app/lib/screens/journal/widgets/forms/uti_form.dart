@@ -5,6 +5,7 @@ import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/condition_dropdown.dart';
 import 'package:scimovement/widgets/condition_item.dart';
 import 'package:scimovement/widgets/condition_select.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class UTIForm extends StatelessWidget {
   final FormGroup form;
@@ -25,7 +26,7 @@ class UTIForm extends StatelessWidget {
       children: [
         ConditionDropdown(
           formKey: 'utiType',
-          hint: 'Hint',
+          hint: AppLocalizations.of(context)!.utiTypeHint,
           items: UTIType.values.map((e) => _dropdownItem(context, e)).toList(),
           selectedItemBuilder: (context) => UTIType.values
               .map((e) => _dropdownItem(context, e, true))
@@ -55,6 +56,7 @@ class UTIForm extends StatelessWidget {
     return {
       'utiType': FormControl<UTIType>(
         value: entry?.utiType,
+        validators: [Validators.required],
       ),
     };
   }

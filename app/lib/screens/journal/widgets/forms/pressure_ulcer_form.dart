@@ -86,6 +86,7 @@ class PressureUlcerForm extends StatelessWidget {
       'pressureUlcerType': FormControl<PressureUlcerType>(
         value:
             !shouldCreateEntry ? pressureUlcerEntry?.pressureUlcerType : null,
+        validators: [Validators.required],
       ),
       'location': FormControl<PressureUlcerLocation>(
         value: pressureUlcerEntry?.location,

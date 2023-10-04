@@ -246,10 +246,8 @@ final paginatedJournalProvider = FutureProvider((ref) async {
   return journal;
 });
 
-final journalSelectedDateProvider = StateProvider<DateTime>((ref) {
-  DateTime now = DateTime.now();
-  return DateTime(now.year, now.month, now.day);
-});
+final journalSelectedDateProvider =
+    StateProvider<DateTime>((ref) => DateTime.now());
 
 final pressureReleaseCountProvider =
     FutureProvider.family<num, Pagination>((ref, pagination) async {

@@ -33,7 +33,7 @@ class JournalCalendarDay extends ConsumerWidget {
           borderRadius: BorderRadius.circular(100),
           border: Border.all(
             color: borderColor(selectedDate),
-            width: selectedDate == date ? 2 : 1,
+            width: isSameDay(selectedDate, date) ? 2 : 1,
           ),
         ),
         child: Column(
@@ -48,7 +48,7 @@ class JournalCalendarDay extends ConsumerWidget {
                     : isFuture
                         ? AppTheme.colors.lightGray
                         : AppTheme.colors.black,
-                fontWeight: isToday || selectedDate == date
+                fontWeight: isToday || isSameDay(selectedDate, date)
                     ? FontWeight.bold
                     : FontWeight.normal,
               ),
@@ -61,7 +61,7 @@ class JournalCalendarDay extends ConsumerWidget {
   }
 
   Color borderColor(DateTime selectedDate) {
-    if (selectedDate == date) return AppTheme.colors.black;
+    if (isSameDay(selectedDate, date)) return AppTheme.colors.black;
     return isToday ? AppTheme.colors.primary : AppTheme.colors.lightGray;
   }
 
@@ -72,23 +72,41 @@ class JournalCalendarDay extends ConsumerWidget {
         date.day == now.day;
   }
 
+  bool isSameDay(DateTime date, DateTime date2) {
+    return date.year == date2.year &&
+        date.month == date2.month &&
+        date.day == date2.day;
+  }
+
   Widget dots() {
+    int numDots = journal.length;
     return SizedBox(
       width: 24,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: journal.take(3).map((e) => dot()).toList(),
+      height: 8,
+      child: Stack(
+        children: [
+          ...journal
+              .take(3)
+              .map((e) => dot(journal.indexOf(e), numDots))
+              .toList()
+          // .reversed,
+        ],
       ),
     );
   }
 
-  Widget dot() {
-    return Container(
-      width: 6,
-      height: 6,
-      decoration: BoxDecoration(
-        color: Colors.grey,
-        borderRadius: BorderRadius.circular(50),
+  Widget dot(int index, numDots) {
+    double stackedOffset = 12 - index * 5;
+    return Positioned(
+      left: numDots > 3 ? stackedOffset : 5 + (numDots * 3) - (7.0 * index),
+      child: Container(
+        width: 8,
+        height: 8,
+        decoration: BoxDecoration(
+          color: AppTheme.colors.primary,
+          borderRadius: BorderRadius.circular(50),
+          border: Border.all(color: AppTheme.colors.white, width: 1),
+        ),
       ),
     );
   }

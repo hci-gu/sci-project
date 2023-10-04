@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:scimovement/models/app_features.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/screens/home/widgets/bladder_emptying_widget.dart';
@@ -17,7 +16,6 @@ import 'package:scimovement/storage.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/activity_wheel/activity_wheel.dart';
 import 'package:scimovement/widgets/date_select.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 final homeWidgetPageProvider = StateProvider<int>((ref) {
   ref.listenSelf((previous, next) {
@@ -166,18 +164,16 @@ class PagedWidgets extends HookConsumerWidget {
 }
 
 class HomeScreen extends HookConsumerWidget {
-  HomeScreen({Key? key}) : super(key: key);
-  final RefreshController _refreshController = RefreshController();
+  const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     List<AppFeature> features = ref.watch(appFeaturesProvider);
 
-    return SmartRefresher(
-      controller: _refreshController,
-      onRefresh: () {
+    return RefreshIndicator(
+      color: AppTheme.primarySwatch,
+      onRefresh: () async {
         ref.read(dateProvider.notifier).state = DateTime.now();
-        _refreshController.refreshCompleted();
       },
       child: ListView(
         children: [

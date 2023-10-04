@@ -31,11 +31,7 @@ class JournalScreen extends HookConsumerWidget {
                 IconButton(
                   onPressed: () {
                     ref.read(journalSelectedDateProvider.notifier).state =
-                        DateTime(
-                      DateTime.now().year,
-                      DateTime.now().month,
-                      DateTime.now().day,
-                    );
+                        DateTime.now();
                   },
                   icon: const Icon(Icons.today_outlined),
                 ),

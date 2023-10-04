@@ -48,7 +48,7 @@ class JournalListItem extends ConsumerWidget {
         onTap: () => onTap(context),
         child: Padding(
           padding: EdgeInsets.symmetric(
-            horizontal: AppTheme.basePadding * 0,
+            horizontal: AppTheme.basePadding * 2,
           ),
           child: Container(
             decoration: BoxDecoration(

@@ -190,9 +190,9 @@ class AppTheme {
         (Set<MaterialState> states) {
           if (secondary) return colors.white;
           if (states.contains(MaterialState.pressed)) {
-            return colors.primaryDark;
+            return color != null ? darkenColor(color) : colors.primaryDark;
           }
-          return colors.primary;
+          return color ?? colors.primary;
         },
       ),
       textStyle: MaterialStateProperty.all<TextStyle>(

@@ -195,6 +195,7 @@
     "utiTypeNoneDescription": "You have no symptoms of a urinary tract infection.",
     "utiTypeFeelingDescription": "You suspect you have a urinary tract infection.",
     "utiTypeDiagnosedDescription": "You have been diagnosed with a urinary tract infection.",
+    "utiTypeHint": "Choose an option",
     "utiChangeStatus": "Change urinary tract infection status",
     "noUti": "No UTI",
     "noLoggedUti": "No logged UTI",
