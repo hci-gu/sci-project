@@ -136,7 +136,7 @@ class JournalScroller extends HookConsumerWidget {
         height - JournalCalendar.heightForPage(context, currentPage.value);
 
     if (ref.watch(showTimelineProvider)) {
-      return JournalTimeline(initialPage: currentPage.value);
+      return JournalTimeline(initialPage: currentPage.value - 2);
     }
 
     return Column(

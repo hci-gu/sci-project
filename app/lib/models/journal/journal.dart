@@ -40,6 +40,14 @@ class JournalEvents {
   }
 
   String title(BuildContext context) {
+    switch (type) {
+      case JournalType.urinaryTractInfection:
+        return type.displayString(context);
+      default:
+    }
+    if (entries.isNotEmpty) {
+      return entries.first.shortcutTitle(context);
+    }
     return type.displayString(context);
   }
 
@@ -87,9 +95,10 @@ class JournalEvents {
     if (entries.length == 1) {
       return [
         Period(
-            start: entries.first.time,
-            end: DateTime.now(),
-            color: periodColorForEntry(entries.first)),
+          start: entries.first.time,
+          end: DateTime.now(),
+          color: periodColorForEntry(entries.first),
+        ),
       ];
     }
 
@@ -133,6 +142,25 @@ class JournalEvents {
     }
     return color;
   }
+
+  int get sortKey {
+    switch (type) {
+      case JournalType.pain:
+        return 0;
+      case JournalType.pressureUlcer:
+        return 10;
+      case JournalType.pressureRelease:
+        return 11;
+      case JournalType.urinaryTractInfection:
+        return 20;
+      case JournalType.bladderEmptying:
+        return 21;
+      case JournalType.leakage:
+        return 22;
+      default:
+        return 30;
+    }
+  }
 }
 
 final journalProvider = FutureProvider.family<List<JournalEntry>, Pagination>(
@@ -170,6 +198,8 @@ final journalEventsProvider =
       event.entries.add(entry);
     }
   }
+
+  events.sort((a, b) => a.sortKey.compareTo(b.sortKey));
 
   return events;
 });
