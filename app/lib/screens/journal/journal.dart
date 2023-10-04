@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_router/go_router.dart';
@@ -5,6 +6,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:infinite_listview/infinite_listview.dart';
 import 'package:intl/intl.dart';
 import 'package:scimovement/models/journal/journal.dart';
+import 'package:scimovement/models/journal/timeline.dart';
 import 'package:scimovement/screens/journal/widgets/journal_calendar.dart';
 import 'package:scimovement/screens/journal/widgets/journal_list.dart';
 import 'package:scimovement/screens/journal/widgets/journal_shortcut_grid.dart';
@@ -13,48 +15,73 @@ import 'package:scimovement/theme/theme.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:scimovement/widgets/button.dart';
 
-class JournalScreen extends ConsumerWidget {
+class JournalScreen extends HookConsumerWidget {
   const JournalScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return OrientationBuilder(builder: (context, orientation) {
-      return Scaffold(
-          appBar: orientation == Orientation.portrait
-              ? AppTheme.appBar(AppLocalizations.of(context)!.logbook)
-              : null,
-          body: LayoutBuilder(
-            builder: (context, constraints) {
-              return JournalScroller(
-                  height: constraints.maxHeight - 18, orientation: orientation);
-            },
-          ),
-          floatingActionButton: orientation == Orientation.portrait
-              ? isToday(ref.watch(journalSelectedDateProvider))
-                  ? null
-                  : FloatingActionButton(
-                      onPressed: () {
-                        DateTime selectedDate =
-                            ref.watch(journalSelectedDateProvider);
-                        GoRouter.of(context).goNamed(
-                          'select-journal-type',
-                          extra: {
-                            'date': DateTime(
-                              selectedDate.year,
-                              selectedDate.month,
-                              selectedDate.day,
-                              12,
-                            ),
-                          },
-                        );
-                      },
-                      child: const Icon(Icons.add),
-                    )
+    bool showTimeline = ref.watch(showTimelineProvider);
+
+    return Scaffold(
+      appBar: showTimeline
+          ? null
+          : AppTheme.appBar(
+              AppLocalizations.of(context)!.logbook,
+              [
+                IconButton(
+                  onPressed: () {
+                    ref.read(journalSelectedDateProvider.notifier).state =
+                        DateTime(
+                      DateTime.now().year,
+                      DateTime.now().month,
+                      DateTime.now().day,
+                    );
+                  },
+                  icon: const Icon(Icons.today_outlined),
+                ),
+                IconButton(
+                  onPressed: () {
+                    ref.read(showTimelineProvider.notifier).state = true;
+                  },
+                  icon: const Icon(Icons.timeline_outlined),
+                ),
+              ],
+            ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return JournalScroller(
+            height: constraints.maxHeight - 18,
+          );
+        },
+      ),
+      floatingActionButton: showTimeline
+          ? FloatingActionButton(
+              onPressed: () {
+                ref.read(showTimelineProvider.notifier).state = false;
+              },
+              child: const Icon(Icons.undo),
+            )
+          : isToday(ref.watch(journalSelectedDateProvider))
+              ? null
               : FloatingActionButton(
-                  onPressed: () {},
-                  child: const Icon(Icons.undo),
-                ));
-    });
+                  onPressed: () {
+                    DateTime selectedDate =
+                        ref.watch(journalSelectedDateProvider);
+                    GoRouter.of(context).goNamed(
+                      'select-journal-type',
+                      extra: {
+                        'date': DateTime(
+                          selectedDate.year,
+                          selectedDate.month,
+                          selectedDate.day,
+                          12,
+                        ),
+                      },
+                    );
+                  },
+                  child: const Icon(Icons.add),
+                ),
+    );
   }
 
   bool isToday(DateTime date) {
@@ -67,16 +94,15 @@ class JournalScreen extends ConsumerWidget {
 
 class JournalScroller extends HookConsumerWidget {
   final double height;
-  final Orientation orientation;
 
   const JournalScroller({
     super.key,
     required this.height,
-    required this.orientation,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    DateTime selectedDate = ref.watch(journalSelectedDateProvider);
     ValueNotifier<int> currentPage = useState(0);
     InfiniteScrollController scrollController =
         useMemoized(() => InfiniteScrollController());
@@ -94,11 +120,22 @@ class JournalScroller extends HookConsumerWidget {
       };
     }, []);
 
+    useEffect(() {
+      if (!scrollController.hasClients) return () => {};
+      DateTime now = DateTime.now();
+      if (selectedDate.day == now.day &&
+          selectedDate.month == now.month &&
+          selectedDate.year == now.year) {
+        scrollController.jumpTo(0);
+      }
+
+      return () => {};
+    }, [selectedDate]);
+
     double listHeight =
         height - JournalCalendar.heightForPage(context, currentPage.value);
 
-    if (orientation == Orientation.landscape ||
-        height < MediaQuery.of(context).size.width) {
+    if (ref.watch(showTimelineProvider)) {
       return JournalTimeline(initialPage: currentPage.value);
     }
 
@@ -115,18 +152,16 @@ class JournalScroller extends HookConsumerWidget {
               Positioned(
                 top: JournalCalendar.heightForPage(context, currentPage.value),
                 child: AnimatedSize(
-                  duration: const Duration(milliseconds: 300),
+                  duration: const Duration(milliseconds: 250),
                   child: SizedBox(
                     width: MediaQuery.of(context).size.width,
-                    height: listHeight,
+                    height: math.max(0, listHeight),
                     child: ListBottomSheet(
                       onPageChanged: (Direction dir) {
                         currentPage.value += dir == Direction.up ? -1 : 1;
-                        scrollController.animateTo(
+                        scrollController.jumpTo(
                           scrollController.offset +
                               (dir == Direction.up ? -height : height),
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.decelerate,
                         );
                       },
                     ),

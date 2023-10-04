@@ -201,12 +201,13 @@ class AppTheme {
     );
   }
 
-  static AppBar appBar(String title) {
+  static AppBar appBar(String title, [List<Widget>? actions]) {
     return AppBar(
       title: Text(
         title,
         style: AppTheme.headLine3.copyWith(color: AppTheme.colors.white),
       ),
+      actions: actions,
     );
   }
 

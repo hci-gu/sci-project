@@ -89,15 +89,13 @@ class ConditionSelect extends ConsumerWidget {
   }
 
   Widget _body(Widget child) {
-    return AspectRatio(
-      aspectRatio: 3,
-      child: Container(
-        decoration: AppTheme.widgetDecoration.copyWith(
-          borderRadius: const BorderRadius.all(Radius.circular(12)),
-        ),
-        padding: const EdgeInsets.only(left: 8, top: 8, bottom: 0, right: 8),
-        child: child,
+    return Container(
+      height: 60,
+      decoration: AppTheme.widgetDecoration.copyWith(
+        borderRadius: const BorderRadius.all(Radius.circular(12)),
       ),
+      padding: const EdgeInsets.only(left: 8, top: 8, bottom: 0, right: 2),
+      child: child,
     );
   }
 

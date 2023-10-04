@@ -254,15 +254,7 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
                             ],
                       );
                     },
-                  ),
-                  GoRoute(
-                    name: 'update-journal',
-                    path: ':id',
-                    builder: (_, state) => EditJournalEntryScreen(
-                      shouldCreateEntry: false,
-                      entry: (state.extra as Map?)?['entry'],
-                    ),
-                  ),
+                  )
                 ],
               )
             ],

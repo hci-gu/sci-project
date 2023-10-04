@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:scimovement/models/journal/timeline.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class TabScreen extends StatelessWidget {
+class TabScreen extends ConsumerWidget {
   final List<String> routes;
   final StatefulNavigationShell navigationShell;
 
@@ -15,13 +17,13 @@ class TabScreen extends StatelessWidget {
       : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return OrientationBuilder(
       builder: (context, orientation) => AnnotatedRegion(
         value: SystemUiOverlayStyle.dark,
         child: Scaffold(
           body: navigationShell,
-          bottomNavigationBar: orientation == Orientation.portrait
+          bottomNavigationBar: !ref.watch(showTimelineProvider)
               ? Container(
                   decoration: BoxDecoration(
                     border: Border(
@@ -51,19 +53,19 @@ class TabScreen extends StatelessWidget {
                     currentIndex: navigationShell.currentIndex,
                     selectedItemColor: AppTheme.colors.primary,
                     onTap: (index) {
-                      if (index == 1) {
-                        SystemChrome.setPreferredOrientations([
-                          DeviceOrientation.portraitUp,
-                          DeviceOrientation.portraitDown,
-                          DeviceOrientation.landscapeLeft,
-                          DeviceOrientation.landscapeRight,
-                        ]);
-                      } else {
-                        SystemChrome.setPreferredOrientations([
-                          DeviceOrientation.portraitUp,
-                          DeviceOrientation.portraitDown,
-                        ]);
-                      }
+                      // if (index == 1) {
+                      //   SystemChrome.setPreferredOrientations([
+                      //     DeviceOrientation.portraitUp,
+                      //     DeviceOrientation.portraitDown,
+                      //     DeviceOrientation.landscapeLeft,
+                      //     DeviceOrientation.landscapeRight,
+                      //   ]);
+                      // } else {
+                      //   SystemChrome.setPreferredOrientations([
+                      //     DeviceOrientation.portraitUp,
+                      //     DeviceOrientation.portraitDown,
+                      //   ]);
+                      // }
 
                       navigationShell.goBranch(index,
                           initialLocation:

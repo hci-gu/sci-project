@@ -1,6 +1,7 @@
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/api/api.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:scimovement/models/journal/journal.dart';
 import 'package:scimovement/models/pagination.dart';
 
 final boutsProvider =
@@ -17,6 +18,7 @@ final boutsProvider =
 
 final excerciseBoutsProvider =
     FutureProvider.family<List<Bout>, Pagination>((ref, pagination) async {
+  ref.watch(updateJournalProvider);
   DateTime date = ref.watch(dateProvider);
   DateTime startOfWeek = date.subtract(Duration(days: date.weekday - 1));
 
@@ -31,6 +33,7 @@ final excerciseBoutsProvider =
 
 final exerciseCountProvider =
     FutureProvider.family<int, Pagination>((ref, pagination) async {
+  ref.watch(updateJournalProvider);
   List<Bout> bouts = (await ref.watch(boutsProvider(pagination).future))
       .where((e) => e.activity.isExercise)
       .toList();
