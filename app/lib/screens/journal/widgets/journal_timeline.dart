@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -143,7 +144,6 @@ class TimelineEvent extends StatelessWidget {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          // if (events.displayType == TimelineDisplayType.events)
           Padding(
             padding: EdgeInsets.only(top: (headerHeight / 2) - 2),
             child: Container(
@@ -318,15 +318,12 @@ class EventHandleItem extends StatelessWidget {
           ],
         ),
         padding: const EdgeInsets.symmetric(horizontal: 8.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              event?.title(context) ?? '',
-              style: AppTheme.labelMedium,
-              textAlign: TextAlign.center,
-            )
-          ],
+        child: Center(
+          child: Text(
+            event?.title(context) ?? '',
+            style: AppTheme.paragraphSmall,
+            textAlign: TextAlign.center,
+          ),
         ),
       ),
     );
@@ -345,21 +342,23 @@ class EventHandles extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedList(
-      key: listKey,
-      physics: const NeverScrollableScrollPhysics(),
-      initialItemCount: events.length,
-      itemBuilder: (context, index, animation) {
-        return SlideTransition(
-          position: animation.drive(
-            Tween<Offset>(
-              begin: const Offset(0, 1),
-              end: const Offset(0, 0),
+    return SafeArea(
+      child: AnimatedList(
+        key: listKey,
+        physics: const NeverScrollableScrollPhysics(),
+        initialItemCount: events.length,
+        itemBuilder: (context, index, animation) {
+          return SlideTransition(
+            position: animation.drive(
+              Tween<Offset>(
+                begin: const Offset(0, 1),
+                end: const Offset(0, 0),
+              ),
             ),
-          ),
-          child: EventHandleItem(events[index]),
-        );
-      },
+            child: EventHandleItem(events[index]),
+          );
+        },
+      ),
     );
   }
 }
@@ -386,7 +385,8 @@ class JournalTimelineWithEvents extends HookWidget {
           initialScrollOffset: initialPage * pageWidth(context)),
     );
     InfiniteScrollController followController = useMemoized(
-      () => InfiniteScrollController(),
+      () => InfiniteScrollController(
+          initialScrollOffset: initialPage * pageWidth(context)),
     );
 
     useEffect(() {
@@ -397,7 +397,7 @@ class JournalTimelineWithEvents extends HookWidget {
           currentPage.value = newPage;
           DateTime displayDate = DateTime(
             date.year,
-            date.month + newPage + 2,
+            date.month + newPage + 3,
             date.day,
           );
           List<JournalEvents> visibleEvents =
@@ -456,7 +456,7 @@ class JournalTimelineWithEvents extends HookWidget {
               Positioned(
                 top: headerHeight,
                 left: 8,
-                width: 120,
+                width: 225,
                 height: 600,
                 child: EventHandles(
                   events: events,
