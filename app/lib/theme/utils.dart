@@ -19,3 +19,10 @@ MaterialColor createMaterialColor(Color color) {
   }
   return MaterialColor(color.value, swatch);
 }
+
+Color darkenColor(Color color) {
+  final hslColor = HSLColor.fromColor(color);
+  final hslDarken = HSLColor.fromAHSL(hslColor.alpha, hslColor.hue,
+      hslColor.saturation, hslColor.lightness - 0.2);
+  return hslDarken.toColor();
+}

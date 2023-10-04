@@ -66,9 +66,11 @@ class ExerciseForm extends StatelessWidget {
     return {
       'activity': FormControl<Activity>(
         value: entry?.activity,
+        validators: [Validators.required],
       ),
       'minutes': FormControl<int>(
         value: entry?.minutes ?? 0,
+        validators: [Validators.min(1)],
       ),
     };
   }
