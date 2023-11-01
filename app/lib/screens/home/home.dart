@@ -176,7 +176,9 @@ class HomeScreen extends HookConsumerWidget {
         ref.read(dateProvider.notifier).state = DateTime.now();
       },
       child: ListView(
+        padding: EdgeInsets.zero,
         children: [
+          SizedBox(height: MediaQuery.of(context).padding.top),
           const PagedWidgets(),
           AppTheme.spacer2x,
           Padding(

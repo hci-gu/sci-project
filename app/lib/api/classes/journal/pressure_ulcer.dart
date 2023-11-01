@@ -11,6 +11,23 @@ enum PressureUlcerType {
   category4,
 }
 
+PressureUlcerType pressureUlcerTypefromString(String type) {
+  switch (type) {
+    case 'none':
+      return PressureUlcerType.none;
+    case 'category1':
+      return PressureUlcerType.category1;
+    case 'category2':
+      return PressureUlcerType.category2;
+    case 'category3':
+      return PressureUlcerType.category3;
+    case 'category4':
+      return PressureUlcerType.category4;
+    default:
+      return PressureUlcerType.none;
+  }
+}
+
 extension PressureUlcerTypeExtension on PressureUlcerType {
   String displayString(BuildContext context) {
     switch (this) {
@@ -138,9 +155,7 @@ class PressureUlcerEntry extends JournalEntry {
       time: DateTime.parse(json['t']),
       type: journalTypeFromString(json['type']),
       comment: json['comment'],
-      pressureUlcerType: PressureUlcerType.values.firstWhere(
-          (e) => e.name == info['pressureUlcerType'],
-          orElse: () => PressureUlcerType.category1),
+      pressureUlcerType: pressureUlcerTypefromString(info['pressureUlcerType']),
       location: pressureUlcerLocationFromString(info['location']),
     );
   }

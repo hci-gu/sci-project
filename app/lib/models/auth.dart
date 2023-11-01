@@ -65,6 +65,17 @@ class UserState extends StateNotifier<User?> {
   }
 
   Future<void> update(Map<String, dynamic> update) async {
+    if (update.containsKey('email') || update.containsKey('password')) {
+      Credentials current = Storage().getCredentials() ?? Credentials('', '');
+      String email = update.containsKey('email')
+          ? update['email'] as String
+          : current.email;
+      String password = update.containsKey('password')
+          ? update['password']
+          : current.password;
+
+      await Storage().storeCredentails(Credentials(email, password));
+    }
     state = await Api().updateUser(update);
   }
 

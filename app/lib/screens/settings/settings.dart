@@ -29,9 +29,9 @@ class SettingsScreen extends ConsumerWidget {
       thumbVisibility: true,
       child: ListView(
         primary: true,
-        padding:
-            const EdgeInsets.only(left: 16, right: 16, top: 32, bottom: 16),
+        padding: const EdgeInsets.only(left: 16, right: 16, top: 0, bottom: 16),
         children: [
+          SizedBox(height: MediaQuery.of(context).padding.top),
           Text(
             AppLocalizations.of(context)!.profile,
             style: AppTheme.headLine1,
