@@ -117,7 +117,11 @@ class UserSettings extends HookWidget {
                         },
                       ),
                       AppTheme.spacer2x,
-                      const SubmitButton(),
+                      SubmitButton(
+                        onPressed: () {
+                          editing.value = false;
+                        },
+                      ),
                     ],
                   )
                 : Button(
@@ -191,7 +195,12 @@ class ConditionDropDown extends StatelessWidget {
 }
 
 class SubmitButton extends ConsumerWidget {
-  const SubmitButton({Key? key}) : super(key: key);
+  final Function onPressed;
+
+  const SubmitButton({
+    super.key,
+    required this.onPressed,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -204,6 +213,8 @@ class SubmitButton extends ConsumerWidget {
               FocusManager.instance.primaryFocus?.unfocus();
               try {
                 await ref.read(userProvider.notifier).update({
+                  'email': form.value['email'],
+                  'password': form.value['password'],
                   'weight': form.value['weight'],
                   'injuryLevel': form.value['injuryLevel'],
                   'gender': (form.value['gender'] as Gender).name,
@@ -212,12 +223,15 @@ class SubmitButton extends ConsumerWidget {
               } catch (e) {
                 return;
               }
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackbarMessage(
-                  context: context,
-                  message: AppLocalizations.of(context)!.updated,
-                ),
-              );
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackbarMessage(
+                    context: context,
+                    message: AppLocalizations.of(context)!.updated,
+                  ),
+                );
+              }
+              onPressed();
             },
           )),
     );

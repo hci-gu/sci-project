@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -187,6 +186,8 @@ class TimelineEvent extends StatelessWidget {
     if (period.end.isBefore(periodStart) || period.start.isAfter(periodEnd)) {
       return const SizedBox();
     }
+    bool endsAfterPeriod = period.end.isAfter(periodEnd);
+    Radius radius = const Radius.circular(4);
 
     final daysInPeriod = periodEnd.difference(periodStart).inDays;
     final dayLength = (pageWidth(context) - 32) / daysInPeriod;
@@ -196,10 +197,15 @@ class TimelineEvent extends StatelessWidget {
       top: (headerHeight / 2) - 5,
       left: offset * dayLength,
       child: Container(
-        width: math.max(period.duration.inDays * dayLength - 8, 8),
+        width: math.max(period.duration.inDays * dayLength - 4, 8),
         height: 8,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: BorderRadius.only(
+            topLeft: radius,
+            bottomLeft: radius,
+            topRight: endsAfterPeriod ? Radius.zero : radius,
+            bottomRight: endsAfterPeriod ? Radius.zero : radius,
+          ),
           color: period.color,
         ),
       ),
@@ -291,8 +297,6 @@ class TimelineEvents extends StatelessWidget {
     );
   }
 }
-
-// final GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
 
 class EventHandleItem extends StatelessWidget {
   final JournalEvents? event;
@@ -492,7 +496,7 @@ class JournalTimeline extends HookConsumerWidget {
         .when(
           data: (events) => JournalTimelineWithEvents(
             initialPage: initialPage,
-            events: events,
+            events: events.toList(),
           ),
           error: (_, __) => const Center(child: Text('error')),
           loading: () => const Center(
