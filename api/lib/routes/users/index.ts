@@ -120,6 +120,7 @@ router.post(
   userBody,
   async (req: ValidatedRequest<UserBodySchema>, res) => {
     const { email, password } = req.body
+    console.log('POST /users/login', email)
 
     try {
       const user = await UserModel.login(email, password)
