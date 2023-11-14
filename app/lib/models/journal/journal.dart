@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api/api.dart';
@@ -39,12 +38,17 @@ class JournalEvents {
 final journalProvider = FutureProvider.family<List<JournalEntry>, Pagination>(
     (ref, pagination) async {
   ref.watch(updateJournalProvider);
-  DateTime date = DateTime.now();
+  DateTime date = ref.watch(dateProvider);
+  Pagination page = Pagination(
+    page: pagination.page,
+    mode: pagination.mode,
+    overrideDate: date,
+  );
 
   List<JournalEntry> journal = await Api().getJournal(
-    pagination.from,
-    pagination.to,
-    pagination.mode,
+    page.from,
+    page.to,
+    page.mode,
   );
   return journal;
 });
@@ -71,7 +75,8 @@ final journalPaginationProvider =
 final journalForDayProvider =
     FutureProvider.family<List<JournalEntry>, DateTime>((ref, date) async {
   ref.watch(updateJournalProvider);
-  Pagination pagination = const Pagination(mode: ChartMode.day, page: 0);
+  Pagination pagination =
+      Pagination(mode: ChartMode.day, page: 0, overrideDate: date);
   List<JournalEntry> journal = await Api().getJournal(
     pagination.from,
     pagination.to,

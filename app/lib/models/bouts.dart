@@ -7,11 +7,16 @@ import 'package:scimovement/models/pagination.dart';
 final boutsProvider =
     FutureProvider.family<List<Bout>, Pagination>((ref, pagination) async {
   DateTime date = ref.watch(dateProvider);
+  Pagination page = Pagination(
+    page: pagination.page,
+    mode: pagination.mode,
+    overrideDate: date,
+  );
 
   List<Bout> bouts = await Api().getBouts(
-    pagination.from,
-    pagination.to,
-    pagination.mode,
+    page.from,
+    page.to,
+    page.mode,
   );
   return bouts;
 });
@@ -21,11 +26,16 @@ final excerciseBoutsProvider =
   ref.watch(updateJournalProvider);
   DateTime date = ref.watch(dateProvider);
   DateTime startOfWeek = date.subtract(Duration(days: date.weekday - 1));
+  Pagination page = Pagination(
+    page: pagination.page,
+    mode: pagination.mode,
+    overrideDate: startOfWeek,
+  );
 
   List<Bout> bouts = await Api().getBouts(
-    pagination.from,
-    pagination.to,
-    pagination.mode,
+    page.from,
+    page.to,
+    page.mode,
   );
 
   return bouts.where((e) => e.activity.isExercise).toList().reversed.toList();

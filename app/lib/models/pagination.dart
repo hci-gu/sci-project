@@ -87,7 +87,10 @@ class Pagination {
 
   @override
   bool operator ==(other) =>
-      other is Pagination && page == other.page && mode == other.mode;
+      other is Pagination &&
+      page == other.page &&
+      mode == other.mode &&
+      overrideDate == other.overrideDate;
   @override
   int get hashCode => page.hashCode + mode.hashCode;
 }
