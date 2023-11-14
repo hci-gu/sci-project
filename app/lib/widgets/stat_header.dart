@@ -68,8 +68,8 @@ class StatHeader extends ConsumerWidget {
   }
 
   String _displayDateRange(Pagination page, DateTime date) {
-    DateTime from = page.from(date);
-    DateTime to = page.to(date);
+    DateTime from = page.from;
+    DateTime to = page.to;
 
     return '${DateFormat('MMMd').format(from)} - ${DateFormat('MMMd').format(to)}';
     // return '${} - ${timeago.format(to)}';

@@ -8,8 +8,8 @@ final energyProvider =
   DateTime date = ref.watch(dateProvider);
 
   List<Energy> energy = await Api().getEnergy(
-    pagination.from(date),
-    pagination.to(date),
+    pagination.from,
+    pagination.to,
     pagination.mode,
   );
   return energy;

@@ -10,6 +10,7 @@ import 'package:scimovement/router.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:show_fps/show_fps.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class App extends ConsumerWidget {
@@ -52,6 +53,13 @@ class App extends ConsumerWidget {
         },
         locale: ref.watch(localeProvider),
         builder: (_, child) {
+          // return ShowFPS(
+          //   alignment: Alignment.topRight,
+          //   visible: true,
+          //   showChart: true,
+          //   borderRadius: const BorderRadius.all(Radius.circular(4)),
+          //   child: child ?? const SizedBox.shrink(),
+          // );
           return child ?? const SizedBox.shrink();
         },
       ),

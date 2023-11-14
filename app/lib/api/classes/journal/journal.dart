@@ -105,4 +105,6 @@ class JournalEntry {
   JournalEntry fromFormUpdate(Map<String, dynamic> values) => this;
 
   String get identifier => type.name;
+
+  String get timelineIdentifier => identifier;
 }
