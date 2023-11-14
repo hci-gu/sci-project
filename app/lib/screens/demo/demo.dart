@@ -64,7 +64,7 @@ List<Bout> mockBoutsForPagination(Pagination pagination) {
   List<Bout> bouts = [];
   switch (pagination.mode) {
     case ChartMode.day:
-      DateTime day = pagination.from(DateTime.now());
+      DateTime day = pagination.from;
       List<Activity> activities = [
         Activity.moving,
         Activity.sedentary,
@@ -91,8 +91,8 @@ List<Bout> mockBoutsForPagination(Pagination pagination) {
       break;
     case ChartMode.week:
     case ChartMode.month:
-      DateTime from = pagination.from(DateTime.now());
-      DateTime to = pagination.to(DateTime.now());
+      DateTime from = pagination.from;
+      DateTime to = pagination.to;
       int days = to.difference(from).inDays + 1;
 
       for (int i = 0; i < days; i++) {
@@ -120,7 +120,7 @@ List<Bout> mockBoutsForPagination(Pagination pagination) {
       }
       break;
     case ChartMode.year:
-      DateTime from = pagination.from(DateTime.now());
+      DateTime from = pagination.from;
       for (int i = 0; i < 12; i++) {
         DateTime day = from.add(Duration(days: i * 30));
         bouts.addAll([

@@ -96,7 +96,7 @@ final goalsProvider =
   ref.watch(updateGoalProvider);
   DateTime date = ref.watch(dateProvider);
 
-  return Api().getGoals(pagination.from(date));
+  return Api().getGoals(pagination.from);
 });
 
 final journalGoalsProvider =

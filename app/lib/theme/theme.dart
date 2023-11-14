@@ -64,6 +64,7 @@ class AppTheme {
   static MaterialColor primarySwatch =
       createMaterialColor(const Color.fromARGB(255, 213, 69, 79));
 
+  static double halfPadding = 4.0;
   static double basePadding = 8.0;
 
   static ThemeData theme = ThemeData(

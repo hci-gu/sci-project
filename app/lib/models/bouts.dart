@@ -9,8 +9,8 @@ final boutsProvider =
   DateTime date = ref.watch(dateProvider);
 
   List<Bout> bouts = await Api().getBouts(
-    pagination.from(date),
-    pagination.to(date),
+    pagination.from,
+    pagination.to,
     pagination.mode,
   );
   return bouts;
@@ -23,8 +23,8 @@ final excerciseBoutsProvider =
   DateTime startOfWeek = date.subtract(Duration(days: date.weekday - 1));
 
   List<Bout> bouts = await Api().getBouts(
-    pagination.from(startOfWeek),
-    pagination.to(date),
+    pagination.from,
+    pagination.to,
     pagination.mode,
   );
 
