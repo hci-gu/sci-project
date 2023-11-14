@@ -6,11 +6,16 @@ import 'package:scimovement/models/pagination.dart';
 final energyProvider =
     FutureProvider.family<List<Energy>, Pagination>((ref, pagination) async {
   DateTime date = ref.watch(dateProvider);
+  Pagination page = Pagination(
+    page: pagination.page,
+    mode: pagination.mode,
+    overrideDate: date,
+  );
 
   List<Energy> energy = await Api().getEnergy(
-    pagination.from,
-    pagination.to,
-    pagination.mode,
+    page.from,
+    page.to,
+    page.mode,
   );
   return energy;
 });
