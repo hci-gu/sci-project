@@ -79,7 +79,7 @@ class Pagination {
       case ChartMode.quarter:
         return DateTime(from.year, from.month + 3, 0, 23, 59, 59);
       case ChartMode.year:
-        return DateTime(from.year + 1, 0, 0, 23, 59, 59);
+        return DateTime(from.year + 1, 1, 0, 23, 59, 59);
       default:
         return DateTime(from.year, from.month, from.day, 23, 59, 59);
     }

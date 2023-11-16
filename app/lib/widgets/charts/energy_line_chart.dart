@@ -215,8 +215,6 @@ class EnergyLineChart extends ConsumerWidget {
           ),
         ),
       ),
-      swapAnimationCurve: Curves.easeInOut,
-      swapAnimationDuration: const Duration(milliseconds: 800),
     );
   }
 }
