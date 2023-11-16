@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/api/classes/journal/journal.dart';
+import 'package:scimovement/models/bouts.dart';
 import 'package:scimovement/models/journal/journal.dart';
 import 'package:scimovement/models/pagination.dart';
 
@@ -101,11 +102,39 @@ class TimelinePage {
   int get hashCode => pagination.hashCode ^ type.hashCode;
 }
 
+final timelineDataProvider = FutureProvider<List<JournalEntry>>((ref) async {
+  int yearsToFetch = ref.watch(timelineYearsProvider);
+  List<JournalEntry> journal = [];
+  for (int i = yearsToFetch - 1; i >= 0; i--) {
+    Pagination yearPage = Pagination(mode: ChartMode.year, page: i);
+    List<JournalEntry> entries = await ref.watch(
+      journalProvider(yearPage).future,
+    );
+
+    journal.addAll(entries);
+  }
+
+  return journal;
+});
+
 final timelinePaginationProvider = StateProvider<Pagination>((ref) {
   return const Pagination(
     mode: ChartMode.month,
     page: 0,
   );
+});
+
+final timelineTouchedDateProvider = StateProvider<DateTime?>((ref) => null);
+
+final timelineYearsProvider = StateProvider<int>((ref) {
+  Pagination page = ref.watch(timelinePaginationProvider);
+  int currentYear = DateTime.now().year;
+  Pagination nextPage = Pagination(
+    mode: page.mode,
+    page: page.page + 1,
+  );
+
+  return currentYear - nextPage.from.year + 1;
 });
 
 final timelineVisibleRangeProvider = StateProvider<List<DateTime>>((ref) {
@@ -125,9 +154,7 @@ final timelineEventsProvider =
     FutureProviderFamily<List<JournalEntry>, TimelinePage>((ref, page) async {
   DateTime from = page.pagination.from;
   DateTime to = page.pagination.to;
-  Pagination yearPage = const Pagination(mode: ChartMode.year, page: 0);
-  List<JournalEntry> journal =
-      await ref.watch(journalProvider(yearPage).future);
+  List<JournalEntry> journal = await ref.watch(timelineDataProvider.future);
 
   return journal
       .where((e) =>
@@ -142,11 +169,12 @@ final timelinePainChartProvider =
     FutureProviderFamily<List<PainLevelEntry>, TimelinePage>((ref, page) async {
   DateTime from = page.pagination.from;
   DateTime to = page.pagination.to;
-  Pagination yearPage = const Pagination(mode: ChartMode.year, page: 0);
-  List<JournalEntry> journal =
-      await ref.watch(journalProvider(yearPage).future);
+  List<JournalEntry> journal = await ref.watch(timelineDataProvider.future);
 
-  List<PainLevelEntry> entries = journal.whereType<PainLevelEntry>().toList();
+  List<PainLevelEntry> entries = journal
+      .whereType<PainLevelEntry>()
+      // .where((e) => e.bodyPart.type == BodyPartType.neck)
+      .toList();
 
   List<PainLevelEntry> entriesToShow = entries
       .where((e) => e.time.isBefore(to) && e.time.isAfter(from))
@@ -185,13 +213,28 @@ final timelinePainChartProvider =
   return entriesToShow;
 });
 
+final timelineBodyPartsForVisibleRange =
+    FutureProvider<List<BodyPart>>((ref) async {
+  List<DateTime> visibleRange = ref.watch(timelineVisibleRangeProvider);
+  List<JournalEntry> journal = await ref.watch(timelineDataProvider.future);
+
+  List<BodyPart> bodyParts = journal
+      .where((e) =>
+          e.time.isAfter(visibleRange.first) &&
+          e.time.isBefore(visibleRange.last))
+      .whereType<PainLevelEntry>()
+      .map((e) => e.bodyPart)
+      .toSet()
+      .toList();
+  bodyParts.sort((a, b) => a.toString().compareTo(b.toString()));
+  return bodyParts;
+});
+
 final timelineTypesProvider =
     FutureProvider.family<List<JournalType>, Pagination>(
         (ref, pagination) async {
   List<DateTime> visibleRange = ref.watch(timelineVisibleRangeProvider);
-  Pagination yearPage = const Pagination(mode: ChartMode.year, page: 0);
-  List<JournalEntry> journal =
-      await ref.watch(journalProvider(yearPage).future);
+  List<JournalEntry> journal = await ref.watch(timelineDataProvider.future);
 
   List<JournalType> types = journal
       .where((e) =>
@@ -209,9 +252,7 @@ final timelinePeriodsProvider =
     FutureProvider.family<List<Period>, TimelinePage>((ref, page) async {
   DateTime from = page.pagination.from;
   DateTime to = page.pagination.to;
-  Pagination yearPage = const Pagination(mode: ChartMode.year, page: 0);
-  List<JournalEntry> journal =
-      await ref.watch(journalProvider(yearPage).future);
+  List<JournalEntry> journal = await ref.watch(timelineDataProvider.future);
 
   List entries = journal
       .where((e) =>
