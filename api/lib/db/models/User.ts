@@ -51,17 +51,7 @@ export default {
     )
     return User
   },
-  associate: (sequelize: Sequelize) => {
-    UserModel.hasMany(sequelize.models.HeartRate, {
-      onDelete: 'cascade',
-    })
-    UserModel.hasMany(sequelize.models.Accel, {
-      onDelete: 'cascade',
-    })
-    UserModel.hasMany(sequelize.models.Journal, {
-      onDelete: 'cascade',
-    })
-  },
+  associate: (sequelize: Sequelize) => {},
   save: ({
     email,
     password,

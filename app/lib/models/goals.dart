@@ -95,8 +95,13 @@ final goalsProvider =
   ref.watch(updateJournalProvider);
   ref.watch(updateGoalProvider);
   DateTime date = ref.watch(dateProvider);
+  Pagination page = Pagination(
+    page: pagination.page,
+    mode: pagination.mode,
+    overrideDate: date,
+  );
 
-  return Api().getGoals(pagination.from(date));
+  return Api().getGoals(page.from);
 });
 
 final journalGoalsProvider =
