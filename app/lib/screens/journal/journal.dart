@@ -11,6 +11,7 @@ import 'package:scimovement/screens/journal/widgets/journal_calendar.dart';
 import 'package:scimovement/screens/journal/widgets/journal_list.dart';
 import 'package:scimovement/screens/journal/widgets/journal_shortcut_grid.dart';
 import 'package:scimovement/screens/journal/widgets/journal_timeline.dart';
+import 'package:scimovement/screens/journal/widgets/timeline/filter_modal.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:scimovement/widgets/button.dart';
@@ -51,11 +52,24 @@ class JournalScreen extends HookConsumerWidget {
         },
       ),
       floatingActionButton: showTimeline
-          ? FloatingActionButton(
-              onPressed: () {
-                ref.read(showTimelineProvider.notifier).state = false;
-              },
-              child: const Icon(Icons.undo),
+          ? Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                FloatingActionButton(
+                  onPressed: () {
+                    // ref.read(showTimelineProvider.notifier).state = false;
+                    showTimelineFilterModal(context);
+                  },
+                  child: const Icon(Icons.filter_alt),
+                ),
+                AppTheme.spacer,
+                FloatingActionButton(
+                  onPressed: () {
+                    ref.read(showTimelineProvider.notifier).state = false;
+                  },
+                  child: const Icon(Icons.undo),
+                ),
+              ],
             )
           : isToday(ref.watch(journalSelectedDateProvider))
               ? null

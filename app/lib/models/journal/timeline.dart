@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/api/classes/journal/journal.dart';
-import 'package:scimovement/models/bouts.dart';
 import 'package:scimovement/models/journal/journal.dart';
 import 'package:scimovement/models/pagination.dart';
 
@@ -26,7 +25,23 @@ final showTimelineProvider = StateProvider<bool>((ref) {
   return false;
 });
 
-enum TimelineDisplayType { events, periods, chart }
+final timelineFiltersProvider = StateProvider<Map<JournalType, bool>>((ref) {
+  return {
+    JournalType.pain: true,
+    JournalType.pressureUlcer: true,
+    JournalType.pressureRelease: true,
+    JournalType.urinaryTractInfection: true,
+    JournalType.bladderEmptying: true,
+    JournalType.leakage: true,
+    JournalType.movement: true,
+  };
+});
+
+enum TimelineDisplayType {
+  events,
+  periods,
+  chart,
+}
 
 TimelineDisplayType timelineDisplayTypeForJournalType(JournalType type) {
   switch (type) {
@@ -103,6 +118,7 @@ class TimelinePage {
 }
 
 final timelineDataProvider = FutureProvider<List<JournalEntry>>((ref) async {
+  Map<JournalType, bool> filters = ref.watch(timelineFiltersProvider);
   int yearsToFetch = ref.watch(timelineYearsProvider);
   List<JournalEntry> journal = [];
   for (int i = yearsToFetch - 1; i >= 0; i--) {
@@ -114,7 +130,7 @@ final timelineDataProvider = FutureProvider<List<JournalEntry>>((ref) async {
     journal.addAll(entries);
   }
 
-  return journal;
+  return journal.where((e) => filters[e.type] == true).toList();
 });
 
 final timelinePaginationProvider = StateProvider<Pagination>((ref) {
@@ -171,10 +187,7 @@ final timelinePainChartProvider =
   DateTime to = page.pagination.to;
   List<JournalEntry> journal = await ref.watch(timelineDataProvider.future);
 
-  List<PainLevelEntry> entries = journal
-      .whereType<PainLevelEntry>()
-      // .where((e) => e.bodyPart.type == BodyPartType.neck)
-      .toList();
+  List<PainLevelEntry> entries = journal.whereType<PainLevelEntry>().toList();
 
   List<PainLevelEntry> entriesToShow = entries
       .where((e) => e.time.isBefore(to) && e.time.isAfter(from))
@@ -245,7 +258,7 @@ final timelineTypesProvider =
       .toList();
   types
       .sort((a, b) => timelineSortForType(a).compareTo(timelineSortForType(b)));
-  return types;
+  return [...types, JournalType.movement];
 });
 
 final timelinePeriodsProvider =
@@ -262,13 +275,18 @@ final timelinePeriodsProvider =
       .toList();
 
   List<Period> periods = [];
+  DateTime today = DateTime(
+    DateTime.now().year,
+    DateTime.now().month,
+    DateTime.now().day,
+  );
 
   if (entries.length == 1) {
     return [
       Period(
         start: entries.first.time,
-        end: DateTime.now(),
-        color: periodColorForEntry(journal.first),
+        end: today,
+        color: periodColorForEntry(entries.first),
       ),
     ];
   }
@@ -282,8 +300,16 @@ final timelinePeriodsProvider =
 
     // add entry and set start time as end time of previous entry
     periods.add(Period(
-      start: previousEntry.time,
-      end: entry.time,
+      start: DateTime(
+        previousEntry.time.year,
+        previousEntry.time.month,
+        previousEntry.time.day,
+      ),
+      end: DateTime(
+        entry.time.year,
+        entry.time.month,
+        entry.time.day,
+      ),
       color: periodColorForEntry(previousEntry),
     ));
   }
@@ -294,8 +320,12 @@ final timelinePeriodsProvider =
       lastEntry is UTIEntry && lastEntry.utiType != UTIType.none)) {
     periods.add(
       Period(
-        start: lastEntry.time,
-        end: DateTime.now(),
+        start: DateTime(
+          lastEntry.time.year,
+          lastEntry.time.month,
+          lastEntry.time.day,
+        ),
+        end: today,
         color: periodColorForEntry(lastEntry),
       ),
     );

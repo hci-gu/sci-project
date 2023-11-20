@@ -26,10 +26,6 @@ class TimelinePainChart extends ConsumerWidget {
         );
   }
 
-  String _displayDate(DateTime date) {
-    return date.toIso8601String().substring(0, 10);
-  }
-
   Widget _body(BuildContext context, List<PainLevelEntry> entries) {
     if (entries.isEmpty) {
       return SizedBox(height: chartEventHeight);
@@ -85,9 +81,6 @@ class TimelinePainChart extends ConsumerWidget {
                 end: lastDataDay.isBefore(page.pagination.to)
                     ? page.pagination.to
                     : lastDataDay,
-                monthStart: page.pagination.from,
-                monthEnd: DateTime(page.pagination.to.year,
-                    page.pagination.to.month, 0, 23, 59),
                 entries: entries,
               ),
             ),
@@ -101,16 +94,12 @@ class TimelinePainChart extends ConsumerWidget {
 class TimelineChart extends ConsumerWidget {
   final DateTime start;
   final DateTime end;
-  final DateTime monthStart;
-  final DateTime monthEnd;
   final List<PainLevelEntry> entries;
 
   const TimelineChart({
     super.key,
     required this.start,
     required this.end,
-    required this.monthStart,
-    required this.monthEnd,
     this.entries = const [],
   });
 
@@ -120,19 +109,11 @@ class TimelineChart extends ConsumerWidget {
     double minX = start.millisecondsSinceEpoch.toDouble();
     double maxX = end.millisecondsSinceEpoch.toDouble();
 
-    double monthX = monthStart.millisecondsSinceEpoch.toDouble();
-    double monthWidth = monthEnd.millisecondsSinceEpoch.toDouble();
-
     return LineChart(
       LineChartData(
         borderData: FlBorderData(show: false),
-        gridData: FlGridData(
-          show: false,
-          drawVerticalLine: true,
-          drawHorizontalLine: false,
-          verticalInterval: const Duration(days: 1).inMilliseconds.toDouble(),
-        ),
-        titlesData: FlTitlesData(show: false),
+        gridData: const FlGridData(show: false),
+        titlesData: const FlTitlesData(show: false),
         // rangeAnnotations: RangeAnnotations(
         //   verticalRangeAnnotations: [
         //     VerticalRangeAnnotation(
@@ -163,16 +144,6 @@ class TimelineChart extends ConsumerWidget {
               AppTheme.colors.bodyPartToColor(bodyPart),
             ),
           ),
-          // line(
-          //   entries
-          //       .where((e) => e.comment.isNotEmpty)
-          //       .map((e) => FlSpot(
-          //             e.time.millisecondsSinceEpoch.toDouble(),
-          //             e.painLevel.toDouble() + 1,
-          //           ))
-          //       .toList(),
-          //   Colors.black,
-          // ),
         ],
         lineTouchData: LineTouchData(
           touchCallback: (FlTouchEvent _, LineTouchResponse? touchResponse) {
@@ -253,17 +224,7 @@ class TimelineChart extends ConsumerWidget {
       isCurved: false,
       curveSmoothness: 0.1,
       color: color,
-      dotData: FlDotData(
-        show: true,
-        // getDotPainter: (spot, x, data, p3) {
-        //   return FlDotCirclePainter(
-        //     radius: 0,
-        //     color: color,
-        //     // strokeWidth: 1,
-        //     // strokeColor: Colors.black,
-        //   );
-        // },
-      ),
+      dotData: const FlDotData(show: true),
       belowBarData: BarAreaData(show: false),
     );
   }

@@ -32,6 +32,9 @@ class AppColors {
         return moving;
       case Activity.active:
       case Activity.weights:
+      case Activity.skiErgo:
+      case Activity.rollOutside:
+      case Activity.armErgo:
         return active;
       case Activity.sedentary:
         return sedentary;
@@ -53,6 +56,8 @@ class AppColors {
         return right ? HexColor('#beb9db') : HexColor('#fdcce5');
       case BodyPartType.neck:
         return HexColor('#8bd3c7');
+      case BodyPartType.back:
+        return HexColor('#f9b5c4');
       default:
         return Colors.black;
     }

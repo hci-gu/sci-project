@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:infinite_listview/infinite_listview.dart';
+
 import 'package:scimovement/api/classes/journal/journal.dart';
 import 'package:scimovement/models/journal/timeline.dart';
 import 'package:scimovement/models/pagination.dart';
-import 'package:scimovement/screens/journal/widgets/timeline/chart.dart';
+import 'package:scimovement/screens/journal/widgets/timeline/movement_chart.dart';
+import 'package:scimovement/screens/journal/widgets/timeline/pain_chart.dart';
 import 'package:scimovement/screens/journal/widgets/timeline/month_header.dart';
 import 'package:scimovement/screens/journal/widgets/timeline/sidebar.dart';
 import 'package:scimovement/screens/journal/widgets/timeline/utils.dart';
@@ -21,7 +23,7 @@ class TimelineEvents extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return ref.watch(timelineEventsProvider(page)).when(
-          data: (data) => _body(data),
+          data: (data) => _body(context, ref, data),
           error: (_, __) => Container(),
           loading: () => const Center(
             child: CircularProgressIndicator(),
@@ -29,7 +31,10 @@ class TimelineEvents extends ConsumerWidget {
         );
   }
 
-  Widget _body(List<JournalEntry> events) {
+  Widget _body(BuildContext context, WidgetRef ref, List<JournalEntry> events) {
+    double width = pageWidth(context);
+    double dayWidth = width / page.pagination.duration.inDays;
+
     return SizedBox(
       height: eventHeight,
       child: Row(
@@ -45,20 +50,40 @@ class TimelineEvents extends ConsumerWidget {
                         page.pagination.from.add(Duration(days: index + 1))))
                 .toList();
 
-            return entries.isNotEmpty ? _dot() : const SizedBox.shrink();
+            return entries.isNotEmpty
+                ? _dot(dayWidth, entries, ref)
+                : SizedBox(width: dayWidth);
           },
         ),
       ),
     );
   }
 
-  Widget _dot() {
-    return Container(
-      width: 8,
-      height: 8,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(4),
-        color: AppTheme.colors.primary,
+  Widget _dot(double width, List<JournalEntry> entries, WidgetRef ref) {
+    return SizedBox(
+      width: width,
+      height: eventHeight,
+      child: GestureDetector(
+        onTap: () {
+          ref.read(timelineTouchedDateProvider.notifier).state =
+              entries.first.time;
+        },
+        // onTap: () {
+        //   ref.read(timelineTouchedDateProvider.notifier).state =
+        //       entries.first.time;
+        //   print(entries.first.time);
+        // },
+        behavior: HitTestBehavior.opaque,
+        child: Center(
+          child: Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(4),
+              color: AppTheme.colors.primary,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -101,7 +126,7 @@ class TimelinePeriods extends ConsumerWidget {
       top: eventHeight / 2 - 4,
       left: offset * dayLength,
       child: Container(
-        width: math.max(period.duration.inDays * dayLength, 8),
+        width: math.max(period.duration.inDays * dayLength, 0),
         height: 8,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.only(
@@ -138,7 +163,6 @@ class Month extends HookConsumerWidget {
     }, [fetch]);
 
     return ClipRRect(
-      clipBehavior: Clip.none,
       child: SizedBox(
         width: pageWidth(context),
         child: Column(
@@ -179,18 +203,24 @@ class Month extends HookConsumerWidget {
 
   Widget _list(List<JournalType> data) {
     return Column(
-      children: data
-          .map(
-            (e) => Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: _contentForType(e),
-            ),
-          )
-          .toList(),
+      children: [
+        ...data
+            .map(
+              (e) => Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: _contentForType(e),
+              ),
+            )
+            .toList(),
+      ],
     );
   }
 
   Widget _contentForType(JournalType type) {
+    if (type == JournalType.movement) {
+      return TimelineMovementChart(page: page);
+    }
+
     switch (timelineDisplayTypeForJournalType(type)) {
       case TimelineDisplayType.chart:
         return TimelinePainChart(
@@ -269,6 +299,7 @@ class JournalTimelineWithEvents extends HookConsumerWidget {
         SizedBox(
           height: 600,
           child: Stack(
+            clipBehavior: Clip.none,
             children: [
               // ListView(
               //   scrollDirection: Axis.horizontal,
@@ -283,12 +314,12 @@ class JournalTimelineWithEvents extends HookConsumerWidget {
               //     //     page: Pagination(mode: ChartMode.month, page: 3),
               //     //   ),
               //     // ),
-              //     // Opacity(
-              //     //   opacity: 0.5,
-              //     //   child: Month(
-              //     //     page: Pagination(mode: ChartMode.month, page: 2),
-              //     //   ),
-              //     // ),
+              //     Opacity(
+              //       opacity: 0.5,
+              //       child: Month(
+              //         page: Pagination(mode: ChartMode.month, page: 1),
+              //       ),
+              //     ),
               //     Month(
               //       page: Pagination(mode: ChartMode.month, page: 0),
               //     ),
