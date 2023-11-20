@@ -31,11 +31,13 @@ extension ChartModeDisplayName on ChartMode {
 class Pagination {
   final int page;
   final ChartMode mode;
+  final DateTime? overrideDate;
   final Duration? overrideDuration;
 
   const Pagination({
     this.page = 0,
     this.mode = ChartMode.day,
+    this.overrideDate,
     this.overrideDuration,
   });
 
@@ -43,34 +45,52 @@ class Pagination {
     if (overrideDuration != null) {
       return overrideDuration!;
     }
+
+    return to.difference(from);
+  }
+
+  DateTime get from {
+    DateTime d = overrideDate ?? DateTime.now();
+
     switch (mode) {
       case ChartMode.day:
-        return const Duration(days: 1);
+        return DateTime(d.year, d.month, d.day - page);
       case ChartMode.week:
-        return const Duration(days: 6);
+        return DateTime(d.year, d.month, d.day - 7 * page);
       case ChartMode.month:
-        return const Duration(days: 30);
+        return DateTime(d.year, d.month - page);
       case ChartMode.quarter:
-        return const Duration(days: 90);
+        return DateTime(d.year, d.month - 3 * page);
       case ChartMode.year:
-        return const Duration(days: 365);
+        return DateTime(d.year - page);
+      default:
+        return DateTime(d.year, d.month, d.day - page);
     }
   }
 
-  DateTime from(DateTime date) {
-    DateTime d =
-        date.subtract(duration * (page + (mode == ChartMode.day ? 0 : 1)));
-    return DateTime(d.year, d.month, d.day);
-  }
-
-  DateTime to(DateTime date) {
-    DateTime d = date.subtract(duration * page);
-    return DateTime(d.year, d.month, d.day, 23, 59, 59);
+  DateTime get to {
+    switch (mode) {
+      case ChartMode.day:
+        return DateTime(from.year, from.month, from.day, 23, 59, 59);
+      case ChartMode.week:
+        return DateTime(from.year, from.month, from.day + 6, 23, 59, 59);
+      case ChartMode.month:
+        return DateTime(from.year, from.month + 1, 1);
+      case ChartMode.quarter:
+        return DateTime(from.year, from.month + 3, 0, 23, 59, 59);
+      case ChartMode.year:
+        return DateTime(from.year + 1, 1, 0, 23, 59, 59);
+      default:
+        return DateTime(from.year, from.month, from.day, 23, 59, 59);
+    }
   }
 
   @override
   bool operator ==(other) =>
-      other is Pagination && page == other.page && mode == other.mode;
+      other is Pagination &&
+      page == other.page &&
+      mode == other.mode &&
+      overrideDate == other.overrideDate;
   @override
   int get hashCode => page.hashCode + mode.hashCode;
 }

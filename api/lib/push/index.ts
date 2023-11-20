@@ -40,8 +40,5 @@ export const send = ({
     body.action = action
   }
 
-  return push
-    .send([deviceId], body)
-    .then((res) => console.info(JSON.stringify(res, null, 2)))
-    .catch(console.error)
+  return push.send([deviceId], body).catch(console.error)
 }

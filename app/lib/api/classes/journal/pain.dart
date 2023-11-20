@@ -65,4 +65,7 @@ class PainLevelEntry extends JournalEntry {
   String get identifier {
     return bodyPart.toString();
   }
+
+  @override
+  String get timelineIdentifier => 'pain';
 }

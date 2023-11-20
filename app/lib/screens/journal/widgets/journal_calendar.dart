@@ -116,8 +116,11 @@ class JournalCalendarMonth extends ConsumerWidget {
   final DateTime date;
   final int page;
 
-  const JournalCalendarMonth(
-      {super.key, required this.date, required this.page});
+  const JournalCalendarMonth({
+    super.key,
+    required this.date,
+    required this.page,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -220,7 +223,7 @@ class JournalCalendar extends StatelessWidget {
         itemBuilder: (_, index) {
           return JournalCalendarMonth(
             date: DateTime(date.year, date.month + index, date.day),
-            page: -index - 1,
+            page: -index,
           );
         },
       ),
