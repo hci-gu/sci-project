@@ -14,7 +14,8 @@ enum JournalType {
   urinaryTractInfection,
   bladderEmptying,
   leakage,
-  exercise
+  exercise,
+  movement,
 }
 
 extension JournalTypeDisplayAsString on JournalType {
@@ -34,6 +35,8 @@ extension JournalTypeDisplayAsString on JournalType {
         return AppLocalizations.of(context)!.leakage;
       case JournalType.exercise:
         return AppLocalizations.of(context)!.exercise;
+      case JournalType.movement:
+        return AppLocalizations.of(context)!.movement;
       default:
         return toString();
     }
