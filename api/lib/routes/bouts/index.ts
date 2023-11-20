@@ -1,7 +1,7 @@
 import express from 'express'
 import { ValidatedRequest } from 'express-joi-validation'
 import { getQuery, GetQuerySchema } from '../validation'
-import { boutsForPeriod, removeBout, saveBout } from './utils'
+import { boutsForPeriod, fillMockData, removeBout, saveBout } from './utils'
 import { boutBody, BoutBodySchema } from './validation'
 
 const router = express.Router()
@@ -51,6 +51,18 @@ router.delete('/:userId/:id', async (req, res) => {
     res.sendStatus(200)
   } catch (e) {
     console.log('DELETE /bouts/:userId/:id', e)
+    res.sendStatus(500)
+  }
+})
+
+router.get('/:userId/mock', async (req, res) => {
+  const { userId } = req.params
+
+  try {
+    await fillMockData(userId)
+    res.send({ ok: true })
+  } catch (e) {
+    console.log('GET /bouts/:userId/mock', e)
     res.sendStatus(500)
   }
 })
