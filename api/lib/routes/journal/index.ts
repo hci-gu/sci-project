@@ -89,13 +89,13 @@ router.get(
   }
 )
 
-// router.get('/:id/mock', async (req, res) => {
-//   await fillMockData(req.params.id)
+router.get('/:id/mock', async (req, res) => {
+  await fillMockData(req.params.id)
 
-//   res.json({
-//     message: 'ok',
-//   })
-// })
+  res.json({
+    message: 'ok',
+  })
+})
 
 router.get(
   '/:id/:type',
