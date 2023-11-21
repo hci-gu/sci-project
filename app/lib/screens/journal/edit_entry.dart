@@ -47,8 +47,10 @@ class EditJournalEntryScreen extends ConsumerWidget {
 
     return fb.group({
       ...defaultFields,
-      if (entry is PainLevelEntry || type == JournalType.pain)
-        ...PainLevelForm.buildForm(entry as PainLevelEntry?),
+      if (entry is PainLevelEntry ||
+          type == JournalType.musclePain ||
+          type == JournalType.neuropathicPain)
+        ...PainLevelForm.buildForm(entry as PainLevelEntry?, type),
       if (entry is PressureReleaseEntry || type == JournalType.pressureRelease)
         ...PressureReleaseForm.buildForm(
             entry as PressureReleaseEntry?, shouldCreateEntry),
@@ -124,8 +126,11 @@ class EditJournalEntryScreen extends ConsumerWidget {
   }
 
   Widget _typeSpecificForm(FormGroup form) {
-    if (entry is PainLevelEntry || type == JournalType.pain) {
-      return PainLevelForm(form: form, entry: entry as PainLevelEntry?);
+    if (entry is PainLevelEntry ||
+        type == JournalType.musclePain ||
+        type == JournalType.neuropathicPain) {
+      return PainLevelForm(
+          form: form, type: type, entry: entry as PainLevelEntry?);
     }
     if (entry is PressureReleaseEntry || type == JournalType.pressureRelease) {
       return PressureReleaseForm(

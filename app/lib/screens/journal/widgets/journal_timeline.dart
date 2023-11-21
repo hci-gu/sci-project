@@ -153,7 +153,7 @@ class Month extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     double sectionWidth = pageWidth(context) / 4;
-    ValueNotifier<List<JournalType>> cachedResponse = useState([]);
+    ValueNotifier<List<TimelineType>> cachedResponse = useState([]);
     final fetch = ref.watch(timelineTypesProvider(page));
 
     useEffect(() {
@@ -201,7 +201,7 @@ class Month extends HookConsumerWidget {
     );
   }
 
-  Widget _list(List<JournalType> data) {
+  Widget _list(List<TimelineType> data) {
     return Column(
       children: [
         ...data
@@ -216,12 +216,12 @@ class Month extends HookConsumerWidget {
     );
   }
 
-  Widget _contentForType(JournalType type) {
-    if (type == JournalType.movement) {
+  Widget _contentForType(TimelineType type) {
+    if (type == TimelineType.movement) {
       return TimelineMovementChart(page: page);
     }
 
-    switch (timelineDisplayTypeForJournalType(type)) {
+    switch (timelineDisplayType(type)) {
       case TimelineDisplayType.chart:
         return TimelinePainChart(
           page: TimelinePage(

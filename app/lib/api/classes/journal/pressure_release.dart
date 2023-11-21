@@ -132,4 +132,7 @@ class PressureReleaseEntry extends JournalEntry {
   String get identifier {
     return 'pressureRelease';
   }
+
+  @override
+  TimelineType get timelineType => TimelineType.pressureRelease;
 }

@@ -1,6 +1,12 @@
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/api/classes/journal/journal.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+enum PainType {
+  muscleAndJoints,
+  neuropathic,
+}
 
 class PainLevelEntry extends JournalEntry {
   final int painLevel;
@@ -17,13 +23,14 @@ class PainLevelEntry extends JournalEntry {
 
   factory PainLevelEntry.fromJson(Map<String, dynamic> json) {
     Map<String, dynamic> info = json['info'];
+
     return PainLevelEntry(
       id: json['id'],
       time: DateTime.parse(json['t']),
       type: journalTypeFromString(json['type']),
       comment: json['comment'],
       painLevel: info['painLevel'],
-      bodyPart: BodyPart.fromString(info['bodyPart']),
+      bodyPart: BodyPart.fromString(info['bodyPart'] ?? ''),
     );
   }
 
@@ -47,25 +54,36 @@ class PainLevelEntry extends JournalEntry {
       comment: values['comment'] as String,
       painLevel: values['painLevel'] as int,
       bodyPart: BodyPart(
-          values['bodyPartType'] as BodyPartType, values['side'] as Side?),
+        values['bodyPartType'] as BodyPartType,
+        values['side'] as Side?,
+      ),
     );
   }
 
   @override
   String title(BuildContext context) {
+    if (type == JournalType.neuropathicPain) {
+      return '${painLevel.toString()} - ${AppLocalizations.of(context)!.neuropathicPain}';
+    }
     return '${painLevel.toString()} - ${bodyPart.displayString(context)}';
   }
 
   @override
   String shortcutTitle(BuildContext context) {
+    if (type == JournalType.neuropathicPain) {
+      return AppLocalizations.of(context)!.neuropathicPain;
+    }
     return bodyPart.displayString(context);
   }
 
   @override
   String get identifier {
+    if (type == JournalType.neuropathicPain) {
+      return 'neuropathic';
+    }
     return bodyPart.toString();
   }
 
   @override
-  String get timelineIdentifier => 'pain';
+  TimelineType get timelineType => TimelineType.pain;
 }

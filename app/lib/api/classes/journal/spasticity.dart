@@ -1,30 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/api/classes/journal/journal.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class ExerciseEntry extends JournalEntry {
-  final Activity activity;
-  final int minutes;
+class SpasticityEntry extends JournalEntry {
+  final int level;
 
-  ExerciseEntry({
+  SpasticityEntry({
     required super.id,
     required super.time,
     required super.type,
     required super.comment,
-    required this.activity,
-    required this.minutes,
+    required this.level,
   });
 
-  factory ExerciseEntry.fromJson(Map<String, dynamic> json) {
+  factory SpasticityEntry.fromJson(Map<String, dynamic> json) {
     Map<String, dynamic> info = json['info'];
-    return ExerciseEntry(
+    return SpasticityEntry(
       id: json['id'],
       time: DateTime.parse(json['t']),
       type: journalTypeFromString(json['type']),
       comment: json['comment'],
-      activity: activityFromString(info['activity']),
-      minutes: info['minutes'],
+      level: info['minutes'],
     );
   }
 
@@ -33,21 +29,19 @@ class ExerciseEntry extends JournalEntry {
     return {
       ...super.toJson(),
       'info': {
-        'activity': activity.name,
-        'minutes': minutes,
+        'level': level,
       }
     };
   }
 
   @override
   JournalEntry fromFormUpdate(Map<String, dynamic> values) {
-    return ExerciseEntry(
+    return SpasticityEntry(
       id: id,
       type: type,
       time: values['time'] as DateTime,
       comment: values['comment'] as String,
-      activity: values['activity'] as Activity,
-      minutes: values['minutes'] as int,
+      level: values['level'] as int,
     );
   }
 
@@ -60,7 +54,4 @@ class ExerciseEntry extends JournalEntry {
   String shortcutTitle(BuildContext context) {
     return title(context);
   }
-
-  @override
-  TimelineType get timelineType => TimelineType.exercise;
 }

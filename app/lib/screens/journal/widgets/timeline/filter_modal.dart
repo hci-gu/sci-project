@@ -17,7 +17,7 @@ class TimelineFilters extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    Map<JournalType, bool> filters = ref.watch(timelineFiltersProvider);
+    Map<TimelineType, bool> filters = ref.watch(timelineFiltersProvider);
 
     return Center(
       child: Padding(

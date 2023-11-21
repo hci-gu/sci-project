@@ -8,6 +8,17 @@ export 'package:scimovement/api/classes/journal/pressure_release.dart';
 export 'package:scimovement/api/classes/journal/bladder_emptying.dart';
 
 enum JournalType {
+  musclePain,
+  neuropathicPain,
+  pressureRelease,
+  pressureUlcer,
+  urinaryTractInfection,
+  bladderEmptying,
+  leakage,
+  exercise,
+}
+
+enum TimelineType {
   pain,
   pressureRelease,
   pressureUlcer,
@@ -21,8 +32,10 @@ enum JournalType {
 extension JournalTypeDisplayAsString on JournalType {
   String displayString(BuildContext context) {
     switch (this) {
-      case JournalType.pain:
-        return AppLocalizations.of(context)!.pain;
+      case JournalType.musclePain:
+        return AppLocalizations.of(context)!.musclePainTitle;
+      case JournalType.neuropathicPain:
+        return AppLocalizations.of(context)!.neuropathicPain;
       case JournalType.pressureRelease:
         return AppLocalizations.of(context)!.pressureRelease;
       case JournalType.pressureUlcer:
@@ -35,8 +48,6 @@ extension JournalTypeDisplayAsString on JournalType {
         return AppLocalizations.of(context)!.leakage;
       case JournalType.exercise:
         return AppLocalizations.of(context)!.exercise;
-      case JournalType.movement:
-        return AppLocalizations.of(context)!.movement;
       default:
         return toString();
     }
@@ -50,7 +61,10 @@ JournalType journalTypeFromString(String type) {
     case 'pressureRelease':
       return JournalType.pressureRelease;
     case 'pain':
-      return JournalType.pain;
+    case 'musclePain':
+      return JournalType.musclePain;
+    case 'neuropathicPain':
+      return JournalType.neuropathicPain;
     case 'bladderEmptying':
       return JournalType.bladderEmptying;
     case 'urinaryTractInfection':
@@ -60,7 +74,30 @@ JournalType journalTypeFromString(String type) {
     case 'exercise':
       return JournalType.exercise;
     default:
-      return JournalType.pain;
+      return JournalType.musclePain;
+  }
+}
+
+extension TimelineTypeDisplayAsString on TimelineType {
+  String displayString(BuildContext context) {
+    switch (this) {
+      case TimelineType.pain:
+        return AppLocalizations.of(context)!.pain;
+      case TimelineType.pressureRelease:
+        return AppLocalizations.of(context)!.pressureRelease;
+      case TimelineType.pressureUlcer:
+        return AppLocalizations.of(context)!.pressureUlcer;
+      case TimelineType.bladderEmptying:
+        return AppLocalizations.of(context)!.bladderEmptying;
+      case TimelineType.urinaryTractInfection:
+        return AppLocalizations.of(context)!.urinaryTractInfection;
+      case TimelineType.leakage:
+        return AppLocalizations.of(context)!.leakage;
+      case TimelineType.exercise:
+        return AppLocalizations.of(context)!.exercise;
+      default:
+        return toString();
+    }
   }
 }
 
@@ -109,5 +146,5 @@ class JournalEntry {
 
   String get identifier => type.name;
 
-  String get timelineIdentifier => identifier;
+  TimelineType get timelineType => TimelineType.pain;
 }

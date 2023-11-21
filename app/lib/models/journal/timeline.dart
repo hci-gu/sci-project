@@ -25,15 +25,15 @@ final showTimelineProvider = StateProvider<bool>((ref) {
   return false;
 });
 
-final timelineFiltersProvider = StateProvider<Map<JournalType, bool>>((ref) {
+final timelineFiltersProvider = StateProvider<Map<TimelineType, bool>>((ref) {
   return {
-    JournalType.pain: true,
-    JournalType.pressureUlcer: true,
-    JournalType.pressureRelease: true,
-    JournalType.urinaryTractInfection: true,
-    JournalType.bladderEmptying: true,
-    JournalType.leakage: true,
-    JournalType.movement: true,
+    TimelineType.pain: true,
+    TimelineType.pressureUlcer: true,
+    TimelineType.pressureRelease: true,
+    TimelineType.urinaryTractInfection: true,
+    TimelineType.bladderEmptying: true,
+    TimelineType.leakage: true,
+    TimelineType.movement: true,
   };
 });
 
@@ -43,12 +43,12 @@ enum TimelineDisplayType {
   chart,
 }
 
-TimelineDisplayType timelineDisplayTypeForJournalType(JournalType type) {
+TimelineDisplayType timelineDisplayType(TimelineType type) {
   switch (type) {
-    case JournalType.pain:
+    case TimelineType.pain:
       return TimelineDisplayType.chart;
-    case JournalType.pressureUlcer:
-    case JournalType.urinaryTractInfection:
+    case TimelineType.pressureUlcer:
+    case TimelineType.urinaryTractInfection:
       return TimelineDisplayType.periods;
     default:
       return TimelineDisplayType.events;
@@ -65,19 +65,19 @@ Color periodColorForEntry(JournalEntry entry) {
   return color;
 }
 
-int timelineSortForType(JournalType type) {
+int timelineSortForType(TimelineType type) {
   switch (type) {
-    case JournalType.pain:
+    case TimelineType.pain:
       return 0;
-    case JournalType.pressureUlcer:
+    case TimelineType.pressureUlcer:
       return 10;
-    case JournalType.pressureRelease:
+    case TimelineType.pressureRelease:
       return 11;
-    case JournalType.urinaryTractInfection:
+    case TimelineType.urinaryTractInfection:
       return 20;
-    case JournalType.bladderEmptying:
+    case TimelineType.bladderEmptying:
       return 21;
-    case JournalType.leakage:
+    case TimelineType.leakage:
       return 22;
     default:
       return 30;
@@ -102,7 +102,7 @@ class Period {
 
 class TimelinePage {
   final Pagination pagination;
-  final JournalType type;
+  final TimelineType type;
 
   TimelinePage({required this.pagination, required this.type});
 
@@ -118,7 +118,7 @@ class TimelinePage {
 }
 
 final timelineDataProvider = FutureProvider<List<JournalEntry>>((ref) async {
-  Map<JournalType, bool> filters = ref.watch(timelineFiltersProvider);
+  Map<TimelineType, bool> filters = ref.watch(timelineFiltersProvider);
   int yearsToFetch = ref.watch(timelineYearsProvider);
   List<JournalEntry> journal = [];
   for (int i = yearsToFetch - 1; i >= 0; i--) {
@@ -130,7 +130,7 @@ final timelineDataProvider = FutureProvider<List<JournalEntry>>((ref) async {
     journal.addAll(entries);
   }
 
-  return journal.where((e) => filters[e.type] == true).toList();
+  return journal.where((e) => filters[e.timelineType] == true).toList();
 });
 
 final timelinePaginationProvider = StateProvider<Pagination>((ref) {
@@ -174,9 +174,8 @@ final timelineEventsProvider =
 
   return journal
       .where((e) =>
-          timelineDisplayTypeForJournalType(e.type) ==
-          TimelineDisplayType.events)
-      .where((e) => e.type == page.type)
+          timelineDisplayType(e.timelineType) == TimelineDisplayType.events)
+      .where((e) => e.timelineType == page.type)
       .where((e) => e.time.isBefore(to) && e.time.isAfter(from))
       .toList();
 });
@@ -244,21 +243,22 @@ final timelineBodyPartsForVisibleRange =
 });
 
 final timelineTypesProvider =
-    FutureProvider.family<List<JournalType>, Pagination>(
+    FutureProvider.family<List<TimelineType>, Pagination>(
         (ref, pagination) async {
   List<DateTime> visibleRange = ref.watch(timelineVisibleRangeProvider);
   List<JournalEntry> journal = await ref.watch(timelineDataProvider.future);
 
-  List<JournalType> types = journal
+  List<TimelineType> types = journal
       .where((e) =>
           e.time.isAfter(visibleRange.first) &&
           e.time.isBefore(visibleRange.last))
-      .map((e) => e.type)
+      .map((e) => e.timelineType)
       .toSet()
       .toList();
+
   types
       .sort((a, b) => timelineSortForType(a).compareTo(timelineSortForType(b)));
-  return [...types, JournalType.movement];
+  return [...types, TimelineType.movement];
 });
 
 final timelinePeriodsProvider =
@@ -269,9 +269,8 @@ final timelinePeriodsProvider =
 
   List entries = journal
       .where((e) =>
-          timelineDisplayTypeForJournalType(e.type) ==
-          TimelineDisplayType.periods)
-      .where((e) => e.type == page.type)
+          timelineDisplayType(e.timelineType) == TimelineDisplayType.periods)
+      .where((e) => e.timelineType == page.type)
       .toList();
 
   List<Period> periods = [];

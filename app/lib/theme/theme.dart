@@ -58,6 +58,8 @@ class AppColors {
         return HexColor('#8bd3c7');
       case BodyPartType.back:
         return HexColor('#f9b5c4');
+      case BodyPartType.neuropathic:
+        return HexColor('#6b6162');
       default:
         return Colors.black;
     }
@@ -252,10 +254,15 @@ class AppTheme {
   static Widget iconForJournalType(JournalType type,
       [BodyPart? bodyPart, double size = 48]) {
     switch (type) {
-      case JournalType.pain:
+      case JournalType.musclePain:
         return BodyPartIcon(
           bodyPart: bodyPart ?? BodyPart(BodyPartType.scapula, null),
           size: size,
+        );
+      case JournalType.neuropathicPain:
+        return SvgPicture.asset(
+          'assets/svg/neuropathic.svg',
+          height: size,
         );
       case JournalType.pressureRelease:
         return Icon(

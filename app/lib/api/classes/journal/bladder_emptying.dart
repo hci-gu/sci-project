@@ -87,4 +87,7 @@ class BladderEmptyingEntry extends JournalEntry {
   String shortcutTitle(BuildContext context) {
     return title(context);
   }
+
+  @override
+  TimelineType get timelineType => TimelineType.bladderEmptying;
 }

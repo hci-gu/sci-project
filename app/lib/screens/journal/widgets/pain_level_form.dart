@@ -9,11 +9,13 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class PainLevelForm extends StatelessWidget {
   final PainLevelEntry? entry;
+  final JournalType? type;
   final FormGroup form;
 
   const PainLevelForm({
     Key? key,
     this.entry,
+    this.type,
     required this.form,
   }) : super(key: key);
 
@@ -22,7 +24,8 @@ class PainLevelForm extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (entry == null) BodyPartSelect(form: form),
+        if (entry == null && type == JournalType.musclePain)
+          BodyPartSelect(form: form),
         if (entry == null) AppTheme.spacer2x,
         Text(
           AppLocalizations.of(context)!.painLevel,
@@ -43,11 +46,12 @@ class PainLevelForm extends StatelessWidget {
     );
   }
 
-  static buildForm(PainLevelEntry? painLevelEntry) {
+  static buildForm(PainLevelEntry? painLevelEntry, JournalType? type) {
     return {
       'bodyPartType': FormControl<BodyPartType>(
         value: painLevelEntry?.bodyPart.type,
-        validators: [Validators.required],
+        validators:
+            type == JournalType.neuropathicPain ? [] : [Validators.required],
       ),
       'side': FormControl<Side>(
         value: painLevelEntry?.bodyPart.side ?? Side.right,
