@@ -6,7 +6,15 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 enum Gender { male, female }
 
-enum BodyPartType { neck, back, scapula, shoulderJoint, elbow, hand }
+enum BodyPartType {
+  neck,
+  back,
+  scapula,
+  shoulderJoint,
+  elbow,
+  hand,
+  neuropathic
+}
 
 enum Side { left, right }
 
@@ -17,6 +25,10 @@ class BodyPart {
   BodyPart(this.type, this.side);
 
   factory BodyPart.fromString(String bodyPartString) {
+    if (bodyPartString.isEmpty) {
+      return BodyPart(BodyPartType.neuropathic, null);
+    }
+
     final parts = bodyPartString.split('-');
     BodyPartType type =
         bodyPartTypeFromString(parts.first) ?? BodyPartType.neck;
@@ -84,6 +96,8 @@ extension BodyPartTypeDisplayAsString on BodyPartType {
         return AppLocalizations.of(context)!.bodyPartElbow;
       case BodyPartType.hand:
         return AppLocalizations.of(context)!.bodyPartHand;
+      case BodyPartType.neuropathic:
+        return AppLocalizations.of(context)!.neuropathic;
       default:
         return toString();
     }

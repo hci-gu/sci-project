@@ -197,4 +197,7 @@ class PressureUlcerEntry extends JournalEntry {
   String get identifier {
     return 'pressureUlcer ${location.name}';
   }
+
+  @override
+  TimelineType get timelineType => TimelineType.bladderEmptying;
 }

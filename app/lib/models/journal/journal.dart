@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api/api.dart';
 import 'package:scimovement/api/classes/journal/journal.dart';
@@ -6,34 +5,6 @@ import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/models/journal/journal-form.dart';
 
 export 'package:scimovement/models/journal/journal-form.dart';
-
-class JournalEvents {
-  final JournalType type;
-  final String identifier;
-  final List<JournalEntry> entries;
-
-  JournalEvents({
-    required this.type,
-    required this.identifier,
-    required this.entries,
-  }) {
-    entries.sort((a, b) => a.time.compareTo(b.time));
-  }
-
-  String title(BuildContext context) {
-    switch (type) {
-      case JournalType.urinaryTractInfection:
-        return type.displayString(context);
-      case JournalType.pain:
-        return 'Pain';
-      default:
-    }
-    if (entries.isNotEmpty) {
-      return entries.first.shortcutTitle(context);
-    }
-    return type.displayString(context);
-  }
-}
 
 final journalProvider = FutureProvider.family<List<JournalEntry>, Pagination>(
     (ref, pagination) async {

@@ -152,6 +152,8 @@
     "journalShortcutDescription": "Tryck på en knapp nedan för att skapa nytt inlägg inom samma kategori.",
     "@_PAIN": {},
     "pain": "Smärta",
+    "neuropathic": "Neuropatisk",
+    "neuropathicPain": "Neuropatisk smärta",
     "musclePainTitle": "Smärta i muskler & leder",
     "musclePainSubtitle": "Från muskler och leder",
     "trackPain": "Spåra smärta",

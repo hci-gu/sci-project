@@ -11,7 +11,7 @@ import 'package:scimovement/screens/journal/widgets/timeline/utils.dart';
 import 'package:scimovement/theme/theme.dart';
 
 class EventHandleItem extends ConsumerWidget {
-  final JournalType type;
+  final TimelineType type;
 
   const EventHandleItem(this.type, {super.key});
 
@@ -21,7 +21,7 @@ class EventHandleItem extends ConsumerWidget {
       padding: const EdgeInsets.only(top: 8.0),
       child: Container(
         width: 160,
-        height: heightForType(timelineDisplayTypeForJournalType(type)),
+        height: heightForType(timelineDisplayType(type)),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(4),
           color: Colors.white,
@@ -57,7 +57,7 @@ class EventHandleItem extends ConsumerWidget {
                 _contentForType(context, ref),
               ],
             ),
-            if (type == JournalType.pain)
+            if (type == TimelineType.pain)
               Padding(
                 padding: EdgeInsets.only(
                   bottom: AppTheme.basePadding,
@@ -89,7 +89,7 @@ class EventHandleItem extends ConsumerWidget {
 
   Widget _contentForType(BuildContext context, WidgetRef ref) {
     switch (type) {
-      case JournalType.pain:
+      case TimelineType.pain:
         return const EventHandleBodyParts();
       default:
     }
@@ -172,7 +172,7 @@ class TimelineSidebar extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     Pagination page = ref.watch(timelinePaginationProvider);
-    ValueNotifier<List<JournalType>> cachedResponse = useState([]);
+    ValueNotifier<List<TimelineType>> cachedResponse = useState([]);
 
     final fetch = ref.watch(timelineTypesProvider(page));
 

@@ -21,11 +21,11 @@ double heightForType(TimelineDisplayType type) {
   return eventHeight;
 }
 
-double offsetForEvents(List<JournalType> types, int index) {
+double offsetForEvents(List<TimelineType> types, int index) {
   double offset = 48 + 8;
 
   for (int i = 0; i < index; i++) {
-    offset += heightForType(timelineDisplayTypeForJournalType(types[i]));
+    offset += heightForType(timelineDisplayType(types[i]));
     offset += 8;
   }
 

@@ -156,7 +156,8 @@ class Api {
         return data.map((json) {
           JournalType type = journalTypeFromString(json['type']);
           switch (type) {
-            case JournalType.pain:
+            case JournalType.musclePain:
+            case JournalType.neuropathicPain:
               return PainLevelEntry.fromJson(json);
             case JournalType.pressureRelease:
               return PressureReleaseEntry.fromJson(json);
@@ -192,7 +193,8 @@ class Api {
         return data.map((json) {
           JournalType type = journalTypeFromString(json['type']);
           switch (type) {
-            case JournalType.pain:
+            case JournalType.musclePain:
+            case JournalType.neuropathicPain:
               return PainLevelEntry.fromJson(json);
             case JournalType.pressureRelease:
               return PressureReleaseEntry.fromJson(json);

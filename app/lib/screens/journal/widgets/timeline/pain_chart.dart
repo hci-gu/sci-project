@@ -142,6 +142,7 @@ class TimelineChart extends ConsumerWidget {
                   )
                   .toList(),
               AppTheme.colors.bodyPartToColor(bodyPart),
+              bodyPart.type == BodyPartType.neuropathic,
             ),
           ),
         ],
@@ -182,7 +183,8 @@ class TimelineChart extends ConsumerWidget {
     return entriesForSpot.map((e) {
       HSLColor color =
           HSLColor.fromColor(AppTheme.colors.bodyPartToColor(e.bodyPart));
-      Color textColor = color.withLightness(color.lightness - 0.45).toColor();
+      Color textColor =
+          color.withLightness(max(0, color.lightness - 0.45)).toColor();
       Color bgColor = color.withLightness(0.9).toColor();
       return LineTooltipItem(
         '',
@@ -216,16 +218,18 @@ class TimelineChart extends ConsumerWidget {
     return date.difference(start).inDays.toDouble();
   }
 
-  LineChartBarData line(List<FlSpot> spots, Color color) {
+  LineChartBarData line(List<FlSpot> spots, Color color,
+      [bool isStepLine = false]) {
     return LineChartBarData(
       spots: spots,
       preventCurveOverShooting: false,
       barWidth: 2,
       isCurved: false,
-      curveSmoothness: 0.1,
       color: color,
       dotData: const FlDotData(show: true),
       belowBarData: BarAreaData(show: false),
+      isStepLineChart: isStepLine,
+      lineChartStepData: const LineChartStepData(stepDirection: 0),
     );
   }
 }

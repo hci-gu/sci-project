@@ -152,6 +152,8 @@
     "journalShortcutDescription": "Press a button below to create a new post within the same category.",
     "@_PAIN": {},
     "pain": "Pain",
+    "neuropathic": "Neuropathic",
+    "neuropathicPain": "Neuropathic pain",
     "musclePainTitle": "Pain in muscles and joints",
     "musclePainSubtitle": "From muscle and joints",
     "trackPain": "Track pain",
