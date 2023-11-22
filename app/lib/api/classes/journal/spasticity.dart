@@ -20,7 +20,7 @@ class SpasticityEntry extends JournalEntry {
       time: DateTime.parse(json['t']),
       type: journalTypeFromString(json['type']),
       comment: json['comment'],
-      level: info['minutes'],
+      level: info['level'],
     );
   }
 
@@ -47,11 +47,14 @@ class SpasticityEntry extends JournalEntry {
 
   @override
   String title(BuildContext context) {
-    return AppLocalizations.of(context)!.exercise;
+    return '$level - ${AppLocalizations.of(context)!.spasticity}';
   }
 
   @override
   String shortcutTitle(BuildContext context) {
-    return title(context);
+    return AppLocalizations.of(context)!.spasticity;
   }
+
+  @override
+  TimelineType get timelineType => TimelineType.pain;
 }

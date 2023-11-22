@@ -16,6 +16,7 @@ enum JournalType {
   bladderEmptying,
   leakage,
   exercise,
+  spasticity,
 }
 
 enum TimelineType {
@@ -26,6 +27,7 @@ enum TimelineType {
   bladderEmptying,
   leakage,
   exercise,
+  spasticity,
   movement,
 }
 
@@ -48,6 +50,8 @@ extension JournalTypeDisplayAsString on JournalType {
         return AppLocalizations.of(context)!.leakage;
       case JournalType.exercise:
         return AppLocalizations.of(context)!.exercise;
+      case JournalType.spasticity:
+        return AppLocalizations.of(context)!.spasticity;
       default:
         return toString();
     }
@@ -73,6 +77,8 @@ JournalType journalTypeFromString(String type) {
       return JournalType.leakage;
     case 'exercise':
       return JournalType.exercise;
+    case 'spasticity':
+      return JournalType.spasticity;
     default:
       return JournalType.musclePain;
   }
@@ -95,6 +101,10 @@ extension TimelineTypeDisplayAsString on TimelineType {
         return AppLocalizations.of(context)!.leakage;
       case TimelineType.exercise:
         return AppLocalizations.of(context)!.exercise;
+      case TimelineType.spasticity:
+        return AppLocalizations.of(context)!.spasticity;
+      case TimelineType.movement:
+        return AppLocalizations.of(context)!.movement;
       default:
         return toString();
     }

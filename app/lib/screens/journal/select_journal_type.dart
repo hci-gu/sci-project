@@ -51,6 +51,12 @@ class SelectJournalTypeScreen extends ConsumerWidget {
                       AppTheme.iconForJournalType(JournalType.neuropathicPain),
                   title: AppLocalizations.of(context)!.neuropathicPain,
                 ),
+              if (ref.watch(appFeaturesProvider).contains(AppFeature.pain))
+                JournalEntryShortcut(
+                  onTap: () => _navigate(context, JournalType.spasticity),
+                  icon: AppTheme.iconForJournalType(JournalType.spasticity),
+                  title: AppLocalizations.of(context)!.spasticity,
+                ),
               if (ref
                   .watch(appFeaturesProvider)
                   .contains(AppFeature.pressureRelease))

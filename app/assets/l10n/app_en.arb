@@ -260,5 +260,9 @@
     "sitBones": "Sit bones",
     "sacrum": "Sacrum",
     "scapula": "Scapula",
-    "shoulder": "Shoulder"
+    "shoulder": "Shoulder",
+    "@_SPASTICITY": {},
+    "spasticity": "Spasticity",
+    "spasticityLevel": "Spasticity level",
+    "spasticityLevelDescription": "Choose a number between 1-10"
 }

@@ -264,6 +264,11 @@ class AppTheme {
           'assets/svg/neuropathic.svg',
           height: size,
         );
+      case JournalType.spasticity:
+        return SvgPicture.asset(
+          'assets/svg/spasticity.svg',
+          height: size,
+        );
       case JournalType.pressureRelease:
         return Icon(
           Icons.alarm,

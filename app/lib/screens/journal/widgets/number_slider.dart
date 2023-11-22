@@ -3,11 +3,11 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import 'package:scimovement/widgets/button.dart';
 
-class PainSlider extends StatelessWidget {
+class NumberSlider extends StatelessWidget {
   final GlobalKey _key = GlobalKey();
   final String formKey;
 
-  PainSlider({
+  NumberSlider({
     Key? key,
     required this.formKey,
   }) : super(key: key);

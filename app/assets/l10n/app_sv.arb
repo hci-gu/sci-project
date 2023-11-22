@@ -260,5 +260,9 @@
     "sitBones": "Sittben",
     "sacrum": "Sakrum",
     "scapula": "Skulderblad",
-    "shoulder": "Axel"
+    "shoulder": "Axel",
+    "@_SPASTICITY": {},
+    "spasticity": "Spasticitet",
+    "spasticityLevel": "Spasticitetsnivå",
+    "spasticityLevelDescription": "Välj en nivå mellan 1-10"
 }

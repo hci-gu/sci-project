@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/api/classes/journal/journal.dart';
 import 'package:scimovement/models/journal/timeline.dart';
+import 'package:scimovement/models/journal/timeline_chart.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/screens/journal/widgets/body_part_icon.dart';
 import 'package:scimovement/screens/journal/widgets/timeline/utils.dart';
@@ -90,20 +91,20 @@ class EventHandleItem extends ConsumerWidget {
   Widget _contentForType(BuildContext context, WidgetRef ref) {
     switch (type) {
       case TimelineType.pain:
-        return const EventHandleBodyParts();
+        return const LineChartSidebar();
       default:
     }
     return const SizedBox.shrink();
   }
 }
 
-class EventHandleBodyParts extends HookConsumerWidget {
-  const EventHandleBodyParts({super.key});
+class LineChartSidebar extends HookConsumerWidget {
+  const LineChartSidebar({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ValueNotifier<List<BodyPart>> cachedResponse = useState([]);
-    final fetch = ref.watch(timelineBodyPartsForVisibleRange);
+    ValueNotifier<List<Category>> cachedResponse = useState([]);
+    final fetch = ref.watch(timelineLineChartCategoriesForVisibleRange);
 
     useEffect(() {
       cachedResponse.value = fetch.value ?? [];
@@ -111,7 +112,7 @@ class EventHandleBodyParts extends HookConsumerWidget {
       return () {};
     }, [fetch]);
 
-    return ref.watch(timelineBodyPartsForVisibleRange).when(
+    return ref.watch(timelineLineChartCategoriesForVisibleRange).when(
           data: (bodyParts) => _content(bodyParts),
           error: (_, __) => const SizedBox.shrink(),
           loading: () => cachedResponse.value.isNotEmpty
@@ -120,12 +121,12 @@ class EventHandleBodyParts extends HookConsumerWidget {
         );
   }
 
-  Widget _content(List<BodyPart> bodyParts) {
+  Widget _content(List<Category> categories) {
     return SizedBox(
       height: 88,
       width: 120,
       child: ListView.builder(
-        itemCount: bodyParts.length,
+        itemCount: categories.length,
         itemBuilder: (context, index) => Padding(
           padding: const EdgeInsets.only(bottom: 4, left: 1),
           child: Row(
@@ -135,24 +136,23 @@ class EventHandleBodyParts extends HookConsumerWidget {
                 width: 4,
                 height: 16,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: categories[index].isStepLine
+                      ? BorderRadius.zero
+                      : BorderRadius.circular(4),
                   border: Border.all(
                     color: AppTheme.colors.black,
                     width: 1,
                     strokeAlign: BorderSide.strokeAlignOutside,
                   ),
-                  color: AppTheme.colors.bodyPartToColor(bodyParts[index]),
+                  color: categories[index].color,
                 ),
               ),
               AppTheme.spacerHalf,
-              BodyPartIcon(
-                bodyPart: bodyParts[index],
-                size: 18,
-              ),
+              categories[index].icon,
               AppTheme.spacer,
               Expanded(
                 child: AutoSizeText(
-                  bodyParts[index].displayString(context),
+                  categories[index].title(context),
                   style: AppTheme.paragraphSmall,
                   maxLines: 1,
                   minFontSize: 8,

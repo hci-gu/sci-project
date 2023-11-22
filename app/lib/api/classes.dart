@@ -51,6 +51,11 @@ class BodyPart {
     return '${side != null ? '${side!.displayString(context)} ' : ''}${type.displayString(context)}';
   }
 
+  int get sort {
+    if (type == BodyPartType.neuropathic) return 10;
+    return 0;
+  }
+
   @override
   int get hashCode => type.hashCode ^ side.hashCode;
 

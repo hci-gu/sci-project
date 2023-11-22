@@ -4,11 +4,10 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/api/classes/journal/journal.dart';
 import 'package:scimovement/models/journal/timeline.dart';
+import 'package:scimovement/models/journal/timeline_chart.dart';
 import 'package:scimovement/screens/journal/widgets/timeline/utils.dart';
-import 'package:scimovement/theme/theme.dart';
 
 class TimelinePainChart extends ConsumerWidget {
   final TimelinePage page;
@@ -17,7 +16,7 @@ class TimelinePainChart extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ref.watch(timelinePainChartProvider(page)).when(
+    return ref.watch(timelineLineChartProvider(page)).when(
           data: (data) => _body(context, data),
           error: (_, __) => Container(),
           loading: () => const Center(
@@ -26,7 +25,7 @@ class TimelinePainChart extends ConsumerWidget {
         );
   }
 
-  Widget _body(BuildContext context, List<PainLevelEntry> entries) {
+  Widget _body(BuildContext context, List<JournalEntry> entries) {
     if (entries.isEmpty) {
       return SizedBox(height: chartEventHeight);
     }
@@ -67,7 +66,6 @@ class TimelinePainChart extends ConsumerWidget {
         ),
       ),
       child: Stack(
-        // clipBehavior: Clip.none,
         children: [
           Positioned(
             left: daysOffset * dayWidth,
@@ -81,7 +79,7 @@ class TimelinePainChart extends ConsumerWidget {
                 end: lastDataDay.isBefore(page.pagination.to)
                     ? page.pagination.to
                     : lastDataDay,
-                entries: entries,
+                items: entries.map(itemForEntry).toList(),
               ),
             ),
           )
@@ -94,18 +92,19 @@ class TimelinePainChart extends ConsumerWidget {
 class TimelineChart extends ConsumerWidget {
   final DateTime start;
   final DateTime end;
-  final List<PainLevelEntry> entries;
+  final List<TimelineChartItem> items;
 
   const TimelineChart({
     super.key,
     required this.start,
     required this.end,
-    this.entries = const [],
+    this.items = const [],
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    List<BodyPart> bodyParts = entries.map((e) => e.bodyPart).toSet().toList();
+    List<Category> categories = items.map((e) => e.category).toSet().toList();
+    categories.sort((a, b) => b.sort - a.sort);
     double minX = start.millisecondsSinceEpoch.toDouble();
     double maxX = end.millisecondsSinceEpoch.toDouble();
 
@@ -114,50 +113,37 @@ class TimelineChart extends ConsumerWidget {
         borderData: FlBorderData(show: false),
         gridData: const FlGridData(show: false),
         titlesData: const FlTitlesData(show: false),
-        // rangeAnnotations: RangeAnnotations(
-        //   verticalRangeAnnotations: [
-        //     VerticalRangeAnnotation(
-        //       x1: monthX,
-        //       x2: monthWidth,
-        //       color: Colors.red.withOpacity(0.5),
-        //     ),
-        //   ],
-        // ),
         minX: minX,
         maxX: maxX,
         minY: -1,
         maxY: 11,
         backgroundColor: Colors.transparent,
-        lineBarsData: [
-          ...bodyParts.map(
-            (bodyPart) => line(
-              entries
-                  .where((e) => e.bodyPart == bodyPart)
-                  .toList()
-                  .map(
-                    (e) => FlSpot(
-                      e.time.millisecondsSinceEpoch.toDouble(),
-                      e.painLevel.toDouble(),
-                    ),
-                  )
-                  .toList(),
-              AppTheme.colors.bodyPartToColor(bodyPart),
-              bodyPart.type == BodyPartType.neuropathic,
-            ),
-          ),
-        ],
+        lineBarsData: categories
+            .map(
+              (category) => line(
+                items
+                    .where((e) => e.category.name == category.name)
+                    .map((e) => FlSpot(e.x, e.y))
+                    .toList(),
+                category.color,
+                category.isStepLine,
+              ),
+            )
+            .toList(),
         lineTouchData: LineTouchData(
           touchCallback: (FlTouchEvent _, LineTouchResponse? touchResponse) {
             if (touchResponse != null) {
-              List<PainLevelEntry> touchedEntries = entries
+              List<TimelineChartItem> touchedItems = items
                   .where((e) => touchResponse.lineBarSpots != null
-                      ? touchResponse.lineBarSpots!.any(
-                          (spot) => spot.x == e.time.millisecondsSinceEpoch)
+                      ? touchResponse.lineBarSpots!.any((spot) => spot.x == e.x)
                       : false)
                   .toList();
 
               ref.read(timelineTouchedDateProvider.notifier).state =
-                  touchedEntries.isNotEmpty ? touchedEntries.first.time : null;
+                  touchedItems.isNotEmpty
+                      ? DateTime.fromMillisecondsSinceEpoch(
+                          touchedItems.first.x.toInt())
+                      : null;
             }
           },
           touchTooltipData: LineTouchTooltipData(
@@ -174,15 +160,12 @@ class TimelineChart extends ConsumerWidget {
 
   List<LineTooltipItem> tooltipsForSpots(
       BuildContext context, List<LineBarSpot> spots) {
-    List<PainLevelEntry> entriesForSpot = entries
-        .where((e) => spots.any((spot) =>
-            e.time.millisecondsSinceEpoch.toDouble() == spot.x &&
-            spot.y == e.painLevel.toDouble()))
+    List<TimelineChartItem> itemsForSpot = items
+        .where((e) => spots.any((spot) => e.x == spot.x && spot.y == e.y))
         .toList();
 
-    return entriesForSpot.map((e) {
-      HSLColor color =
-          HSLColor.fromColor(AppTheme.colors.bodyPartToColor(e.bodyPart));
+    return itemsForSpot.map((e) {
+      HSLColor color = HSLColor.fromColor(e.category.color);
       Color textColor =
           color.withLightness(max(0, color.lightness - 0.45)).toColor();
       Color bgColor = color.withLightness(0.9).toColor();
@@ -191,7 +174,7 @@ class TimelineChart extends ConsumerWidget {
         const TextStyle(),
         children: [
           TextSpan(
-            text: e.painLevel.toString(),
+            text: e.y.toString(),
             style: TextStyle(
               color: textColor,
               fontSize: 16,
@@ -223,7 +206,7 @@ class TimelineChart extends ConsumerWidget {
     return LineChartBarData(
       spots: spots,
       preventCurveOverShooting: false,
-      barWidth: 2,
+      barWidth: isStepLine ? 1 : 2,
       isCurved: false,
       color: color,
       dotData: const FlDotData(show: true),
