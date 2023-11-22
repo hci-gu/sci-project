@@ -3,7 +3,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/models/bouts.dart';
 import 'package:scimovement/models/pagination.dart';
-import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/stat_widget.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';

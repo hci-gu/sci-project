@@ -5,11 +5,13 @@ import 'package:intl/intl.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import 'package:scimovement/api/classes/journal/exercise.dart';
 import 'package:scimovement/api/classes/journal/journal.dart';
+import 'package:scimovement/api/classes/journal/spasticity.dart';
 import 'package:scimovement/models/journal/journal.dart';
 import 'package:scimovement/screens/journal/widgets/forms/bladder_emptying_form.dart';
 import 'package:scimovement/screens/journal/widgets/forms/exercise_form.dart';
+import 'package:scimovement/screens/journal/widgets/forms/spasticity_form.dart';
 import 'package:scimovement/screens/journal/widgets/forms/uti_form.dart';
-import 'package:scimovement/screens/journal/widgets/pain_level_form.dart';
+import 'package:scimovement/screens/journal/widgets/forms/pain_level_form.dart';
 import 'package:scimovement/screens/journal/widgets/forms/pressure_release_form.dart';
 import 'package:scimovement/screens/journal/widgets/forms/pressure_ulcer_form.dart';
 import 'package:scimovement/theme/theme.dart';
@@ -51,6 +53,8 @@ class EditJournalEntryScreen extends ConsumerWidget {
           type == JournalType.musclePain ||
           type == JournalType.neuropathicPain)
         ...PainLevelForm.buildForm(entry as PainLevelEntry?, type),
+      if (entry is SpasticityEntry || type == JournalType.spasticity)
+        ...SpasticityForm.buildForm(entry as SpasticityEntry?),
       if (entry is PressureReleaseEntry || type == JournalType.pressureRelease)
         ...PressureReleaseForm.buildForm(
             entry as PressureReleaseEntry?, shouldCreateEntry),
@@ -95,6 +99,11 @@ class EditJournalEntryScreen extends ConsumerWidget {
               const DateTimeButton(formKey: 'time'),
               AppTheme.spacer2x,
               _typeSpecificForm(form),
+              Text(
+                '${AppLocalizations.of(context)!.comment} ( ${AppLocalizations.of(context)!.optional} )',
+                style: AppTheme.labelLarge,
+              ),
+              AppTheme.spacer,
               StyledTextField(
                 formControlName: 'comment',
                 placeholder:
@@ -130,7 +139,16 @@ class EditJournalEntryScreen extends ConsumerWidget {
         type == JournalType.musclePain ||
         type == JournalType.neuropathicPain) {
       return PainLevelForm(
-          form: form, type: type, entry: entry as PainLevelEntry?);
+        form: form,
+        type: type,
+        entry: entry as PainLevelEntry?,
+      );
+    }
+    if (entry is SpasticityEntry || type == JournalType.spasticity) {
+      return SpasticityForm(
+        form: form,
+        entry: entry as SpasticityEntry?,
+      );
     }
     if (entry is PressureReleaseEntry || type == JournalType.pressureRelease) {
       return PressureReleaseForm(

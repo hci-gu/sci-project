@@ -29,6 +29,11 @@ class JournalState extends StateNotifier<DateTime> {
           'painLevel': values['painLevel'] as int,
         };
         break;
+      case JournalType.spasticity:
+        info = {
+          'level': values['level'] as int,
+        };
+        break;
       case JournalType.pressureRelease:
         List<PressureReleaseExercise> exercises =
             values['exercises'] as List<PressureReleaseExercise>;

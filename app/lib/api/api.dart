@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/api/classes/journal/exercise.dart';
 import 'package:scimovement/api/classes/journal/journal.dart';
+import 'package:scimovement/api/classes/journal/spasticity.dart';
 import 'package:scimovement/models/goals.dart';
 import 'package:scimovement/models/pagination.dart';
 
@@ -206,6 +207,8 @@ class Api {
               return UTIEntry.fromJson(json);
             case JournalType.exercise:
               return ExerciseEntry.fromJson(json);
+            case JournalType.spasticity:
+              return SpasticityEntry.fromJson(json);
             default:
               return JournalEntry.fromJson(json);
           }

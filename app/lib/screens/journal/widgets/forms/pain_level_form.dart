@@ -3,7 +3,7 @@ import 'package:reactive_forms/reactive_forms.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/api/classes/journal/journal.dart';
 import 'package:scimovement/screens/journal/widgets/body_part_select.dart';
-import 'package:scimovement/screens/journal/widgets/pain_slider.dart';
+import 'package:scimovement/screens/journal/widgets/number_slider.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -36,12 +36,8 @@ class PainLevelForm extends StatelessWidget {
           style: AppTheme.paragraphMedium,
         ),
         AppTheme.spacer2x,
-        PainSlider(formKey: 'painLevel'),
+        NumberSlider(formKey: 'painLevel'),
         AppTheme.spacer2x,
-        Text(
-            '${AppLocalizations.of(context)!.comment} ( ${AppLocalizations.of(context)!.optional} )',
-            style: AppTheme.labelLarge),
-        AppTheme.spacer,
       ],
     );
   }

@@ -180,68 +180,6 @@ final timelineEventsProvider =
       .toList();
 });
 
-final timelinePainChartProvider =
-    FutureProviderFamily<List<PainLevelEntry>, TimelinePage>((ref, page) async {
-  DateTime from = page.pagination.from;
-  DateTime to = page.pagination.to;
-  List<JournalEntry> journal = await ref.watch(timelineDataProvider.future);
-
-  List<PainLevelEntry> entries = journal.whereType<PainLevelEntry>().toList();
-
-  List<PainLevelEntry> entriesToShow = entries
-      .where((e) => e.time.isBefore(to) && e.time.isAfter(from))
-      .toList();
-
-  List<BodyPart> bodyParts = entries.map((e) => e.bodyPart).toSet().toList();
-  for (BodyPart bodyPart in bodyParts) {
-    List<PainLevelEntry> entriesForBodyPart =
-        entries.where((e) => e.bodyPart == bodyPart).toList();
-
-    List<PainLevelEntry> entriesBefore =
-        entriesForBodyPart.where((e) => e.time.isBefore(from)).toList();
-    entriesBefore.sort((a, b) {
-      int aDistance = a.time.difference(from).inMilliseconds.abs();
-      int bDistance = b.time.difference(from).inMilliseconds.abs();
-      return aDistance.compareTo(bDistance);
-    });
-
-    List<PainLevelEntry> entriesAfter =
-        entriesForBodyPart.where((e) => e.time.isAfter(to)).toList();
-    entriesAfter.sort((a, b) {
-      int aDistance = a.time.difference(to).inMilliseconds.abs();
-      int bDistance = b.time.difference(to).inMilliseconds.abs();
-      return aDistance.compareTo(bDistance);
-    });
-
-    if (entriesBefore.isNotEmpty) {
-      entriesToShow.add(entriesBefore.first);
-    }
-    if (entriesAfter.isNotEmpty) {
-      entriesToShow.add(entriesAfter.first);
-    }
-  }
-
-  entriesToShow.sort((a, b) => a.time.compareTo(b.time));
-  return entriesToShow;
-});
-
-final timelineBodyPartsForVisibleRange =
-    FutureProvider<List<BodyPart>>((ref) async {
-  List<DateTime> visibleRange = ref.watch(timelineVisibleRangeProvider);
-  List<JournalEntry> journal = await ref.watch(timelineDataProvider.future);
-
-  List<BodyPart> bodyParts = journal
-      .where((e) =>
-          e.time.isAfter(visibleRange.first) &&
-          e.time.isBefore(visibleRange.last))
-      .whereType<PainLevelEntry>()
-      .map((e) => e.bodyPart)
-      .toSet()
-      .toList();
-  bodyParts.sort((a, b) => a.toString().compareTo(b.toString()));
-  return bodyParts;
-});
-
 final timelineTypesProvider =
     FutureProvider.family<List<TimelineType>, Pagination>(
         (ref, pagination) async {

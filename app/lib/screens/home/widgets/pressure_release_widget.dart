@@ -1,7 +1,4 @@
 import 'dart:async';
-import 'dart:math' as math;
-
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
@@ -112,35 +109,36 @@ class PressureReleaseWidget extends ConsumerWidget {
     String asset = 'assets/svg/alarm.svg';
     bool finishedGoal = goal.progress >= goal.value;
     return StatWidget.container(
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Row(
-              children: [
-                SvgPicture.asset(asset, height: 18),
-                AppTheme.spacerHalf,
-                Text(
-                  AppLocalizations.of(context)!.pressureRelease,
-                  style: AppTheme.labelTiny,
-                ),
-              ],
-            ),
-            AppTheme.spacer,
-            SvgPicture.asset(
-                finishedGoal
-                    ? 'assets/svg/goal_done.svg'
-                    : 'assets/svg/set_goal.svg',
-                height: 36),
-            AppTheme.spacer,
-            GoalProgress(goal: goal)
-          ],
-        ),
-        AppTheme.widgetDecoration.copyWith(
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(24),
-            topRight: Radius.circular(24),
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Row(
+            children: [
+              SvgPicture.asset(asset, height: 18),
+              AppTheme.spacerHalf,
+              Text(
+                AppLocalizations.of(context)!.pressureRelease,
+                style: AppTheme.labelTiny,
+              ),
+            ],
           ),
-        ));
+          AppTheme.spacer,
+          SvgPicture.asset(
+              finishedGoal
+                  ? 'assets/svg/goal_done.svg'
+                  : 'assets/svg/set_goal.svg',
+              height: 36),
+          AppTheme.spacer,
+          GoalProgress(goal: goal)
+        ],
+      ),
+      AppTheme.widgetDecoration.copyWith(
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
+        ),
+      ),
+    );
   }
 
   Widget _withGoal(BuildContext context, Goal goal, bool isToday) {
