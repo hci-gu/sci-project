@@ -4,7 +4,8 @@ import 'package:scimovement/models/journal/timeline.dart';
 
 double headerHeight = 48;
 double eventHeight = 48;
-double chartEventHeight = 140;
+double lineChartHeight = 180;
+double barChartHeight = 100;
 
 enum TimelineMode {
   day,
@@ -15,8 +16,11 @@ enum TimelineMode {
 TimelineMode activeMode = TimelineMode.month;
 
 double heightForType(TimelineDisplayType type) {
-  if (type == TimelineDisplayType.chart) {
-    return chartEventHeight;
+  if (type == TimelineDisplayType.lineChart) {
+    return lineChartHeight;
+  }
+  if (type == TimelineDisplayType.barChart) {
+    return barChartHeight;
   }
   return eventHeight;
 }

@@ -13,8 +13,23 @@ enum BodyPartType {
   shoulderJoint,
   elbow,
   hand,
-  neuropathic
+  neuropathic,
+  intermittentNeuroPathic,
+  allodynia,
 }
+
+final bodyPartsWithSide = [
+  BodyPartType.scapula,
+  BodyPartType.shoulderJoint,
+  BodyPartType.elbow,
+  BodyPartType.hand,
+];
+
+final neuroPathicBodyParts = [
+  BodyPartType.neuropathic,
+  BodyPartType.intermittentNeuroPathic,
+  BodyPartType.allodynia,
+];
 
 enum Side { left, right }
 
@@ -25,10 +40,6 @@ class BodyPart {
   BodyPart(this.type, this.side);
 
   factory BodyPart.fromString(String bodyPartString) {
-    if (bodyPartString.isEmpty) {
-      return BodyPart(BodyPartType.neuropathic, null);
-    }
-
     final parts = bodyPartString.split('-');
     BodyPartType type =
         bodyPartTypeFromString(parts.first) ?? BodyPartType.neck;
@@ -38,21 +49,21 @@ class BodyPart {
 
   @override
   String toString() {
-    if (type == BodyPartType.neck || type == BodyPartType.back) {
-      return type.name;
+    if (bodyPartsWithSide.contains(type)) {
+      return '${type.name}${side != null ? '-${side!.name}' : ''}';
     }
-    return '${type.name}${side != null ? '-${side!.name}' : ''}';
+    return type.name;
   }
 
   String displayString(BuildContext context) {
-    if (type == BodyPartType.neck || type == BodyPartType.back) {
-      return type.displayString(context);
+    if (bodyPartsWithSide.contains(type)) {
+      return '${side != null ? '${side!.displayString(context)} ' : ''}${type.displayString(context)}';
     }
-    return '${side != null ? '${side!.displayString(context)} ' : ''}${type.displayString(context)}';
+    return type.displayString(context);
   }
 
   int get sort {
-    if (type == BodyPartType.neuropathic) return 10;
+    if (neuroPathicBodyParts.contains(type)) return 10;
     return 0;
   }
 
@@ -102,7 +113,11 @@ extension BodyPartTypeDisplayAsString on BodyPartType {
       case BodyPartType.hand:
         return AppLocalizations.of(context)!.bodyPartHand;
       case BodyPartType.neuropathic:
-        return AppLocalizations.of(context)!.neuropathic;
+        return AppLocalizations.of(context)!.belowOrAt;
+      case BodyPartType.intermittentNeuroPathic:
+        return AppLocalizations.of(context)!.intermittent;
+      case BodyPartType.allodynia:
+        return AppLocalizations.of(context)!.allodynia;
       default:
         return toString();
     }
@@ -123,6 +138,12 @@ BodyPartType? bodyPartTypeFromString(String bodyPartString) {
       return BodyPartType.elbow;
     case 'hand':
       return BodyPartType.hand;
+    case 'neuropathic':
+      return BodyPartType.neuropathic;
+    case 'intermittentNeuroPathic':
+      return BodyPartType.intermittentNeuroPathic;
+    case 'allodynia':
+      return BodyPartType.allodynia;
     default:
       return null;
   }

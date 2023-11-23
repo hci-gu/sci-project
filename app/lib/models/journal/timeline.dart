@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/api/classes/journal/journal.dart';
 import 'package:scimovement/models/journal/journal.dart';
 import 'package:scimovement/models/pagination.dart';
@@ -40,13 +39,17 @@ final timelineFiltersProvider = StateProvider<Map<TimelineType, bool>>((ref) {
 enum TimelineDisplayType {
   events,
   periods,
-  chart,
+  lineChart,
+  barChart,
 }
 
 TimelineDisplayType timelineDisplayType(TimelineType type) {
   switch (type) {
     case TimelineType.pain:
-      return TimelineDisplayType.chart;
+    case TimelineType.spasticity:
+      return TimelineDisplayType.lineChart;
+    case TimelineType.movement:
+      return TimelineDisplayType.barChart;
     case TimelineType.pressureUlcer:
     case TimelineType.urinaryTractInfection:
       return TimelineDisplayType.periods;

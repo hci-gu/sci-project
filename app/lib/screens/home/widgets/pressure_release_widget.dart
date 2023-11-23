@@ -4,6 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:scimovement/api/classes/journal/journal.dart';
 import 'package:scimovement/models/goals.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/theme/theme.dart';
@@ -97,6 +98,18 @@ class PressureReleaseWidget extends ConsumerWidget {
   Widget _body(BuildContext context, JournalGoal? goal, bool isToday) {
     return GestureDetector(
       onTap: () {
+        if (goal != null) {
+          Duration timeLeft = goal.reminder.difference(DateTime.now());
+          if (timeLeft.inMinutes <= 0) {
+            context.pushNamed(
+              'create-journal',
+              extra: {
+                'type': JournalType.pressureRelease,
+              },
+            );
+            return;
+          }
+        }
         context.goNamed('pressure-release');
       },
       child: goal != null
