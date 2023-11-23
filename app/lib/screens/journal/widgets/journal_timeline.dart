@@ -6,6 +6,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:infinite_listview/infinite_listview.dart';
 
 import 'package:scimovement/api/classes/journal/journal.dart';
+import 'package:scimovement/models/goals.dart';
 import 'package:scimovement/models/journal/timeline.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/screens/journal/widgets/timeline/movement_chart.dart';
@@ -15,6 +16,27 @@ import 'package:scimovement/screens/journal/widgets/timeline/sidebar.dart';
 import 'package:scimovement/screens/journal/widgets/timeline/utils.dart';
 import 'package:scimovement/theme/theme.dart';
 
+class TimeLineEventsData {
+  final List<JournalEntry> events;
+  final JournalGoal? goal;
+
+  TimeLineEventsData({required this.events, required this.goal});
+}
+
+final timeLineEventsProvider =
+    FutureProvider.family<TimeLineEventsData, TimelinePage>((ref, page) async {
+  List<JournalEntry> events =
+      await ref.watch(timelineEventsProvider(page).future);
+  JournalGoal? goal;
+  if (page.type == TimelineType.pressureRelease) {
+    goal = await ref.watch(pressureReleaseGoalProvider(page.pagination).future);
+  } else if (page.type == TimelineType.bladderEmptying) {
+    goal = await ref.watch(bladderEmptyingGoalProvider(page.pagination).future);
+  }
+
+  return TimeLineEventsData(events: events, goal: goal);
+});
+
 class TimelineEvents extends ConsumerWidget {
   final TimelinePage page;
 
@@ -22,8 +44,8 @@ class TimelineEvents extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ref.watch(timelineEventsProvider(page)).when(
-          data: (data) => _body(context, ref, data),
+    return ref.watch(timeLineEventsProvider(page)).when(
+          data: (data) => _body(context, ref, data.events, data.goal),
           error: (_, __) => Container(),
           loading: () => const Center(
             child: CircularProgressIndicator(),
@@ -31,7 +53,8 @@ class TimelineEvents extends ConsumerWidget {
         );
   }
 
-  Widget _body(BuildContext context, WidgetRef ref, List<JournalEntry> events) {
+  Widget _body(BuildContext context, WidgetRef ref, List<JournalEntry> events,
+      JournalGoal? goal) {
     double width = pageWidth(context);
     double dayWidth = width / page.pagination.duration.inDays;
 
@@ -51,7 +74,7 @@ class TimelineEvents extends ConsumerWidget {
                 .toList();
 
             return entries.isNotEmpty
-                ? _dot(dayWidth, entries, ref)
+                ? _dot(dayWidth, entries, goal)
                 : SizedBox(width: dayWidth);
           },
         ),
@@ -59,28 +82,24 @@ class TimelineEvents extends ConsumerWidget {
     );
   }
 
-  Widget _dot(double width, List<JournalEntry> entries, WidgetRef ref) {
+  Widget _dot(double width, List<JournalEntry> entries, JournalGoal? goal) {
+    double borderWidth = 5;
+    if (goal != null) {
+      borderWidth *= math.min(entries.length / goal.value, 1);
+    }
+
     return SizedBox(
       width: width,
       height: eventHeight,
-      child: GestureDetector(
-        onTap: () {
-          ref.read(timelineTouchedDateProvider.notifier).state =
-              entries.first.time;
-        },
-        // onTap: () {
-        //   ref.read(timelineTouchedDateProvider.notifier).state =
-        //       entries.first.time;
-        //   print(entries.first.time);
-        // },
-        behavior: HitTestBehavior.opaque,
-        child: Center(
-          child: Container(
-            width: 8,
-            height: 8,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(4),
+      child: Center(
+        child: Container(
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(5),
+            border: Border.all(
               color: AppTheme.colors.primary,
+              width: borderWidth,
             ),
           ),
         ),
@@ -217,18 +236,16 @@ class Month extends HookConsumerWidget {
   }
 
   Widget _contentForType(TimelineType type) {
-    if (type == TimelineType.movement) {
-      return TimelineMovementChart(page: page);
-    }
-
     switch (timelineDisplayType(type)) {
-      case TimelineDisplayType.chart:
+      case TimelineDisplayType.lineChart:
         return TimelinePainChart(
           page: TimelinePage(
             pagination: page,
             type: type,
           ),
         );
+      case TimelineDisplayType.barChart:
+        return TimelineMovementChart(page: page);
       case TimelineDisplayType.periods:
         return TimelinePeriods(
           page: TimelinePage(

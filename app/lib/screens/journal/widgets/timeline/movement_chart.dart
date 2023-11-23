@@ -30,7 +30,7 @@ class TimelineMovementChart extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: SizedBox(
-        height: eventHeight - 16,
+        height: barChartHeight - 16,
         child: MovementBarChart(bouts: bouts, start: page.from, end: page.to),
       ),
     );
@@ -51,7 +51,6 @@ class MovementBarChart extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // double minutesInADay = 24 * 60;
     int days = end.difference(start).inDays;
     double width = pageWidth(context);
     double dayWidth = width / days;

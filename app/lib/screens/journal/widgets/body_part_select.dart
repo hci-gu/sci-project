@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import 'package:scimovement/api/classes.dart';
+import 'package:scimovement/api/classes/journal/journal.dart';
 import 'package:scimovement/screens/journal/widgets/body_part_icon.dart';
 import 'package:scimovement/screens/settings/widgets/form_dropdown.dart';
 import 'package:scimovement/theme/theme.dart';
@@ -8,8 +9,13 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class BodyPartSelect extends StatelessWidget {
   final FormGroup form;
+  final JournalType type;
 
-  const BodyPartSelect({Key? key, required this.form}) : super(key: key);
+  const BodyPartSelect({
+    Key? key,
+    required this.form,
+    required this.type,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -21,11 +27,18 @@ class BodyPartSelect extends StatelessWidget {
                 flex: 2,
                 child: FormDropdown(
                   formKey: 'bodyPartType',
-                  title: AppLocalizations.of(context)!.bodyPart,
+                  title: type == JournalType.neuropathicPain
+                      ? AppLocalizations.of(context)!.typeOfPain
+                      : AppLocalizations.of(context)!.bodyPart,
                   form: form,
-                  hint:
-                      '${AppLocalizations.of(context)!.select} ${AppLocalizations.of(context)!.bodyPart.toLowerCase()}',
+                  hint: hint(context),
                   items: BodyPartType.values
+                      .where((element) {
+                        if (type == JournalType.neuropathicPain) {
+                          return neuroPathicBodyParts.contains(element);
+                        }
+                        return !neuroPathicBodyParts.contains(element);
+                      })
                       .map((bodyPartType) => DropdownMenuItem(
                             value: bodyPartType,
                             child: Padding(
@@ -76,9 +89,16 @@ class BodyPartSelect extends StatelessWidget {
     );
   }
 
+  String hint(BuildContext context) {
+    String text = type == JournalType.neuropathicPain
+        ? AppLocalizations.of(context)!.typeOfPain
+        : AppLocalizations.of(context)!.bodyPart;
+
+    return '${AppLocalizations.of(context)!.select} ${text.toLowerCase()}';
+  }
+
   bool showSideDropdown() {
     return form.value['bodyPartType'] != null &&
-        form.value['bodyPartType'] != BodyPartType.neck &&
-        form.value['bodyPartType'] != BodyPartType.back;
+        bodyPartsWithSide.contains(form.value['bodyPartType']);
   }
 }

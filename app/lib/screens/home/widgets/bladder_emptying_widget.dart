@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:scimovement/api/classes/journal/journal.dart';
 import 'package:scimovement/models/goals.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/screens/home/widgets/pressure_release_widget.dart';
@@ -55,8 +56,19 @@ class BladderEmptyingWidget extends ConsumerWidget {
   Widget _body(BuildContext context, JournalGoal? goal, bool isToday) {
     return GestureDetector(
       onTap: () {
-        String path = GoRouter.of(context).location;
-        context.go('$path${path.length > 1 ? '/' : ''}bladder-emptying');
+        if (goal != null) {
+          Duration timeLeft = goal.reminder.difference(DateTime.now());
+          if (timeLeft.inMinutes <= 0) {
+            context.pushNamed(
+              'create-journal',
+              extra: {
+                'type': JournalType.bladderEmptying,
+              },
+            );
+            return;
+          }
+        }
+        context.goNamed('bladder-emptying');
       },
       child: goal != null
           ? _withGoal(context, goal, isToday)

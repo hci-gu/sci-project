@@ -30,7 +30,7 @@ class PainLevelEntry extends JournalEntry {
       type: journalTypeFromString(json['type']),
       comment: json['comment'],
       painLevel: info['painLevel'],
-      bodyPart: BodyPart.fromString(info['bodyPart'] ?? ''),
+      bodyPart: BodyPart.fromString(info['bodyPart']),
     );
   }
 
@@ -62,25 +62,16 @@ class PainLevelEntry extends JournalEntry {
 
   @override
   String title(BuildContext context) {
-    if (type == JournalType.neuropathicPain) {
-      return '${painLevel.toString()} - ${AppLocalizations.of(context)!.neuropathicPain}';
-    }
     return '${painLevel.toString()} - ${bodyPart.displayString(context)}';
   }
 
   @override
   String shortcutTitle(BuildContext context) {
-    if (type == JournalType.neuropathicPain) {
-      return AppLocalizations.of(context)!.neuropathicPain;
-    }
     return bodyPart.displayString(context);
   }
 
   @override
   String get identifier {
-    if (type == JournalType.neuropathicPain) {
-      return 'neuropathic';
-    }
     return bodyPart.toString();
   }
 

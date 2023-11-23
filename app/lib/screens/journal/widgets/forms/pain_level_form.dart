@@ -24,8 +24,8 @@ class PainLevelForm extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (entry == null && type == JournalType.musclePain)
-          BodyPartSelect(form: form),
+        if (entry == null)
+          BodyPartSelect(form: form, type: type ?? JournalType.musclePain),
         if (entry == null) AppTheme.spacer2x,
         Text(
           AppLocalizations.of(context)!.painLevel,
@@ -46,8 +46,7 @@ class PainLevelForm extends StatelessWidget {
     return {
       'bodyPartType': FormControl<BodyPartType>(
         value: painLevelEntry?.bodyPart.type,
-        validators:
-            type == JournalType.neuropathicPain ? [] : [Validators.required],
+        validators: [Validators.required],
       ),
       'side': FormControl<Side>(
         value: painLevelEntry?.bodyPart.side ?? Side.right,

@@ -27,7 +27,7 @@ class TimelinePainChart extends ConsumerWidget {
 
   Widget _body(BuildContext context, List<JournalEntry> entries) {
     if (entries.isEmpty) {
-      return SizedBox(height: chartEventHeight);
+      return SizedBox(height: lineChartHeight);
     }
     entries.sort((a, b) => a.time.compareTo(b.time));
 
@@ -57,7 +57,7 @@ class TimelinePainChart extends ConsumerWidget {
     int daysOffset = firstDataDay.difference(page.pagination.from).inDays;
 
     return Container(
-      height: chartEventHeight,
+      height: lineChartHeight,
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
@@ -71,7 +71,7 @@ class TimelinePainChart extends ConsumerWidget {
             left: daysOffset * dayWidth,
             child: SizedBox(
               width: max(dayWidth * numDays, dayWidth * daysInMonth),
-              height: chartEventHeight,
+              height: lineChartHeight,
               child: TimelineChart(
                 start: firstDataDay.isAfter(page.pagination.from)
                     ? page.pagination.from
@@ -177,11 +177,11 @@ class TimelineChart extends ConsumerWidget {
             text: e.y.toString(),
             style: TextStyle(
               color: textColor,
-              fontSize: 16,
+              fontSize: 13,
               fontWeight: FontWeight.bold,
               background: Paint()
                 ..color = bgColor
-                ..strokeWidth = 10
+                ..strokeWidth = 17
                 ..strokeJoin = StrokeJoin.round
                 ..strokeCap = StrokeCap.round
                 ..style = PaintingStyle.stroke,

@@ -15,6 +15,7 @@ class JournalState extends StateNotifier<DateTime> {
 
     switch (type) {
       case JournalType.musclePain:
+      case JournalType.neuropathicPain:
         BodyPart bodyPart = BodyPart(
           values['bodyPartType'] as BodyPartType,
           values['side'] as Side?,
@@ -22,11 +23,6 @@ class JournalState extends StateNotifier<DateTime> {
         info = {
           'painLevel': values['painLevel'] as int,
           'bodyPart': bodyPart.toString(),
-        };
-        break;
-      case JournalType.neuropathicPain:
-        info = {
-          'painLevel': values['painLevel'] as int,
         };
         break;
       case JournalType.spasticity:
