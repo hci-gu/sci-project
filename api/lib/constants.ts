@@ -22,6 +22,8 @@ export enum Condition {
 
 export enum JournalType {
   painLevel = 'painLevel',
+  neuropathicPain = 'neuropathicPain',
+  spasticity = 'spasticity',
   pressureRelease = 'pressureRelease',
   pressureUlcer = 'pressureUlcer',
   bodyTemperature = 'bodyTemperature',

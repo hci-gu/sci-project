@@ -56,10 +56,44 @@ export const getCurrentUTI = async (userId: string, to?: Date) => {
   return [sortedEntries[0]]
 }
 
+export const getCurrentPain = async (
+  userId: string,
+  type: JournalType,
+  to?: Date
+) => {
+  const dateTo = moment(to).endOf('day').toDate()
+  const entries = await Journal.find(
+    {
+      userId,
+    },
+    {
+      type: type,
+      t: {
+        [Op.lte]: dateTo,
+      },
+    }
+  )
+
+  // sort by timestamp and return latest entry
+  const sortedEntries = entries.sort((a: any, b: any) =>
+    moment(a.t).isAfter(b.t) ? -1 : 1
+  )
+
+  const lastEntries = entries.reduce((acc: any, entry: any) => {
+    if (!acc[entry.info.bodyPart]) {
+      acc[entry.info.bodyPart] = entry
+    } else if (moment(entry.t).isAfter(acc[entry.info.bodyPart].t)) {
+      acc[entry.info.bodyPart] = entry
+    }
+    return acc
+  }, {})
+
+  return Object.values(lastEntries)
+}
+
 const bodyParts: any = [
   { name: 'elbow-right', noise: createNoise2D(Math.random) },
   { name: 'scapula-left', noise: createNoise2D(Math.random) },
-  { name: 'neck', noise: createNoise2D(Math.random) },
 ]
 
 export const fillMockData = async (userId: string, days = 600) => {
@@ -90,7 +124,7 @@ export const fillMockData = async (userId: string, days = 600) => {
           painLevel: Math.floor(painValue * 10),
         },
       }
-      if (Math.random() < 0.15) {
+      if (Math.random() < 0.1) {
         painEntries.push(painEntry)
       }
     }
