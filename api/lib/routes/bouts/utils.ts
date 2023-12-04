@@ -137,7 +137,7 @@ export const removeBout = async (userId: string, id: string) => {
 
 const randMin = (value: number) => Math.floor((Math.random() * 2 - 1) * value)
 
-export const fillMockData = async (userId: string, days = 90) => {
+export const fillMockData = async (userId: string, days = 365) => {
   let bouts = []
 
   for (let i = 0; i < days; i++) {

@@ -4,7 +4,12 @@ import moment from 'moment'
 import Journal from '../../db/models/Journal'
 import { getQuery, GetQuerySchema } from '../validation'
 import { JournalType } from '../../constants'
-import { fillMockData, getCurrentPressureUlcers, getCurrentUTI } from './utils'
+import {
+  fillMockData,
+  getCurrentPain,
+  getCurrentPressureUlcers,
+  getCurrentUTI,
+} from './utils'
 import { removeBout, saveBout } from '../bouts/utils'
 
 const router = express.Router()
@@ -111,6 +116,10 @@ router.get(
           break
         case JournalType.urinaryTractInfection:
           res.json(await getCurrentUTI(id, to))
+          break
+        case JournalType.painLevel:
+        case JournalType.neuropathicPain:
+          res.json(await getCurrentPain(id, type, to))
           break
         default:
           res.sendStatus(404)
