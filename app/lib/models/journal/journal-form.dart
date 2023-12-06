@@ -2,6 +2,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api/api.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/api/classes/journal/journal.dart';
+import 'package:scimovement/api/classes/journal/spasticity.dart';
 
 class JournalState extends StateNotifier<DateTime> {
   JournalState() : super(DateTime.now());
@@ -77,6 +78,30 @@ class JournalState extends StateNotifier<DateTime> {
       'comment': comment,
       'info': info,
     });
+    state = DateTime.now();
+  }
+
+  Future setJournalEntryValue(JournalEntry entry, int updatedValue) async {
+    if (entry is PainLevelEntry) {
+      await Api().createJournalEntry({
+        't': DateTime.now().toIso8601String(),
+        'type': entry.type.name,
+        'comment': '',
+        'info': {
+          'bodyPart': entry.bodyPart.toString(),
+          'painLevel': updatedValue,
+        },
+      });
+    } else if (entry is SpasticityEntry) {
+      await Api().createJournalEntry({
+        't': DateTime.now().toIso8601String(),
+        'type': entry.type.name,
+        'comment': '',
+        'info': {
+          'level': updatedValue,
+        },
+      });
+    }
     state = DateTime.now();
   }
 
