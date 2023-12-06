@@ -7,6 +7,7 @@ import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/screens/home/widgets/bladder_emptying_widget.dart';
 import 'package:scimovement/screens/home/widgets/energy_widget.dart';
 import 'package:scimovement/screens/home/widgets/exercise_widget.dart';
+import 'package:scimovement/screens/home/widgets/neuropathic_pain_widgets.dart';
 import 'package:scimovement/screens/home/widgets/pressure_release_widget.dart';
 import 'package:scimovement/screens/home/widgets/pressure_ulcer_widget.dart';
 import 'package:scimovement/screens/home/widgets/sedentary_widget.dart';
@@ -114,6 +115,22 @@ class PagedWidgets extends HookConsumerWidget {
                                         !features.contains(
                                             AppFeature.pressureRelease))
                                       const Expanded(child: SizedBox.shrink())
+                                  ],
+                                ),
+                              ),
+                              AppTheme.spacer,
+                              Text(
+                                'Smärta & besvär',
+                                style: AppTheme.labelLarge,
+                              ),
+                              AppTheme.spacer,
+                              SizedBox(
+                                height: 110,
+                                child: ListView(
+                                  shrinkWrap: true,
+                                  scrollDirection: Axis.horizontal,
+                                  children: const [
+                                    NeuroPathicPainWidgets(),
                                   ],
                                 ),
                               ),

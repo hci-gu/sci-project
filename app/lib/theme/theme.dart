@@ -60,6 +60,10 @@ class AppColors {
         return HexColor('#f9b5c4');
       case BodyPartType.neuropathic:
         return HexColor('#6b6162');
+      case BodyPartType.allodynia:
+        return HexColor('#6B8982');
+      case BodyPartType.intermittentNeuroPathic:
+        return HexColor('#811D27');
       default:
         return Colors.black;
     }
@@ -161,6 +165,10 @@ class AppTheme {
     horizontal: basePadding * 2,
     vertical: basePadding * 1.5,
   );
+  static EdgeInsetsGeometry elementPaddingSmall = EdgeInsets.symmetric(
+    horizontal: basePadding,
+    vertical: basePadding,
+  );
 
   static TextStyle buttonTextStyle(
       [bool secondary = false,
@@ -236,7 +244,7 @@ class AppTheme {
 
   static BoxDecoration cardDecoration = BoxDecoration(
     color: colors.white,
-    borderRadius: BorderRadius.circular(16),
+    borderRadius: BorderRadius.circular(12),
     border: Border.all(
       color: colors.black.withOpacity(0.1),
     ),
@@ -304,5 +312,52 @@ class AppTheme {
           color: AppTheme.colors.black,
         );
     }
+  }
+}
+
+const _shimmerGradient = LinearGradient(
+  colors: [
+    Color(0xFFEBEBF4),
+    Color(0xFFF4F4F4),
+    Color(0xFFEBEBF4),
+  ],
+  stops: [
+    0.1,
+    0.3,
+    0.4,
+  ],
+  begin: Alignment(-1.0, -0.3),
+  end: Alignment(1.0, 0.3),
+  tileMode: TileMode.clamp,
+);
+
+class ShimmerLoading extends StatefulWidget {
+  const ShimmerLoading({
+    super.key,
+    required this.isLoading,
+    required this.child,
+  });
+
+  final bool isLoading;
+  final Widget child;
+
+  @override
+  State<ShimmerLoading> createState() => _ShimmerLoadingState();
+}
+
+class _ShimmerLoadingState extends State<ShimmerLoading> {
+  @override
+  Widget build(BuildContext context) {
+    if (!widget.isLoading) {
+      return widget.child;
+    }
+
+    return ShaderMask(
+      blendMode: BlendMode.srcATop,
+      shaderCallback: (bounds) {
+        return _shimmerGradient.createShader(bounds);
+      },
+      child: widget.child,
+    );
   }
 }

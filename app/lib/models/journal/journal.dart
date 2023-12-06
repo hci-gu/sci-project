@@ -126,3 +126,16 @@ final utiProvider = FutureProvider<UTIEntry?>((ref) async {
 
   return journal.isEmpty ? null : journal.first as UTIEntry;
 });
+
+final neuroPathicPainProvider =
+    FutureProvider<List<PainLevelEntry>>((ref) async {
+  ref.watch(updateJournalProvider);
+  DateTime date = ref.watch(dateProvider);
+
+  List<JournalEntry> journal =
+      await Api().getJournalForType(JournalType.neuropathicPain, date);
+
+  List<PainLevelEntry> entries = journal.whereType<PainLevelEntry>().toList();
+  entries.sort((a, b) => b.time.compareTo(a.time));
+  return entries;
+});
