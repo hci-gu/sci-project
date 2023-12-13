@@ -75,9 +75,7 @@ export const getCurrentPain = async (
   )
 
   // sort by timestamp and return latest entry
-  const sortedEntries = entries.sort((a: any, b: any) =>
-    moment(a.t).isAfter(b.t) ? -1 : 1
-  )
+  entries.sort((a: any, b: any) => (moment(a.t).isAfter(b.t) ? -1 : 1))
 
   const lastEntries = entries.reduce((acc: any, entry: any) => {
     if (!acc[entry.info.bodyPart]) {
@@ -89,6 +87,28 @@ export const getCurrentPain = async (
   }, {})
 
   return Object.values(lastEntries)
+}
+
+export const getCurrentSpasticity = async (userId: string, to?: Date) => {
+  const dateTo = moment(to).endOf('day').toDate()
+  const entries = await Journal.find(
+    {
+      userId,
+    },
+    {
+      type: JournalType.spasticity,
+      t: {
+        [Op.lte]: dateTo,
+      },
+    }
+  )
+
+  // sort by timestamp and return latest entry
+  const sortedEntries = entries.sort((a: any, b: any) =>
+    moment(a.t).isAfter(b.t) ? -1 : 1
+  )
+
+  return [sortedEntries[0]]
 }
 
 const bodyParts: any = [

@@ -8,6 +8,7 @@ import {
   fillMockData,
   getCurrentPain,
   getCurrentPressureUlcers,
+  getCurrentSpasticity,
   getCurrentUTI,
 } from './utils'
 import { removeBout, saveBout } from '../bouts/utils'
@@ -120,6 +121,9 @@ router.get(
         case JournalType.painLevel:
         case JournalType.neuropathicPain:
           res.json(await getCurrentPain(id, type, to))
+          break
+        case JournalType.spasticity:
+          res.json(await getCurrentSpasticity(id, to))
           break
         default:
           res.sendStatus(404)
