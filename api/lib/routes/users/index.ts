@@ -8,12 +8,7 @@ const router = express.Router()
 
 import handleFitbitData from '../../adapters/fitbit'
 import { checkAndSaveCounts } from './utils'
-import {
-  getQuery,
-  GetQuerySchema,
-  userBody,
-  UserBodySchema,
-} from './validation'
+import { userBody, UserBodySchema } from './validation'
 import UserModel, {
   ForbiddenError,
   hashPassword,
@@ -140,11 +135,12 @@ router.post(
 
 router.delete('/:id', async (req, res) => {
   try {
-    await UserModel.delete(req.params.id)
-    res.sendStatus(200)
+    UserModel.delete(req.params.id)
   } catch (e) {
     res.sendStatus(500)
+    return
   }
+  res.sendStatus(200)
 })
 
 export default router
