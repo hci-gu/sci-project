@@ -27,25 +27,29 @@ class JournalShortcutGrid extends ConsumerWidget {
   }
 
   Widget _emptyState(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          AppLocalizations.of(context)!.journalWelcome,
-          style: AppTheme.labelLarge,
-        ),
-        AppTheme.spacer,
-        Text(
-          AppLocalizations.of(context)!.journalWelcomeDescription,
-          style: AppTheme.paragraphMedium,
-        )
-      ],
+    return Padding(
+      padding: AppTheme.screenPadding,
+      child: Column(
+        children: [
+          Text(
+            AppLocalizations.of(context)!.journalWelcome,
+            style: AppTheme.labelLarge,
+          ),
+          AppTheme.spacer,
+          Text(
+            AppLocalizations.of(context)!.journalWelcomeDescription,
+            style: AppTheme.paragraphMedium,
+          )
+        ],
+      ),
     );
   }
 
   Widget _buildList(
       BuildContext context, List<JournalEntry> data, WidgetRef ref) {
+    double size = AppTheme.isBigScreen(context) ? 148 : 120;
     return SizedBox(
-      height: 148,
+      height: size,
       child: ListView(
         scrollDirection: Axis.horizontal,
         children: [
@@ -55,14 +59,16 @@ class JournalShortcutGrid extends ConsumerWidget {
                 (e) => Padding(
                   padding: EdgeInsets.only(right: AppTheme.basePadding * 2),
                   child: SizedBox(
-                    width: 148,
+                    width: size,
                     child: JournalEntryShortcut(
                       onTap: () => context.goNamed(
                         'create-journal',
                         extra: {'entry': e},
                       ),
                       icon: AppTheme.iconForJournalType(
-                          e.type, e is PainLevelEntry ? e.bodyPart : null),
+                          e.type,
+                          e is PainLevelEntry ? e.bodyPart : null,
+                          AppTheme.isBigScreen(context) ? 48 : 40),
                       title: e.shortcutTitle(context),
                       subtitle: timeago.format(e.time),
                     ),
@@ -73,7 +79,7 @@ class JournalShortcutGrid extends ConsumerWidget {
           Padding(
             padding: EdgeInsets.only(right: AppTheme.basePadding * 2),
             child: SizedBox(
-              width: 148,
+              width: size,
               child: JournalEntryShortcut(
                 onTap: () => context.goNamed(
                   'select-journal-type',

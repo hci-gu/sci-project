@@ -124,6 +124,17 @@ class JournalEntry {
     required this.comment,
   });
 
+  JournalEntry copyWith({
+    DateTime? updateTime,
+  }) {
+    return JournalEntry(
+      id: id,
+      time: updateTime ?? time,
+      type: type,
+      comment: comment,
+    );
+  }
+
   Map<String, dynamic> toJson() => {
         't': time.toIso8601String(),
         'comment': comment,

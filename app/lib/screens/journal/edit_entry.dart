@@ -127,7 +127,13 @@ class EditJournalEntryScreen extends ConsumerWidget {
       return PressureReleaseForm.actions(
         context,
         form,
-        (goBack) => _onSave(context, ref, form, goBack),
+        (goBack, showSnackbar) => _onSave(
+          context,
+          ref,
+          form,
+          goBack,
+          showSnackbar,
+        ),
       );
     }
 
@@ -189,7 +195,7 @@ class EditJournalEntryScreen extends ConsumerWidget {
   }
 
   Future _onSave(BuildContext context, WidgetRef ref, FormGroup form,
-      [bool shouldPop = true]) async {
+      [bool shouldPop = true, bool showSnackbar = true]) async {
     if (shouldCreateEntry) {
       await ref
           .read(updateJournalProvider.notifier)
@@ -205,7 +211,7 @@ class EditJournalEntryScreen extends ConsumerWidget {
       }
     }
 
-    if (context.mounted) {
+    if (context.mounted && showSnackbar) {
       String typeTitle = entry?.type.displayString(context) ??
           type?.displayString(context) ??
           '';

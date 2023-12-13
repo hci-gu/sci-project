@@ -2,64 +2,106 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api/classes/journal/journal.dart';
+import 'package:scimovement/api/classes/journal/spasticity.dart';
 import 'package:scimovement/models/journal/journal.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class NeuroPathicPainWidgets extends ConsumerWidget {
+class NeuroPathicPainWidgets extends HookConsumerWidget {
   const NeuroPathicPainWidgets({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ref.watch(neuroPathicPainProvider).when(
-          // data: (data) => NeuroPathicPain.empty(),
-          data: (data) => Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: data
-                .map(
-                  (e) => Padding(
-                    padding: EdgeInsets.only(right: AppTheme.basePadding),
-                    child: NeuroPathicPain(e),
-                  ),
-                )
-                .toList(),
+    ValueNotifier<List<JournalEntry>> cachedResponse = useState([]);
+    final fetch = ref.watch(neuroPathicPainAndSpasticityProvider);
+
+    useEffect(() {
+      cachedResponse.value = fetch.value ?? [];
+
+      return () {};
+    }, [fetch]);
+
+    return fetch.when(
+      data: (data) => data.isEmpty ? _emptyState(context) : _body(data),
+      error: (_, __) => Container(),
+      loading: () => cachedResponse.value.isNotEmpty
+          ? _body(cachedResponse.value)
+          : NeuroPathicPain.empty(),
+    );
+  }
+
+  Widget _body(List<JournalEntry> data) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: data
+          .map(
+            (e) => Padding(
+              padding: EdgeInsets.only(right: AppTheme.basePadding),
+              child: NeuroPathicPain(e),
+            ),
+          )
+          .toList(),
+    );
+  }
+
+  Widget _emptyState(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: MediaQuery.of(context).size.width * 0.8,
+          child: Text(
+            AppLocalizations.of(context)!.painAndDiscormfortEmpty,
+            style: AppTheme.paragraphMedium,
           ),
-          error: (_, __) => Container(),
-          loading: () => NeuroPathicPain.empty(),
-        );
+        ),
+        AppTheme.spacer,
+        Button(
+          onPressed: () => context.goNamed('select-journal-type'),
+          title: AppLocalizations.of(context)!.painAndDiscormfortEmptyButton,
+        )
+      ],
+    );
   }
 }
 
 class NeuroPathicPain extends HookConsumerWidget {
-  final PainLevelEntry entry;
+  final JournalEntry entry;
 
   const NeuroPathicPain(this.entry, {super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ValueNotifier<int> painLevel = useState(entry.painLevel);
+    ValueNotifier<int> level = useState(_valueForEntry);
 
     useEffect(() {
-      if (painLevel.value == entry.painLevel) {
+      if (level.value == _valueForEntry) {
         return null;
       }
       final timer = Timer(const Duration(milliseconds: 1250), () {
         ref
             .read(updateJournalProvider.notifier)
-            .setJournalEntryValue(entry, painLevel.value);
+            .setJournalEntryValue(entry, level.value);
       });
 
       return timer.cancel;
-    }, [painLevel.value]);
+    }, [level.value]);
 
     return _body([
       Row(
         children: [
           Padding(
             padding: const EdgeInsets.all(4.0),
-            child: AppTheme.iconForJournalType(entry.type, entry.bodyPart, 32),
+            child: AppTheme.iconForJournalType(
+                entry.type,
+                entry is PainLevelEntry
+                    ? (entry as PainLevelEntry).bodyPart
+                    : null,
+                32),
           ),
           Text(
             entry.shortcutTitle(context),
@@ -74,16 +116,16 @@ class NeuroPathicPain extends HookConsumerWidget {
             width: 44,
             rounded: false,
             icon: Icons.remove,
-            disabled: painLevel.value == 0,
+            disabled: level.value == 0,
             onPressed: () {
-              painLevel.value--;
+              level.value--;
             },
           ),
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
-                painLevel.value.toString(),
+                level.value.toString(),
                 style: AppTheme.headLine2,
               ),
               const Text('/10'),
@@ -93,14 +135,24 @@ class NeuroPathicPain extends HookConsumerWidget {
             width: 44,
             rounded: false,
             icon: Icons.add,
-            disabled: painLevel.value == 10,
+            disabled: level.value == 10,
             onPressed: () {
-              painLevel.value++;
+              level.value++;
             },
           ),
         ],
       )
     ]);
+  }
+
+  int get _valueForEntry {
+    if (entry is PainLevelEntry) {
+      return (entry as PainLevelEntry).painLevel;
+    }
+    if (entry is SpasticityEntry) {
+      return (entry as SpasticityEntry).level;
+    }
+    return 0;
   }
 
   static Widget _body(List<Widget> children) {

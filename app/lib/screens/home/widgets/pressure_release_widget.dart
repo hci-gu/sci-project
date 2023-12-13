@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
@@ -15,7 +16,7 @@ import 'package:scimovement/widgets/stat_widget.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class GoalProgress extends StatelessWidget {
+class GoalProgress extends HookWidget {
   final Goal goal;
 
   const GoalProgress({super.key, required this.goal});

@@ -16,8 +16,8 @@ class Api {
   String tz = 'Europe/Stockholm';
   Dio dio = Dio(BaseOptions(
     baseUrl: apiUrl,
-    // connectTimeout: 30000,
-    // receiveTimeout: 45000,
+    connectTimeout: const Duration(seconds: 20),
+    receiveTimeout: const Duration(seconds: 20),
   ));
 
   void clearUserId() {
@@ -170,6 +170,8 @@ class Api {
               return UTIEntry.fromJson(json);
             case JournalType.exercise:
               return ExerciseEntry.fromJson(json);
+            case JournalType.spasticity:
+              return SpasticityEntry.fromJson(json);
             default:
               return JournalEntry.fromJson(json);
           }

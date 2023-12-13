@@ -313,6 +313,10 @@ class AppTheme {
         );
     }
   }
+
+  static bool isBigScreen(BuildContext context) {
+    return MediaQuery.of(context).size.width > 668;
+  }
 }
 
 const _shimmerGradient = LinearGradient(

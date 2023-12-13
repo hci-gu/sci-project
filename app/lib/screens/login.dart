@@ -1,4 +1,6 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import 'package:scimovement/models/auth.dart';
@@ -8,7 +10,7 @@ import 'package:scimovement/widgets/snackbar_message.dart';
 import 'package:scimovement/widgets/text_field.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class LoginScreen extends ConsumerWidget {
+class LoginScreen extends HookConsumerWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
   FormGroup buildForm() => fb.group({
@@ -27,6 +29,8 @@ class LoginScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ValueNotifier<bool> loading = useState(false);
+
     return Scaffold(
       appBar: AppTheme.appBar(AppLocalizations.of(context)!.login),
       body: Padding(
@@ -36,14 +40,15 @@ class LoginScreen extends ConsumerWidget {
             const SizedBox(height: 64),
             _header(context),
             AppTheme.spacer2x,
-            _form(context, ref),
+            _form(context, ref, loading),
           ],
         ),
       ),
     );
   }
 
-  Widget _form(BuildContext context, WidgetRef ref) {
+  Widget _form(
+      BuildContext context, WidgetRef ref, ValueNotifier<bool> loading) {
     return ReactiveFormBuilder(
         form: buildForm,
         builder: (context, form, _) {
@@ -62,7 +67,7 @@ class LoginScreen extends ConsumerWidget {
                 obscureText: true,
               ),
               AppTheme.spacer2x,
-              _loginButton(context, ref),
+              _loginButton(context, ref, loading),
             ],
           );
         });
@@ -82,28 +87,44 @@ class LoginScreen extends ConsumerWidget {
     );
   }
 
-  Widget _loginButton(BuildContext context, WidgetRef ref) {
+  Widget _loginButton(
+      BuildContext context, WidgetRef ref, ValueNotifier<bool> loading) {
     return ReactiveFormConsumer(
       builder: ((context, form, child) => Button(
             title: AppLocalizations.of(context)!.login,
             width: 130,
             disabled: form.pristine || !form.valid,
+            loading: loading.value,
             onPressed: () async {
               FocusManager.instance.primaryFocus?.unfocus();
               String email = form.value['email'] as String;
               String password = form.value['password'] as String;
-              ref
+              loading.value = true;
+              await ref
                   .read(userProvider.notifier)
                   .login(email, password)
-                  .catchError((_) {
+                  .catchError((e) {
+                String message = AppLocalizations.of(context)!.genericError;
+                // check if error is Dio connection timeout
+                if (e is DioError) {
+                  if (e.type == DioErrorType.connectionTimeout) {
+                    message = AppLocalizations.of(context)!.connectionTimeout;
+                  }
+                  if (e.type == DioErrorType.connectionError) {
+                    message = AppLocalizations.of(context)!.connectionError;
+                  }
+                }
+
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackbarMessage(
                     context: context,
-                    message: AppLocalizations.of(context)!.genericError,
+                    message: message,
                     type: SnackbarType.error,
                   ),
                 );
+                loading.value = false;
               });
+              loading.value = false;
             },
           )),
     );

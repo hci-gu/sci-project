@@ -34,7 +34,7 @@ class PressureReleaseForm extends StatelessWidget {
           secondary: true,
           width: 200,
           onPressed: () {
-            callback(true);
+            callback(true, true);
           },
           title: AppLocalizations.of(context)!.save,
         ),
@@ -54,7 +54,7 @@ class PressureReleaseForm extends StatelessWidget {
               });
             }
 
-            callback(false);
+            callback(false, false);
           },
           title: AppLocalizations.of(context)!.start,
         ),

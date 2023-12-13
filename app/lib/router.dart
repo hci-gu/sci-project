@@ -25,6 +25,9 @@ import 'package:scimovement/screens/settings/settings.dart';
 import 'package:scimovement/screens/tab.dart';
 import 'package:scimovement/screens/onboarding/onboarding.dart';
 import 'package:scimovement/screens/register.dart';
+import 'package:scimovement/theme/theme.dart';
+import 'package:scimovement/widgets/button.dart';
+import 'package:scimovement/widgets/snackbar_message.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 List<String> detailRoutes = [
@@ -77,6 +80,10 @@ class RouterNotifier extends ChangeNotifier {
       return null;
     } else if (loggedIn && state.matchedLocation == '/loading') {
       return landingRoute;
+    }
+
+    if (state.matchedLocation == '/watch-login') {
+      return null;
     }
 
     // redirect from login screen to home or onboarding after login
@@ -310,6 +317,32 @@ class RedirectScreen extends HookConsumerWidget {
     useEffect(() {
       if (user != null && redirectUri != null && state != null) {
         launchUrl(Uri.parse('$redirectUri?state=$state&userId=${user.id}'));
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          context.goNamed('home');
+        });
+      }
+      if (user == null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackbarMessage(
+              context: context,
+              message: 'You need to be logged in to sync with your watch.',
+              type: SnackbarType.error,
+            ),
+          );
+          context.goNamed('introduction');
+        });
+      } else {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackbarMessage(
+              context: context,
+              message: 'Got invalid information from the Fitbit app.',
+              type: SnackbarType.error,
+            ),
+          );
+          context.goNamed('home');
+        });
       }
       return () => {};
     }, [user]);
@@ -322,15 +355,44 @@ class RedirectScreen extends HookConsumerWidget {
   }
 }
 
-class LoadingScreen extends StatelessWidget {
+class LoadingScreen extends HookConsumerWidget {
   const LoadingScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: CircularProgressIndicator(),
-      ),
+  Widget build(BuildContext context, WidgetRef ref) {
+    ValueNotifier<bool> waitedLongEnough = useState(false);
+
+    useEffect(() {
+      Future.delayed(const Duration(seconds: 5), () {
+        if (context.mounted) {
+          waitedLongEnough.value = true;
+        }
+      });
+      return () => {};
+    }, []);
+
+    return Scaffold(
+      body: waitedLongEnough.value
+          ? Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Center(child: CircularProgressIndicator()),
+                AppTheme.spacer4x,
+                Center(
+                  child: Button(
+                    onPressed: () {
+                      ref.read(userProvider.notifier).logout();
+                      context.goNamed('introduction');
+                    },
+                    title: 'Abort',
+                  ),
+                )
+              ],
+            )
+          : const Center(
+              child: CircularProgressIndicator(),
+            ),
     );
   }
 }

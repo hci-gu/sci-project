@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/api/classes/journal/journal.dart';
 import 'package:scimovement/api/classes/journal/spasticity.dart';
+import 'package:scimovement/models/journal/journal.dart';
 import 'package:scimovement/models/journal/timeline.dart';
 import 'package:scimovement/screens/journal/widgets/body_part_icon.dart';
 import 'package:scimovement/theme/theme.dart';
@@ -150,9 +152,45 @@ final timelineLineChartProvider =
     }
   }
 
-  entriesToShow.sort((a, b) => a.time.compareTo(b.time));
-  return entriesToShow;
+  DateTime today = DateTime.now();
+  List<JournalEntry> finalEntries = [];
+  for (String category in categories) {
+    List<JournalEntry> entriesForCategory = entriesToShow
+        .where((e) => categoryIdentifierForEntry(e) == category)
+        .toList();
+    entriesForCategory.sort((a, b) => b.time.compareTo(a.time));
+
+    Map<String, bool> days = Map.fromIterable(
+        entriesForCategory
+            .map((e) => e.time.toIso8601String().substring(0, 10)),
+        value: (e) => false);
+
+    for (JournalEntry entry in entriesForCategory) {
+      String day = entry.time.toIso8601String().substring(0, 10);
+      if (days[day] == false) {
+        finalEntries.add(entry);
+        days[day] = true;
+      }
+    }
+    JournalEntry lastEntry = entriesForCategory.last;
+    if (entryShouldExtend(lastEntry) && !isSameDay(lastEntry.time, today)) {
+      finalEntries.add(lastEntry.copyWith(updateTime: today));
+    }
+  }
+
+  finalEntries.sort((a, b) => a.time.compareTo(b.time));
+  return finalEntries;
 });
+
+bool entryShouldExtend(JournalEntry entry) {
+  if (entry is PainLevelEntry) {
+    return entry.bodyPart.type == BodyPartType.allodynia ||
+        entry.bodyPart.type == BodyPartType.neuropathic ||
+        entry.bodyPart.type == BodyPartType.intermittentNeuroPathic;
+  }
+
+  return entry is SpasticityEntry;
+}
 
 final timelineLineChartCategoriesForVisibleRange =
     FutureProvider<List<Category>>((ref) async {

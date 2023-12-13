@@ -13,6 +13,19 @@ class SpasticityEntry extends JournalEntry {
     required this.level,
   });
 
+  @override
+  SpasticityEntry copyWith({
+    DateTime? updateTime,
+  }) {
+    return SpasticityEntry(
+      id: id,
+      time: updateTime ?? time,
+      type: type,
+      comment: comment,
+      level: level,
+    );
+  }
+
   factory SpasticityEntry.fromJson(Map<String, dynamic> json) {
     Map<String, dynamic> info = json['info'];
     return SpasticityEntry(

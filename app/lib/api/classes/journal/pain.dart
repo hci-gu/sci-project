@@ -20,6 +20,20 @@ class PainLevelEntry extends JournalEntry {
     required this.bodyPart,
   });
 
+  @override
+  PainLevelEntry copyWith({
+    DateTime? updateTime,
+  }) {
+    return PainLevelEntry(
+      id: id,
+      time: updateTime ?? time,
+      type: type,
+      comment: comment,
+      painLevel: painLevel,
+      bodyPart: bodyPart,
+    );
+  }
+
   factory PainLevelEntry.fromJson(Map<String, dynamic> json) {
     Map<String, dynamic> info = json['info'];
 
