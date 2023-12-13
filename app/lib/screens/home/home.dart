@@ -17,6 +17,7 @@ import 'package:scimovement/storage.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/activity_wheel/activity_wheel.dart';
 import 'package:scimovement/widgets/date_select.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 final homeWidgetPageProvider = StateProvider<int>((ref) {
   ref.listenSelf((previous, next) {
@@ -120,7 +121,7 @@ class PagedWidgets extends HookConsumerWidget {
                               ),
                               AppTheme.spacer,
                               Text(
-                                'Smärta & besvär',
+                                AppLocalizations.of(context)!.painAndDiscomfort,
                                 style: AppTheme.labelLarge,
                               ),
                               AppTheme.spacer,

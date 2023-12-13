@@ -79,21 +79,12 @@ class GoalWidget extends StatelessWidget {
               title: AppLocalizations.of(context)!.editGoal,
               size: ButtonSize.small,
               onPressed: () {
-                // current route
                 String path = GoRouter.of(context).location;
 
                 context.go('$path/goal', extra: {
                   'goal': goal,
                   'type': type,
                 });
-                // context.goNamed(
-                //     type == JournalType.bladderEmptying
-                //         ? 'edit-goal-bladder'
-                //         : 'edit-goal',
-                //     extra: {
-                //       'goal': goal,
-                //       'type': type,
-                //     });
               },
             ),
           )

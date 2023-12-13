@@ -210,7 +210,7 @@ class ListBottomSheet extends HookConsumerWidget {
       child: ListView(
         children: [
           _dateHeader(context, ref, date),
-          AppTheme.spacer2x,
+          AppTheme.spacer,
           if (isToday(date)) _createEntry(context),
           const JournalList(),
         ],
