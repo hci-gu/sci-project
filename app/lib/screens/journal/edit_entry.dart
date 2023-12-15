@@ -3,11 +3,13 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:reactive_forms/reactive_forms.dart';
+import 'package:scimovement/api/classes/journal/bowel_emptying.dart';
 import 'package:scimovement/api/classes/journal/exercise.dart';
 import 'package:scimovement/api/classes/journal/journal.dart';
 import 'package:scimovement/api/classes/journal/spasticity.dart';
 import 'package:scimovement/models/journal/journal.dart';
 import 'package:scimovement/screens/journal/widgets/forms/bladder_emptying_form.dart';
+import 'package:scimovement/screens/journal/widgets/forms/bowel_emptying_form.dart';
 import 'package:scimovement/screens/journal/widgets/forms/exercise_form.dart';
 import 'package:scimovement/screens/journal/widgets/forms/spasticity_form.dart';
 import 'package:scimovement/screens/journal/widgets/forms/uti_form.dart';
@@ -64,6 +66,9 @@ class EditJournalEntryScreen extends ConsumerWidget {
       if (entry is BladderEmptyingEntry || type == JournalType.bladderEmptying)
         ...BladderEmptyingForm.buildForm(
             entry as BladderEmptyingEntry?, shouldCreateEntry),
+      if (entry is BowelEmptyingEntry || type == JournalType.bowelEmptying)
+        ...BowelEmptyingForm.buildForm(
+            entry as BowelEmptyingEntry?, shouldCreateEntry),
       if (entry is UTIEntry || type == JournalType.urinaryTractInfection)
         ...UTIForm.buildForm(entry as UTIEntry?, shouldCreateEntry),
       if (entry is ExerciseEntry || type == JournalType.exercise)
@@ -173,6 +178,13 @@ class EditJournalEntryScreen extends ConsumerWidget {
       return BladderEmptyingForm(
         form: form,
         entry: entry as BladderEmptyingEntry?,
+        shouldCreateEntry: shouldCreateEntry,
+      );
+    }
+    if (entry is BowelEmptyingEntry || type == JournalType.bowelEmptying) {
+      return BowelEmptyingForm(
+        form: form,
+        entry: entry as BowelEmptyingEntry?,
         shouldCreateEntry: shouldCreateEntry,
       );
     }

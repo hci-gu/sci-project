@@ -236,7 +236,7 @@ class BladderFunctions extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       children: [
-        Text(AppLocalizations.of(context)!.onboardingBladderFunctions,
+        Text(AppLocalizations.of(context)!.onboardingBladderAndBowelFunctions,
             style: AppTheme.headLine3),
         const SizedBox(
           height: 200,
@@ -267,7 +267,7 @@ class BladderFunctions extends ConsumerWidget {
         ),
         AppTheme.spacer4x,
         FeatureToggle(
-          feature: AppFeature.bladder,
+          feature: AppFeature.bladderAndBowel,
           addText: AppLocalizations.of(context)!.onboardingWantFunctions,
           removeText: AppLocalizations.of(context)!.onboardingNotInterested,
         ),

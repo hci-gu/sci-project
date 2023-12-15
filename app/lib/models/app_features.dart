@@ -9,14 +9,14 @@ enum AppFeature {
   pressureRelease,
   pain,
   exercise,
-  bladder,
+  bladderAndBowel,
 }
 
 List<AppFeature> defaultAppFeatures = [
   AppFeature.pressureRelease,
   AppFeature.pain,
   AppFeature.exercise,
-  AppFeature.bladder,
+  AppFeature.bladderAndBowel,
 ];
 
 extension AppFeatureDisplayAsString on AppFeature {
@@ -28,8 +28,8 @@ extension AppFeatureDisplayAsString on AppFeature {
         return AppLocalizations.of(context)!.pressureRelease;
       case AppFeature.pain:
         return AppLocalizations.of(context)!.painAndDiscomfort;
-      case AppFeature.bladder:
-        return AppLocalizations.of(context)!.onboardingBladderFunctions;
+      case AppFeature.bladderAndBowel:
+        return AppLocalizations.of(context)!.onboardingBladderAndBowelFunctions;
       case AppFeature.exercise:
         return AppLocalizations.of(context)!.exercise;
     }
@@ -46,8 +46,9 @@ final Map<AppFeature, List<JournalType>> groupedFeatures = {
     JournalType.pressureRelease,
     JournalType.pressureUlcer,
   ],
-  AppFeature.bladder: [
+  AppFeature.bladderAndBowel: [
     JournalType.bladderEmptying,
+    JournalType.bowelEmptying,
     JournalType.leakage,
     JournalType.urinaryTractInfection
   ],

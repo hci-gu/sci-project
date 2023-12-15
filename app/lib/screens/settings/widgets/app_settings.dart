@@ -103,8 +103,8 @@ class AppFeatureToggles extends ConsumerWidget {
           ref,
         ),
         _row(
-          AppLocalizations.of(context)!.onboardingBladderFunctions,
-          AppFeature.bladder,
+          AppLocalizations.of(context)!.onboardingBladderAndBowelFunctions,
+          AppFeature.bladderAndBowel,
           ref,
         ),
       ],

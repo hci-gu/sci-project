@@ -36,7 +36,7 @@ class PagedWidgets extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     List<AppFeature> features = ref.watch(appFeaturesProvider);
     bool hasWatchFeatures = features.contains(AppFeature.watch);
-    bool hasLogFeatures = features.contains(AppFeature.bladder) ||
+    bool hasLogFeatures = features.contains(AppFeature.bladderAndBowel) ||
         features.contains(AppFeature.pressureRelease);
     int page = ref.watch(homeWidgetPageProvider);
     bool centerAlignDate = page == 0 && hasLogFeatures;
@@ -104,15 +104,18 @@ class PagedWidgets extends HookConsumerWidget {
                                             AppFeature.pressureRelease)
                                         ? const PressureUlcerWidget()
                                         : const SizedBox.shrink(),
-                                    if (features.contains(AppFeature.bladder) &&
+                                    if (features.contains(
+                                            AppFeature.bladderAndBowel) &&
                                         features.contains(
                                             AppFeature.pressureRelease))
                                       AppTheme.spacer,
-                                    features.contains(AppFeature.bladder)
+                                    features.contains(
+                                            AppFeature.bladderAndBowel)
                                         ? const UTIWidget()
                                         : const Expanded(
                                             child: SizedBox.shrink()),
-                                    if (features.contains(AppFeature.bladder) &&
+                                    if (features.contains(
+                                            AppFeature.bladderAndBowel) &&
                                         !features.contains(
                                             AppFeature.pressureRelease))
                                       const Expanded(child: SizedBox.shrink())
@@ -210,7 +213,7 @@ class HomeScreen extends HookConsumerWidget {
               children: [
                 if (features.contains(AppFeature.pressureRelease))
                   const PressureReleaseWidget(),
-                if (features.contains(AppFeature.bladder))
+                if (features.contains(AppFeature.bladderAndBowel))
                   const BladderEmptyingWidget(),
                 if (features.contains(AppFeature.exercise))
                   const ExerciseWidget(),
