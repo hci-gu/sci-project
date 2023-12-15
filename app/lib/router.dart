@@ -14,6 +14,7 @@ import 'package:scimovement/screens/detail/exercise.dart';
 import 'package:scimovement/screens/detail/pressure_release.dart';
 import 'package:scimovement/screens/detail/sedentary.dart';
 import 'package:scimovement/screens/goal/goal.dart';
+import 'package:scimovement/screens/goal/goal_reached.dart';
 import 'package:scimovement/screens/home/home.dart';
 import 'package:scimovement/screens/introduction.dart';
 import 'package:scimovement/screens/journal/edit_entry.dart';
@@ -211,6 +212,11 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
                     path: 'exercise',
                     name: 'exercise',
                     builder: (_, state) => const ExerciseScreen(),
+                  ),
+                  GoRoute(
+                    path: 'goal-reached',
+                    name: 'goal-reached',
+                    builder: (_, __) => const GoalReachedScreen(),
                   ),
                 ],
               )

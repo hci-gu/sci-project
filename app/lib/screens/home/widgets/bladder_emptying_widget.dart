@@ -20,10 +20,9 @@ class BladderEmptyingWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    Pagination pagination = ref.watch(paginationProvider);
     bool isToday = ref.watch(isTodayProvider);
     String asset = 'assets/svg/toilet.svg';
-    return ref.watch(bladderEmptyingGoalProvider(pagination)).when(
+    return ref.watch(bladderEmptyingGoalProvider).when(
           data: (goal) => _body(context, goal, isToday),
           error: (_, __) => StatWidget.error(asset),
           loading: () => StatWidget.loading(asset),

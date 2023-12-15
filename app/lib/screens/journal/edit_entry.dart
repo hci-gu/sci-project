@@ -7,6 +7,7 @@ import 'package:scimovement/api/classes/journal/bowel_emptying.dart';
 import 'package:scimovement/api/classes/journal/exercise.dart';
 import 'package:scimovement/api/classes/journal/journal.dart';
 import 'package:scimovement/api/classes/journal/spasticity.dart';
+import 'package:scimovement/models/goals.dart';
 import 'package:scimovement/models/journal/journal.dart';
 import 'package:scimovement/screens/journal/widgets/forms/bladder_emptying_form.dart';
 import 'package:scimovement/screens/journal/widgets/forms/bowel_emptying_form.dart';
@@ -218,8 +219,20 @@ class EditJournalEntryScreen extends ConsumerWidget {
           .updateJournalEntry(entry!, form.value);
     }
     if (context.mounted && shouldPop) {
-      while (context.canPop()) {
-        context.pop();
+      JournalType? journalType = entry?.type ?? type;
+      if (journalType != null && journalType.hasGoal) {
+        bool completed = await hasCompletedGoal(ref);
+        if (completed && context.mounted) {
+          context.goNamed('goal-reached');
+        } else if (context.mounted) {
+          while (context.canPop()) {
+            context.pop();
+          }
+        }
+      } else {
+        while (context.canPop()) {
+          context.pop();
+        }
       }
     }
 
@@ -238,6 +251,21 @@ class EditJournalEntryScreen extends ConsumerWidget {
     }
 
     form.dispose();
+  }
+
+  Future<bool> hasCompletedGoal(WidgetRef ref) async {
+    JournalGoal? goal;
+    if (type == JournalType.pressureRelease) {
+      goal = await ref.watch(pressureReleaseGoalProvider.future);
+    } else if (type == JournalType.bladderEmptying) {
+      goal = await ref.watch(bladderEmptyingGoalProvider.future);
+    }
+
+    if (goal != null) {
+      return goal.progress == goal.value;
+    }
+
+    return false;
   }
 
   Widget _submitButton(WidgetRef ref) {

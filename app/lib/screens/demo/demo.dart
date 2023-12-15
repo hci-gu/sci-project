@@ -219,7 +219,7 @@ class DemoWrapper extends ConsumerWidget {
         movementBarChartProvider,
         notificationsEnabledProvider.overrideWithValue(false),
         userHasDataProvider.overrideWithValue(true),
-        goalsProvider.overrideWith((ref, arg) => [
+        goalsProvider.overrideWith((ref) => [
               JournalGoal(
                 id: 0,
                 value: 8,

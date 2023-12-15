@@ -37,7 +37,7 @@ class PressureReleaseScreen extends ConsumerWidget {
         showModeSelect: false,
         content: Column(
           children: [
-            _goalWidget(context, ref, pagination),
+            _goalWidget(context, ref),
             AppTheme.separator,
             Button(
               icon: Icons.alarm,
@@ -54,8 +54,8 @@ class PressureReleaseScreen extends ConsumerWidget {
         ));
   }
 
-  Widget _goalWidget(BuildContext context, WidgetRef ref, pagination) {
-    return ref.watch(pressureReleaseGoalProvider(pagination)).when(
+  Widget _goalWidget(BuildContext context, WidgetRef ref) {
+    return ref.watch(pressureReleaseGoalProvider).when(
           data: (goal) {
             if (goal != null) {
               return GoalWidget(goal: goal, type: JournalType.pressureRelease);

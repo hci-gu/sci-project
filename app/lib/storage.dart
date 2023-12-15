@@ -74,10 +74,18 @@ class Storage {
   }
 
   List<AppFeature> getAppFeatures() {
-    final List<String>? features = prefs.getStringList('appFeatures');
+    List<String>? features = prefs.getStringList('appFeatures');
     if (features == null) {
       return defaultAppFeatures;
     }
+
+    features = features.map((e) {
+      if (e == 'AppFeature.bladder') {
+        return AppFeature.bladderAndBowel.toString();
+      }
+
+      return e;
+    }).toList();
 
     return features
         .map((e) =>

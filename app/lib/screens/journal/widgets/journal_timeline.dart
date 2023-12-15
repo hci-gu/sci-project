@@ -29,9 +29,9 @@ final timeLineEventsProvider =
       await ref.watch(timelineEventsProvider(page).future);
   JournalGoal? goal;
   if (page.type == TimelineType.pressureRelease) {
-    goal = await ref.watch(pressureReleaseGoalProvider(page.pagination).future);
+    goal = await ref.watch(pressureReleaseGoalProvider.future);
   } else if (page.type == TimelineType.bladderEmptying) {
-    goal = await ref.watch(bladderEmptyingGoalProvider(page.pagination).future);
+    goal = await ref.watch(bladderEmptyingGoalProvider.future);
   }
 
   return TimeLineEventsData(events: events, goal: goal);

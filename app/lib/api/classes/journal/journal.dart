@@ -60,6 +60,16 @@ extension JournalTypeDisplayAsString on JournalType {
         return toString();
     }
   }
+
+  bool get hasGoal {
+    switch (this) {
+      case JournalType.bladderEmptying:
+      case JournalType.pressureRelease:
+        return true;
+      default:
+        return false;
+    }
+  }
 }
 
 JournalType journalTypeFromString(String type) {
