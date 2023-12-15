@@ -64,10 +64,9 @@ class PressureReleaseWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    Pagination pagination = ref.watch(paginationProvider);
     bool isToday = ref.watch(isTodayProvider);
     String asset = 'assets/svg/alarm.svg';
-    return ref.watch(pressureReleaseGoalProvider(pagination)).when(
+    return ref.watch(pressureReleaseGoalProvider).when(
           data: (goal) => _body(context, goal, isToday),
           error: (_, __) => StatWidget.error(asset),
           loading: () => StatWidget.loading(asset),

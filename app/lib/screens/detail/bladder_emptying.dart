@@ -36,7 +36,7 @@ class BladderEmptyingScreen extends ConsumerWidget {
         ),
         content: Column(
           children: [
-            _goalWidget(context, ref, pagination),
+            _goalWidget(context, ref),
             AppTheme.separator,
             Button(
               icon: Icons.alarm,
@@ -53,8 +53,8 @@ class BladderEmptyingScreen extends ConsumerWidget {
         ));
   }
 
-  Widget _goalWidget(BuildContext context, WidgetRef ref, pagination) {
-    return ref.watch(bladderEmptyingGoalProvider(pagination)).when(
+  Widget _goalWidget(BuildContext context, WidgetRef ref) {
+    return ref.watch(bladderEmptyingGoalProvider).when(
           data: (goal) {
             if (goal != null) {
               return GoalWidget(goal: goal, type: JournalType.bladderEmptying);

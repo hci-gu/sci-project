@@ -90,40 +90,28 @@ class JournalGoal extends Goal {
   }
 }
 
-final goalsProvider =
-    FutureProvider.family<List<Goal>, Pagination>((ref, pagination) async {
+final goalsProvider = FutureProvider<List<Goal>>((ref) async {
+  DateTime date = ref.watch(dateProvider);
   ref.watch(updateJournalProvider);
   ref.watch(updateGoalProvider);
-  DateTime date = ref.watch(dateProvider);
-  Pagination page = Pagination(
-    page: pagination.page,
-    mode: pagination.mode,
-    overrideDate: date,
-  );
 
-  return Api().getGoals(page.from);
+  return Api().getGoals(date);
 });
 
-final journalGoalsProvider =
-    FutureProvider.family<List<JournalGoal>, Pagination>(
-        (ref, pagination) async {
-  final goals = await ref.watch(goalsProvider(pagination).future);
+final journalGoalsProvider = FutureProvider<List<JournalGoal>>((ref) async {
+  final goals = await ref.watch(goalsProvider.future);
 
   return goals.whereType<JournalGoal>().toList();
 });
 
-final pressureReleaseGoalProvider =
-    FutureProvider.family<JournalGoal?, Pagination>((ref, pagination) async {
-  List<JournalGoal> goals =
-      await ref.watch(journalGoalsProvider(pagination).future);
+final pressureReleaseGoalProvider = FutureProvider<JournalGoal?>((ref) async {
+  List<JournalGoal> goals = await ref.watch(journalGoalsProvider.future);
 
   return goals.firstWhereOrNull((e) => e.type == JournalType.pressureRelease);
 });
 
-final bladderEmptyingGoalProvider =
-    FutureProvider.family<JournalGoal?, Pagination>((ref, pagination) async {
-  List<JournalGoal> goals =
-      await ref.watch(journalGoalsProvider(pagination).future);
+final bladderEmptyingGoalProvider = FutureProvider<JournalGoal?>((ref) async {
+  List<JournalGoal> goals = await ref.watch(journalGoalsProvider.future);
 
   return goals.firstWhereOrNull((e) => e.type == JournalType.bladderEmptying);
 });
