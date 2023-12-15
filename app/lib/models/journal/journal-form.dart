@@ -1,6 +1,7 @@
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api/api.dart';
 import 'package:scimovement/api/classes.dart';
+import 'package:scimovement/api/classes/journal/bowel_emptying.dart';
 import 'package:scimovement/api/classes/journal/journal.dart';
 import 'package:scimovement/api/classes/journal/spasticity.dart';
 
@@ -53,6 +54,12 @@ class JournalState extends StateNotifier<DateTime> {
         info = {
           'urineType': type.name,
           'smell': values['smell'] as bool,
+        };
+        break;
+      case JournalType.bowelEmptying:
+        StoolType type = values['stoolType'] as StoolType;
+        info = {
+          'stoolType': type.name,
         };
         break;
       case JournalType.urinaryTractInfection:

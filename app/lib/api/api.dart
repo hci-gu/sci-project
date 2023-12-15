@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:scimovement/api/classes.dart';
+import 'package:scimovement/api/classes/journal/bowel_emptying.dart';
 import 'package:scimovement/api/classes/journal/exercise.dart';
 import 'package:scimovement/api/classes/journal/journal.dart';
 import 'package:scimovement/api/classes/journal/spasticity.dart';
@@ -166,6 +167,8 @@ class Api {
               return PressureUlcerEntry.fromJson(json);
             case JournalType.bladderEmptying:
               return BladderEmptyingEntry.fromJson(json);
+            case JournalType.bowelEmptying:
+              return BowelEmptyingEntry.fromJson(json);
             case JournalType.urinaryTractInfection:
               return UTIEntry.fromJson(json);
             case JournalType.exercise:
@@ -205,6 +208,8 @@ class Api {
               return PressureUlcerEntry.fromJson(json);
             case JournalType.bladderEmptying:
               return BladderEmptyingEntry.fromJson(json);
+            case JournalType.bowelEmptying:
+              return BowelEmptyingEntry.fromJson(json);
             case JournalType.urinaryTractInfection:
               return UTIEntry.fromJson(json);
             case JournalType.exercise:

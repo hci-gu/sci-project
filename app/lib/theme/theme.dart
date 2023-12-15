@@ -296,6 +296,8 @@ class AppTheme {
         );
       case JournalType.bladderEmptying:
         return SvgPicture.asset('assets/svg/toilet.svg', height: size);
+      case JournalType.bowelEmptying:
+        return SvgPicture.asset('assets/svg/bowel.svg', height: size);
       case JournalType.urinaryTractInfection:
         return Icon(
           Icons.water,

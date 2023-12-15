@@ -14,6 +14,7 @@ enum JournalType {
   pressureUlcer,
   urinaryTractInfection,
   bladderEmptying,
+  bowelEmptying,
   leakage,
   exercise,
   spasticity,
@@ -25,6 +26,7 @@ enum TimelineType {
   pressureUlcer,
   urinaryTractInfection,
   bladderEmptying,
+  bowelEmptying,
   leakage,
   exercise,
   spasticity,
@@ -44,6 +46,8 @@ extension JournalTypeDisplayAsString on JournalType {
         return AppLocalizations.of(context)!.pressureUlcer;
       case JournalType.bladderEmptying:
         return AppLocalizations.of(context)!.bladderEmptying;
+      case JournalType.bowelEmptying:
+        return AppLocalizations.of(context)!.bowelEmptying;
       case JournalType.urinaryTractInfection:
         return AppLocalizations.of(context)!.urinaryTractInfection;
       case JournalType.leakage:
@@ -71,6 +75,8 @@ JournalType journalTypeFromString(String type) {
       return JournalType.neuropathicPain;
     case 'bladderEmptying':
       return JournalType.bladderEmptying;
+    case 'bowelEmptying':
+      return JournalType.bowelEmptying;
     case 'urinaryTractInfection':
       return JournalType.urinaryTractInfection;
     case 'leakage':
@@ -95,6 +101,8 @@ extension TimelineTypeDisplayAsString on TimelineType {
         return AppLocalizations.of(context)!.pressureUlcer;
       case TimelineType.bladderEmptying:
         return AppLocalizations.of(context)!.bladderEmptying;
+      case TimelineType.bowelEmptying:
+        return AppLocalizations.of(context)!.bowelEmptying;
       case TimelineType.urinaryTractInfection:
         return AppLocalizations.of(context)!.urinaryTractInfection;
       case TimelineType.leakage:
