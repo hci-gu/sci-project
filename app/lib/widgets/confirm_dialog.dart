@@ -7,16 +7,18 @@ Future<bool?> confirmDialog(
   BuildContext context, {
   required String title,
   required String message,
+  Widget? body,
 }) {
   return showDialog<bool?>(
     context: context,
     builder: (BuildContext ctx) {
       return AlertDialog(
         title: Text(title, style: AppTheme.headLine3),
-        content: Text(
-          message,
-          style: AppTheme.paragraphMedium,
-        ),
+        content: body ??
+            Text(
+              message,
+              style: AppTheme.paragraphMedium,
+            ),
         titlePadding: EdgeInsets.symmetric(
           horizontal: AppTheme.basePadding * 2,
           vertical: AppTheme.basePadding,

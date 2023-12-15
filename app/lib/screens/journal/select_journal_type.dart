@@ -1,12 +1,13 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/api/classes/journal/journal.dart';
 import 'package:scimovement/models/app_features.dart';
 import 'package:scimovement/screens/journal/widgets/entry_shortcut.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:scimovement/widgets/button.dart';
 
 class SelectJournalTypeScreen extends ConsumerWidget {
   final DateTime? initialDate;
@@ -15,95 +16,116 @@ class SelectJournalTypeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    List<AppFeature> activatedFeatures = ref.watch(appFeaturesProvider);
+
     return Scaffold(
       appBar: AppTheme.appBar(AppLocalizations.of(context)!.newEntry),
       body: ListView(
         padding: EdgeInsets.symmetric(
-          horizontal: AppTheme.basePadding * 3,
           vertical: AppTheme.basePadding * 3,
         ),
         children: [
-          Text(
-            AppLocalizations.of(context)!.journalCategoriesTitle,
-            style: AppTheme.headLine3,
-          ),
-          Text(
-            AppLocalizations.of(context)!.journalCategoriesDescription,
-            style: AppTheme.paragraphMedium,
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: AppTheme.basePadding * 2),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  AppLocalizations.of(context)!.journalCategoriesTitle,
+                  style: AppTheme.headLine3,
+                ),
+                Text(
+                  AppLocalizations.of(context)!.journalCategoriesDescription,
+                  style: AppTheme.paragraphMedium,
+                ),
+              ],
+            ),
           ),
           AppTheme.spacer2x,
-          GridView.count(
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: 2,
-            crossAxisSpacing: AppTheme.basePadding * 4,
-            mainAxisSpacing: AppTheme.basePadding * 4,
-            shrinkWrap: true,
-            children: [
-              if (ref.watch(appFeaturesProvider).contains(AppFeature.pain))
-                JournalEntryShortcut(
-                  onTap: () => _navigate(context, JournalType.musclePain),
-                  icon: AppTheme.iconForJournalType(JournalType.musclePain),
-                  title: AppLocalizations.of(context)!.musclePainTitle,
-                ),
-              if (ref.watch(appFeaturesProvider).contains(AppFeature.pain))
-                JournalEntryShortcut(
-                  onTap: () => _navigate(context, JournalType.neuropathicPain),
-                  icon: AppTheme.iconForJournalType(JournalType.neuropathicPain,
-                      BodyPart(BodyPartType.neuropathic, null)),
-                  title: AppLocalizations.of(context)!.neuropathicPain,
-                ),
-              if (ref.watch(appFeaturesProvider).contains(AppFeature.pain))
-                JournalEntryShortcut(
-                  onTap: () => _navigate(context, JournalType.spasticity),
-                  icon: AppTheme.iconForJournalType(JournalType.spasticity),
-                  title: AppLocalizations.of(context)!.spasticity,
-                ),
-              if (ref
-                  .watch(appFeaturesProvider)
-                  .contains(AppFeature.pressureRelease))
-                JournalEntryShortcut(
-                  onTap: () => _navigate(context, JournalType.pressureRelease),
-                  icon:
-                      AppTheme.iconForJournalType(JournalType.pressureRelease),
-                  title: AppLocalizations.of(context)!.pressureRelease,
-                ),
-              if (ref
-                  .watch(appFeaturesProvider)
-                  .contains(AppFeature.pressureRelease))
-                JournalEntryShortcut(
-                  onTap: () => _navigate(context, JournalType.pressureUlcer),
-                  icon: AppTheme.iconForJournalType(JournalType.pressureUlcer),
-                  title: AppLocalizations.of(context)!.pressureUlcer,
-                ),
-              if (ref.watch(appFeaturesProvider).contains(AppFeature.bladder))
-                JournalEntryShortcut(
-                  onTap: () => _navigate(context, JournalType.bladderEmptying),
-                  icon:
-                      AppTheme.iconForJournalType(JournalType.bladderEmptying),
-                  title: AppLocalizations.of(context)!.bladderEmptying,
-                ),
-              if (ref.watch(appFeaturesProvider).contains(AppFeature.bladder))
-                JournalEntryShortcut(
-                  onTap: () =>
-                      _navigate(context, JournalType.urinaryTractInfection),
-                  icon: AppTheme.iconForJournalType(
-                      JournalType.urinaryTractInfection),
-                  title: AppLocalizations.of(context)!.urinaryTractInfection,
-                ),
-              if (ref.watch(appFeaturesProvider).contains(AppFeature.bladder))
-                JournalEntryShortcut(
-                  onTap: () => _navigate(context, JournalType.leakage),
-                  icon: AppTheme.iconForJournalType(JournalType.leakage),
-                  title: AppLocalizations.of(context)!.leakage,
-                ),
-              JournalEntryShortcut(
-                onTap: () => _navigate(context, JournalType.exercise),
-                icon: AppTheme.iconForJournalType(JournalType.exercise),
-                title: AppLocalizations.of(context)!.exercise,
-              ),
-            ],
-          )
+          Column(
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: groupedFeatures.entries
+                .sorted((a, b) {
+                  if (activatedFeatures.contains(a.key) &&
+                      !activatedFeatures.contains(b.key)) {
+                    return -1;
+                  } else if (!activatedFeatures.contains(a.key) &&
+                      activatedFeatures.contains(b.key)) {
+                    return 1;
+                  } else {
+                    return 0;
+                  }
+                })
+                .map((e) => _featureRow(context, ref, e))
+                .toList(),
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _featureRow(BuildContext context, WidgetRef ref,
+      MapEntry<AppFeature, List<JournalType>> featureGroup) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: AppTheme.basePadding * 2),
+          child: Text(
+            featureGroup.key.displayString(context),
+            style: AppTheme.labelLarge,
+          ),
+        ),
+        AppTheme.spacer,
+        if (!ref.watch(appFeaturesProvider).contains(featureGroup.key))
+          _emptyState(context),
+        if (ref.watch(appFeaturesProvider).contains(featureGroup.key))
+          Container(
+            padding: EdgeInsets.only(bottom: AppTheme.basePadding * 2),
+            height: 176,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              shrinkWrap: true,
+              padding: EdgeInsets.only(left: AppTheme.basePadding * 2),
+              children: featureGroup.value
+                  .map((e) => _shortCutForType(context, e))
+                  .toList(),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _emptyState(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: AppTheme.basePadding * 2),
+      child: Column(
+        children: [
+          const Text(
+            'You have deactivated this feature, do you want to toggle it back on?',
+          ),
+          AppTheme.spacer,
+          Button(
+            onPressed: () => context.goNamed('settings'),
+            title: 'Go to settings',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _shortCutForType(BuildContext context, JournalType type) {
+    return Padding(
+      padding: EdgeInsets.only(right: AppTheme.basePadding * 2),
+      child: SizedBox(
+        width: 160,
+        height: 160,
+        child: JournalEntryShortcut(
+          onTap: () => _navigate(context, type),
+          icon: AppTheme.iconForJournalType(type),
+          title: type.displayString(context),
+        ),
       ),
     );
   }

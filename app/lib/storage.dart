@@ -76,7 +76,7 @@ class Storage {
   List<AppFeature> getAppFeatures() {
     final List<String>? features = prefs.getStringList('appFeatures');
     if (features == null) {
-      return AppFeature.values.toList();
+      return defaultAppFeatures;
     }
 
     return features

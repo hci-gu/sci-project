@@ -43,20 +43,27 @@ class PressureReleaseForm extends StatelessWidget {
           style: AppTheme.paragraphSmall,
         ),
         AppTheme.spacer2x,
-        Button(
-          width: 200,
-          onPressed: () {
+        ReactiveFormConsumer(
+          builder: ((context, formGroup, child) {
             List<PressureReleaseExercise> exercises =
-                form.control('exercises').value;
-            if (!exercises.contains(PressureReleaseExercise.lying)) {
-              context.goNamed('perform-pressure-release', extra: {
-                'exercises': exercises,
-              });
+                formGroup.value['exercises'] as List<PressureReleaseExercise>;
+            if (exercises.contains(PressureReleaseExercise.lying) ||
+                exercises.isEmpty) {
+              return const SizedBox.shrink();
             }
 
-            callback(false, false);
-          },
-          title: AppLocalizations.of(context)!.start,
+            return Button(
+              width: 200,
+              onPressed: () {
+                context.goNamed('perform-pressure-release', extra: {
+                  'exercises': exercises,
+                });
+
+                callback(false, false);
+              },
+              title: AppLocalizations.of(context)!.start,
+            );
+          }),
         ),
       ],
     );

@@ -153,30 +153,32 @@ class NotificationToggles extends ConsumerWidget {
       child: Column(
         children: [
           AppTheme.spacer,
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                AppLocalizations.of(context)!.movementReminders,
-                style: AppTheme.paragraphMedium,
-              ),
-              CupertinoSwitch(
-                thumbColor: AppTheme.colors.white,
-                activeColor: AppTheme.colors.primary,
-                value: user.notificationSettings.activity,
-                onChanged: (value) async {
-                  ref
-                      .read(userProvider.notifier)
-                      .updateNotificationSettings(NotificationSettings(
-                        activity: value,
-                        data: user.notificationSettings.data,
-                        journal: user.notificationSettings.journal,
-                      ));
-                },
-              ),
-            ],
-          ),
-          AppTheme.spacer,
+          if (ref.watch(appFeaturesProvider).contains(AppFeature.watch))
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  AppLocalizations.of(context)!.movementReminders,
+                  style: AppTheme.paragraphMedium,
+                ),
+                CupertinoSwitch(
+                  thumbColor: AppTheme.colors.white,
+                  activeColor: AppTheme.colors.primary,
+                  value: user.notificationSettings.activity,
+                  onChanged: (value) async {
+                    ref
+                        .read(userProvider.notifier)
+                        .updateNotificationSettings(NotificationSettings(
+                          activity: value,
+                          data: user.notificationSettings.data,
+                          journal: user.notificationSettings.journal,
+                        ));
+                  },
+                ),
+              ],
+            ),
+          if (ref.watch(appFeaturesProvider).contains(AppFeature.watch))
+            AppTheme.spacer,
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -201,29 +203,30 @@ class NotificationToggles extends ConsumerWidget {
             ],
           ),
           AppTheme.spacer,
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                AppLocalizations.of(context)!.noDataWarning,
-                style: AppTheme.paragraphMedium,
-              ),
-              CupertinoSwitch(
-                thumbColor: AppTheme.colors.white,
-                activeColor: AppTheme.colors.primary,
-                value: user.notificationSettings.data,
-                onChanged: (value) async {
-                  ref
-                      .read(userProvider.notifier)
-                      .updateNotificationSettings(NotificationSettings(
-                        activity: user.notificationSettings.activity,
-                        data: value,
-                        journal: user.notificationSettings.journal,
-                      ));
-                },
-              ),
-            ],
-          )
+          if (ref.watch(appFeaturesProvider).contains(AppFeature.watch))
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  AppLocalizations.of(context)!.noDataWarning,
+                  style: AppTheme.paragraphMedium,
+                ),
+                CupertinoSwitch(
+                  thumbColor: AppTheme.colors.white,
+                  activeColor: AppTheme.colors.primary,
+                  value: user.notificationSettings.data,
+                  onChanged: (value) async {
+                    ref
+                        .read(userProvider.notifier)
+                        .updateNotificationSettings(NotificationSettings(
+                          activity: user.notificationSettings.activity,
+                          data: value,
+                          journal: user.notificationSettings.journal,
+                        ));
+                  },
+                ),
+              ],
+            )
         ],
       ),
     );

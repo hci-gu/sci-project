@@ -263,9 +263,13 @@ class AppTheme {
       [BodyPart? bodyPart, double size = 48]) {
     switch (type) {
       case JournalType.musclePain:
-      case JournalType.neuropathicPain:
         return BodyPartIcon(
           bodyPart: bodyPart ?? BodyPart(BodyPartType.scapula, null),
+          size: size,
+        );
+      case JournalType.neuropathicPain:
+        return BodyPartIcon(
+          bodyPart: bodyPart ?? BodyPart(BodyPartType.neuropathic, null),
           size: size,
         );
       case JournalType.spasticity:

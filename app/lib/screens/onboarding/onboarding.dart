@@ -77,8 +77,10 @@ class OnboardingWelcome extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(AppLocalizations.of(context)!.introductionWelcome,
-            style: AppTheme.headLine3),
+        Text(
+          AppLocalizations.of(context)!.introductionWelcome,
+          style: AppTheme.headLine3,
+        ),
         AppTheme.spacer2x,
         SvgPicture.asset(
           'assets/svg/person.svg',
@@ -102,6 +104,11 @@ class WatchFunctions extends ConsumerWidget {
         Text(AppLocalizations.of(context)!.watchFunctions,
             style: AppTheme.headLine3),
         Image.asset('assets/images/fitbit.png', width: 200),
+        Text(
+          AppLocalizations.of(context)!.onboardingWatchRequirement,
+          style: AppTheme.paragraph,
+        ),
+        AppTheme.spacer,
         AppFeatureWidget(
           asset: 'assets/svg/flame.svg',
           title: AppLocalizations.of(context)!.calories,
@@ -182,8 +189,10 @@ class PainFunctions extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       children: [
-        Text(AppLocalizations.of(context)!.musclePainTitle,
-            style: AppTheme.headLine3),
+        Text(
+          AppLocalizations.of(context)!.painAndDiscomfort,
+          style: AppTheme.headLine3,
+        ),
         SizedBox(
           height: 200,
           child: Center(
@@ -192,8 +201,22 @@ class PainFunctions extends ConsumerWidget {
         ),
         AppFeatureWidget(
           asset: 'assets/svg/alarm.svg',
-          title: AppLocalizations.of(context)!.onboardingPainFeature,
+          title: AppLocalizations.of(context)!.musclePainTitle,
           description: AppLocalizations.of(context)!.onboardingPainDescription,
+        ),
+        AppTheme.spacer,
+        AppFeatureWidget(
+          asset: 'assets/svg/neuropathic.svg',
+          title: AppLocalizations.of(context)!.neuropathicPain,
+          description: AppLocalizations.of(context)!
+              .onboardingNeuropathicPainDescription,
+        ),
+        AppTheme.spacer,
+        AppFeatureWidget(
+          asset: 'assets/svg/spasticity.svg',
+          title: AppLocalizations.of(context)!.spasticity,
+          description:
+              AppLocalizations.of(context)!.onboardingSpasticityDescription,
         ),
         AppTheme.spacer4x,
         FeatureToggle(
