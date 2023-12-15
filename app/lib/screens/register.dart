@@ -9,6 +9,7 @@ import 'package:scimovement/screens/settings/widgets/form_dropdown.dart';
 import 'package:scimovement/screens/settings/widgets/user_settings.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
+import 'package:scimovement/widgets/confirm_dialog.dart';
 import 'package:scimovement/widgets/snackbar_message.dart';
 import 'package:scimovement/widgets/text_field.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -151,6 +152,8 @@ class RegisterScreen extends HookConsumerWidget {
             disabled: form.pristine || !form.valid,
             loading: loading.value,
             onPressed: () async {
+              bool proceed = await _confirm(context);
+              if (!proceed) return;
               FocusManager.instance.primaryFocus?.unfocus();
               String email = form.value['email'] as String;
               String password = form.value['password'] as String;
@@ -181,6 +184,33 @@ class RegisterScreen extends HookConsumerWidget {
               loading.value = false;
             },
           )),
+    );
+  }
+
+  Future _confirm(BuildContext context) {
+    return confirmDialog(
+      context,
+      title: AppLocalizations.of(context)!.registerDataTitle,
+      message: '',
+      body: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            AppLocalizations.of(context)!.registerDataDescription,
+            style: AppTheme.paragraphMedium,
+          ),
+          AppTheme.spacer,
+          Text(
+            AppLocalizations.of(context)!.registerDataDeletion,
+            style: AppTheme.paragraphMedium,
+          ),
+          AppTheme.spacer,
+          Text(
+            AppLocalizations.of(context)!.registerProceed,
+            style: AppTheme.labelMedium,
+          ),
+        ],
+      ),
     );
   }
 
