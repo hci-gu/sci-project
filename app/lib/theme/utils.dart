@@ -26,3 +26,7 @@ Color darkenColor(Color color) {
       hslColor.saturation, hslColor.lightness - 0.2);
   return hslDarken.toColor();
 }
+
+Color FromColorToColor(Color c1, Color c2, double percent) {
+  return Color.lerp(c1, c2, percent)!;
+}

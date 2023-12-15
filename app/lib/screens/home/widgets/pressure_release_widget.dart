@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -211,15 +212,18 @@ class PressureReleaseWidget extends ConsumerWidget {
     return StatWidget.container(Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Row(
-          children: [
-            SvgPicture.asset(asset, height: 18),
-            AppTheme.spacerHalf,
-            Text(
-              AppLocalizations.of(context)!.pressureRelease,
-              style: AppTheme.labelTiny,
-            ),
-          ],
+        MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaleFactor: 1),
+          child: Row(
+            children: [
+              SvgPicture.asset(asset, height: 16),
+              AppTheme.spacerHalf,
+              AutoSizeText(
+                AppLocalizations.of(context)!.pressureRelease,
+                style: AppTheme.labelTiny,
+              ),
+            ],
+          ),
         ),
         RebuildOnTimer(
           child: TimeUntilGoal(goal: goal),

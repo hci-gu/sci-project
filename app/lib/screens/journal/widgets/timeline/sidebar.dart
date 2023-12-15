@@ -19,7 +19,7 @@ class EventHandleItem extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 8.0),
       child: Container(
-        width: 160,
+        // width: 160,
         height: type == TimelineType.movement
             ? eventHeight
             : heightForType(timelineDisplayType(type)),
@@ -44,17 +44,12 @@ class EventHandleItem extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                SizedBox(
-                  width: 120,
-                  height: 24,
-                  child: AutoSizeText(
-                    type.displayString(context),
-                    maxLines: 2,
-                    style: AppTheme.labelMedium,
-                    minFontSize: 10,
-                  ),
+                AutoSizeText(
+                  type.displayString(context),
+                  maxLines: 2,
+                  style: AppTheme.labelSmall,
+                  minFontSize: 10,
                 ),
-                AppTheme.spacer,
                 _contentForType(context, ref),
               ],
             ),
@@ -122,43 +117,46 @@ class LineChartSidebar extends HookConsumerWidget {
   }
 
   Widget _content(List<Category> categories) {
-    return SizedBox(
-      height: lineChartHeight - 48,
-      width: 120,
-      child: ListView.builder(
-        itemCount: categories.length,
-        itemBuilder: (context, index) => Padding(
-          padding: const EdgeInsets.only(bottom: 4, left: 1),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                width: 4,
-                height: 16,
-                decoration: BoxDecoration(
-                  borderRadius: categories[index].isStepLine
-                      ? BorderRadius.zero
-                      : BorderRadius.circular(4),
-                  border: Border.all(
-                    color: AppTheme.colors.black,
-                    width: 1,
-                    strokeAlign: BorderSide.strokeAlignOutside,
+    return Padding(
+      padding: EdgeInsets.only(top: AppTheme.halfPadding),
+      child: SizedBox(
+        height: lineChartHeight - 40,
+        width: 120,
+        child: ListView.builder(
+          itemCount: categories.length,
+          itemBuilder: (context, index) => Padding(
+            padding: const EdgeInsets.only(bottom: 4, left: 1),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  width: 4,
+                  height: 16,
+                  decoration: BoxDecoration(
+                    borderRadius: categories[index].isStepLine
+                        ? BorderRadius.zero
+                        : BorderRadius.circular(4),
+                    border: Border.all(
+                      color: AppTheme.colors.black,
+                      width: 1,
+                      strokeAlign: BorderSide.strokeAlignOutside,
+                    ),
+                    color: categories[index].color,
                   ),
-                  color: categories[index].color,
                 ),
-              ),
-              AppTheme.spacerHalf,
-              categories[index].icon,
-              AppTheme.spacer,
-              Expanded(
-                child: AutoSizeText(
-                  categories[index].title(context),
-                  style: AppTheme.paragraphSmall,
-                  maxLines: 1,
-                  minFontSize: 8,
+                AppTheme.spacerHalf,
+                categories[index].icon,
+                AppTheme.spacer,
+                Expanded(
+                  child: AutoSizeText(
+                    categories[index].title(context),
+                    style: AppTheme.paragraphSmall,
+                    maxLines: 1,
+                    minFontSize: 8,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -184,6 +182,7 @@ class TimelineSidebar extends HookConsumerWidget {
 
     return fetch.when(
       data: (data) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: data.map((e) => EventHandleItem(e)).toList(),
       ),
       error: (_, __) => const SizedBox.shrink(),

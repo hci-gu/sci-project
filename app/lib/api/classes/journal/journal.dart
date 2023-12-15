@@ -88,7 +88,7 @@ extension TimelineTypeDisplayAsString on TimelineType {
   String displayString(BuildContext context) {
     switch (this) {
       case TimelineType.pain:
-        return AppLocalizations.of(context)!.pain;
+        return AppLocalizations.of(context)!.painAndDiscomfort;
       case TimelineType.pressureRelease:
         return AppLocalizations.of(context)!.pressureRelease;
       case TimelineType.pressureUlcer:
