@@ -83,26 +83,36 @@ class TimelineEvents extends ConsumerWidget {
   }
 
   Widget _dot(double width, List<JournalEntry> entries, JournalGoal? goal) {
-    double borderWidth = 5;
+    double borderWidth = 6;
+    double goalProgress = 0;
     if (goal != null) {
-      borderWidth *= math.min(entries.length / goal.value, 1);
+      goalProgress = math.min(entries.length / goal.value, 1);
+      borderWidth *= goalProgress;
     }
 
     return SizedBox(
       width: width,
       height: eventHeight,
       child: Center(
-        child: Container(
-          width: 10,
-          height: 10,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(5),
-            border: Border.all(
-              color: AppTheme.colors.primary,
-              width: borderWidth,
-            ),
-          ),
-        ),
+        child: goalProgress == 1
+            ? Icon(
+                Icons.check_circle,
+                size: 14,
+                color: AppTheme.colors.success,
+              )
+            : Container(
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(
+                    color: Color.lerp(AppTheme.colors.lightGray,
+                            AppTheme.colors.success, goalProgress) ??
+                        AppTheme.colors.lightGray,
+                    width: borderWidth,
+                  ),
+                ),
+              ),
       ),
     );
   }
@@ -318,34 +328,6 @@ class JournalTimelineWithEvents extends HookConsumerWidget {
           child: Stack(
             clipBehavior: Clip.none,
             children: [
-              // ListView(
-              //   scrollDirection: Axis.horizontal,
-              //   children: const [
-              //     SizedBox(
-              //       width: 400,
-              //       height: 10,
-              //     ),
-              //     // Opacity(
-              //     //   opacity: 1,
-              //     //   child: Month(
-              //     //     page: Pagination(mode: ChartMode.month, page: 3),
-              //     //   ),
-              //     // ),
-              //     Opacity(
-              //       opacity: 0.5,
-              //       child: Month(
-              //         page: Pagination(mode: ChartMode.month, page: 1),
-              //       ),
-              //     ),
-              //     Month(
-              //       page: Pagination(mode: ChartMode.month, page: 0),
-              //     ),
-              //     SizedBox(
-              //       width: 400,
-              //       height: 10,
-              //     ),
-              //   ],
-              // ),
               InfiniteListView.builder(
                 controller: controller,
                 scrollDirection: Axis.horizontal,
@@ -360,7 +342,6 @@ class JournalTimelineWithEvents extends HookConsumerWidget {
                 top: headerHeight,
                 left: AppTheme.basePadding +
                     MediaQuery.of(context).viewPadding.left,
-                width: 160,
                 height: 600,
                 child: const TimelineSidebar(),
               ),
@@ -382,8 +363,11 @@ class JournalTimeline extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return JournalTimelineWithEvents(
-      initialPage: initialPage,
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(textScaleFactor: 1),
+      child: JournalTimelineWithEvents(
+        initialPage: initialPage,
+      ),
     );
   }
 }

@@ -138,6 +138,11 @@ class AppTheme {
     fontWeight: FontWeight.w700,
     color: colors.black,
   );
+  static TextStyle labelSmall = TextStyle(
+    fontSize: 12,
+    fontWeight: FontWeight.w700,
+    color: colors.black,
+  );
   static TextStyle labelTiny = TextStyle(
     fontSize: 11,
     fontWeight: FontWeight.w500,

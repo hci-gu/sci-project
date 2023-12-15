@@ -25,8 +25,11 @@ class TimelineFilters extends ConsumerWidget {
         child: Container(
           width: 400,
           decoration: AppTheme.cardDecoration,
-          padding: AppTheme.screenPadding,
           child: ListView(
+            padding: EdgeInsets.symmetric(
+              horizontal: AppTheme.basePadding * 2,
+              vertical: AppTheme.basePadding,
+            ),
             shrinkWrap: true,
             children: [
               Row(

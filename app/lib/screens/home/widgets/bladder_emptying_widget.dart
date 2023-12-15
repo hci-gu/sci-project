@@ -172,15 +172,18 @@ class BladderEmptyingWidget extends ConsumerWidget {
     return StatWidget.container(Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Row(
-          children: [
-            SvgPicture.asset(asset, height: 18),
-            AppTheme.spacerHalf,
-            Text(
-              AppLocalizations.of(context)!.bladderEmptying,
-              style: AppTheme.labelTiny,
-            ),
-          ],
+        MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaleFactor: 1),
+          child: Row(
+            children: [
+              SvgPicture.asset(asset, height: 16),
+              AppTheme.spacerHalf,
+              Text(
+                AppLocalizations.of(context)!.bladderEmptying,
+                style: AppTheme.labelTiny,
+              ),
+            ],
+          ),
         ),
         RebuildOnTimer(
           child: TimeUntilGoal(goal: goal),
