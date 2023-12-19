@@ -68,7 +68,7 @@ class TimelinePainChart extends ConsumerWidget {
       child: Stack(
         children: [
           Positioned(
-            left: daysOffset * dayWidth,
+            left: min(daysOffset, 0) * dayWidth,
             child: SizedBox(
               width: max(dayWidth * numDays, dayWidth * daysInMonth),
               height: lineChartHeight,

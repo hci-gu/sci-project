@@ -95,6 +95,10 @@ final timelineLineChartProvider =
   DateTime to = page.pagination.to;
   List<JournalEntry> journal = await ref.watch(timelineDataProvider.future);
 
+  if (journal.length == 1 || journal.isEmpty) {
+    return journal;
+  }
+
   List<JournalEntry> entries = [
     ...journal.whereType<PainLevelEntry>().toList(),
     ...journal.whereType<SpasticityEntry>().toList(),
@@ -103,10 +107,6 @@ final timelineLineChartProvider =
   List<JournalEntry> entriesToShow = entries
       .where((e) => e.time.isBefore(to) && e.time.isAfter(from))
       .toList();
-  // create a map with empty list for each day for all journalentries
-  // Map<String, List<JournalEntry>> days = Map.fromIterable(
-  //     entriesToShow.map((e) => e.time.toIso8601String().substring(0, 10)),
-  //     value: (e) => []);
 
   List<String> categories =
       entries.map((e) => categoryIdentifierForEntry(e)).toSet().toList();
@@ -114,19 +114,6 @@ final timelineLineChartProvider =
     List<JournalEntry> entriesForCategory = entries
         .where((e) => categoryIdentifierForEntry(e) == category)
         .toList();
-
-    // for (JournalEntry entry in entriesForCategory) {
-    //   String day = entry.time.toIso8601String().substring(0, 10);
-
-    //   List<JournalEntry>? entriesForDay = days[day];
-
-    //   if (entriesForDay != null &&
-    //       !entriesForDay
-    //           .map((e) => categoryIdentifierForEntry(e))
-    //           .contains(category)) {
-    //     entriesForDay.add(entry);
-    //   }
-    // }
 
     List<JournalEntry> entriesBefore =
         entriesForCategory.where((e) => e.time.isBefore(from)).toList();
