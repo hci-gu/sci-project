@@ -3,6 +3,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/api/classes/journal/journal.dart';
+import 'package:scimovement/app.dart';
 import 'package:scimovement/screens/journal/widgets/body_part_icon.dart';
 import 'package:scimovement/theme/utils.dart';
 import 'package:scimovement/widgets/button.dart';
@@ -79,11 +80,19 @@ class AppTheme {
   static double basePadding = 8.0;
 
   static ThemeData theme = ThemeData(
-    primarySwatch: primarySwatch,
     primaryColor: colors.primary,
     primaryColorDark: colors.primaryDark,
-    backgroundColor: colors.background,
     fontFamily: 'Manrope',
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: colors.primary,
+      background: colors.background,
+    ),
+    useMaterial3: true,
+    appBarTheme: AppBarTheme(
+      backgroundColor: colors.primary,
+      surfaceTintColor: colors.white,
+      foregroundColor: colors.white,
+    ),
   );
 
   static TextStyle headLine1 = TextStyle(

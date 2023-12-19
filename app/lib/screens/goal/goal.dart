@@ -12,7 +12,7 @@ import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/text_field.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class GoalScreen extends ConsumerWidget {
+class GoalScreen extends HookConsumerWidget {
   final Goal? goal;
   final JournalType type;
 
@@ -41,6 +41,8 @@ class GoalScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ValueNotifier<bool> loading = useState(false);
+
     return Scaffold(
       appBar: AppTheme.appBar(AppLocalizations.of(context)!.goal),
       body: ReactiveFormBuilder(
@@ -95,7 +97,7 @@ class GoalScreen extends ConsumerWidget {
                 },
               ),
               AppTheme.spacer4x,
-              _saveButton(ref),
+              _saveButton(ref, loading),
             ],
           );
         },
@@ -103,14 +105,16 @@ class GoalScreen extends ConsumerWidget {
     );
   }
 
-  Widget _saveButton(WidgetRef ref) {
+  Widget _saveButton(WidgetRef ref, ValueNotifier<bool> loading) {
     return ReactiveFormConsumer(
       builder: (context, form, __) => Center(
         child: Button(
           disabled: form.valid == false,
+          loading: loading.value,
           width: 180,
           title: AppLocalizations.of(context)!.save,
           onPressed: () async {
+            loading.value = true;
             if (goal != null) {
               Duration start = form.value['start'] as Duration;
               await ref.read(updateGoalProvider.notifier).updateGoal(
@@ -128,6 +132,7 @@ class GoalScreen extends ConsumerWidget {
                   .read(updateGoalProvider.notifier)
                   .createGoal(form.value, type);
             }
+            loading.value = false;
             if (context.mounted) {
               context.pop();
             }
