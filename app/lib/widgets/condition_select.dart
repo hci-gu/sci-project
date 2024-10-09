@@ -108,13 +108,16 @@ class ConditionSelect extends ConsumerWidget {
       elevation: 4,
       isScrollControlled: true,
       clipBehavior: Clip.hardEdge,
-      builder: (context) => Wrap(
-        children: [
-          Padding(
-            padding: AppTheme.elementPadding,
-            child: modal,
-          )
-        ],
+      builder: (context) => Container(
+        color: AppTheme.colors.background,
+        child: Wrap(
+          children: [
+            Padding(
+              padding: AppTheme.elementPadding,
+              child: modal,
+            )
+          ],
+        ),
       ),
     );
   }
