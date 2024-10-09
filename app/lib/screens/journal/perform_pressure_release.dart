@@ -28,9 +28,7 @@ class PerformPressureReleaseScreen extends HookWidget {
     bool isDone = currentExercise.value == exercises.length;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.pressureRelease),
-      ),
+      appBar: AppTheme.appBar(AppLocalizations.of(context)!.pressureRelease),
       body: ListView(
         padding: AppTheme.screenPadding,
         children: [
