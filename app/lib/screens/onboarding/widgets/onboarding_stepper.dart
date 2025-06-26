@@ -4,7 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/models/onboarding.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:scimovement/gen_l10n/app_localizations.dart';
 
 class StepIndicator extends StatelessWidget {
   final int index;

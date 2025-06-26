@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:scimovement/gen_l10n/app_localizations.dart';
 
 export 'package:scimovement/api/classes/journal/pain.dart';
 export 'package:scimovement/api/classes/journal/uti.dart';

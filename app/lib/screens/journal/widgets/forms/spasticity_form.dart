@@ -3,7 +3,7 @@ import 'package:reactive_forms/reactive_forms.dart';
 import 'package:scimovement/api/classes/journal/spasticity.dart';
 import 'package:scimovement/screens/journal/widgets/number_slider.dart';
 import 'package:scimovement/theme/theme.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:scimovement/gen_l10n/app_localizations.dart';
 
 class SpasticityForm extends StatelessWidget {
   final FormGroup form;

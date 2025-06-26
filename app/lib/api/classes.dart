@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:scimovement/api/api.dart';
 import 'package:intl/intl.dart';
 import 'package:timezone/standalone.dart' as tz;
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:scimovement/gen_l10n/app_localizations.dart';
 
 enum Gender { male, female }
 

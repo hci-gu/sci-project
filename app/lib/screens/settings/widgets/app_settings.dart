@@ -8,7 +8,7 @@ import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/locale_select.dart';
 import 'package:scimovement/widgets/snackbar_message.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:scimovement/gen_l10n/app_localizations.dart';
 
 class AppSettings extends ConsumerWidget {
   const AppSettings({Key? key}) : super(key: key);

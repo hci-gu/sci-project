@@ -4,7 +4,7 @@ import 'package:scimovement/api/classes/journal/journal.dart';
 import 'package:scimovement/models/journal/journal.dart';
 import 'package:scimovement/screens/journal/edit_entry.dart';
 import 'package:scimovement/theme/theme.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:scimovement/gen_l10n/app_localizations.dart';
 import 'package:scimovement/widgets/confirm_dialog.dart';
 import 'package:scimovement/widgets/tappable.dart';
 

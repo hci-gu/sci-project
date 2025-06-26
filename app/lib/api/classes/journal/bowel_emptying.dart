@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:scimovement/api/classes/journal/journal.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:scimovement/gen_l10n/app_localizations.dart';
 
 enum StoolType { type1, type2, type3, type4, type5, type6, type7 }
 

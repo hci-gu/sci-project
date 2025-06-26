@@ -5,7 +5,7 @@ import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/condition_dropdown.dart';
 import 'package:scimovement/widgets/condition_item.dart';
 import 'package:scimovement/widgets/condition_select.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:scimovement/gen_l10n/app_localizations.dart';
 
 class UTIForm extends StatelessWidget {
   final FormGroup form;
