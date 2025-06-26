@@ -40,6 +40,15 @@ class UserState extends StateNotifier<User?> {
     }
   }
 
+  Future<void> forcedLogin(String userId, String apiKey) async {
+    try {
+      state = await Api().forcedLogin(userId, apiKey);
+      // Note: We don't store credentials for forced login as we don't have email/password
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> register(String email, String password,
       [Map<dynamic, dynamic> values = emptyBody]) async {
     try {

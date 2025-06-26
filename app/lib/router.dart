@@ -87,6 +87,10 @@ class RouterNotifier extends ChangeNotifier {
       return null;
     }
 
+    if (state.matchedLocation == '/forced-login') {
+      return null;
+    }
+
     // redirect from login screen to home or onboarding after login
     if (loggedIn && _isLoginRoute(state.matchedLocation)) {
       if (onboardingDone) {
@@ -230,22 +234,23 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
                 builder: (context, state) => const JournalScreen(),
                 routes: [
                   GoRoute(
-                      name: 'select-journal-type',
-                      path: 'type',
-                      builder: (_, state) => SelectJournalTypeScreen(
-                            initialDate: (state.extra as Map?)?['date'],
-                          ),
-                      routes: [
-                        GoRoute(
-                          name: 'create-journal-from-type',
-                          path: 'create',
-                          builder: (_, state) => EditJournalEntryScreen(
-                            type: (state.extra as Map?)?['type'],
-                            entry: (state.extra as Map?)?['entry'],
-                            initialDate: (state.extra as Map?)?['date'],
-                          ),
+                    name: 'select-journal-type',
+                    path: 'type',
+                    builder: (_, state) => SelectJournalTypeScreen(
+                      initialDate: (state.extra as Map?)?['date'],
+                    ),
+                    routes: [
+                      GoRoute(
+                        name: 'create-journal-from-type',
+                        path: 'create',
+                        builder: (_, state) => EditJournalEntryScreen(
+                          type: (state.extra as Map?)?['type'],
+                          entry: (state.extra as Map?)?['entry'],
+                          initialDate: (state.extra as Map?)?['date'],
                         ),
-                      ]),
+                      ),
+                    ],
+                  ),
                   GoRoute(
                     name: 'create-journal',
                     path: 'create',
@@ -295,6 +300,17 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
           return RedirectScreen(
             redirectUri: state.queryParameters['redirect_uri'],
             state: state.queryParameters['state'],
+          );
+        },
+      ),
+      GoRoute(
+        name: 'forced-login',
+        path: '/forced-login',
+        builder: (context, state) {
+          return ForcedLoginScreen(
+            userId: state.queryParameters['userId'],
+            apiKey: state.queryParameters['apiKey'],
+            date: state.queryParameters['date'],
           );
         },
       ),
@@ -399,6 +415,78 @@ class LoadingScreen extends HookConsumerWidget {
           : const Center(
               child: CircularProgressIndicator(),
             ),
+    );
+  }
+}
+
+class ForcedLoginScreen extends HookConsumerWidget {
+  final String? userId;
+  final String? apiKey;
+  final String? date;
+
+  const ForcedLoginScreen({
+    Key? key,
+    this.userId,
+    this.apiKey,
+    this.date,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    User? user = ref.watch(userProvider);
+
+    useEffect(() {
+      if (userId != null && apiKey != null) {
+        // Attempt forced login
+        ref.read(userProvider.notifier).forcedLogin(userId!, apiKey!).then((_) {
+          // Set the date if provided
+          if (date != null) {
+            try {
+              DateTime parsedDate = DateTime.parse(date!);
+              ref.read(dateProvider.notifier).state = parsedDate;
+            } catch (e) {
+              // If date parsing fails, ignore and use current date
+              print('Failed to parse date: $date');
+            }
+          }
+
+          // Redirect to home after successful login
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            context.goNamed('home');
+          });
+        }).catchError((e) {
+          // Show error message and redirect to introduction
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackbarMessage(
+                context: context,
+                message: 'Failed to login with provided credentials.',
+                type: SnackbarType.error,
+              ),
+            );
+            context.goNamed('introduction');
+          });
+        });
+      } else {
+        // Missing parameters, redirect to introduction
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackbarMessage(
+              context: context,
+              message: 'Missing userId or apiKey parameters.',
+              type: SnackbarType.error,
+            ),
+          );
+          context.goNamed('introduction');
+        });
+      }
+      return () => {};
+    }, [userId, apiKey, date, user]);
+
+    return const Scaffold(
+      body: Center(
+        child: Text('Authenticating...'),
+      ),
     );
   }
 }
