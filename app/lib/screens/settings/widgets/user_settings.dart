@@ -37,7 +37,7 @@ class UserSettings extends HookWidget {
           'injuryLevel': FormControl<int>(
             value: user.injuryLevel,
             validators: [
-              Validators.number,
+              Validators.number(),
             ],
           ),
           'gender': FormControl<Gender>(

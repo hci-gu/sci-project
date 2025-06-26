@@ -36,6 +36,27 @@ class Api {
     return user;
   }
 
+  Future<User?> forcedLogin(String userId, String apiKey) async {
+    // validate apiKey
+    await dio.get(
+      '/users',
+      options: Options(
+        headers: {'x-api-key': apiKey},
+      ),
+    );
+
+    // For now, we'll just get the user by ID
+    // In a real implementation, you'd want to validate the apiKey on the server
+    var response = await dio.get('/users/$userId');
+
+    if (response.statusCode != 200) return null;
+
+    User user = User.fromJson(response.data);
+    _userId = user.id;
+
+    return user;
+  }
+
   Future<User?> register(String email, String password,
       [Map<dynamic, dynamic> values = emptyBody]) async {
     Map<dynamic, dynamic> body = {
@@ -103,7 +124,7 @@ class Api {
   }
 
   Future createBout(DateTime time, int minutes, Activity activity) async {
-    var response = await dio.post('/bouts/$_userId', data: {
+    await dio.post('/bouts/$_userId', data: {
       't': time.toIso8601String(),
       'minutes': minutes,
       'activity': activity.name,

@@ -6,43 +6,9 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:scimovement/widgets/locale_select.dart';
 
-class IntroductionScreen extends StatelessWidget {
-  const IntroductionScreen({Key? key}) : super(key: key);
-
+class IntroductionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Stack(
-          children: [
-            ListView(
-              padding: AppTheme.screenPadding,
-              children: [
-                const SizedBox(height: 64),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _header(context),
-                    AppTheme.spacer2x,
-                    _actions(context),
-                    Image.asset('assets/images/ryggmarg_logo.png', width: 200),
-                  ],
-                ),
-              ],
-            ),
-            Positioned(
-              top: AppTheme.basePadding,
-              right: AppTheme.basePadding,
-              child: LocaleSelect(),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _header(BuildContext context) {
     return Column(
       children: [
         Text('RullaPå', style: AppTheme.headLine1.copyWith(height: 0.5)),
@@ -63,6 +29,43 @@ class IntroductionScreen extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class IntroductionScreen extends StatelessWidget {
+  const IntroductionScreen({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: Stack(
+          children: [
+            ListView(
+              padding: AppTheme.screenPadding,
+              children: [
+                const SizedBox(height: 64),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    IntroductionHeader(),
+                    AppTheme.spacer2x,
+                    _actions(context),
+                    Image.asset('assets/images/ryggmarg_logo.png', width: 200),
+                  ],
+                ),
+              ],
+            ),
+            Positioned(
+              top: AppTheme.basePadding,
+              right: AppTheme.basePadding,
+              child: LocaleSelect(),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
