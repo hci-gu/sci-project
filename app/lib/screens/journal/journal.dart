@@ -13,7 +13,7 @@ import 'package:scimovement/screens/journal/widgets/journal_shortcut_grid.dart';
 import 'package:scimovement/screens/journal/widgets/journal_timeline.dart';
 import 'package:scimovement/screens/journal/widgets/timeline/filter_modal.dart';
 import 'package:scimovement/theme/theme.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:scimovement/gen_l10n/app_localizations.dart';
 import 'package:scimovement/widgets/button.dart';
 
 class JournalScreen extends HookConsumerWidget {

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import 'package:scimovement/api/classes/journal/journal.dart';
 import 'package:scimovement/theme/theme.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:scimovement/gen_l10n/app_localizations.dart';
 
 class BladderEmptyingForm extends StatelessWidget {
   final FormGroup form;

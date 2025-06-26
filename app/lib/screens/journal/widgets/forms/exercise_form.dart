@@ -4,7 +4,7 @@ import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/api/classes/journal/exercise.dart';
 import 'package:scimovement/screens/goal/goal.dart';
 import 'package:scimovement/theme/theme.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:scimovement/gen_l10n/app_localizations.dart';
 
 class ExerciseForm extends StatelessWidget {
   final FormGroup form;

@@ -6,7 +6,7 @@ import 'package:scimovement/api/classes/journal/journal.dart';
 import 'package:scimovement/models/app_features.dart';
 import 'package:scimovement/screens/journal/widgets/entry_shortcut.dart';
 import 'package:scimovement/theme/theme.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:scimovement/gen_l10n/app_localizations.dart';
 import 'package:scimovement/widgets/button.dart';
 
 class SelectJournalTypeScreen extends ConsumerWidget {

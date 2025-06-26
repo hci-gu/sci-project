@@ -13,7 +13,7 @@ import 'package:scimovement/widgets/button.dart';
 import 'package:go_router/go_router.dart';
 import 'package:scimovement/widgets/confirm_dialog.dart';
 import 'package:scimovement/widgets/snackbar_message.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:scimovement/gen_l10n/app_localizations.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({Key? key}) : super(key: key);

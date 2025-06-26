@@ -9,7 +9,7 @@ import 'package:scimovement/api/classes/journal/spasticity.dart';
 import 'package:scimovement/models/journal/journal.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:scimovement/gen_l10n/app_localizations.dart';
 
 class NeuroPathicPainWidgets extends HookConsumerWidget {
   const NeuroPathicPainWidgets({super.key});

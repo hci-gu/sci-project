@@ -12,7 +12,7 @@ import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/confirm_dialog.dart';
 import 'package:scimovement/widgets/snackbar_message.dart';
 import 'package:scimovement/widgets/text_field.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:scimovement/gen_l10n/app_localizations.dart';
 
 class RegisterScreen extends HookConsumerWidget {
   const RegisterScreen({Key? key}) : super(key: key);

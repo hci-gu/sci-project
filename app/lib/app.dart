@@ -9,8 +9,8 @@ import 'package:scimovement/models/locale.dart';
 import 'package:scimovement/router.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:collection/collection.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:scimovement/gen_l10n/app_localizations.dart';
 
 class App extends ConsumerWidget {
   final bool onboardingDone;

@@ -4,7 +4,7 @@ import 'package:scimovement/models/bouts.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/widgets/stat_widget.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:scimovement/gen_l10n/app_localizations.dart';
 
 final sedentaryWidgetProvider = FutureProvider<WidgetValues>((ref) async {
   double current =

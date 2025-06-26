@@ -4,7 +4,7 @@ import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/models/energy.dart';
 import 'package:scimovement/widgets/stat_widget.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:scimovement/gen_l10n/app_localizations.dart';
 
 final energyWidgetProvider = FutureProvider<WidgetValues>((ref) async {
   int current = await ref.watch(totalEnergyProvider(const Pagination()).future);
