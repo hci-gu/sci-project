@@ -1,8 +1,7 @@
 import moment from 'moment-timezone'
-import { Op } from 'sequelize'
-import { GoalType } from '../../constants'
-import { Goal, Journal } from '../../db/classes'
-import JournalModel from '../../db/models/Journal'
+import { GoalType } from '../../constants.ts'
+import { Goal, Journal } from '../../db/classes.ts'
+import JournalModel from '../../db/models/Journal.ts'
 
 const getGoalReccurence = (goal: Goal) => {
   const goalMinuteOfDay =

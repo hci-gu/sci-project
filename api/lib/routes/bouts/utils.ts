@@ -1,13 +1,13 @@
-import UserModel from '../../db/models/User'
-import { overwriteEnergy } from '../../db/models/Energy'
-import AccelCountModel from '../../db/models/AccelCount'
-import BoutModel from '../../db/models/Bout'
-import { Activity } from '../../constants'
+import UserModel from '../../db/models/User.ts'
+import { overwriteEnergy } from '../../db/models/Energy.ts'
+import AccelCountModel from '../../db/models/AccelCount.ts'
+import BoutModel from '../../db/models/Bout.ts'
+import { Activity } from '../../constants.ts'
 import {
   activityForAccAndCondition,
   getEnergyForCountAndActivity,
-} from '../../adapters/energy'
-import { Energy } from '../../db/classes'
+} from '../../adapters/energy/index.ts'
+import { Energy } from '../../db/classes.ts'
 import moment from 'moment'
 
 export const boutsForPeriod = async ({

@@ -1,8 +1,8 @@
 import express from 'express'
-import { ValidatedRequest } from 'express-joi-validation'
-import Goal from '../../db/models/Goal'
-import { getQuery, GetQuerySchema } from '../validation'
-import { getGoalInfo } from './utils'
+import { type ValidatedRequest } from 'express-joi-validation'
+import Goal from '../../db/models/Goal.ts'
+import { getQuery, type GetQuerySchema } from '../validation.ts'
+import { getGoalInfo } from './utils.ts'
 
 const router = express.Router()
 
@@ -44,7 +44,6 @@ router.get(
   getQuery,
   async (req: ValidatedRequest<GetQuerySchema>, res) => {
     const { id } = req.params
-    const { date } = req.query
 
     try {
       const goals = await Goal.find({
@@ -52,7 +51,7 @@ router.get(
       })
       const goalsWithProgress = await Promise.all(
         goals.map(async (g) => {
-          const info = await getGoalInfo(id, g, date)
+          const info = await getGoalInfo(id, g)
           return {
             ...g.dataValues,
             ...info,

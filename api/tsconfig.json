@@ -1,9 +1,23 @@
 {
-  "extends": "@tsconfig/node16/tsconfig.json",
+  "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
-    "outDir": "dist",
-    "resolveJsonModule": true
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "outDir": "./dist",
+    "rootDir": "./lib",
+    "noEmit": true,
+    "types": ["node"],
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "incremental": true
   },
-  "include": ["lib"],
-  "exclude": ["node_modules"],
+  "include": ["lib/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
 }

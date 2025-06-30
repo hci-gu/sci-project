@@ -1,5 +1,5 @@
-import { DataTypes, Sequelize, ModelStatic } from 'sequelize'
-import { Goal } from '../classes'
+import { DataTypes, Sequelize, type ModelStatic } from 'sequelize'
+import { Goal } from '../classes.ts'
 
 let GoalModel: ModelStatic<Goal>
 export default {

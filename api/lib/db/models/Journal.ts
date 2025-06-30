@@ -1,5 +1,5 @@
-import { DataTypes, Op, Sequelize, ModelStatic } from 'sequelize'
-import { Journal } from '../classes'
+import { DataTypes, Op, Sequelize, type ModelStatic } from 'sequelize'
+import { Journal } from '../classes.ts'
 
 let sequelizeInstance: Sequelize
 let JournalModel: ModelStatic<Journal>

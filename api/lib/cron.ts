@@ -1,16 +1,15 @@
-import { activityForPeriod } from './routes/sedentary/utils'
+import { activityForPeriod } from './routes/sedentary/utils.ts'
 import moment from 'moment-timezone'
-import * as redis from './adapters/redis'
-import UserModel from './db/models/User'
-import * as push from './push'
-import AccelCount from './db/models/AccelCount'
-import { Goal, NotificationSettings, User } from './db/classes'
-import JournalModel from './db/models/Journal'
-import GoalModel from './db/models/Goal'
-import { getGoalInfo } from './routes/goals/utils'
-import { JournalType } from './constants'
-
-const CronJob = require('cron').CronJob
+import * as redis from './adapters/redis.ts'
+import UserModel from './db/models/User.ts'
+import * as push from './push/index.ts'
+import AccelCount from './db/models/AccelCount.ts'
+import { Goal, User } from './db/classes.ts'
+import JournalModel from './db/models/Journal.ts'
+import GoalModel from './db/models/Goal.ts'
+import { getGoalInfo } from './routes/goals/utils.ts'
+import { JournalType } from './constants.ts'
+import { CronJob } from 'cron'
 
 enum MessageType {
   Activity = 'activity',

@@ -1,9 +1,9 @@
 import {
   Model,
-  InferAttributes,
-  InferCreationAttributes,
-  CreationOptional,
-  ForeignKey,
+  type InferAttributes,
+  type InferCreationAttributes,
+  type CreationOptional,
+  type ForeignKey,
 } from 'sequelize'
 import {
   Activity,
@@ -12,7 +12,7 @@ import {
   TimeFrame,
   GoalType,
   JournalType,
-} from '../constants'
+} from '../constants.ts'
 
 export type NotificationSettings = {
   activity: boolean

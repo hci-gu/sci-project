@@ -1,9 +1,9 @@
-import { DataTypes, Op, Sequelize, ModelStatic } from 'sequelize'
-import UserModel from './User'
-import { saveEnergyFromCount } from './Energy'
-import { AccelCount } from '../classes'
+import { DataTypes, Op, Sequelize, type ModelStatic } from 'sequelize'
+import UserModel from './User.ts'
+import { saveEnergyFromCount } from './Energy.ts'
+import { AccelCount } from '../classes.ts'
 import moment from 'moment'
-import { createBoutFromCounts } from './Bout'
+import { createBoutFromCounts } from './Bout.ts'
 
 const afterCreate = async (count: AccelCount) => {
   if (!count.UserId || !(count.hr > 0)) return

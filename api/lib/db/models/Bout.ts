@@ -1,9 +1,8 @@
 import moment from 'moment'
-import { DataTypes, Op, Sequelize, ModelStatic } from 'sequelize'
-import { activityForAccAndCondition } from '../../adapters/energy'
-import AccelCountModel from './AccelCount'
-import { Activity, MINUTES_FOR_SLEEP } from '../../constants'
-import { AccelCount, Bout, User } from '../classes'
+import { DataTypes, Op, Sequelize, type ModelStatic } from 'sequelize'
+import { activityForAccAndCondition } from '../../adapters/energy/index.ts'
+import { Activity, MINUTES_FOR_SLEEP } from '../../constants.ts'
+import { AccelCount, Bout, User } from '../classes.ts'
 
 let sequelizeInstance: Sequelize
 let BoutModel: ModelStatic<Bout>

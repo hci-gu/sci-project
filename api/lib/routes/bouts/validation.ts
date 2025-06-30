@@ -1,11 +1,11 @@
 import Joi from 'joi'
-import moment from 'moment'
 import {
-  ContainerTypes,
   createValidator,
-  ValidatedRequestSchema,
+  type ValidatedRequestSchema,
 } from 'express-joi-validation'
-import { Activity } from '../../constants'
+import ejv from 'express-joi-validation'
+const { ContainerTypes } = ejv
+import { Activity } from '../../constants.ts'
 const validator = createValidator({})
 
 const bout = Joi.object({

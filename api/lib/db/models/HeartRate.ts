@@ -1,5 +1,5 @@
-import { DataTypes, Op, Sequelize, ModelStatic } from 'sequelize'
-import { HeartRate } from '../classes'
+import { DataTypes, Op, Sequelize, type ModelStatic } from 'sequelize'
+import { HeartRate } from '../classes.ts'
 
 export type HeartRateData = {
   t: Date

@@ -1,17 +1,16 @@
 import express from 'express'
-import { ValidatedRequest } from 'express-joi-validation'
-import moment from 'moment'
-import Journal from '../../db/models/Journal'
-import { getQuery, GetQuerySchema } from '../validation'
-import { JournalType } from '../../constants'
+import { type ValidatedRequest } from 'express-joi-validation'
+import Journal from '../../db/models/Journal.ts'
+import { getQuery, type GetQuerySchema } from '../validation.ts'
+import { JournalType } from '../../constants.ts'
 import {
   fillMockData,
   getCurrentPain,
   getCurrentPressureUlcers,
   getCurrentSpasticity,
   getCurrentUTI,
-} from './utils'
-import { removeBout, saveBout } from '../bouts/utils'
+} from './utils.ts'
+import { removeBout, saveBout } from '../bouts/utils.ts'
 
 const router = express.Router()
 

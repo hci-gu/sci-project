@@ -1,5 +1,5 @@
 import { Sequelize } from 'sequelize'
-import { init } from './models'
+import { init } from './models/index.ts'
 
 type DBProps = {
   database: string
