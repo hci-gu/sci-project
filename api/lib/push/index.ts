@@ -38,6 +38,7 @@ export const send = ({
   }
   if (action) {
     body.action = action
+    body.expiry = Math.floor(Date.now() / 1000) + 3600
   }
 
   return push.send([deviceId], body).catch(console.error)

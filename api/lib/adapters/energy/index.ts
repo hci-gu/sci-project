@@ -5,9 +5,9 @@ import {
   MOVING_THRESHOLD_PARA,
   MOVING_THRESHOLD_TETRA,
   SEDENTARY_THRESHOLD,
-} from '../../constants'
-import getCoeff from './coeff'
-import { AccelCount, User } from '../../db/classes'
+} from '../../constants.ts'
+import getCoeff from './coeff.ts'
+import { AccelCount, User } from '../../db/classes.ts'
 
 const valueForGender = (gender: Gender) => {
   switch (gender) {

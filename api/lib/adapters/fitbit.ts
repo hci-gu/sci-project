@@ -1,5 +1,5 @@
-import { AccelData } from '../db/models/Accel'
-import { HeartRateData } from '../db/models/HeartRate'
+import { type AccelData } from '../db/models/Accel.ts'
+import { type HeartRateData } from '../db/models/HeartRate.ts'
 
 enum FitbitDataType {
   HeartRate = 'heartRate',

@@ -1,7 +1,7 @@
 import express from 'express'
-import { ValidatedRequest } from 'express-joi-validation'
-import { getQuery, GetQuerySchema } from '../validation'
-import { activityForPeriod } from './utils'
+import { type ValidatedRequest } from 'express-joi-validation'
+import { getQuery, type GetQuerySchema } from '../validation.ts'
+import { activityForPeriod } from './utils.ts'
 
 const router = express.Router()
 

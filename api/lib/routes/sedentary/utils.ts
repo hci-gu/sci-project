@@ -1,7 +1,7 @@
 import moment from 'moment'
-import { SEDENTARY_THRESHOLD } from '../../constants'
-import { AccelCount } from '../../db/classes'
-import AccelCountModel from '../../db/models/AccelCount'
+import { SEDENTARY_THRESHOLD } from '../../constants.ts'
+import { AccelCount } from '../../db/classes.ts'
+import AccelCountModel from '../../db/models/AccelCount.ts'
 
 export const activityForPeriod = async ({
   from,

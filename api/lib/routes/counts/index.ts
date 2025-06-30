@@ -1,9 +1,7 @@
 import express from 'express'
-import { ValidatedRequest } from 'express-joi-validation'
-import { getQuery, GetQuerySchema } from '../validation'
-import AccelCountModel from '../../db/models/AccelCount'
-import moment from 'moment'
-import { Activity } from '../../constants'
+import { type ValidatedRequest } from 'express-joi-validation'
+import { getQuery, type GetQuerySchema } from '../validation.ts'
+import AccelCountModel from '../../db/models/AccelCount.ts'
 
 const router = express.Router()
 

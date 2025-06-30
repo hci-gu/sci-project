@@ -1,8 +1,8 @@
 import express from 'express'
-import { ValidatedRequest } from 'express-joi-validation'
-import { getQuery, GetQuerySchema } from '../validation'
-import { boutsForPeriod, fillMockData, removeBout, saveBout } from './utils'
-import { boutBody, BoutBodySchema } from './validation'
+import { type ValidatedRequest } from 'express-joi-validation'
+import { getQuery, type GetQuerySchema } from '../validation.ts'
+import { boutsForPeriod, fillMockData, removeBout, saveBout } from './utils.ts'
+import { boutBody, type BoutBodySchema } from './validation.ts'
 
 const router = express.Router()
 

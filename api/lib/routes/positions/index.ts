@@ -1,7 +1,5 @@
 import express from 'express'
-import Position from '../../db/models/Position'
-import { ValidatedRequest } from 'express-joi-validation'
-import { getQuery, GetQuerySchema } from '../validation'
+import Position from '../../db/models/Position.ts'
 
 const router = express.Router()
 

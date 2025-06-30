@@ -1,5 +1,5 @@
-import { DataTypes, Op, Sequelize, ModelStatic } from 'sequelize'
-import { Accel } from '../classes'
+import { DataTypes, Op, Sequelize, type ModelStatic } from 'sequelize'
+import { Accel } from '../classes.ts'
 
 export type AccelData = {
   t: Date

@@ -1,20 +1,21 @@
 import express from 'express'
-import { ValidatedRequest } from 'express-joi-validation'
-import AccelCountModel from '../../db/models/AccelCount'
-import AccelModel from '../../db/models/Accel'
-import HeartRateModel from '../../db/models/HeartRate'
+import { type ValidatedRequest } from 'express-joi-validation'
+import AccelCountModel from '../../db/models/AccelCount.ts'
+import AccelModel from '../../db/models/Accel.ts'
+import HeartRateModel from '../../db/models/HeartRate.ts'
 
 const router = express.Router()
 
-import handleFitbitData from '../../adapters/fitbit'
-import { checkAndSaveCounts } from './utils'
-import { userBody, UserBodySchema } from './validation'
+import handleFitbitData from '../../adapters/fitbit.ts'
+import { checkAndSaveCounts } from './utils.ts'
+import { userBody, type UserBodySchema } from './validation.ts'
 import UserModel, {
   ForbiddenError,
   hashPassword,
   NotFoundError,
-} from '../../db/models/User'
-import { User } from '../../db/classes'
+} from '../../db/models/User.ts'
+import { User } from '../../db/classes.ts'
+import { type Request, type Response, type NextFunction } from 'express'
 
 const stripSensitive = (user: User) => {
   const { password, ...rest } = user.toJSON()
@@ -28,6 +29,28 @@ const returnUser = async (user: User) => {
     hasData,
   }
 }
+
+const apiKeyMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  const apiKey =
+    typeof req.headers['x-api-key'] === 'string'
+      ? req.headers['x-api-key']
+      : undefined
+  if (apiKey !== process.env.API_KEY) {
+    res.status(403).send('Forbidden')
+    return
+  }
+  next()
+}
+
+router.get('/', apiKeyMiddleware, async (_, res) => {
+  try {
+    const users = await UserModel.getAll()
+    const result = await Promise.all(users.map(returnUser))
+    res.send(result)
+  } catch (e) {
+    res.sendStatus(500)
+  }
+})
 
 router.post('/', userBody, async (req, res) => {
   try {

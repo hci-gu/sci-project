@@ -1,16 +1,16 @@
 import express from 'express'
 const router = express.Router()
 
-import userRouter from './users'
-import energyRouter from './energy'
-import countsRouter from './counts'
-import sedentaryRouter from './sedentary'
-import boutsRouter from './bouts'
-import positionsRouter from './positions'
-import journalRouter from './journal'
-import goalsRouter from './goals'
+import userRouter from './users/index.ts'
+import energyRouter from './energy/index.ts'
+import countsRouter from './counts/index.ts'
+import sedentaryRouter from './sedentary/index.ts'
+import boutsRouter from './bouts/index.ts'
+import positionsRouter from './positions/index.ts'
+import journalRouter from './journal/index.ts'
+import goalsRouter from './goals/index.ts'
 
-router.get('/ping', (_, res) => res.send('pong'))
+router.get('/ping', (_, res: any) => res.send('pong'))
 
 router.use('/users', userRouter)
 router.use('/energy', energyRouter)

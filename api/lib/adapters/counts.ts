@@ -1,6 +1,6 @@
 import axios from 'axios'
-import { Accel, AccelCount, HeartRate } from '../db/classes'
-import * as utils from '../utils'
+import { Accel, AccelCount, HeartRate } from '../db/classes.ts'
+import * as utils from '../utils/index.ts'
 const { PYTHON_API = 'http://localhost:5555' } = process.env
 
 export const getCounts = async (acc: number[]): Promise<number[]> => {
