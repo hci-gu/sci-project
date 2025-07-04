@@ -12,10 +12,10 @@ class BodyPartSelect extends StatelessWidget {
   final JournalType type;
 
   const BodyPartSelect({
-    Key? key,
+    super.key,
     required this.form,
     required this.type,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

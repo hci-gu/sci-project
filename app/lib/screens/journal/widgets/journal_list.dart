@@ -85,7 +85,7 @@ class JournalListItem extends ConsumerWidget {
     );
   }
 
-  onTap(BuildContext context) {
+  void onTap(BuildContext context) {
     showModalBottomSheet(
       isScrollControlled: true,
       useRootNavigator: true,
@@ -98,7 +98,7 @@ class JournalListItem extends ConsumerWidget {
     );
   }
 
-  onDelete(BuildContext context, WidgetRef ref) async {
+  void onDelete(BuildContext context, WidgetRef ref) async {
     bool? confirmed = await confirmDialog(
       context,
       title: AppLocalizations.of(context)!.remove,

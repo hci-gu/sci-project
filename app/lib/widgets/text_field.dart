@@ -16,7 +16,7 @@ class StyledTextField extends StatelessWidget {
   final TextInputType? keyboardType;
 
   const StyledTextField({
-    Key? key,
+    super.key,
     required this.formControlName,
     required this.placeholder,
     this.helperText,
@@ -29,7 +29,7 @@ class StyledTextField extends StatelessWidget {
     this.canEdit = true,
     this.icon,
     this.keyboardType,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

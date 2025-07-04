@@ -35,7 +35,7 @@ class SpasticityForm extends StatelessWidget {
     );
   }
 
-  static buildForm(SpasticityEntry? entry) {
+  static Map<String, FormControl> buildForm(SpasticityEntry? entry) {
     return {
       'level': FormControl<int>(
         value: entry?.level ?? 0,

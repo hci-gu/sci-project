@@ -11,10 +11,10 @@ class StepIndicator extends StatelessWidget {
   final int count;
 
   const StepIndicator({
-    Key? key,
+    super.key,
     this.index = 0,
     this.count = 3,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +42,7 @@ class StepIndicator extends StatelessWidget {
 }
 
 class OnboardingStepper extends ConsumerWidget {
-  const OnboardingStepper({Key? key}) : super(key: key);
+  const OnboardingStepper({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

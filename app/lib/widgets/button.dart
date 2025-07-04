@@ -70,7 +70,7 @@ class Button extends StatelessWidget {
   late Color? color;
 
   Button({
-    Key? key,
+    super.key,
     required this.onPressed,
     this.title,
     this.subtitle,
@@ -83,7 +83,7 @@ class Button extends StatelessWidget {
     this.flipIcon = false,
     this.disabled = false,
     this.loading = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -161,7 +161,7 @@ class Button extends StatelessWidget {
 
     double buttonScaleFactor = min(
       1.5,
-      max(1, MediaQuery.of(context).textScaleFactor),
+      max(1, MediaQuery.textScalerOf(context).scale(1)),
     );
 
     return AbsorbPointer(

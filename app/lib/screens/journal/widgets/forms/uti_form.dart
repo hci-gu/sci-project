@@ -52,7 +52,8 @@ class UTIForm extends StatelessWidget {
     );
   }
 
-  static buildForm(UTIEntry? entry, bool shouldCreateEntry) {
+  static Map<String, FormControl> buildForm(
+      UTIEntry? entry, bool shouldCreateEntry) {
     return {
       'utiType': FormControl<UTIType>(
         value: entry?.utiType,

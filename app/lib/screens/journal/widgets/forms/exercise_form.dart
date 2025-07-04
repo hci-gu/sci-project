@@ -62,7 +62,8 @@ class ExerciseForm extends StatelessWidget {
     );
   }
 
-  static buildForm(ExerciseEntry? entry, bool shouldCreateEntry) {
+  static Map<String, FormControl> buildForm(
+      ExerciseEntry? entry, bool shouldCreateEntry) {
     return {
       'activity': FormControl<Activity>(
         value: entry?.activity,
@@ -81,10 +82,10 @@ class ActivitySelect extends StatelessWidget {
   final Function onChanged;
 
   const ActivitySelect({
-    Key? key,
+    super.key,
     this.value,
     required this.onChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

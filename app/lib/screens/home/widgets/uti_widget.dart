@@ -68,7 +68,7 @@ class UTIModal extends ConsumerWidget {
           style: AppTheme.paragraphSmall,
         ),
         AppTheme.separator,
-        ...UTIType.values.map((type) => _listItem(context, type)).toList(),
+        ...UTIType.values.map((type) => _listItem(context, type)),
       ],
     );
   }

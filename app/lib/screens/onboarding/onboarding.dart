@@ -14,7 +14,7 @@ import 'package:scimovement/widgets/snackbar_message.dart';
 import 'package:scimovement/gen_l10n/app_localizations.dart';
 
 class OnboardingScreen extends ConsumerWidget {
-  const OnboardingScreen({Key? key}) : super(key: key);
+  const OnboardingScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -307,7 +307,7 @@ class PushNotifications extends ConsumerWidget {
             AppTheme.spacer2x,
             CupertinoSwitch(
               thumbColor: AppTheme.colors.white,
-              activeColor: AppTheme.colors.primary,
+              activeTrackColor: AppTheme.colors.primary,
               value: ref.watch(notificationsEnabledProvider),
               onChanged: (value) async {
                 if (value) {
@@ -406,11 +406,10 @@ class FeatureToggle extends ConsumerWidget {
 
     didChange(bool remove) {
       if (!hasFeature && !remove) {
-        ref.read(appFeaturesProvider.notifier).state = [...features, feature];
+        ref.read(appFeaturesProvider.notifier).addFeature(feature);
       }
       if (hasFeature && remove) {
-        ref.read(appFeaturesProvider.notifier).state =
-            features.whereNot((e) => e == feature).toList();
+        ref.read(appFeaturesProvider.notifier).removeFeature(feature);
       }
     }
 

@@ -85,10 +85,7 @@ class JournalCalendarDay extends ConsumerWidget {
       height: 8,
       child: Stack(
         children: [
-          ...journal
-              .take(3)
-              .map((e) => dot(journal.indexOf(e), numDots))
-              .toList()
+          ...journal.take(3).map((e) => dot(journal.indexOf(e), numDots))
           // .reversed,
         ],
       ),

@@ -11,7 +11,7 @@ import 'package:scimovement/widgets/snackbar_message.dart';
 import 'package:scimovement/gen_l10n/app_localizations.dart';
 
 class AppSettings extends ConsumerWidget {
-  const AppSettings({Key? key}) : super(key: key);
+  const AppSettings({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -25,7 +25,7 @@ class AppSettings extends ConsumerWidget {
                 style: AppTheme.paragraphMedium),
             CupertinoSwitch(
               thumbColor: AppTheme.colors.white,
-              activeColor: AppTheme.colors.primary,
+              activeTrackColor: AppTheme.colors.primary,
               value: ref.watch(notificationsEnabledProvider),
               onChanged: (value) async {
                 if (value) {
@@ -122,17 +122,13 @@ class AppFeatureToggles extends ConsumerWidget {
         ),
         CupertinoSwitch(
           thumbColor: AppTheme.colors.white,
-          activeColor: AppTheme.colors.primary,
+          activeTrackColor: AppTheme.colors.primary,
           value: features.contains(feature),
           onChanged: (add) async {
             if (add) {
-              ref.read(appFeaturesProvider.notifier).state = [
-                ...features,
-                feature
-              ];
+              ref.read(appFeaturesProvider.notifier).addFeature(feature);
             } else {
-              ref.read(appFeaturesProvider.notifier).state =
-                  features.whereNot((e) => e == feature).toList();
+              ref.read(appFeaturesProvider.notifier).removeFeature(feature);
             }
           },
         ),
@@ -142,7 +138,7 @@ class AppFeatureToggles extends ConsumerWidget {
 }
 
 class NotificationToggles extends ConsumerWidget {
-  const NotificationToggles({Key? key}) : super(key: key);
+  const NotificationToggles({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -163,7 +159,7 @@ class NotificationToggles extends ConsumerWidget {
                 ),
                 CupertinoSwitch(
                   thumbColor: AppTheme.colors.white,
-                  activeColor: AppTheme.colors.primary,
+                  activeTrackColor: AppTheme.colors.primary,
                   value: user.notificationSettings.activity,
                   onChanged: (value) async {
                     ref
@@ -188,7 +184,7 @@ class NotificationToggles extends ConsumerWidget {
               ),
               CupertinoSwitch(
                 thumbColor: AppTheme.colors.white,
-                activeColor: AppTheme.colors.primary,
+                activeTrackColor: AppTheme.colors.primary,
                 value: user.notificationSettings.journal,
                 onChanged: (value) async {
                   ref
@@ -213,7 +209,7 @@ class NotificationToggles extends ConsumerWidget {
                 ),
                 CupertinoSwitch(
                   thumbColor: AppTheme.colors.white,
-                  activeColor: AppTheme.colors.primary,
+                  activeTrackColor: AppTheme.colors.primary,
                   value: user.notificationSettings.data,
                   onChanged: (value) async {
                     ref

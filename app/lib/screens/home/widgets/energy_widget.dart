@@ -14,7 +14,7 @@ final energyWidgetProvider = FutureProvider<WidgetValues>((ref) async {
 });
 
 class EnergyWidget extends ConsumerWidget {
-  const EnergyWidget({Key? key}) : super(key: key);
+  const EnergyWidget({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

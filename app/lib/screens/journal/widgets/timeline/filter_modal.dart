@@ -49,35 +49,32 @@ class TimelineFilters extends ConsumerWidget {
                 ],
               ),
               AppTheme.separator,
-              ...filters.entries
-                  .map(
-                    (e) => Padding(
-                      padding: EdgeInsets.only(bottom: AppTheme.basePadding),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          Text(
-                            e.key.displayString(context),
-                            style: AppTheme.paragraphMedium,
-                          ),
-                          CupertinoSwitch(
-                            thumbColor: AppTheme.colors.white,
-                            activeColor: AppTheme.colors.primary,
-                            value: filters[e.key] ?? false,
-                            onChanged: (add) async {
-                              ref.read(timelineFiltersProvider.notifier).state =
-                                  {
-                                ...filters,
-                                e.key: add,
-                              };
-                            },
-                          ),
-                        ],
+              ...filters.entries.map(
+                (e) => Padding(
+                  padding: EdgeInsets.only(bottom: AppTheme.basePadding),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      Text(
+                        e.key.displayString(context),
+                        style: AppTheme.paragraphMedium,
                       ),
-                    ),
-                  )
-                  .toList()
+                      CupertinoSwitch(
+                        thumbColor: AppTheme.colors.white,
+                        activeTrackColor: AppTheme.colors.primary,
+                        value: filters[e.key] ?? false,
+                        onChanged: (add) async {
+                          ref.read(timelineFiltersProvider.notifier).state = {
+                            ...filters,
+                            e.key: add,
+                          };
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              )
             ],
           ),
         ),

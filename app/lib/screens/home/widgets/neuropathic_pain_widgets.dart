@@ -168,7 +168,7 @@ class NeuroPathicPain extends HookConsumerWidget {
     );
   }
 
-  static empty() {
+  static Widget empty() {
     return _body([
       Container(
         width: double.infinity,

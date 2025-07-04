@@ -53,7 +53,8 @@ class BladderEmptyingForm extends StatelessWidget {
     );
   }
 
-  static buildForm(BladderEmptyingEntry? entry, bool shouldCreateEntry) {
+  static Map<String, FormControl> buildForm(
+      BladderEmptyingEntry? entry, bool shouldCreateEntry) {
     return {
       'urineType': FormControl<UrineType>(
         value: entry != null && !shouldCreateEntry

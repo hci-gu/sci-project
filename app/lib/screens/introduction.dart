@@ -7,6 +7,8 @@ import 'package:scimovement/gen_l10n/app_localizations.dart';
 import 'package:scimovement/widgets/locale_select.dart';
 
 class IntroductionHeader extends StatelessWidget {
+  const IntroductionHeader({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -34,7 +36,7 @@ class IntroductionHeader extends StatelessWidget {
 }
 
 class IntroductionScreen extends StatelessWidget {
-  const IntroductionScreen({Key? key}) : super(key: key);
+  const IntroductionScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

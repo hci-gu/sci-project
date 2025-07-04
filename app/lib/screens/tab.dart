@@ -27,7 +27,7 @@ class TabScreen extends ConsumerWidget {
                 decoration: BoxDecoration(
                   border: Border(
                     top: BorderSide(
-                      color: AppTheme.colors.black.withOpacity(0.1),
+                      color: AppTheme.colors.black.withValues(alpha: .1),
                       width: 1,
                     ),
                   ),

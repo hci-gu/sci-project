@@ -2,9 +2,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api/api.dart';
 import 'package:scimovement/api/classes/journal/journal.dart';
 import 'package:scimovement/models/pagination.dart';
-import 'package:scimovement/models/journal/journal-form.dart';
+import 'package:scimovement/models/journal/journal_form.dart';
 
-export 'package:scimovement/models/journal/journal-form.dart';
+export 'package:scimovement/models/journal/journal_form.dart';
 
 final journalProvider = FutureProvider.family<List<JournalEntry>, Pagination>(
     (ref, pagination) async {

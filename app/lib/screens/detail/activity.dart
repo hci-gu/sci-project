@@ -14,7 +14,7 @@ import 'package:scimovement/widgets/stat_widget.dart';
 import 'package:scimovement/gen_l10n/app_localizations.dart';
 
 class ActivityScreen extends ConsumerWidget {
-  const ActivityScreen({Key? key}) : super(key: key);
+  const ActivityScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -50,7 +50,7 @@ class ActivityScreen extends ConsumerWidget {
 class AllActivitiesArc extends ConsumerWidget {
   final Pagination pagination;
 
-  const AllActivitiesArc(this.pagination, {Key? key}) : super(key: key);
+  const AllActivitiesArc(this.pagination, {super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -65,7 +65,7 @@ class AllActivitiesArc extends ConsumerWidget {
 class ActivityBarChart extends ConsumerWidget {
   final Pagination pagination;
 
-  const ActivityBarChart(this.pagination, {Key? key}) : super(key: key);
+  const ActivityBarChart(this.pagination, {super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

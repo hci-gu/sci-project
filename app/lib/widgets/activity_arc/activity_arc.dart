@@ -19,8 +19,8 @@ class ActivityArc extends HookWidget {
       Activity.moving,
       Activity.sedentary
     ],
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -133,8 +133,10 @@ class ArcPainter extends CustomPainter {
         false,
         Paint()
           ..color = activities.length == 1
-              ? AppTheme.colors.black.withOpacity(0.4)
-              : AppTheme.colors.activityLevelToColor(activity).withOpacity(0.33)
+              ? AppTheme.colors.black.withValues(alpha: 0.4)
+              : AppTheme.colors
+                  .activityLevelToColor(activity)
+                  .withValues(alpha: 0.33)
           ..strokeWidth = 2
           ..style = PaintingStyle.stroke,
       );
@@ -248,7 +250,7 @@ class ArcPainter extends CustomPainter {
     return '${timestamp.hour.toString().padLeft(2, '0')}:${timestamp.minute.toString().padLeft(2, '0')}';
   }
 
-  _paintText(Canvas canvas, Size size, String text, double offset) {
+  void _paintText(Canvas canvas, Size size, String text, double offset) {
     _textPainter.text = TextSpan(
       text: text,
       style: AppTheme.paragraphSmall,
@@ -261,7 +263,7 @@ class ArcPainter extends CustomPainter {
         Offset(offset - _textPainter.width, size.height - _textPainter.height));
   }
 
-  _painCenterText(Canvas canvas, Size size, String text) {
+  void _painCenterText(Canvas canvas, Size size, String text) {
     _textPainter.text = TextSpan(
       text: text,
       style: AppTheme.labelXLarge,

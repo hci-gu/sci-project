@@ -5,24 +5,33 @@ import 'package:scimovement/api/classes/journal/journal.dart';
 import 'package:scimovement/models/journal/journal.dart';
 import 'package:scimovement/models/pagination.dart';
 
-final showTimelineProvider = StateProvider<bool>((ref) {
-  ref.listenSelf((previous, next) {
-    // force orientation
-    if (next) {
-      SystemChrome.setPreferredOrientations([
-        DeviceOrientation.landscapeLeft,
-        DeviceOrientation.landscapeRight,
-      ]);
-    } else {
-      SystemChrome.setPreferredOrientations([
-        DeviceOrientation.portraitUp,
-        DeviceOrientation.portraitDown,
-      ]);
-    }
-  });
+class ShowTimelineNotifier extends Notifier<bool> {
+  @override
+  bool build() {
+    listenSelf((previous, next) {
+      if (next) {
+        SystemChrome.setPreferredOrientations([
+          DeviceOrientation.landscapeLeft,
+          DeviceOrientation.landscapeRight,
+        ]);
+      } else {
+        SystemChrome.setPreferredOrientations([
+          DeviceOrientation.portraitUp,
+          DeviceOrientation.portraitDown,
+        ]);
+      }
+    });
 
-  return false;
-});
+    return false;
+  }
+
+  void toggle() {
+    state = !state;
+  }
+}
+
+final showTimelineProvider =
+    NotifierProvider<ShowTimelineNotifier, bool>(ShowTimelineNotifier.new);
 
 final timelineFiltersProvider = StateProvider<Map<TimelineType, bool>>((ref) {
   return {

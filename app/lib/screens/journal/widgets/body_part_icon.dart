@@ -7,8 +7,7 @@ class BodyPartIcon extends StatelessWidget {
   final BodyPart bodyPart;
   final double size;
 
-  const BodyPartIcon({Key? key, required this.bodyPart, this.size = 64})
-      : super(key: key);
+  const BodyPartIcon({super.key, required this.bodyPart, this.size = 64});
 
   @override
   Widget build(BuildContext context) {

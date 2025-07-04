@@ -19,13 +19,23 @@ import 'package:scimovement/widgets/activity_wheel/activity_wheel.dart';
 import 'package:scimovement/widgets/date_select.dart';
 import 'package:scimovement/gen_l10n/app_localizations.dart';
 
-final homeWidgetPageProvider = StateProvider<int>((ref) {
-  ref.listenSelf((previous, next) {
-    Storage().storeHomeWidgetPage(next);
-  });
+class HomeWidgetPageNotifier extends Notifier<int> {
+  @override
+  int build() {
+    listenSelf((previous, next) {
+      Storage().storeHomeWidgetPage(next);
+    });
 
-  return Storage().getHomeWidgetPage();
-});
+    return Storage().getHomeWidgetPage();
+  }
+
+  void setPage(int value) {
+    state = value;
+  }
+}
+
+final homeWidgetPageProvider =
+    NotifierProvider<HomeWidgetPageNotifier, int>(HomeWidgetPageNotifier.new);
 
 class PagedWidgets extends HookConsumerWidget {
   const PagedWidgets({
@@ -79,7 +89,7 @@ class PagedWidgets extends HookConsumerWidget {
                   child: PageView(
                     controller: controller,
                     onPageChanged: (value) {
-                      ref.read(homeWidgetPageProvider.notifier).state = value;
+                      ref.read(homeWidgetPageProvider.notifier).setPage(value);
                     },
                     scrollDirection: Axis.horizontal,
                     children: [

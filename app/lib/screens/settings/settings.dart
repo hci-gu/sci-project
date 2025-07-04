@@ -16,7 +16,7 @@ import 'package:scimovement/widgets/snackbar_message.dart';
 import 'package:scimovement/gen_l10n/app_localizations.dart';
 
 class SettingsScreen extends ConsumerWidget {
-  const SettingsScreen({Key? key}) : super(key: key);
+  const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -83,7 +83,7 @@ class SettingsScreen extends ConsumerWidget {
 }
 
 class AboutInfo extends StatelessWidget {
-  const AboutInfo({Key? key}) : super(key: key);
+  const AboutInfo({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -136,7 +136,7 @@ class AboutInfo extends StatelessWidget {
 }
 
 class LogoutButton extends ConsumerWidget {
-  const LogoutButton({Key? key}) : super(key: key);
+  const LogoutButton({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -152,7 +152,7 @@ class LogoutButton extends ConsumerWidget {
 }
 
 class OnboardingButton extends ConsumerWidget {
-  const OnboardingButton({Key? key}) : super(key: key);
+  const OnboardingButton({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -170,7 +170,7 @@ class OnboardingButton extends ConsumerWidget {
 }
 
 class DeleteAccountButton extends ConsumerWidget {
-  const DeleteAccountButton({Key? key}) : super(key: key);
+  const DeleteAccountButton({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

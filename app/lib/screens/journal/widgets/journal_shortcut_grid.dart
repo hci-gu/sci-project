@@ -10,7 +10,7 @@ import 'package:scimovement/gen_l10n/app_localizations.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class JournalShortcutGrid extends ConsumerWidget {
-  const JournalShortcutGrid({Key? key}) : super(key: key);
+  const JournalShortcutGrid({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -54,28 +54,26 @@ class JournalShortcutGrid extends ConsumerWidget {
         scrollDirection: Axis.horizontal,
         children: [
           AppTheme.spacer2x,
-          ...data
-              .map(
-                (e) => Padding(
-                  padding: EdgeInsets.only(right: AppTheme.basePadding * 2),
-                  child: SizedBox(
-                    width: size,
-                    child: JournalEntryShortcut(
-                      onTap: () => context.goNamed(
-                        'create-journal',
-                        extra: {'entry': e},
-                      ),
-                      icon: AppTheme.iconForJournalType(
-                          e.type,
-                          e is PainLevelEntry ? e.bodyPart : null,
-                          AppTheme.isBigScreen(context) ? 48 : 40),
-                      title: e.shortcutTitle(context),
-                      subtitle: timeago.format(e.time),
-                    ),
+          ...data.map(
+            (e) => Padding(
+              padding: EdgeInsets.only(right: AppTheme.basePadding * 2),
+              child: SizedBox(
+                width: size,
+                child: JournalEntryShortcut(
+                  onTap: () => context.goNamed(
+                    'create-journal',
+                    extra: {'entry': e},
                   ),
+                  icon: AppTheme.iconForJournalType(
+                      e.type,
+                      e is PainLevelEntry ? e.bodyPart : null,
+                      AppTheme.isBigScreen(context) ? 48 : 40),
+                  title: e.shortcutTitle(context),
+                  subtitle: timeago.format(e.time),
                 ),
-              )
-              .toList(),
+              ),
+            ),
+          ),
           Padding(
             padding: EdgeInsets.only(right: AppTheme.basePadding * 2),
             child: SizedBox(

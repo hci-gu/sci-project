@@ -15,7 +15,7 @@ final sedentaryWidgetProvider = FutureProvider<WidgetValues>((ref) async {
 });
 
 class SedentaryWidget extends ConsumerWidget {
-  const SedentaryWidget({Key? key}) : super(key: key);
+  const SedentaryWidget({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

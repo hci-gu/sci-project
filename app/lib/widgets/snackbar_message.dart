@@ -12,12 +12,11 @@ class SnackbarMessage extends SnackBar {
   final SnackbarType type;
 
   SnackbarMessage({
-    Key? key,
+    super.key,
     required this.context,
     required this.message,
     this.type = SnackbarType.success,
   }) : super(
-          key: key,
           content: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
