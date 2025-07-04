@@ -298,8 +298,8 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
         path: '/watch-login',
         builder: (context, state) {
           return RedirectScreen(
-            redirectUri: state.queryParameters['redirect_uri'],
-            state: state.queryParameters['state'],
+            redirectUri: state.uri.queryParameters['redirect_uri'],
+            state: state.uri.queryParameters['state'],
           );
         },
       ),
@@ -308,9 +308,9 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
         path: '/forced-login',
         builder: (context, state) {
           return ForcedLoginScreen(
-            userId: state.queryParameters['userId'],
-            apiKey: state.queryParameters['apiKey'],
-            date: state.queryParameters['date'],
+            userId: state.uri.queryParameters['userId'],
+            apiKey: state.uri.queryParameters['apiKey'],
+            date: state.uri.queryParameters['date'],
           );
         },
       ),
@@ -327,10 +327,10 @@ class RedirectScreen extends HookConsumerWidget {
   final String? state;
 
   const RedirectScreen({
-    Key? key,
+    super.key,
     this.redirectUri,
     this.state,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -378,7 +378,7 @@ class RedirectScreen extends HookConsumerWidget {
 }
 
 class LoadingScreen extends HookConsumerWidget {
-  const LoadingScreen({Key? key}) : super(key: key);
+  const LoadingScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -425,11 +425,11 @@ class ForcedLoginScreen extends HookConsumerWidget {
   final String? date;
 
   const ForcedLoginScreen({
-    Key? key,
+    super.key,
     this.userId,
     this.apiKey,
     this.date,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -446,7 +446,7 @@ class ForcedLoginScreen extends HookConsumerWidget {
               ref.read(dateProvider.notifier).state = parsedDate;
             } catch (e) {
               // If date parsing fails, ignore and use current date
-              print('Failed to parse date: $date');
+              // print('Failed to parse date: $date');
             }
           }
 

@@ -74,16 +74,16 @@ class NotificationLauncherWrapper extends HookWidget {
     useEffect(() {
       if (kIsWeb) return () => {};
 
-      final onNotificationTap = Push.instance.onNotificationTap.listen((data) {
+      final onNotificationTap = Push.instance.addOnNotificationTap((data) {
         handleLaunchFromNotification(data);
       });
 
       final onBackgroundMessageSubscription =
-          Push.instance.onBackgroundMessage.listen((message) {
+          Push.instance.addOnBackgroundMessage((message) {
         handleLaunchFromNotification(message);
       });
 
-      final onMessageSubscription = Push.instance.onMessage.listen((message) {
+      final onMessageSubscription = Push.instance.addOnMessage((message) {
         handleLaunchFromNotification(message);
       });
 
@@ -94,16 +94,16 @@ class NotificationLauncherWrapper extends HookWidget {
       });
 
       return () {
-        onNotificationTap.cancel();
-        onBackgroundMessageSubscription.cancel();
-        onMessageSubscription.cancel();
+        onNotificationTap();
+        onBackgroundMessageSubscription();
+        onMessageSubscription();
       };
     }, []);
 
     return child;
   }
 
-  handleRoute(String route) {
+  void handleRoute(String route) {
     String routeName = route.split('?').first;
     Map<String, String> query = Uri.splitQueryString(route.split('?').last);
 
@@ -118,7 +118,7 @@ class NotificationLauncherWrapper extends HookWidget {
     }
   }
 
-  handleLaunchFromNotification(data) {
+  void handleLaunchFromNotification(dynamic data) {
     Map<Object?, Object?>? aps = data?['aps'] as Map<Object?, Object?>?;
 
     if (aps != null) {

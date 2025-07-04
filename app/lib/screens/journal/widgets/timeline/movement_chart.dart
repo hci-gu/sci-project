@@ -112,7 +112,6 @@ class MovementBarChart extends ConsumerWidget {
           touchTooltipData: BarTouchTooltipData(
             fitInsideVertically: true,
             fitInsideHorizontally: true,
-            tooltipBgColor: Colors.transparent,
             tooltipPadding: const EdgeInsets.all(0),
             // tooltipBottomMargin: 0,
             getTooltipItem: (group, groupIndex, rod, rodIndex) {
@@ -130,7 +129,7 @@ class MovementBarChart extends ConsumerWidget {
     );
   }
 
-  _boutsToBars(List<Bout> bouts, double width) {
+  List<BarChartRodData> _boutsToBars(List<Bout> bouts, double width) {
     if (bouts.isEmpty) {
       return [
         BarChartRodData(
