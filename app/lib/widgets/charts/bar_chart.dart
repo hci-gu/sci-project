@@ -20,8 +20,8 @@ class CustomBarChart extends StatelessWidget {
     required this.chartData,
     required this.displayMode,
     this.unit = Unit.calories,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +43,6 @@ class CustomBarChart extends StatelessWidget {
             touchTooltipData: BarTouchTooltipData(
               fitInsideVertically: true,
               fitInsideHorizontally: true,
-              tooltipBgColor: AppTheme.colors.white,
               tooltipBorder: BorderSide(
                 color: AppTheme.colors.black,
                 width: 1,
@@ -82,13 +81,13 @@ class CustomBarChart extends StatelessWidget {
               sideTitles: SideTitles(
                 showTitles: true,
                 reservedSize: 24,
-                getTitlesWidget: (double value, _) {
+                getTitlesWidget: (double value, TitleMeta meta) {
                   return SideTitleWidget(
+                    meta: meta,
                     child: Text(
                       _getTitle(value, chartData.mode),
                       style: AppTheme.labelTiny,
                     ),
-                    axisSide: AxisSide.bottom,
                   );
                 },
               ),
@@ -108,7 +107,7 @@ class CustomBarChart extends StatelessWidget {
                   ))
               .toList(),
         ),
-        swapAnimationCurve: Curves.easeOut,
+        curve: Curves.easeOut,
       ),
     );
   }

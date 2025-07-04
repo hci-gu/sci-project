@@ -1,41 +1,79 @@
 PODS:
+  - device_info_plus (0.0.1):
+    - Flutter
   - Flutter (1.0.0)
   - package_info_plus (0.4.5):
     - Flutter
-  - push_ios (0.0.1):
+  - permission_handler_apple (9.3.0):
     - Flutter
+  - polar (0.0.1):
+    - Flutter
+    - PolarBleSdk (~> 6.1.0)
+  - PolarBleSdk (6.1.0):
+    - RxSwift (~> 6.8.0)
+    - SwiftProtobuf (~> 1.0)
+    - Zip (~> 2.1.2)
+  - push (0.0.1):
+    - Flutter
+    - FlutterMacOS
+  - RxSwift (6.8.0)
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
+  - SwiftProtobuf (1.30.0)
   - url_launcher_ios (0.0.1):
     - Flutter
+  - Zip (2.1.2)
 
 DEPENDENCIES:
+  - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - Flutter (from `Flutter`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
-  - push_ios (from `.symlinks/plugins/push_ios/ios`)
+  - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
+  - polar (from `.symlinks/plugins/polar/ios`)
+  - push (from `.symlinks/plugins/push/darwin`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
 
+SPEC REPOS:
+  trunk:
+    - PolarBleSdk
+    - RxSwift
+    - SwiftProtobuf
+    - Zip
+
 EXTERNAL SOURCES:
+  device_info_plus:
+    :path: ".symlinks/plugins/device_info_plus/ios"
   Flutter:
     :path: Flutter
   package_info_plus:
     :path: ".symlinks/plugins/package_info_plus/ios"
-  push_ios:
-    :path: ".symlinks/plugins/push_ios/ios"
+  permission_handler_apple:
+    :path: ".symlinks/plugins/permission_handler_apple/ios"
+  polar:
+    :path: ".symlinks/plugins/polar/ios"
+  push:
+    :path: ".symlinks/plugins/push/darwin"
   shared_preferences_foundation:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
   url_launcher_ios:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
 
 SPEC CHECKSUMS:
-  Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
-  package_info_plus: 115f4ad11e0698c8c1c5d8a689390df880f47e85
-  push_ios: 2bd1b4d3f782209da1f571db1250af236957e807
-  shared_preferences_foundation: 5b919d13b803cadd15ed2dc053125c68730e5126
-  url_launcher_ios: bf5ce03e0e2088bad9cc378ea97fa0ed5b49673b
+  device_info_plus: bf2e3232933866d73fe290f2942f2156cdd10342
+  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  package_info_plus: c0502532a26c7662a62a356cebe2692ec5fe4ec4
+  permission_handler_apple: 9878588469a2b0d0fc1e048d9f43605f92e6cec2
+  polar: 0b84526f717123ae89648b83b5010b7fe1fcc858
+  PolarBleSdk: bfb57cf8350f0c53d441b8632ba6df363ce7c79f
+  push: dab402f84bedfc62b8e5f6d81db808a7502025f7
+  RxSwift: 4e28be97cbcfeee614af26d83415febbf2bf6f45
+  shared_preferences_foundation: fcdcbc04712aee1108ac7fda236f363274528f78
+  SwiftProtobuf: 3697407f0d5b23bedeba9c2eaaf3ec6fdff69349
+  url_launcher_ios: 5334b05cef931de560670eeae103fd3e431ac3fe
+  Zip: b3fef584b147b6e582b2256a9815c897d60ddc67
 
-PODFILE CHECKSUM: 7368163408c647b7eb699d0d788ba6718e18fb8d
+PODFILE CHECKSUM: 775997f741c536251164e3eacf6e34abf2eb7a17
 
-COCOAPODS: 1.12.1
+COCOAPODS: 1.16.2

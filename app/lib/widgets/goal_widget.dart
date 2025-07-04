@@ -79,7 +79,7 @@ class GoalWidget extends StatelessWidget {
               title: AppLocalizations.of(context)!.editGoal,
               size: ButtonSize.small,
               onPressed: () {
-                String path = GoRouter.of(context).location;
+                String path = GoRouterState.of(context).uri.path;
 
                 context.go('$path/goal', extra: {
                   'goal': goal,

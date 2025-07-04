@@ -149,7 +149,6 @@ class TimelineChart extends ConsumerWidget {
           touchTooltipData: LineTouchTooltipData(
             fitInsideVertically: true,
             fitInsideHorizontally: true,
-            tooltipBgColor: Colors.transparent,
             getTooltipItems: (List<LineBarSpot> spots) =>
                 tooltipsForSpots(context, spots),
           ),

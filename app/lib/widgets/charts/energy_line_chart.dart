@@ -46,10 +46,10 @@ class EnergyLineChart extends ConsumerWidget {
   final Pagination pagination;
 
   const EnergyLineChart({
-    Key? key,
+    super.key,
     this.pagination = const Pagination(),
     this.isCard = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -58,8 +58,8 @@ class EnergyLineChart extends ConsumerWidget {
             _legend(context, ref),
             ChartWrapper(
               isCard: isCard,
-              child: _energyChart(values.current, values.previous),
               aspectRatio: 1.4,
+              child: _energyChart(values.current, values.previous),
             )
           ]),
           error: (e, stacktrace) => ChartWrapper.error(e.toString()),
@@ -197,7 +197,6 @@ class EnergyLineChart extends ConsumerWidget {
           touchTooltipData: LineTouchTooltipData(
             fitInsideVertically: true,
             fitInsideHorizontally: true,
-            tooltipBgColor: Colors.white,
             getTooltipItems: (List<LineBarSpot> spots) {
               return spots
                   .map(
