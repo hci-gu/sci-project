@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 MaterialColor createMaterialColor(Color color) {
   List strengths = <double>[.05];
   final swatch = <int, Color>{};
-  final double r = color.r, g = color.g, b = color.b;
+  final int r = color.r.toInt(), g = color.g.toInt(), b = color.b.toInt();
 
   for (int i = 1; i < 10; i++) {
     strengths.add(0.1 * i);
