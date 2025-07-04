@@ -84,7 +84,7 @@ class AppTheme {
     fontFamily: 'Manrope',
     colorScheme: ColorScheme.fromSeed(
       seedColor: colors.primary,
-      background: colors.background,
+      surface: colors.background,
     ),
     useMaterial3: true,
     appBarTheme: AppBarTheme(
@@ -200,7 +200,7 @@ class AppTheme {
       ButtonSize size = ButtonSize.medium,
       Color? color}) {
     return ButtonStyle(
-      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+      shape: WidgetStateProperty.all<RoundedRectangleBorder>(
         RoundedRectangleBorder(
           borderRadius: rounded
               ? BorderRadius.circular(28.0)
@@ -211,20 +211,20 @@ class AppTheme {
         ),
       ),
       visualDensity: VisualDensity.compact,
-      padding: MaterialStateProperty.resolveWith<EdgeInsetsGeometry>(
-          (Set<MaterialState> states) {
+      padding: WidgetStateProperty.resolveWith<EdgeInsetsGeometry>(
+          (Set<WidgetState> states) {
         return const EdgeInsets.all(0);
       }),
-      backgroundColor: MaterialStateProperty.resolveWith<Color>(
-        (Set<MaterialState> states) {
+      backgroundColor: WidgetStateProperty.resolveWith<Color>(
+        (Set<WidgetState> states) {
           if (secondary) return colors.white;
-          if (states.contains(MaterialState.pressed)) {
+          if (states.contains(WidgetState.pressed)) {
             return color != null ? darkenColor(color) : colors.primaryDark;
           }
           return color ?? colors.primary;
         },
       ),
-      textStyle: MaterialStateProperty.all<TextStyle>(
+      textStyle: WidgetStateProperty.all<TextStyle>(
         buttonTextStyle(secondary, color),
       ),
     );
@@ -259,7 +259,7 @@ class AppTheme {
     color: colors.white,
     borderRadius: BorderRadius.circular(12),
     border: Border.all(
-      color: colors.black.withOpacity(0.1),
+      color: colors.black.withValues(alpha: 0.1),
     ),
   );
   static BoxDecoration widgetDecoration = BoxDecoration(

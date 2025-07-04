@@ -57,10 +57,28 @@ final Map<AppFeature, List<JournalType>> groupedFeatures = {
   ]
 };
 
-final appFeaturesProvider = StateProvider<List<AppFeature>>((ref) {
-  ref.listenSelf((previous, next) {
-    Storage().storeAppFeatures(next);
-  });
+class AppFeaturesNotifier extends Notifier<List<AppFeature>> {
+  @override
+  List<AppFeature> build() {
+    listenSelf((previous, next) {
+      Storage().storeAppFeatures(next);
+    });
 
-  return Storage().getAppFeatures();
-});
+    return Storage().getAppFeatures();
+  }
+
+  void addFeature(AppFeature feature) {
+    if (state.contains(feature)) return;
+    state = [...state, feature];
+  }
+
+  void removeFeature(AppFeature feature) {
+    if (!state.contains(feature)) return;
+    state = state.where((f) => f != feature).toList();
+  }
+}
+
+final appFeaturesProvider =
+    NotifierProvider<AppFeaturesNotifier, List<AppFeature>>(
+  AppFeaturesNotifier.new,
+);

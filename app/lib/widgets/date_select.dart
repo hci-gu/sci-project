@@ -32,7 +32,7 @@ class SelectedDateText extends ConsumerWidget {
 
   DateTime get _now => DateTime.now();
   DateTime get _today => DateTime(_now.year, _now.month, _now.day);
-  bool canGoForward(date) => date.isBefore(_today);
+  bool canGoForward(DateTime date) => date.isBefore(_today);
 }
 
 class DateSelectButton extends ConsumerWidget {

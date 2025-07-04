@@ -17,7 +17,7 @@ import 'package:scimovement/gen_l10n/app_localizations.dart';
 import 'package:scimovement/widgets/button.dart';
 
 class JournalScreen extends HookConsumerWidget {
-  const JournalScreen({Key? key}) : super(key: key);
+  const JournalScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -38,7 +38,7 @@ class JournalScreen extends HookConsumerWidget {
                 ),
                 IconButton(
                   onPressed: () {
-                    ref.read(showTimelineProvider.notifier).state = true;
+                    ref.read(showTimelineProvider.notifier).toggle();
                   },
                   icon: const Icon(Icons.timeline_outlined),
                 ),
@@ -65,7 +65,7 @@ class JournalScreen extends HookConsumerWidget {
                 AppTheme.spacer,
                 FloatingActionButton(
                   onPressed: () {
-                    ref.read(showTimelineProvider.notifier).state = false;
+                    ref.read(showTimelineProvider.notifier).toggle();
                   },
                   child: const Icon(Icons.undo),
                 ),

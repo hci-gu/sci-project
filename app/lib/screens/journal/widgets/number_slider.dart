@@ -8,9 +8,9 @@ class NumberSlider extends StatelessWidget {
   final String formKey;
 
   NumberSlider({
-    Key? key,
+    super.key,
     required this.formKey,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -86,17 +86,17 @@ class PositionedSliderLabel extends HookWidget {
   final GlobalKey positionKey;
 
   const PositionedSliderLabel({
-    Key? key,
+    super.key,
     this.value,
     required this.positionKey,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     var state = useState(null);
     useEffect(() {
       Future.delayed(const Duration(milliseconds: 25)).then((value) {
-        state.notifyListeners();
+        state.value = state.value;
       });
       return () => {};
     }, []);

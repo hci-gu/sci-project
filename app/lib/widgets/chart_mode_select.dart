@@ -4,7 +4,7 @@ import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/theme/theme.dart';
 
 class ChartModeSelect extends ConsumerWidget {
-  const ChartModeSelect({Key? key}) : super(key: key);
+  const ChartModeSelect({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -17,15 +17,15 @@ class ChartModeSelect extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4.0),
         child: DropdownButton<ChartMode>(
           isDense: true,
-          items: [
-            ChartMode.day,
-            ChartMode.week,
-            ChartMode.month,
-            ChartMode.year
-          ]
-              .map((e) => DropdownMenuItem(
-                  child: Text(e.displayName(context)), value: e))
-              .toList(),
+          items:
+              [ChartMode.day, ChartMode.week, ChartMode.month, ChartMode.year]
+                  .map(
+                    (e) => DropdownMenuItem(
+                      value: e,
+                      child: Text(e.displayName(context)),
+                    ),
+                  )
+                  .toList(),
           onChanged: (value) {
             if (value != null) {
               Pagination page = ref.read(paginationProvider);

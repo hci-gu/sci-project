@@ -15,7 +15,7 @@ import 'package:scimovement/widgets/text_field.dart';
 import 'package:scimovement/gen_l10n/app_localizations.dart';
 
 class RegisterScreen extends HookConsumerWidget {
-  const RegisterScreen({Key? key}) : super(key: key);
+  const RegisterScreen({super.key});
 
   FormGroup buildForm() => FormGroup(
         {
@@ -162,24 +162,26 @@ class RegisterScreen extends HookConsumerWidget {
                   .read(userProvider.notifier)
                   .register(email, password, _formToBody(form.rawValue))
                   .catchError((e) {
-                String message = AppLocalizations.of(context)!.genericError;
-                // check if error is Dio connection timeout
-                if (e is DioError) {
-                  if (e.type == DioErrorType.connectionTimeout) {
-                    message = AppLocalizations.of(context)!.connectionTimeout;
+                if (context.mounted) {
+                  String message = AppLocalizations.of(context)!.genericError;
+                  // check if error is Dio connection timeout
+                  if (e is DioException) {
+                    if (e.type == DioExceptionType.connectionTimeout) {
+                      message = AppLocalizations.of(context)!.connectionTimeout;
+                    }
+                    if (e.type == DioExceptionType.connectionError) {
+                      message = AppLocalizations.of(context)!.connectionError;
+                    }
                   }
-                  if (e.type == DioErrorType.connectionError) {
-                    message = AppLocalizations.of(context)!.connectionError;
-                  }
+                  loading.value = false;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackbarMessage(
+                      context: context,
+                      message: message,
+                      type: SnackbarType.error,
+                    ),
+                  );
                 }
-                loading.value = false;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackbarMessage(
-                    context: context,
-                    message: message,
-                    type: SnackbarType.error,
-                  ),
-                );
               });
               loading.value = false;
             },

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 MaterialColor createMaterialColor(Color color) {
   List strengths = <double>[.05];
   final swatch = <int, Color>{};
-  final int r = color.red, g = color.green, b = color.blue;
+  final double r = color.r, g = color.g, b = color.b;
 
   for (int i = 1; i < 10; i++) {
     strengths.add(0.1 * i);
@@ -17,7 +17,7 @@ MaterialColor createMaterialColor(Color color) {
       1,
     );
   }
-  return MaterialColor(color.value, swatch);
+  return MaterialColor(color.toARGB32(), swatch);
 }
 
 Color darkenColor(Color color) {
@@ -27,6 +27,6 @@ Color darkenColor(Color color) {
   return hslDarken.toColor();
 }
 
-Color FromColorToColor(Color c1, Color c2, double percent) {
+Color fromColorToColor(Color c1, Color c2, double percent) {
   return Color.lerp(c1, c2, percent)!;
 }

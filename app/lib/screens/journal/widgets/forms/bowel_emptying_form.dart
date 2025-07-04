@@ -38,7 +38,8 @@ class BowelEmptyingForm extends StatelessWidget {
     );
   }
 
-  static buildForm(BowelEmptyingEntry? entry, bool shouldCreateEntry) {
+  static Map<String, FormControl> buildForm(
+      BowelEmptyingEntry? entry, bool shouldCreateEntry) {
     return {
       'stoolType': FormControl<StoolType>(
         value: entry != null && !shouldCreateEntry ? entry.stoolType : null,

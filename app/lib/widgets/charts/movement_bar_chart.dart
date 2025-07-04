@@ -12,8 +12,8 @@ class MovementBarChart extends StatelessWidget {
 
   const MovementBarChart({
     required this.chartData,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

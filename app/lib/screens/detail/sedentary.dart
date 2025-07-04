@@ -16,7 +16,7 @@ import 'package:scimovement/widgets/stat_widget.dart';
 import 'package:scimovement/gen_l10n/app_localizations.dart';
 
 class SedentaryScreen extends ConsumerWidget {
-  const SedentaryScreen({Key? key}) : super(key: key);
+  const SedentaryScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

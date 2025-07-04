@@ -16,7 +16,7 @@ final exerciseWidgetProvider = FutureProvider<WidgetValues>((ref) async {
 });
 
 class ExerciseWidget extends ConsumerWidget {
-  const ExerciseWidget({Key? key}) : super(key: key);
+  const ExerciseWidget({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

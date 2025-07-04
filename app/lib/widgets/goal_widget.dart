@@ -30,8 +30,8 @@ class GoalWidget extends StatelessWidget {
               Row(
                 children: [
                   Container(
-                    width: 30 * MediaQuery.of(context).textScaleFactor,
-                    height: 30 * MediaQuery.of(context).textScaleFactor,
+                    width: 30 * MediaQuery.textScalerOf(context).scale(1),
+                    height: 30 * MediaQuery.textScalerOf(context).scale(1),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(15),
                       color: AppTheme.colors.primary,
@@ -59,7 +59,7 @@ class GoalWidget extends StatelessWidget {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(5),
                   border: Border.all(
-                    color: AppTheme.colors.black.withOpacity(0.1),
+                    color: AppTheme.colors.black.withValues(alpha: 0.1),
                     strokeAlign: BorderSide.strokeAlignOutside,
                   ),
                 ),

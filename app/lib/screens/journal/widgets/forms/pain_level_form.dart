@@ -13,11 +13,11 @@ class PainLevelForm extends StatelessWidget {
   final FormGroup form;
 
   const PainLevelForm({
-    Key? key,
+    super.key,
     this.entry,
     this.type,
     required this.form,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +42,8 @@ class PainLevelForm extends StatelessWidget {
     );
   }
 
-  static buildForm(PainLevelEntry? painLevelEntry, JournalType? type) {
+  static Map<String, FormControl> buildForm(
+      PainLevelEntry? painLevelEntry, JournalType? type) {
     return {
       'bodyPartType': FormControl<BodyPartType>(
         value: painLevelEntry?.bodyPart.type,

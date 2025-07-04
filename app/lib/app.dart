@@ -17,10 +17,10 @@ class App extends ConsumerWidget {
   final bool loggedIn;
 
   const App({
-    Key? key,
+    super.key,
     required this.onboardingDone,
     required this.loggedIn,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

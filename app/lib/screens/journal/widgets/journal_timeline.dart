@@ -139,7 +139,7 @@ class TimelinePeriods extends ConsumerWidget {
       height: eventHeight,
       child: Stack(
         children: [
-          ...periods.map((e) => _period(context, e)).toList(),
+          ...periods.map((e) => _period(context, e)),
         ],
       ),
     );
@@ -207,7 +207,7 @@ class Month extends HookConsumerWidget {
                     children: [
                       Container(
                         width: sectionWidth,
-                        color: AppTheme.colors.lightGray.withOpacity(0.5),
+                        color: AppTheme.colors.lightGray.withValues(alpha: 0.5),
                       ),
                       _line(sectionWidth),
                       _line(sectionWidth),
@@ -233,14 +233,12 @@ class Month extends HookConsumerWidget {
   Widget _list(List<TimelineType> data) {
     return Column(
       children: [
-        ...data
-            .map(
-              (e) => Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: _contentForType(e),
-              ),
-            )
-            .toList(),
+        ...data.map(
+          (e) => Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: _contentForType(e),
+          ),
+        )
       ],
     );
   }

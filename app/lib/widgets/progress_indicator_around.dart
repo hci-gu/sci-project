@@ -27,12 +27,12 @@ class ProgressIndicatorAround extends StatelessWidget {
         children: [
           Positioned(
             child: SizedBox(
-              height: size * 1.25 * MediaQuery.of(context).textScaleFactor,
-              width: size * 1.25 * MediaQuery.of(context).textScaleFactor,
+              height: size * 1.25 * MediaQuery.textScalerOf(context).scale(1),
+              width: size * 1.25 * MediaQuery.textScalerOf(context).scale(1),
               child: CircularProgressIndicator(
                 value: value / duration,
                 strokeWidth: strokeWidth,
-                backgroundColor: AppTheme.colors.black.withOpacity(0.1),
+                backgroundColor: AppTheme.colors.black.withValues(alpha: 0.1),
               ),
             ),
           ),

@@ -42,7 +42,7 @@ final activityProvider = FutureProvider<List<ActivityGroup>>((ref) async {
 });
 
 class ActivityWheel extends ConsumerWidget {
-  const ActivityWheel({Key? key}) : super(key: key);
+  const ActivityWheel({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -108,7 +108,7 @@ class ActivityWheel extends ConsumerWidget {
     );
   }
 
-  Widget _error(_, __) {
+  Widget _error(dynamic _, dynamic __) {
     return const Text('Error');
   }
 
@@ -124,8 +124,7 @@ class ActivityWheel extends ConsumerWidget {
 class AnimatedWheel extends HookWidget {
   final List<ActivityGroup> activityGroups;
 
-  const AnimatedWheel({Key? key, required this.activityGroups})
-      : super(key: key);
+  const AnimatedWheel({super.key, required this.activityGroups});
 
   @override
   Widget build(BuildContext context) {
@@ -161,7 +160,7 @@ class AnimatedWheel extends HookWidget {
                           style: TextStyle(
                             height: 0.85,
                             fontSize:
-                                28 / MediaQuery.of(context).textScaleFactor,
+                                28 / MediaQuery.textScalerOf(context).scale(1),
                             fontWeight: FontWeight.w800,
                             color: AppTheme.colors
                                 .activityLevelToColor(e.activity),
@@ -170,10 +169,11 @@ class AnimatedWheel extends HookWidget {
                         Text(
                           'kcal',
                           style: AppTheme.labelMedium.copyWith(
-                              color: AppTheme.colors
-                                  .activityLevelToColor(e.activity),
-                              fontSize:
-                                  14 / MediaQuery.of(context).textScaleFactor),
+                            color: AppTheme.colors
+                                .activityLevelToColor(e.activity),
+                            fontSize:
+                                14 / MediaQuery.textScalerOf(context).scale(1),
+                          ),
                         )
                       ],
                     ),

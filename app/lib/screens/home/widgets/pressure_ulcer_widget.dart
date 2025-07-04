@@ -77,7 +77,7 @@ class PressureUlcerModal extends ConsumerWidget {
                 style: AppTheme.labelLarge,
               ),
               AppTheme.separator,
-              ...data.map((e) => _listItem(context, e)).toList(),
+              ...data.map((e) => _listItem(context, e)),
               AppTheme.spacer,
               Button(
                 onPressed: () {

@@ -17,7 +17,9 @@ class GoalReachedScreen extends HookWidget {
     useEffect(() {
       confettiController.play();
       Future.delayed(const Duration(seconds: 5)).then((_) {
-        Navigator.of(context).pop();
+        if (context.mounted) {
+          Navigator.of(context).pop();
+        }
       });
       return () => confettiController.dispose();
     }, [confettiController]);

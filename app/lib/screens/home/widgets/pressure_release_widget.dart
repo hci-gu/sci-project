@@ -41,7 +41,8 @@ class GoalProgress extends HookWidget {
         Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(5),
-            border: Border.all(color: AppTheme.colors.black.withOpacity(0.1)),
+            border:
+                Border.all(color: AppTheme.colors.black.withValues(alpha: 0.1)),
           ),
           clipBehavior: Clip.antiAlias,
           width: 100,
@@ -60,7 +61,7 @@ class GoalProgress extends HookWidget {
 }
 
 class PressureReleaseWidget extends ConsumerWidget {
-  const PressureReleaseWidget({Key? key}) : super(key: key);
+  const PressureReleaseWidget({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

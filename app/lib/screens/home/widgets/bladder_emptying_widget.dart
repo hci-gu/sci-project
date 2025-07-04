@@ -16,7 +16,7 @@ import 'package:go_router/go_router.dart';
 import 'package:scimovement/gen_l10n/app_localizations.dart';
 
 class BladderEmptyingWidget extends ConsumerWidget {
-  const BladderEmptyingWidget({Key? key}) : super(key: key);
+  const BladderEmptyingWidget({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

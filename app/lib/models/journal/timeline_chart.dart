@@ -100,8 +100,8 @@ final timelineLineChartProvider =
   }
 
   List<JournalEntry> entries = [
-    ...journal.whereType<PainLevelEntry>().toList(),
-    ...journal.whereType<SpasticityEntry>().toList(),
+    ...journal.whereType<PainLevelEntry>(),
+    ...journal.whereType<SpasticityEntry>(),
   ];
 
   List<JournalEntry> entriesToShow = entries

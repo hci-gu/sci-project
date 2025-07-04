@@ -130,7 +130,7 @@ class SelectJournalTypeScreen extends ConsumerWidget {
     );
   }
 
-  _navigate(BuildContext context, JournalType type) {
+  void _navigate(BuildContext context, JournalType type) {
     GoRouter.of(context).goNamed(
       'create-journal-from-type',
       extra: {

@@ -13,11 +13,11 @@ class StatHeader extends ConsumerWidget {
   final FutureProvider<num> provider;
 
   const StatHeader({
-    Key? key,
+    super.key,
     required this.unit,
     required this.provider,
     this.isAverage = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

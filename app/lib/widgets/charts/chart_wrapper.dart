@@ -7,11 +7,11 @@ class ChartWrapper extends StatelessWidget {
   final double aspectRatio;
 
   const ChartWrapper({
-    Key? key,
+    super.key,
     required this.child,
     this.isCard = true,
     this.aspectRatio = 1.7,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

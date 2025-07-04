@@ -80,7 +80,7 @@ class PressureUlcerForm extends StatelessWidget {
     );
   }
 
-  static buildForm(
+  static Map<String, FormControl> buildForm(
       PressureUlcerEntry? pressureUlcerEntry, bool shouldCreateEntry) {
     return {
       'pressureUlcerType': FormControl<PressureUlcerType>(

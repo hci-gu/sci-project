@@ -161,13 +161,13 @@ class DurationPicker extends HookWidget {
   final bool readOnly;
 
   const DurationPicker({
-    Key? key,
+    super.key,
     required this.value,
     required this.onChange,
     this.title,
     this.titleColor,
     this.readOnly = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -286,10 +286,10 @@ class DurationDisplay extends StatelessWidget {
   final bool highlighted;
 
   const DurationDisplay({
-    Key? key,
+    super.key,
     required this.duration,
     this.highlighted = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

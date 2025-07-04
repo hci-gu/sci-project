@@ -57,14 +57,14 @@ class StatWidget extends StatelessWidget {
   final Widget? action;
 
   const StatWidget({
-    Key? key,
+    super.key,
     this.title = 'Kalorier',
     this.mode = StatWidgetMode.day,
     this.action,
     required this.unit,
     required this.values,
     required this.asset,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

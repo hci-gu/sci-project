@@ -156,7 +156,7 @@ List<Bout> mockBoutsForPagination(Pagination pagination) {
 class DemoWrapper extends ConsumerWidget {
   final Widget child;
 
-  const DemoWrapper({Key? key, required this.child}) : super(key: key);
+  const DemoWrapper({super.key, required this.child});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

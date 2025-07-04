@@ -18,14 +18,14 @@ class DetailScreen extends HookConsumerWidget {
   final bool showModeSelect;
 
   const DetailScreen({
-    Key? key,
+    super.key,
     required this.title,
     required this.pageBuilder,
     required this.header,
     required this.content,
     this.height = 200,
     this.showModeSelect = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

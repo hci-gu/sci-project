@@ -14,7 +14,7 @@ import 'package:scimovement/gen_l10n/app_localizations.dart';
 class UserSettings extends HookWidget {
   final User user;
 
-  const UserSettings({Key? key, required this.user}) : super(key: key);
+  const UserSettings({super.key, required this.user});
 
   FormGroup buildForm() => fb.group(
         {
@@ -142,10 +142,10 @@ class ConditionDropDown extends StatelessWidget {
   final bool readOnly;
 
   const ConditionDropDown({
-    Key? key,
+    super.key,
     required this.form,
     this.readOnly = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

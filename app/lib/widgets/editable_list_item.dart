@@ -11,14 +11,14 @@ class EditableListItem extends StatelessWidget {
   final Function onDismissed;
 
   const EditableListItem({
-    Key? key,
+    super.key,
     required this.id,
     required this.title,
     required this.subtitle,
     required this.onTap,
     required this.onDismissed,
     this.icon,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -34,7 +34,8 @@ class ConditionItem extends StatelessWidget {
                         color: display.color,
                         borderRadius: BorderRadius.circular(6),
                         border: Border.all(
-                            color: AppTheme.colors.black.withOpacity(0.1)),
+                          color: AppTheme.colors.black.withValues(alpha: 0.1),
+                        ),
                       ),
                     ),
                   if (display.color != null) AppTheme.spacer,

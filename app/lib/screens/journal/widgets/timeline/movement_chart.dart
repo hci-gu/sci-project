@@ -136,7 +136,7 @@ class MovementBarChart extends ConsumerWidget {
           fromY: 0,
           toY: 0,
           width: width,
-          color: AppTheme.colors.gray.withOpacity(0.25),
+          color: AppTheme.colors.gray.withValues(alpha: 0.25),
         )
       ];
     }

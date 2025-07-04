@@ -5,7 +5,7 @@ import 'package:scimovement/widgets/button.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class NoDataMessage extends StatelessWidget {
-  const NoDataMessage({Key? key}) : super(key: key);
+  const NoDataMessage({super.key});
 
   @override
   Widget build(BuildContext context) {

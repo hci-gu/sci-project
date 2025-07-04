@@ -69,7 +69,7 @@ class PressureReleaseForm extends StatelessWidget {
     );
   }
 
-  static buildForm(
+  static Map<String, FormControl> buildForm(
       PressureReleaseEntry? pressureReleaseEntry, bool shouldCreateEntry) {
     List<PressureReleaseExercise> exercises = [
       PressureReleaseExercise.forwards,

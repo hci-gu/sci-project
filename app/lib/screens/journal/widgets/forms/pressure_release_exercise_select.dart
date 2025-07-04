@@ -83,7 +83,8 @@ class PressureReleaseExerciseSelect extends HookWidget {
     );
   }
 
-  void _onTap(state, PressureReleaseExercise exercise) {
+  void _onTap(ValueNotifier<List<PressureReleaseExercise>> state,
+      PressureReleaseExercise exercise) {
     if (exercise == PressureReleaseExercise.lying) {
       state.value = [PressureReleaseExercise.lying];
       form.patchValue({

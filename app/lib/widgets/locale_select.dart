@@ -14,7 +14,7 @@ class LocaleSelect extends HookConsumerWidget {
   final List<Locale> languages = AppLocalizations.supportedLocales;
   final bool small;
 
-  LocaleSelect({Key? key, this.small = false}) : super(key: key);
+  LocaleSelect({super.key, this.small = false});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -44,7 +44,7 @@ class LocaleSelect extends HookConsumerWidget {
     );
   }
 
-  open(BuildContext context, WidgetRef ref, isOpen) {
+  void open(BuildContext context, WidgetRef ref, isOpen) {
     findButton();
     _animationController.forward();
     _overlayEntry = _overlayEntryBuilder(context, ref, isOpen);
@@ -52,13 +52,13 @@ class LocaleSelect extends HookConsumerWidget {
     isOpen.value = true;
   }
 
-  close(isOpen) {
+  void close(ValueNotifier<bool> isOpen) {
     _overlayEntry.remove();
     _animationController.reverse();
     isOpen.value = false;
   }
 
-  findButton() {
+  void findButton() {
     RenderBox renderBox = _key.currentContext!.findRenderObject() as RenderBox;
     buttonSize = renderBox.size;
     buttonPosition = renderBox.localToGlobal(Offset.zero);
@@ -95,7 +95,7 @@ class LocaleSelect extends HookConsumerWidget {
                       borderRadius: BorderRadius.circular(4),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.grey.withOpacity(0.1),
+                          color: Colors.grey.withValues(alpha: 0.1),
                           spreadRadius: 3,
                           blurRadius: 3,
                           offset: const Offset(0, 3),
