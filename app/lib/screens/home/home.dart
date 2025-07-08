@@ -1,9 +1,12 @@
+import 'package:blur/blur.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:polar/polar.dart';
 import 'package:scimovement/models/app_features.dart';
 import 'package:scimovement/models/pagination.dart';
+import 'package:scimovement/models/watch/polar.dart';
 import 'package:scimovement/screens/home/widgets/bladder_emptying_widget.dart';
 import 'package:scimovement/screens/home/widgets/energy_widget.dart';
 import 'package:scimovement/screens/home/widgets/exercise_widget.dart';
@@ -18,6 +21,8 @@ import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/activity_wheel/activity_wheel.dart';
 import 'package:scimovement/widgets/date_select.dart';
 import 'package:scimovement/gen_l10n/app_localizations.dart';
+import 'package:scimovement/widgets/watch/connect_watch.dart';
+import 'package:scimovement/widgets/watch/sync_watch_data.dart';
 
 class HomeWidgetPageNotifier extends Notifier<int> {
   @override
@@ -34,24 +39,26 @@ class HomeWidgetPageNotifier extends Notifier<int> {
   }
 }
 
-final homeWidgetPageProvider =
-    NotifierProvider<HomeWidgetPageNotifier, int>(HomeWidgetPageNotifier.new);
+final homeWidgetPageProvider = NotifierProvider<HomeWidgetPageNotifier, int>(
+  HomeWidgetPageNotifier.new,
+);
 
 class PagedWidgets extends HookConsumerWidget {
-  const PagedWidgets({
-    super.key,
-  });
+  const PagedWidgets({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     List<AppFeature> features = ref.watch(appFeaturesProvider);
     bool hasWatchFeatures = features.contains(AppFeature.watch);
-    bool hasLogFeatures = features.contains(AppFeature.bladderAndBowel) ||
+    bool hasLogFeatures =
+        features.contains(AppFeature.bladderAndBowel) ||
         features.contains(AppFeature.pressureRelease);
     int page = ref.watch(homeWidgetPageProvider);
     bool centerAlignDate = page == 0 && hasLogFeatures;
-    PageController controller =
-        useMemoized(() => PageController(initialPage: page), [page]);
+    PageController controller = useMemoized(
+      () => PageController(initialPage: page),
+      [page],
+    );
 
     return Column(
       children: [
@@ -75,9 +82,7 @@ class PagedWidgets extends HookConsumerWidget {
                     padding: EdgeInsets.symmetric(
                       horizontal: AppTheme.basePadding * 2,
                     ),
-                    child: SelectedDateText(
-                      centerAlign: centerAlignDate,
-                    ),
+                    child: SelectedDateText(centerAlign: centerAlignDate),
                   ),
                 ),
               ),
@@ -111,24 +116,31 @@ class PagedWidgets extends HookConsumerWidget {
                                       MainAxisAlignment.spaceAround,
                                   children: [
                                     features.contains(
-                                            AppFeature.pressureRelease)
+                                          AppFeature.pressureRelease,
+                                        )
                                         ? const PressureUlcerWidget()
                                         : const SizedBox.shrink(),
                                     if (features.contains(
-                                            AppFeature.bladderAndBowel) &&
+                                          AppFeature.bladderAndBowel,
+                                        ) &&
                                         features.contains(
-                                            AppFeature.pressureRelease))
+                                          AppFeature.pressureRelease,
+                                        ))
                                       AppTheme.spacer,
                                     features.contains(
-                                            AppFeature.bladderAndBowel)
+                                          AppFeature.bladderAndBowel,
+                                        )
                                         ? const UTIWidget()
                                         : const Expanded(
-                                            child: SizedBox.shrink()),
+                                          child: SizedBox.shrink(),
+                                        ),
                                     if (features.contains(
-                                            AppFeature.bladderAndBowel) &&
+                                          AppFeature.bladderAndBowel,
+                                        ) &&
                                         !features.contains(
-                                            AppFeature.pressureRelease))
-                                      const Expanded(child: SizedBox.shrink())
+                                          AppFeature.pressureRelease,
+                                        ))
+                                      const Expanded(child: SizedBox.shrink()),
                                   ],
                                 ),
                               ),
@@ -143,39 +155,13 @@ class PagedWidgets extends HookConsumerWidget {
                                 child: ListView(
                                   shrinkWrap: true,
                                   scrollDirection: Axis.horizontal,
-                                  children: const [
-                                    NeuroPathicPainWidgets(),
-                                  ],
+                                  children: const [NeuroPathicPainWidgets()],
                                 ),
                               ),
                             ],
                           ),
                         ),
-                      if (hasWatchFeatures)
-                        Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: AppTheme.basePadding * 2,
-                          ),
-                          child: Center(
-                            child: AspectRatio(
-                              aspectRatio: 1,
-                              child: StaggeredGrid.count(
-                                crossAxisCount: 2,
-                                crossAxisSpacing: AppTheme.basePadding * 2,
-                                mainAxisSpacing: AppTheme.basePadding * 2,
-                                children: const [
-                                  StaggeredGridTile.count(
-                                    crossAxisCellCount: 1,
-                                    mainAxisCellCount: 2,
-                                    child: ActivityWheel(),
-                                  ),
-                                  EnergyWidget(),
-                                  SedentaryWidget(),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
+                      WatchFeaturesWidget(),
                     ],
                   ),
                 ),
@@ -185,11 +171,83 @@ class PagedWidgets extends HookConsumerWidget {
         ),
         if (hasWatchFeatures && hasLogFeatures) AppTheme.spacer2x,
         if (hasWatchFeatures && hasLogFeatures)
-          StepIndicator(
-            index: page,
-            count: 2,
-          )
+          StepIndicator(index: page, count: 2),
       ],
+    );
+  }
+}
+
+class WatchFeaturesWidget extends HookConsumerWidget {
+  const WatchFeaturesWidget({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    List<AppFeature> features = ref.watch(appFeaturesProvider);
+    ConnectedWatch? watch = ref.watch(connectedWatchProvider);
+
+    if (!features.contains(AppFeature.watch)) {
+      return const SizedBox.shrink();
+    }
+
+    Widget activity = Padding(
+      padding: EdgeInsets.symmetric(horizontal: AppTheme.basePadding * 2),
+      child: Center(
+        child: AspectRatio(
+          aspectRatio: 1,
+          child: StaggeredGrid.count(
+            crossAxisCount: 2,
+            crossAxisSpacing: AppTheme.basePadding * 2,
+            mainAxisSpacing: AppTheme.basePadding * 2,
+            children: const [
+              StaggeredGridTile.count(
+                crossAxisCellCount: 1,
+                mainAxisCellCount: 2,
+                child: ActivityWheel(),
+              ),
+              EnergyWidget(),
+              SedentaryWidget(),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    if (watch == null) {
+      return Stack(
+        children: [
+          Blur(blur: 6, colorOpacity: 0.5, child: activity),
+          ConnectWatch(),
+        ],
+      );
+    }
+
+    return FutureBuilder(
+      future: PolarService.instance.listRecordings(),
+      builder: (
+        context,
+        AsyncSnapshot<List<PolarOfflineRecordingEntry>> snapshot,
+      ) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Stack(
+            children: [
+              Blur(blur: 6, colorOpacity: 0.5, child: activity),
+              const Center(child: CircularProgressIndicator()),
+            ],
+          );
+        }
+        List<PolarOfflineRecordingEntry> entries = snapshot.data ?? [];
+
+        return Stack(
+          children: [
+            Blur(
+              blur: entries.isEmpty ? 0 : 6,
+              colorOpacity: entries.isEmpty ? 0 : 0.5,
+              child: activity,
+            ),
+            SyncWatchData(entries: entries),
+          ],
+        );
+      },
     );
   }
 }
@@ -213,9 +271,7 @@ class HomeScreen extends HookConsumerWidget {
           const PagedWidgets(),
           AppTheme.spacer2x,
           Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: AppTheme.basePadding * 2,
-            ),
+            padding: EdgeInsets.symmetric(horizontal: AppTheme.basePadding * 2),
             child: StaggeredGrid.count(
               crossAxisCount: 2,
               crossAxisSpacing: AppTheme.basePadding * 2,
