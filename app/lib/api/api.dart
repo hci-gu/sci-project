@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:scimovement/api/classes.dart';
+import 'package:scimovement/api/classes/counts.dart';
 import 'package:scimovement/api/classes/journal/bowel_emptying.dart';
 import 'package:scimovement/api/classes/journal/exercise.dart';
 import 'package:scimovement/api/classes/journal/journal.dart';
@@ -15,21 +16,23 @@ const emptyBody = {};
 class Api {
   String _userId = '';
   String tz = 'Europe/Stockholm';
-  Dio dio = Dio(BaseOptions(
-    baseUrl: apiUrl,
-    connectTimeout: const Duration(seconds: 20),
-    receiveTimeout: const Duration(seconds: 20),
-  ));
+  Dio dio = Dio(
+    BaseOptions(
+      baseUrl: apiUrl,
+      connectTimeout: const Duration(seconds: 20),
+      receiveTimeout: const Duration(seconds: 20),
+    ),
+  );
 
   void clearUserId() {
     _userId = '';
   }
 
   Future<User?> login(String email, String password) async {
-    var response = await dio.post('/users/login', data: {
-      'email': email,
-      'password': password,
-    });
+    var response = await dio.post(
+      '/users/login',
+      data: {'email': email, 'password': password},
+    );
     User user = User.fromJson(response.data);
     _userId = user.id;
 
@@ -38,12 +41,7 @@ class Api {
 
   Future<User?> forcedLogin(String userId, String apiKey) async {
     // validate apiKey
-    await dio.get(
-      '/users',
-      options: Options(
-        headers: {'x-api-key': apiKey},
-      ),
-    );
+    await dio.get('/users', options: Options(headers: {'x-api-key': apiKey}));
 
     // For now, we'll just get the user by ID
     // In a real implementation, you'd want to validate the apiKey on the server
@@ -57,8 +55,11 @@ class Api {
     return user;
   }
 
-  Future<User?> register(String email, String password,
-      [Map<dynamic, dynamic> values = emptyBody]) async {
+  Future<User?> register(
+    String email,
+    String password, [
+    Map<dynamic, dynamic> values = emptyBody,
+  ]) async {
     Map<dynamic, dynamic> body = {
       'email': email,
       'password': password,
@@ -106,7 +107,10 @@ class Api {
   }
 
   Future<List<Bout>> getBouts(
-      DateTime from, DateTime to, ChartMode mode) async {
+    DateTime from,
+    DateTime to,
+    ChartMode mode,
+  ) async {
     Map<String, String> params = {
       'from': from.toIso8601String().substring(0, 16),
       'to': to.toIso8601String().substring(0, 16),
@@ -124,11 +128,14 @@ class Api {
   }
 
   Future createBout(DateTime time, int minutes, Activity activity) async {
-    await dio.post('/bouts/$_userId', data: {
-      't': time.toIso8601String(),
-      'minutes': minutes,
-      'activity': activity.name,
-    });
+    await dio.post(
+      '/bouts/$_userId',
+      data: {
+        't': time.toIso8601String(),
+        'minutes': minutes,
+        'activity': activity.name,
+      },
+    );
   }
 
   Future deleteBout(int id) async {
@@ -136,10 +143,13 @@ class Api {
   }
 
   Future<int> getActivity(DateTime from, DateTime to) async {
-    var response = await dio.get('/sedentary/$_userId', queryParameters: {
-      'from': from.toIso8601String().substring(0, 16),
-      'to': to.toIso8601String().substring(0, 16),
-    });
+    var response = await dio.get(
+      '/sedentary/$_userId',
+      queryParameters: {
+        'from': from.toIso8601String().substring(0, 16),
+        'to': to.toIso8601String().substring(0, 16),
+      },
+    );
 
     if (response.statusCode == 200) {
       Map<String, dynamic> data = response.data;
@@ -156,10 +166,7 @@ class Api {
   Future<User?> updateUser(Map<String, dynamic> userdata) async {
     userdata.removeWhere((key, value) => value == null);
     try {
-      await dio.patch(
-        '/users/$_userId',
-        data: userdata,
-      );
+      await dio.patch('/users/$_userId', data: userdata);
     } catch (e) {
       print(e);
     }
@@ -168,12 +175,14 @@ class Api {
   }
 
   Future<List<JournalEntry>> getJournalForType(
-      JournalType type, DateTime date) async {
+    JournalType type,
+    DateTime date,
+  ) async {
     try {
-      var response =
-          await dio.get('/journal/$_userId/${type.name}', queryParameters: {
-        'to': date.toIso8601String().substring(0, 16),
-      });
+      var response = await dio.get(
+        '/journal/$_userId/${type.name}',
+        queryParameters: {'to': date.toIso8601String().substring(0, 16)},
+      );
       if (response.statusCode == 200) {
         List<dynamic> data = response.data;
         return data.map((json) {
@@ -211,10 +220,13 @@ class Api {
     ChartMode mode,
   ) async {
     try {
-      var response = await dio.get('/journal/$_userId', queryParameters: {
-        'from': from.toIso8601String().substring(0, 16),
-        'to': to.toIso8601String().substring(0, 16),
-      });
+      var response = await dio.get(
+        '/journal/$_userId',
+        queryParameters: {
+          'from': from.toIso8601String().substring(0, 16),
+          'to': to.toIso8601String().substring(0, 16),
+        },
+      );
       if (response.statusCode == 200) {
         List<dynamic> data = response.data;
         return data.map((json) {
@@ -262,9 +274,10 @@ class Api {
 
   Future<List<Goal>> getGoals(DateTime date) async {
     try {
-      var response = await dio.get('/goals/$_userId', queryParameters: {
-        'date': date.toIso8601String().substring(0, 16),
-      });
+      var response = await dio.get(
+        '/goals/$_userId',
+        queryParameters: {'date': date.toIso8601String().substring(0, 16)},
+      );
       if (response.statusCode == 200) {
         List<dynamic> data = response.data;
         return data.map((json) {
@@ -291,6 +304,13 @@ class Api {
 
   Future deleteGoal(int id) async {
     await dio.delete('/goals/$_userId/$id');
+  }
+
+  Future uploadCounts(List<Counts> counts) async {
+    await dio.post(
+      '/counts/$_userId',
+      data: counts.map((c) => c.toJson()).toList(),
+    );
   }
 
   String chartModeToGroup(ChartMode mode) {

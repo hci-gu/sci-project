@@ -41,6 +41,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.0"
+  blur:
+    dependency: "direct main"
+    description:
+      name: blur
+      sha256: "1318cf79c735784eda8dffc77b1085b757373d233c1c8d94dc0cfd81530a3574"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.0.2"
   boolean_selector:
     dependency: transitive
     description:
@@ -93,10 +101,10 @@ packages:
     dependency: transitive
     description:
       name: device_info_plus
-      sha256: "72d146c6d7098689ff5c5f66bcf593ac11efc530095385356e131070333e64da"
+      sha256: a7fd703482b391a87d60b6061d04dfdeab07826b96f9abd8f5ed98068acc0074
       url: "https://pub.dev"
     source: hosted
-    version: "11.3.0"
+    version: "10.1.2"
   device_info_plus_platform_interface:
     dependency: transitive
     description:
@@ -498,10 +506,10 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "048e9ab5ee614139dfd20a40d166cceea668ba13"
-      url: "https://github.com/hci-gu/polar-flutter.git"
+      resolved-ref: e16cc3a119d8cebdf2bd869eabcdb809cadd3a99
+      url: "https://github.com/mikeread-dev/polar.git"
     source: git
-    version: "7.6.0"
+    version: "7.5.1"
   push:
     dependency: "direct main"
     description:

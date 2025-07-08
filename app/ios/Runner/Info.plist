@@ -70,5 +70,14 @@
 	<false/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>Used to connect to Polar devices</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>Used to connect to Polar devices</string>
+	<key>UIBackgroundModes</key>
+	<array>
+	<string>bluetooth-central</string>
+	</array>
+
 </dict>
 </plist>
