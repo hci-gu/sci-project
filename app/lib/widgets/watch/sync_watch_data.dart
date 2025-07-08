@@ -42,6 +42,7 @@ class SyncWatchData extends HookConsumerWidget {
             loading.value = true;
             (AccOfflineRecording?, HrOfflineRecording?) records =
                 await PolarService.instance.getRecordings(entries);
+
             if (records.$1 != null && records.$2 != null) {
               List<Counts> counts = countsFromPolarData(
                 records.$1!,
