@@ -312,21 +312,21 @@ List<Counts> countsFromPolarData(
       accSamplesInSameMinute
           .map((s) => (s.x / 1000 / 9.82).toDouble())
           .toList(),
-      49,
+      26,
       30,
     );
     List<double> ys = resampleAccelerometerData(
       accSamplesInSameMinute
           .map((s) => (s.y / 1000 / 9.82).toDouble())
           .toList(),
-      49,
+      26,
       30,
     );
     List<double> zs = resampleAccelerometerData(
       accSamplesInSameMinute
           .map((s) => (s.z / 1000 / 9.82).toDouble())
           .toList(),
-      49,
+      26,
       30,
     );
     double accVM = computeAccVM(xs, ys, zs);

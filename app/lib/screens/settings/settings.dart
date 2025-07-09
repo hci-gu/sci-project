@@ -7,6 +7,7 @@ import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/models/onboarding.dart';
 import 'package:scimovement/screens/settings/widgets/app_settings.dart';
 import 'package:scimovement/screens/settings/widgets/user_settings.dart';
+import 'package:scimovement/screens/settings/widgets/watch_settings.dart';
 import 'package:scimovement/storage.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
@@ -40,6 +41,12 @@ class SettingsScreen extends ConsumerWidget {
           UserSettings(user: user),
           AppTheme.separator,
           Text(
+            AppLocalizations.of(context)!.watchSettings,
+            style: AppTheme.labelXLarge,
+          ),
+          const WatchSettings(),
+          AppTheme.separator,
+          Text(
             AppLocalizations.of(context)!.appSettings,
             style: AppTheme.labelXLarge,
           ),
@@ -55,10 +62,12 @@ class SettingsScreen extends ConsumerWidget {
             onTap: () async {
               await Clipboard.setData(ClipboardData(text: user.id));
               if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(SnackbarMessage(
-                  context: context,
-                  message: AppLocalizations.of(context)!.userIdCopyMessage,
-                ));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackbarMessage(
+                    context: context,
+                    message: AppLocalizations.of(context)!.userIdCopyMessage,
+                  ),
+                );
               }
             },
             child: Column(
@@ -67,10 +76,7 @@ class SettingsScreen extends ConsumerWidget {
                   '${AppLocalizations.of(context)!.userId}:',
                   style: AppTheme.labelMedium,
                 ),
-                Text(
-                  user.id,
-                  style: AppTheme.paragraphSmall,
-                ),
+                Text(user.id, style: AppTheme.paragraphSmall),
               ],
             ),
           ),
@@ -100,9 +106,7 @@ class AboutInfo extends StatelessWidget {
 
   Widget _body(BuildContext context, PackageInfo? info) {
     return GestureDetector(
-      onTap: () => showLicensePage(
-        context: context,
-      ),
+      onTap: () => showLicensePage(context: context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -111,10 +115,7 @@ class AboutInfo extends StatelessWidget {
             children: [
               const Icon(Icons.info_outline),
               AppTheme.spacer,
-              Text(
-                info?.appName ?? '',
-                style: AppTheme.labelMedium,
-              ),
+              Text(info?.appName ?? '', style: AppTheme.labelMedium),
               AppTheme.spacer,
               Text(
                 '${info?.version} (${info?.buildNumber})',

@@ -36,7 +36,7 @@ List<String> detailRoutes = [
   'activity',
   'sedentary',
   'pressure-release',
-  'bladder-emptying'
+  'bladder-emptying',
 ];
 String landingRoute = '/';
 
@@ -65,7 +65,7 @@ class RouterNotifier extends ChangeNotifier {
 
     _ref.listen<String?>(
       userProvider.select((value) => value?.id),
-      (_, __) => notifyListeners(),
+      (_, _) => notifyListeners(),
     );
   }
 
@@ -133,28 +133,29 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
       GoRoute(
         name: 'loading',
         path: '/loading',
-        builder: (_, __) => const LoadingScreen(),
+        builder: (_, _) => const LoadingScreen(),
       ),
       GoRoute(
         name: 'introduction',
         path: '/introduction',
-        builder: (_, __) => const IntroductionScreen(),
+        builder: (_, _) => const IntroductionScreen(),
         routes: [
           GoRoute(
             name: 'login',
             path: 'login',
-            builder: (_, __) => const LoginScreen(),
+            builder: (_, _) => const LoginScreen(),
           ),
           GoRoute(
             name: 'register',
             path: 'register',
-            builder: (_, __) => const RegisterScreen(),
+            builder: (_, _) => const RegisterScreen(),
           ),
         ],
       ),
       StatefulShellRoute.indexedStack(
-        builder: (context, state, navigationShell) =>
-            TabScreen(navigationShell: navigationShell),
+        builder:
+            (context, state, navigationShell) =>
+                TabScreen(navigationShell: navigationShell),
         branches: [
           StatefulShellBranch(
             routes: [
@@ -166,22 +167,22 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
                   GoRoute(
                     name: 'calories',
                     path: 'calories',
-                    builder: (_, __) => const CaloriesScreen(),
+                    builder: (_, _) => const CaloriesScreen(),
                   ),
                   GoRoute(
                     name: 'activity',
                     path: 'activity',
-                    builder: (_, __) => const ActivityScreen(),
+                    builder: (_, _) => const ActivityScreen(),
                   ),
                   GoRoute(
                     name: 'sedentary',
                     path: 'sedentary',
-                    builder: (_, __) => const SedentaryScreen(),
+                    builder: (_, _) => const SedentaryScreen(),
                   ),
                   GoRoute(
                     name: 'pressure-release',
                     path: 'pressure-release',
-                    builder: (_, __) => const PressureReleaseScreen(),
+                    builder: (_, _) => const PressureReleaseScreen(),
                     routes: [
                       GoRoute(
                         path: 'goal',
@@ -198,7 +199,7 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
                   GoRoute(
                     name: 'bladder-emptying',
                     path: 'bladder-emptying',
-                    builder: (_, __) => const BladderEmptyingScreen(),
+                    builder: (_, _) => const BladderEmptyingScreen(),
                     routes: [
                       GoRoute(
                         path: 'goal',
@@ -220,10 +221,10 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
                   GoRoute(
                     path: 'goal-reached',
                     name: 'goal-reached',
-                    builder: (_, __) => const GoalReachedScreen(),
+                    builder: (_, _) => const GoalReachedScreen(),
                   ),
                 ],
-              )
+              ),
             ],
           ),
           StatefulShellBranch(
@@ -236,35 +237,39 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
                   GoRoute(
                     name: 'select-journal-type',
                     path: 'type',
-                    builder: (_, state) => SelectJournalTypeScreen(
-                      initialDate: (state.extra as Map?)?['date'],
-                    ),
+                    builder:
+                        (_, state) => SelectJournalTypeScreen(
+                          initialDate: (state.extra as Map?)?['date'],
+                        ),
                     routes: [
                       GoRoute(
                         name: 'create-journal-from-type',
                         path: 'create',
-                        builder: (_, state) => EditJournalEntryScreen(
-                          type: (state.extra as Map?)?['type'],
-                          entry: (state.extra as Map?)?['entry'],
-                          initialDate: (state.extra as Map?)?['date'],
-                        ),
+                        builder:
+                            (_, state) => EditJournalEntryScreen(
+                              type: (state.extra as Map?)?['type'],
+                              entry: (state.extra as Map?)?['entry'],
+                              initialDate: (state.extra as Map?)?['date'],
+                            ),
                       ),
                     ],
                   ),
                   GoRoute(
                     name: 'create-journal',
                     path: 'create',
-                    builder: (_, state) => EditJournalEntryScreen(
-                      type: (state.extra as Map?)?['type'],
-                      entry: (state.extra as Map?)?['entry'],
-                    ),
+                    builder:
+                        (_, state) => EditJournalEntryScreen(
+                          type: (state.extra as Map?)?['type'],
+                          entry: (state.extra as Map?)?['entry'],
+                        ),
                   ),
                   GoRoute(
                     path: 'perform-pressure-release',
                     name: 'perform-pressure-release',
                     builder: (_, state) {
                       return PerformPressureReleaseScreen(
-                        exercises: (state.extra as Map?)?['exercises'] ??
+                        exercises:
+                            (state.extra as Map?)?['exercises'] ??
                             [
                               PressureReleaseExercise.forwards,
                               PressureReleaseExercise.rightSide,
@@ -272,9 +277,9 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
                             ],
                       );
                     },
-                  )
+                  ),
                 ],
-              )
+              ),
             ],
           ),
           StatefulShellBranch(
@@ -283,7 +288,7 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
                 path: '/settings',
                 name: 'settings',
                 builder: (context, state) => const SettingsScreen(),
-              )
+              ),
             ],
           ),
         ],
@@ -291,7 +296,7 @@ final routerProvider = Provider.family<GoRouter, RouterProps>((ref, props) {
       GoRoute(
         name: 'onboarding',
         path: '/onboarding',
-        builder: (_, __) => const OnboardingScreen(),
+        builder: (_, _) => const OnboardingScreen(),
       ),
       GoRoute(
         name: 'watch-login',
@@ -326,11 +331,7 @@ class RedirectScreen extends HookConsumerWidget {
   final String? redirectUri;
   final String? state;
 
-  const RedirectScreen({
-    super.key,
-    this.redirectUri,
-    this.state,
-  });
+  const RedirectScreen({super.key, this.redirectUri, this.state});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -369,11 +370,7 @@ class RedirectScreen extends HookConsumerWidget {
       return () => {};
     }, [user]);
 
-    return const Scaffold(
-      body: Center(
-        child: Text('Redirecting...'),
-      ),
-    );
+    return const Scaffold(body: Center(child: Text('Redirecting...')));
   }
 }
 
@@ -394,27 +391,26 @@ class LoadingScreen extends HookConsumerWidget {
     }, []);
 
     return Scaffold(
-      body: waitedLongEnough.value
-          ? Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Center(child: CircularProgressIndicator()),
-                AppTheme.spacer4x,
-                Center(
-                  child: Button(
-                    onPressed: () {
-                      ref.read(userProvider.notifier).logout();
-                      context.goNamed('introduction');
-                    },
-                    title: 'Abort',
+      body:
+          waitedLongEnough.value
+              ? Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Center(child: CircularProgressIndicator()),
+                  AppTheme.spacer4x,
+                  Center(
+                    child: Button(
+                      onPressed: () {
+                        ref.read(userProvider.notifier).logout();
+                        context.goNamed('introduction');
+                      },
+                      title: 'Abort',
+                    ),
                   ),
-                )
-              ],
-            )
-          : const Center(
-              child: CircularProgressIndicator(),
-            ),
+                ],
+              )
+              : const Center(child: CircularProgressIndicator()),
     );
   }
 }
@@ -424,52 +420,49 @@ class ForcedLoginScreen extends HookConsumerWidget {
   final String? apiKey;
   final String? date;
 
-  const ForcedLoginScreen({
-    super.key,
-    this.userId,
-    this.apiKey,
-    this.date,
-  });
+  const ForcedLoginScreen({super.key, this.userId, this.apiKey, this.date});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     User? user = ref.watch(userProvider);
 
     useEffect(() {
-      if (userId != null && apiKey != null) {
-        // Attempt forced login
-        ref.read(userProvider.notifier).forcedLogin(userId!, apiKey!).then((_) {
-          // Set the date if provided
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (userId != null && apiKey != null) {
           if (date != null) {
             try {
-              DateTime parsedDate = DateTime.parse(date!);
+              String dateString = date!;
+              // take the first 10 characters to avoid issues with time
+              dateString = dateString.substring(0, 10);
+              DateTime parsedDate = DateTime.parse(dateString);
+
               ref.read(dateProvider.notifier).state = parsedDate;
-            } catch (e) {
-              // If date parsing fails, ignore and use current date
-              // print('Failed to parse date: $date');
-            }
+            } catch (_) {}
           }
 
-          // Redirect to home after successful login
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            context.goNamed('home');
-          });
-        }).catchError((e) {
-          // Show error message and redirect to introduction
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackbarMessage(
-                context: context,
-                message: 'Failed to login with provided credentials.',
-                type: SnackbarType.error,
-              ),
-            );
-            context.goNamed('introduction');
-          });
-        });
-      } else {
-        // Missing parameters, redirect to introduction
-        WidgetsBinding.instance.addPostFrameCallback((_) {
+          // Attempt forced login
+          ref
+              .read(userProvider.notifier)
+              .forcedLogin(userId!, apiKey!)
+              .then((_) {
+                // Redirect to home after successful login
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  context.goNamed('home');
+                });
+              })
+              .catchError((e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackbarMessage(
+                      context: context,
+                      message: 'Failed to login with provided credentials.',
+                      type: SnackbarType.error,
+                    ),
+                  );
+                  context.goNamed('introduction');
+                }
+              });
+        } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackbarMessage(
               context: context,
@@ -478,15 +471,11 @@ class ForcedLoginScreen extends HookConsumerWidget {
             ),
           );
           context.goNamed('introduction');
-        });
-      }
+        }
+      });
       return () => {};
     }, [userId, apiKey, date, user]);
 
-    return const Scaffold(
-      body: Center(
-        child: Text('Authenticating...'),
-      ),
-    );
+    return const Scaffold(body: Center(child: Text('Authenticating...')));
   }
 }

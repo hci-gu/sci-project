@@ -5,12 +5,15 @@ import 'package:polar/polar.dart';
 import 'package:scimovement/api/api.dart';
 import 'package:scimovement/api/classes/counts.dart';
 import 'package:scimovement/models/watch/polar.dart';
+import 'package:scimovement/models/watch/watch.dart';
+import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 class SyncWatchData extends HookConsumerWidget {
-  final List<PolarOfflineRecordingEntry> entries;
+  final PolarState polarState;
 
-  const SyncWatchData({super.key, required this.entries});
+  const SyncWatchData({super.key, required this.polarState});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -19,10 +22,10 @@ class SyncWatchData extends HookConsumerWidget {
     return Column(
       children: [
         ListView.builder(
-          itemCount: entries.length,
+          itemCount: polarState.recordings.length,
           shrinkWrap: true,
           itemBuilder: (context, index) {
-            final entry = entries[index];
+            final entry = polarState.recordings[index];
             return ListTile(
               title: Text('Recording ${index + 1}'),
               subtitle: Text(
@@ -37,27 +40,36 @@ class SyncWatchData extends HookConsumerWidget {
             );
           },
         ),
+        AppTheme.spacer2x,
+        Text(
+          'Last synced: ${ref.watch(lastSyncProvider) != null ? timeago.format(ref.watch(lastSyncProvider)!) : 'Never'}',
+          style: AppTheme.paragraphMedium,
+        ),
+        Text(
+          'Press the sync button to upload your data',
+          style: AppTheme.paragraphMedium,
+        ),
+        AppTheme.spacer2x,
         Button(
           onPressed: () async {
             loading.value = true;
-            (AccOfflineRecording?, HrOfflineRecording?) records =
-                await PolarService.instance.getRecordings(entries);
-
-            if (records.$1 != null && records.$2 != null) {
-              List<Counts> counts = countsFromPolarData(
-                records.$1!,
-                records.$2!,
-              );
-              await Api().uploadCounts(counts);
-            } else if (context.mounted) {
-              // Handle the case where no recordings were found
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('No recordings found to sync.')),
-              );
+            bool success =
+                await ref.read(connectedWatchProvider.notifier).syncData();
+            if (context.mounted) {
+              if (success) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Recordings synced successfully!')),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('No recordings found to sync.')),
+                );
+              }
             }
 
             loading.value = false;
           },
+          icon: Icons.sync,
           title: "Sync",
           loading: loading.value,
         ),

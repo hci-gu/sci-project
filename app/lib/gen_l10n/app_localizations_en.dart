@@ -211,6 +211,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'You need to turn on notifications in your phone\'s app settings.';
 
   @override
+  String get watchSettings => 'Watch settings';
+
+  @override
   String get paraplegic => 'Paraplegic';
 
   @override

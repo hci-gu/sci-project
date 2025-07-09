@@ -494,6 +494,12 @@ abstract class AppLocalizations {
   /// **'You need to turn on notifications in your phone\'s app settings.'**
   String get pushPermissionsErrorMessage;
 
+  /// No description provided for @watchSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch settings'**
+  String get watchSettings;
+
   /// No description provided for @paraplegic.
   ///
   /// In en, this message translates to:
