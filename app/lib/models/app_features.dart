@@ -1,17 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api/classes/journal/journal.dart';
-import 'package:scimovement/models/watch/polar.dart';
 import 'package:scimovement/storage.dart';
 import 'package:scimovement/gen_l10n/app_localizations.dart';
 
-enum AppFeature {
-  watch,
-  pressureRelease,
-  pain,
-  exercise,
-  bladderAndBowel,
-}
+enum AppFeature { watch, pressureRelease, pain, exercise, bladderAndBowel }
 
 List<AppFeature> defaultAppFeatures = [
   AppFeature.pressureRelease,
@@ -51,11 +44,9 @@ final Map<AppFeature, List<JournalType>> groupedFeatures = {
     JournalType.bladderEmptying,
     JournalType.bowelEmptying,
     JournalType.leakage,
-    JournalType.urinaryTractInfection
+    JournalType.urinaryTractInfection,
   ],
-  AppFeature.exercise: [
-    JournalType.exercise,
-  ]
+  AppFeature.exercise: [JournalType.exercise],
 };
 
 class AppFeaturesNotifier extends Notifier<List<AppFeature>> {
@@ -81,50 +72,5 @@ class AppFeaturesNotifier extends Notifier<List<AppFeature>> {
 
 final appFeaturesProvider =
     NotifierProvider<AppFeaturesNotifier, List<AppFeature>>(
-  AppFeaturesNotifier.new,
-);
-
-enum WatchType {
-  polar,
-}
-
-class ConnectedWatch {
-  final String id;
-  final WatchType type;
-
-  ConnectedWatch({required this.id, required this.type});
-}
-
-class ConnectedWatchNotifier extends Notifier<ConnectedWatch?> {
-  @override
-  ConnectedWatch? build() {
-    listenSelf((previous, next) {
-      if (next != null && next.type == WatchType.polar) {
-        PolarService.initialize(next.id);
-        PolarService.instance.start();
-      } else {
-        if (previous?.type == WatchType.polar) {
-          PolarService.instance.stop();
-          PolarService.dispose();
-        }
-      }
-    });
-
-    return null;
-  }
-
-  void setConnectedWatch(ConnectedWatch watch) {
-    state = watch;
-    // Storage().storeConnectedWatch(watch);
-  }
-
-  void removeConnectedWatch() {
-    state = null;
-    // Storage().removeConnectedWatch();
-  }
-}
-
-final connectedWatchProvider =
-    NotifierProvider<ConnectedWatchNotifier, ConnectedWatch?>(
-  ConnectedWatchNotifier.new,
-);
+      AppFeaturesNotifier.new,
+    );

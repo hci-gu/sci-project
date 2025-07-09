@@ -7,6 +7,7 @@ import 'package:polar/polar.dart';
 import 'package:scimovement/models/app_features.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/models/watch/polar.dart';
+import 'package:scimovement/models/watch/watch.dart';
 import 'package:scimovement/screens/home/widgets/bladder_emptying_widget.dart';
 import 'package:scimovement/screens/home/widgets/energy_widget.dart';
 import 'package:scimovement/screens/home/widgets/exercise_widget.dart';
@@ -221,12 +222,16 @@ class WatchFeaturesWidget extends HookConsumerWidget {
       );
     }
 
+    DateTime? lastSync = ref.watch(lastSyncProvider);
+    // if lastsync was less than 15 minutes ago, we don't show the sync data
+    if (lastSync != null &&
+        DateTime.now().difference(lastSync).inMinutes < 15) {
+      return activity;
+    }
+
     return FutureBuilder(
-      future: PolarService.instance.listRecordings(),
-      builder: (
-        context,
-        AsyncSnapshot<List<PolarOfflineRecordingEntry>> snapshot,
-      ) {
+      future: PolarService.instance.getState(),
+      builder: (context, AsyncSnapshot<PolarState> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Stack(
             children: [
@@ -235,16 +240,12 @@ class WatchFeaturesWidget extends HookConsumerWidget {
             ],
           );
         }
-        List<PolarOfflineRecordingEntry> entries = snapshot.data ?? [];
 
         return Stack(
           children: [
-            Blur(
-              blur: entries.isEmpty ? 0 : 6,
-              colorOpacity: entries.isEmpty ? 0 : 0.5,
-              child: activity,
-            ),
-            SyncWatchData(entries: entries),
+            Blur(blur: 6, colorOpacity: 0.5, child: activity),
+            if (snapshot.data != null && snapshot.data!.isRecording)
+              SyncWatchData(polarState: snapshot.data!),
           ],
         );
       },

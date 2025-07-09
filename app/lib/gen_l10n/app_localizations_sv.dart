@@ -211,6 +211,9 @@ class AppLocalizationsSv extends AppLocalizations {
       'Du måste slå på notifikationer i telefonens appinställningar.';
 
   @override
+  String get watchSettings => 'Klockinställningar';
+
+  @override
   String get paraplegic => 'Paraplegiker';
 
   @override
