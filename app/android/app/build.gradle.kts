@@ -56,9 +56,15 @@ android {
 
     buildTypes {
         getByName("release") {
+            isMinifyEnabled = true
             signingConfig = signingConfigs.getByName("release")
+            proguardFiles("proguard-rules.pro")
         }
     }
+}
+
+dependencies {
+    implementation("joda-time:joda-time:2.10.10")
 }
 
 flutter {

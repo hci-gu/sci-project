@@ -29,17 +29,17 @@ class ConditionSelect extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ref.watch(provider).when(
-          data: (data) => GestureDetector(
-            onTap: () => _openModal(context),
-            child: _body(
-              _row(context, data),
-            ),
-          ),
-          error: (_, __) => _body(const Text('error')),
-          loading: () => _body(
-            const Center(child: CircularProgressIndicator()),
-          ),
+    return ref
+        .watch(provider)
+        .when(
+          data:
+              (data) => GestureDetector(
+                onTap: () => _openModal(context),
+                child: _body(_row(context, data)),
+              ),
+          error: (_, _) => _body(const Text('error')),
+          loading:
+              () => _body(const Center(child: CircularProgressIndicator())),
         );
   }
 
@@ -77,13 +77,13 @@ class ConditionSelect extends ConsumerWidget {
                   child: AutoSizeText(
                     display.subtitle!,
                     style: AppTheme.paragraphSmall,
-                    maxLines: 2,
+                    minFontSize: 6,
                   ),
                 ),
             ],
           ),
         ),
-        const Icon(Icons.keyboard_arrow_down)
+        const Icon(Icons.keyboard_arrow_down),
       ],
     );
   }
@@ -108,17 +108,15 @@ class ConditionSelect extends ConsumerWidget {
       elevation: 4,
       isScrollControlled: true,
       clipBehavior: Clip.hardEdge,
-      builder: (context) => Container(
-        color: AppTheme.colors.background,
-        child: Wrap(
-          children: [
-            Padding(
-              padding: AppTheme.elementPadding,
-              child: modal,
-            )
-          ],
-        ),
-      ),
+      builder:
+          (context) => Container(
+            color: AppTheme.colors.background,
+            child: Wrap(
+              children: [
+                Padding(padding: AppTheme.elementPadding, child: modal),
+              ],
+            ),
+          ),
     );
   }
 }

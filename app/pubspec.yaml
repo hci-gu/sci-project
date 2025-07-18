@@ -42,9 +42,13 @@ dependencies:
   show_fps: ^1.0.6
   confetti: ^0.8.0
   blur: ^4.0.2
+  flutter_foreground_task: ^9.1.0
   polar:
     git:
       url: https://github.com/mikeread-dev/polar.git
+      # url: https://github.com/hci-gu/polar.git
+      # ref: master
+  
 
 dev_dependencies:
   flutter_test:

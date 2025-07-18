@@ -110,7 +110,7 @@ class PagedWidgets extends HookConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               SizedBox(
-                                height: 90,
+                                height: 91,
                                 child: Row(
                                   mainAxisSize: MainAxisSize.max,
                                   mainAxisAlignment:
@@ -225,7 +225,7 @@ class WatchFeaturesWidget extends HookConsumerWidget {
     DateTime? lastSync = ref.watch(lastSyncProvider);
     // if lastsync was less than 15 minutes ago, we don't show the sync data
     if (lastSync != null &&
-        DateTime.now().difference(lastSync).inMinutes < 15) {
+        DateTime.now().difference(lastSync).inMinutes <= 10) {
       return activity;
     }
 
@@ -244,8 +244,10 @@ class WatchFeaturesWidget extends HookConsumerWidget {
         return Stack(
           children: [
             Blur(blur: 6, colorOpacity: 0.5, child: activity),
-            if (snapshot.data != null && snapshot.data!.isRecording)
-              SyncWatchData(polarState: snapshot.data!),
+            RebuildOnTimer(
+              duration: const Duration(seconds: 30),
+              child: const SyncWatchData(),
+            ),
           ],
         );
       },

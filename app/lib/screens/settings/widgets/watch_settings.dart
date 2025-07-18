@@ -15,7 +15,10 @@ class WatchSettings extends ConsumerWidget {
     final watch = ref.watch(connectedWatchProvider);
 
     if (watch == null) {
-      return Center(child: Text('No watch connected'));
+      return Padding(
+        padding: AppTheme.elementPadding,
+        child: Center(child: Text('No watch connected')),
+      );
     }
 
     return Column(

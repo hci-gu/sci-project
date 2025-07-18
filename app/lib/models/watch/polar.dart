@@ -37,17 +37,18 @@ class PolarService {
   Future start() async {
     // polar.batteryLevel.listen((e) => print('Battery: ${e.level}'));
     // polar.deviceConnecting.listen((_) => print('Device connecting'));
-    // polar.deviceConnected.listen((_) {
-    //   connected = true;
-    // });
-    // polar.deviceDisconnected.listen((_) {
-    //   connected = false;
-    // });
+    polar.deviceConnected.listen((_) {
+      connected = true;
+    });
+    polar.deviceDisconnected.listen((_) {
+      connected = false;
+    });
 
     await polar.connectToDevice(identifier);
 
     // await startRecording(PolarDataType.acc);
     // await startRecording(PolarDataType.hr);
+    return connected;
   }
 
   Future<PolarState> getState() async {
@@ -106,6 +107,7 @@ class PolarService {
   }
 
   Future<void> deleteAllRecordings() async {
+    print("Deleting all recordings for $identifier");
     List<PolarOfflineRecordingEntry> entries = await listRecordings();
     for (var entry in entries) {
       await polar.removeOfflineRecord(identifier, entry);
