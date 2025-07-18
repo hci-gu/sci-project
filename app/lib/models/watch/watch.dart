@@ -10,8 +10,13 @@ enum WatchType { polar }
 class ConnectedWatch {
   final String id;
   final WatchType type;
+  final bool connected;
 
-  ConnectedWatch({required this.id, required this.type});
+  ConnectedWatch({
+    required this.id,
+    required this.type,
+    this.connected = false,
+  });
 
   void initialize() {
     if (type == WatchType.polar) {
@@ -40,7 +45,10 @@ class ConnectedWatchNotifier extends Notifier<ConnectedWatch?> {
       }
     });
 
-    return Storage().getConnectedWatch();
+    final stored = Storage().getConnectedWatch();
+    stored?.initialize();
+
+    return stored;
   }
 
   void setConnectedWatch(ConnectedWatch watch) {
@@ -59,30 +67,53 @@ class ConnectedWatchNotifier extends Notifier<ConnectedWatch?> {
     }
 
     if (state?.type == WatchType.polar) {
-      await PolarService.instance.stopRecording(PolarDataType.acc);
-      await PolarService.instance.stopRecording(PolarDataType.hr);
+      print("Stop current recordings");
+      print("current watch: ${state?.id}");
+      try {
+        await PolarService.instance.stopRecording(PolarDataType.acc);
+        await PolarService.instance.stopRecording(PolarDataType.hr);
+      } catch (_) {}
 
-      await Future.delayed(Duration(seconds: 5));
+      await Future.delayed(Duration(seconds: 3));
 
-      List<PolarOfflineRecordingEntry> entries =
-          await PolarService.instance.listRecordings();
+      try {
+        print("list entries");
+        List<PolarOfflineRecordingEntry> entries =
+            await PolarService.instance.listRecordings();
+        print("listed");
+        (AccOfflineRecording?, HrOfflineRecording?) records = await PolarService
+            .instance
+            .getRecordings(entries);
+        print("got recordings");
 
-      (AccOfflineRecording?, HrOfflineRecording?) records = await PolarService
-          .instance
-          .getRecordings(entries);
+        if (records.$1 != null && records.$2 != null) {
+          print("calculate counts");
+          List<Counts> counts = countsFromPolarData(records.$1!, records.$2!);
+          print("pre upload");
+          await Api().uploadCounts(counts);
+          print("post upload");
 
-      if (records.$1 != null && records.$2 != null) {
-        List<Counts> counts = countsFromPolarData(records.$1!, records.$2!);
-        await Api().uploadCounts(counts);
+          await PolarService.instance.deleteAllRecordings();
+          print("delete all recordings");
+        }
+        // restart offline recording
+        await PolarService.instance.startRecording(PolarDataType.acc);
+        await PolarService.instance.startRecording(PolarDataType.hr);
+        print("start recording");
 
+        ref.read(lastSyncProvider.notifier).setLastSync(DateTime.now());
+
+        return true;
+      } catch (e) {
+        print("error caught, deleting all recordings: $e");
         await PolarService.instance.deleteAllRecordings();
+
+        print("restart recording");
 
         // restart offline recording
         await PolarService.instance.startRecording(PolarDataType.acc);
         await PolarService.instance.startRecording(PolarDataType.hr);
-
-        ref.read(lastSyncProvider.notifier).setLastSync(DateTime.now());
-        return true;
+        print("restarted");
       }
     }
 

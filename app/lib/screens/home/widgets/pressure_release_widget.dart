@@ -41,8 +41,9 @@ class GoalProgress extends HookWidget {
         Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(5),
-            border:
-                Border.all(color: AppTheme.colors.black.withValues(alpha: 0.1)),
+            border: Border.all(
+              color: AppTheme.colors.black.withValues(alpha: 0.1),
+            ),
           ),
           clipBehavior: Clip.antiAlias,
           width: 100,
@@ -67,34 +68,40 @@ class PressureReleaseWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     bool isToday = ref.watch(isTodayProvider);
     String asset = 'assets/svg/alarm.svg';
-    return ref.watch(pressureReleaseGoalProvider).when(
+    return ref
+        .watch(pressureReleaseGoalProvider)
+        .when(
           data: (goal) => _body(context, goal, isToday),
-          error: (_, __) => StatWidget.error(asset),
+          error: (_, _) => StatWidget.error(asset),
           loading: () => StatWidget.loading(asset),
         );
   }
 
   Widget _emptyState(BuildContext context) {
-    return StatWidget.container(Column(children: [
-      SizedBox(
-        width: 150,
-        child: Text(
-          AppLocalizations.of(context)!.pressureReleaseCreateGoal,
-          style: AppTheme.labelLarge,
-          textAlign: TextAlign.center,
-        ),
+    return StatWidget.container(
+      Column(
+        children: [
+          SizedBox(
+            width: 150,
+            child: Text(
+              AppLocalizations.of(context)!.pressureReleaseCreateGoal,
+              style: AppTheme.labelLarge,
+              textAlign: TextAlign.center,
+            ),
+          ),
+          SvgPicture.asset('assets/svg/set_goal.svg', height: 56),
+          AppTheme.spacer,
+          IgnorePointer(
+            child: Button(
+              width: 140,
+              onPressed: () {},
+              size: ButtonSize.tiny,
+              title: AppLocalizations.of(context)!.getStarted,
+            ),
+          ),
+        ],
       ),
-      SvgPicture.asset('assets/svg/set_goal.svg', height: 56),
-      AppTheme.spacer,
-      IgnorePointer(
-        child: Button(
-          width: 140,
-          onPressed: () {},
-          size: ButtonSize.tiny,
-          title: AppLocalizations.of(context)!.getStarted,
-        ),
-      ),
-    ]));
+    );
   }
 
   Widget _body(BuildContext context, JournalGoal? goal, bool isToday) {
@@ -105,18 +112,17 @@ class PressureReleaseWidget extends ConsumerWidget {
           if (timeLeft.inMinutes <= 0) {
             context.pushNamed(
               'create-journal',
-              extra: {
-                'type': JournalType.pressureRelease,
-              },
+              extra: {'type': JournalType.pressureRelease},
             );
             return;
           }
         }
         context.goNamed('pressure-release');
       },
-      child: goal != null
-          ? _withGoal(context, goal, isToday)
-          : _emptyState(context),
+      child:
+          goal != null
+              ? _withGoal(context, goal, isToday)
+              : _emptyState(context),
     );
   }
 
@@ -139,12 +145,13 @@ class PressureReleaseWidget extends ConsumerWidget {
           ),
           AppTheme.spacer,
           SvgPicture.asset(
-              finishedGoal
-                  ? 'assets/svg/goal_done.svg'
-                  : 'assets/svg/set_goal.svg',
-              height: 36),
+            finishedGoal
+                ? 'assets/svg/goal_done.svg'
+                : 'assets/svg/set_goal.svg',
+            height: 36,
+          ),
           AppTheme.spacer,
-          GoalProgress(goal: goal)
+          GoalProgress(goal: goal),
         ],
       ),
       AppTheme.widgetDecoration.copyWith(
@@ -165,83 +172,79 @@ class PressureReleaseWidget extends ConsumerWidget {
     Duration timeLeft = goal.reminder.difference(DateTime.now());
 
     if (timeLeft.inMinutes <= 0) {
-      return StatWidget.container(Column(
+      return StatWidget.container(
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Row(
+              children: [
+                SvgPicture.asset(asset, height: 18),
+                AppTheme.spacerHalf,
+                Text(
+                  AppLocalizations.of(context)!.pressureRelease,
+                  style: AppTheme.labelTiny,
+                ),
+              ],
+            ),
+            ProgressIndicatorAround(
+              size: 50,
+              value: 0,
+              strokeWidth: 2.5,
+              duration: 1,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const ShakeWidget(
+                    child: Icon(Icons.notifications_active_outlined, size: 16),
+                  ),
+                  Text(
+                    '00:00',
+                    style: AppTheme.labelLarge.copyWith(fontSize: 12),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+            AppTheme.spacer,
+            Text(
+              AppLocalizations.of(context)!.pressureReleaseTimeToDoIt,
+              style: AppTheme.labelMedium,
+            ),
+          ],
+        ),
+      );
+    }
+
+    return StatWidget.container(
+      Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Row(
-            children: [
-              SvgPicture.asset(asset, height: 18),
-              AppTheme.spacerHalf,
-              Text(
-                AppLocalizations.of(context)!.pressureRelease,
-                style: AppTheme.labelTiny,
-              ),
-            ],
-          ),
-          ProgressIndicatorAround(
-            size: 50,
-            value: 0,
-            strokeWidth: 2.5,
-            duration: 1,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+          MediaQuery(
+            data: MediaQuery.of(
+              context,
+            ).copyWith(textScaler: const TextScaler.linear(1)),
+            child: Row(
               children: [
-                const ShakeWidget(
-                  child: Icon(
-                    Icons.notifications_active_outlined,
-                    size: 16,
-                  ),
-                ),
-                Text(
-                  '00:00',
-                  style: AppTheme.labelLarge.copyWith(fontSize: 12),
-                  textAlign: TextAlign.center,
+                SvgPicture.asset(asset, height: 16),
+                AppTheme.spacerHalf,
+                AutoSizeText(
+                  AppLocalizations.of(context)!.pressureRelease,
+                  style: AppTheme.labelTiny,
                 ),
               ],
             ),
           ),
-          AppTheme.spacer,
-          Text(
-            AppLocalizations.of(context)!.pressureReleaseTimeToDoIt,
-            style: AppTheme.labelMedium,
-          ),
+          RebuildOnTimer(child: TimeUntilGoal(goal: goal)),
+          GoalProgress(goal: goal),
         ],
-      ));
-    }
-
-    return StatWidget.container(Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        MediaQuery(
-          data: MediaQuery.of(context).copyWith(
-            textScaler: const TextScaler.linear(1),
-          ),
-          child: Row(
-            children: [
-              SvgPicture.asset(asset, height: 16),
-              AppTheme.spacerHalf,
-              AutoSizeText(
-                AppLocalizations.of(context)!.pressureRelease,
-                style: AppTheme.labelTiny,
-              ),
-            ],
-          ),
-        ),
-        RebuildOnTimer(
-          child: TimeUntilGoal(goal: goal),
-        ),
-        GoalProgress(goal: goal)
-      ],
-    ));
+      ),
+    );
   }
 }
 
 class TimeUntilGoal extends StatelessWidget {
   final Goal goal;
-  const TimeUntilGoal({
-    super.key,
-    required this.goal,
-  });
+  const TimeUntilGoal({super.key, required this.goal});
 
   @override
   Widget build(BuildContext context) {
@@ -273,10 +276,7 @@ class TimeUntilGoal extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.notifications_none,
-                size: 8,
-              ),
+              const Icon(Icons.notifications_none, size: 8),
               Text(
                 DateFormat(DateFormat.HOUR24_MINUTE).format(goal.reminder),
                 style: AppTheme.paragraphSmall.copyWith(fontSize: 10),

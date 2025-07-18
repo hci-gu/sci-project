@@ -72,8 +72,9 @@ class AppColors {
 
 class AppTheme {
   static AppColors colors = AppColors();
-  static MaterialColor primarySwatch =
-      createMaterialColor(const Color.fromARGB(255, 213, 69, 79));
+  static MaterialColor primarySwatch = createMaterialColor(
+    const Color.fromARGB(255, 213, 69, 79),
+  );
 
   static double halfPadding = 4.0;
   static double basePadding = 8.0;
@@ -87,6 +88,7 @@ class AppTheme {
       surface: colors.background,
     ),
     useMaterial3: true,
+
     appBarTheme: AppBarTheme(
       backgroundColor: colors.primary,
       surfaceTintColor: colors.white,
@@ -162,13 +164,19 @@ class AppTheme {
     color: colors.gray,
   );
 
-  static Widget spacerHalf =
-      SizedBox(width: basePadding / 2, height: basePadding / 2);
+  static Widget spacerHalf = SizedBox(
+    width: basePadding / 2,
+    height: basePadding / 2,
+  );
   static Widget spacer = SizedBox(width: basePadding, height: basePadding);
-  static Widget spacer2x =
-      SizedBox(width: basePadding * 2, height: basePadding * 2);
-  static Widget spacer4x =
-      SizedBox(width: basePadding * 4, height: basePadding * 4);
+  static Widget spacer2x = SizedBox(
+    width: basePadding * 2,
+    height: basePadding * 2,
+  );
+  static Widget spacer4x = SizedBox(
+    width: basePadding * 4,
+    height: basePadding * 4,
+  );
 
   static EdgeInsetsGeometry screenPadding = EdgeInsets.symmetric(
     horizontal: basePadding * 2,
@@ -183,10 +191,11 @@ class AppTheme {
     vertical: basePadding,
   );
 
-  static TextStyle buttonTextStyle(
-      [bool secondary = false,
-      Color? color,
-      ButtonSize size = ButtonSize.medium]) {
+  static TextStyle buttonTextStyle([
+    bool secondary = false,
+    Color? color,
+    ButtonSize size = ButtonSize.medium,
+  ]) {
     return TextStyle(
       color: secondary ? color ?? primarySwatch.shade500 : colors.white,
       fontSize: size.fontSize,
@@ -194,36 +203,40 @@ class AppTheme {
     );
   }
 
-  static ButtonStyle buttonStyle(
-      {bool rounded = false,
-      bool secondary = false,
-      ButtonSize size = ButtonSize.medium,
-      Color? color}) {
+  static ButtonStyle buttonStyle({
+    bool rounded = false,
+    bool secondary = false,
+    ButtonSize size = ButtonSize.medium,
+    Color? color,
+  }) {
     return ButtonStyle(
       shape: WidgetStateProperty.all<RoundedRectangleBorder>(
         RoundedRectangleBorder(
-          borderRadius: rounded
-              ? BorderRadius.circular(28.0)
-              : BorderRadius.circular(4.0),
-          side: secondary
-              ? BorderSide(color: color ?? primarySwatch.shade700)
-              : BorderSide.none,
+          borderRadius:
+              rounded
+                  ? BorderRadius.circular(28.0)
+                  : BorderRadius.circular(4.0),
+          side:
+              secondary
+                  ? BorderSide(color: color ?? primarySwatch.shade700)
+                  : BorderSide.none,
         ),
       ),
       visualDensity: VisualDensity.compact,
-      padding: WidgetStateProperty.resolveWith<EdgeInsetsGeometry>(
-          (Set<WidgetState> states) {
+      padding: WidgetStateProperty.resolveWith<EdgeInsetsGeometry>((
+        Set<WidgetState> states,
+      ) {
         return const EdgeInsets.all(0);
       }),
-      backgroundColor: WidgetStateProperty.resolveWith<Color>(
-        (Set<WidgetState> states) {
-          if (secondary) return colors.white;
-          if (states.contains(WidgetState.pressed)) {
-            return color != null ? darkenColor(color) : colors.primaryDark;
-          }
-          return color ?? colors.primary;
-        },
-      ),
+      backgroundColor: WidgetStateProperty.resolveWith<Color>((
+        Set<WidgetState> states,
+      ) {
+        if (secondary) return colors.white;
+        if (states.contains(WidgetState.pressed)) {
+          return color != null ? darkenColor(color) : colors.primaryDark;
+        }
+        return color ?? colors.primary;
+      }),
       textStyle: WidgetStateProperty.all<TextStyle>(
         buttonTextStyle(secondary, color),
       ),
@@ -241,39 +254,31 @@ class AppTheme {
   }
 
   static Widget get separator => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16.0),
-        child: Container(
-          height: 1,
-          color: const Color.fromRGBO(0, 0, 0, 0.1),
-        ),
-      );
+    padding: const EdgeInsets.symmetric(vertical: 16.0),
+    child: Container(height: 1, color: const Color.fromRGBO(0, 0, 0, 0.1)),
+  );
   static Widget get separatorSmall => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: Container(
-          height: 1,
-          color: const Color.fromRGBO(0, 0, 0, 0.1),
-        ),
-      );
+    padding: const EdgeInsets.symmetric(vertical: 8.0),
+    child: Container(height: 1, color: const Color.fromRGBO(0, 0, 0, 0.1)),
+  );
 
   static BoxDecoration cardDecoration = BoxDecoration(
     color: colors.white,
     borderRadius: BorderRadius.circular(12),
-    border: Border.all(
-      color: colors.black.withValues(alpha: 0.1),
-    ),
+    border: Border.all(color: colors.black.withValues(alpha: 0.1)),
   );
   static BoxDecoration widgetDecoration = BoxDecoration(
-    border: Border.all(
-      width: 1.0,
-      color: const Color.fromRGBO(0, 0, 0, 0.1),
-    ),
+    border: Border.all(width: 1.0, color: const Color.fromRGBO(0, 0, 0, 0.1)),
     color: AppTheme.colors.white,
     borderRadius: BorderRadius.circular(16),
   );
   static BorderRadius borderRadius = BorderRadius.circular(16);
 
-  static Widget iconForJournalType(JournalType type,
-      [BodyPart? bodyPart, double size = 48]) {
+  static Widget iconForJournalType(
+    JournalType type, [
+    BodyPart? bodyPart,
+    double size = 48,
+  ]) {
     switch (type) {
       case JournalType.musclePain:
         return BodyPartIcon(
@@ -286,16 +291,9 @@ class AppTheme {
           size: size,
         );
       case JournalType.spasticity:
-        return SvgPicture.asset(
-          'assets/svg/spasticity.svg',
-          height: size,
-        );
+        return SvgPicture.asset('assets/svg/spasticity.svg', height: size);
       case JournalType.pressureRelease:
-        return Icon(
-          Icons.alarm,
-          size: size,
-          color: AppTheme.colors.black,
-        );
+        return Icon(Icons.alarm, size: size, color: AppTheme.colors.black);
       case JournalType.pressureUlcer:
         return Icon(
           Icons.album_outlined,
@@ -307,11 +305,7 @@ class AppTheme {
       case JournalType.bowelEmptying:
         return SvgPicture.asset('assets/svg/bowel.svg', height: size);
       case JournalType.urinaryTractInfection:
-        return Icon(
-          Icons.water,
-          size: size,
-          color: AppTheme.colors.black,
-        );
+        return Icon(Icons.water, size: size, color: AppTheme.colors.black);
       case JournalType.leakage:
         return Icon(
           Icons.water_drop_outlined,
@@ -339,16 +333,8 @@ class AppTheme {
 }
 
 const _shimmerGradient = LinearGradient(
-  colors: [
-    Color(0xFFEBEBF4),
-    Color(0xFFF4F4F4),
-    Color(0xFFEBEBF4),
-  ],
-  stops: [
-    0.1,
-    0.3,
-    0.4,
-  ],
+  colors: [Color(0xFFEBEBF4), Color(0xFFF4F4F4), Color(0xFFEBEBF4)],
+  stops: [0.1, 0.3, 0.4],
   begin: Alignment(-1.0, -0.3),
   end: Alignment(1.0, 0.3),
   tileMode: TileMode.clamp,

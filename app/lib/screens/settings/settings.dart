@@ -5,6 +5,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/models/onboarding.dart';
+import 'package:scimovement/screens/home/widgets/pressure_release_widget.dart';
 import 'package:scimovement/screens/settings/widgets/app_settings.dart';
 import 'package:scimovement/screens/settings/widgets/user_settings.dart';
 import 'package:scimovement/screens/settings/widgets/watch_settings.dart';
@@ -44,7 +45,10 @@ class SettingsScreen extends ConsumerWidget {
             AppLocalizations.of(context)!.watchSettings,
             style: AppTheme.labelXLarge,
           ),
-          const WatchSettings(),
+          RebuildOnTimer(
+            duration: const Duration(seconds: 30),
+            child: const WatchSettings(),
+          ),
           AppTheme.separator,
           Text(
             AppLocalizations.of(context)!.appSettings,

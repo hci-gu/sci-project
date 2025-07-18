@@ -2,6 +2,8 @@ PODS:
   - device_info_plus (0.0.1):
     - Flutter
   - Flutter (1.0.0)
+  - flutter_foreground_task (0.0.1):
+    - Flutter
   - package_info_plus (0.4.5):
     - Flutter
   - permission_handler_apple (9.3.0):
@@ -28,6 +30,7 @@ PODS:
 DEPENDENCIES:
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - Flutter (from `Flutter`)
+  - flutter_foreground_task (from `.symlinks/plugins/flutter_foreground_task/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
   - polar (from `.symlinks/plugins/polar/ios`)
@@ -47,6 +50,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/device_info_plus/ios"
   Flutter:
     :path: Flutter
+  flutter_foreground_task:
+    :path: ".symlinks/plugins/flutter_foreground_task/ios"
   package_info_plus:
     :path: ".symlinks/plugins/package_info_plus/ios"
   permission_handler_apple:
@@ -63,6 +68,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   device_info_plus: 97af1d7e84681a90d0693e63169a5d50e0839a0d
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  flutter_foreground_task: 21ef182ab0a29a3005cc72cd70e5f45cb7f7f817
   package_info_plus: c0502532a26c7662a62a356cebe2692ec5fe4ec4
   permission_handler_apple: 9878588469a2b0d0fc1e048d9f43605f92e6cec2
   polar: 67a1230343752cffadfe2fa95d345c8bdff6173e
