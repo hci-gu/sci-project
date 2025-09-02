@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:polar/polar.dart';
@@ -8,73 +10,258 @@ import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/confirm_dialog.dart';
 import 'package:scimovement/gen_l10n/app_localizations.dart';
 
-Future<String?> connectWatchDialog(BuildContext context) {
+Future<String?> showDevicePicker(BuildContext context) async {
+  await Polar().requestPermissions();
+
+  if (!context.mounted) return null;
+
   return showDialog<String?>(
     context: context,
-    builder: (BuildContext ctx) {
-      return FutureBuilder(
-        future: Polar().searchForDevice().first,
-        builder: (ctx, snapshot) {
-          return AlertDialog(
-            title: Text('Connect Watch', style: AppTheme.headLine3),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  snapshot.connectionState == ConnectionState.done
-                      ? 'Found watch: ${snapshot.data?.name ?? 'Unknown'}'
-                      : 'Searching for watch...',
-                  style: AppTheme.paragraphMedium,
-                ),
-              ],
-            ),
-            titlePadding: EdgeInsets.symmetric(
-              horizontal: AppTheme.basePadding * 2,
-              vertical: AppTheme.basePadding,
-            ),
-            contentPadding: EdgeInsets.symmetric(
-              horizontal: AppTheme.basePadding * 2,
-            ),
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(8.0)),
-            ),
-            actionsPadding: EdgeInsets.all(AppTheme.basePadding * 2),
-            actions: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Expanded(
-                    child: Button(
-                      onPressed: () => Navigator.of(ctx).pop(null),
-                      secondary: true,
-                      rounded: true,
-                      size: ButtonSize.small,
-                      title: AppLocalizations.of(context)!.cancel,
-                    ),
-                  ),
-                  SizedBox(width: AppTheme.basePadding * 4),
-                  Expanded(
-                    child: Button(
-                      onPressed:
-                          () => Navigator.of(ctx).pop(snapshot.data!.deviceId),
-                      disabled:
-                          snapshot.connectionState != ConnectionState.done ||
-                          snapshot.data == null,
-                      rounded: true,
-                      size: ButtonSize.small,
-                      color: AppTheme.colors.error,
-                      title: AppLocalizations.of(context)!.yes,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          );
-        },
-      );
-    },
+    barrierDismissible: true,
+    builder: (_) => const _DevicePickerDialog(),
   );
 }
+
+class _DevicePickerDialog extends StatefulWidget {
+  const _DevicePickerDialog();
+
+  @override
+  State<_DevicePickerDialog> createState() => _DevicePickerDialogState();
+}
+
+class _DevicePickerDialogState extends State<_DevicePickerDialog> {
+  final List<PolarDeviceInfo> _devices = [];
+  StreamSubscription<PolarDeviceInfo>? _sub;
+  bool _scanning = true;
+  String? _selectedId;
+
+  @override
+  void initState() {
+    super.initState();
+    _startScan();
+  }
+
+  void _startScan() {
+    _sub?.cancel();
+    setState(() {
+      _devices.clear();
+      _selectedId = null;
+      _scanning = true;
+    });
+
+    _sub = Polar()
+        .searchForDevice()
+        // Optional: ignore duplicates by deviceId
+        .where((d) {
+          final idx = _devices.indexWhere((x) => x.deviceId == d.deviceId);
+          final isNew = idx == -1;
+          if (isNew) _devices.add(d);
+          return isNew;
+        })
+        .listen(
+          (_) => setState(() {}), // list updated
+          onError: (_) => setState(() => _scanning = false),
+          onDone: () => setState(() => _scanning = false),
+        );
+
+    // Optional: auto-stop after 10s
+    Future.delayed(const Duration(seconds: 10), () {
+      if (mounted && _scanning) {
+        _sub?.cancel();
+        setState(() => _scanning = false);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _sub?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('Connect Watch', style: AppTheme.headLine3),
+      content: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 420),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (_devices.isEmpty)
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: AppTheme.basePadding),
+                child: Row(
+                  children: [
+                    if (_scanning)
+                      const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    if (_scanning) const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        _scanning
+                            ? 'Searching for watches...'
+                            : 'No devices found.',
+                        style: AppTheme.paragraphMedium,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else
+              SizedBox(
+                width: 1000,
+                height: 200,
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: _devices.length,
+                  separatorBuilder: (_, _) => const Divider(height: 1),
+                  itemBuilder: (ctx, i) {
+                    final d = _devices[i];
+                    final selected = d.deviceId == _selectedId;
+                    return ListTile(
+                      dense: true,
+                      title: Text(d.name),
+                      subtitle: Text(d.deviceId),
+                      trailing: selected ? const Icon(Icons.check) : null,
+                      onTap: () => setState(() => _selectedId = d.deviceId),
+                    );
+                  },
+                ),
+              ),
+          ],
+        ),
+      ),
+      titlePadding: EdgeInsets.symmetric(
+        horizontal: AppTheme.basePadding * 2,
+        vertical: AppTheme.basePadding,
+      ),
+      contentPadding: EdgeInsets.symmetric(
+        horizontal: AppTheme.basePadding * 2,
+      ),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(8.0)),
+      ),
+      actionsPadding: EdgeInsets.all(AppTheme.basePadding * 2),
+      actions: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Expanded(
+              child: Button(
+                onPressed: () => Navigator.of(context).pop(null),
+                secondary: true,
+                rounded: true,
+                size: ButtonSize.small,
+                title: AppLocalizations.of(context)!.cancel,
+              ),
+            ),
+            SizedBox(width: AppTheme.basePadding * 2),
+            Expanded(
+              child: Button(
+                onPressed: () {
+                  if (!_scanning) _startScan();
+                },
+                rounded: true,
+                size: ButtonSize.small,
+                title: _scanning ? 'Searching...' : 'Search again',
+              ),
+            ),
+            SizedBox(width: AppTheme.basePadding * 2),
+            Expanded(
+              child: Button(
+                onPressed: () {
+                  if (_selectedId != null) {
+                    Navigator.of(context).pop(_selectedId);
+                  }
+                },
+                rounded: true,
+                size: ButtonSize.small,
+                color: AppTheme.colors.error,
+                title: AppLocalizations.of(context)!.yes,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+// Future<String?> connectWatchDialog(BuildContext context) async {
+//   await Polar().requestPermissions();
+
+//   if (!context.mounted) return null;
+
+//   return showDialog<String?>(
+//     context: context,
+//     builder: (BuildContext ctx) {
+//       return FutureBuilder(
+//         future: Polar().searchForDevice().first,
+//         builder: (ctx, snapshot) {
+//           return AlertDialog(
+//             title: Text('Connect Watch', style: AppTheme.headLine3),
+//             content: Column(
+//               mainAxisSize: MainAxisSize.min,
+//               children: [
+//                 Text(
+//                   snapshot.connectionState == ConnectionState.done
+//                       ? 'Found watch: ${snapshot.data?.name ?? 'Unknown'}'
+//                       : 'Searching for watch...',
+//                   style: AppTheme.paragraphMedium,
+//                 ),
+//               ],
+//             ),
+//             titlePadding: EdgeInsets.symmetric(
+//               horizontal: AppTheme.basePadding * 2,
+//               vertical: AppTheme.basePadding,
+//             ),
+//             contentPadding: EdgeInsets.symmetric(
+//               horizontal: AppTheme.basePadding * 2,
+//             ),
+//             shape: const RoundedRectangleBorder(
+//               borderRadius: BorderRadius.all(Radius.circular(8.0)),
+//             ),
+//             actionsPadding: EdgeInsets.all(AppTheme.basePadding * 2),
+//             actions: [
+//               Row(
+//                 mainAxisAlignment: MainAxisAlignment.spaceAround,
+//                 children: [
+//                   Expanded(
+//                     child: Button(
+//                       onPressed: () => Navigator.of(ctx).pop(null),
+//                       secondary: true,
+//                       rounded: true,
+//                       size: ButtonSize.small,
+//                       title: AppLocalizations.of(context)!.cancel,
+//                     ),
+//                   ),
+//                   SizedBox(width: AppTheme.basePadding * 4),
+//                   Expanded(
+//                     child: Button(
+//                       onPressed:
+//                           () => Navigator.of(ctx).pop(snapshot.data!.deviceId),
+//                       disabled:
+//                           snapshot.connectionState != ConnectionState.done ||
+//                           snapshot.data == null,
+//                       rounded: true,
+//                       size: ButtonSize.small,
+//                       color: AppTheme.colors.error,
+//                       title: AppLocalizations.of(context)!.yes,
+//                     ),
+//                   ),
+//                 ],
+//               ),
+//             ],
+//           );
+//         },
+//       );
+//     },
+//   );
+// }
 
 class ConnectWatch extends HookConsumerWidget {
   const ConnectWatch({super.key});
@@ -106,7 +293,7 @@ class ConnectWatch extends HookConsumerWidget {
         AppTheme.spacer2x,
         Button(
           onPressed: () async {
-            String? watchID = await connectWatchDialog(context);
+            String? watchID = await showDevicePicker(context);
 
             if (watchID != null) {
               ref

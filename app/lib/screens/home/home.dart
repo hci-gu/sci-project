@@ -20,6 +20,7 @@ import 'package:scimovement/screens/onboarding/widgets/onboarding_stepper.dart';
 import 'package:scimovement/storage.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/activity_wheel/activity_wheel.dart';
+import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/date_select.dart';
 import 'package:scimovement/gen_l10n/app_localizations.dart';
 import 'package:scimovement/widgets/watch/connect_watch.dart';
@@ -241,13 +242,34 @@ class WatchFeaturesWidget extends HookConsumerWidget {
           );
         }
 
+        if (snapshot.data?.isRecording != true) {
+          return Stack(
+            children: [
+              Blur(blur: 6, colorOpacity: 0.5, child: activity),
+              Center(
+                child: Button(
+                  onPressed: () async {
+                    await ref
+                        .read(connectedWatchProvider.notifier)
+                        .startRecording();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Watch recording started')),
+                      );
+                    }
+                  },
+                  icon: Icons.watch,
+                  title: "Start watch",
+                ),
+              ),
+            ],
+          );
+        }
+
         return Stack(
           children: [
             Blur(blur: 6, colorOpacity: 0.5, child: activity),
-            RebuildOnTimer(
-              duration: const Duration(seconds: 30),
-              child: const SyncWatchData(),
-            ),
+            const SyncWatchData(),
           ],
         );
       },

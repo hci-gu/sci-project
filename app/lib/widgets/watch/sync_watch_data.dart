@@ -42,9 +42,8 @@ class SyncWatchData extends HookConsumerWidget {
                     SnackBar(content: Text('No recordings found to sync.')),
                   );
                 }
+                loading.value = false;
               }
-
-              loading.value = false;
             },
             icon: Icons.sync,
             title: "Sync",

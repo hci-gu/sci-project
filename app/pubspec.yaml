@@ -43,6 +43,7 @@ dependencies:
   confetti: ^0.8.0
   blur: ^4.0.2
   flutter_foreground_task: ^9.1.0
+  permission_handler: ^11.0.0
   polar:
     git:
       url: https://github.com/mikeread-dev/polar.git
