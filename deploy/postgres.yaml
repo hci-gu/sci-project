@@ -37,7 +37,7 @@ spec:
           claimName: postgres-pv-claim
       containers:
       - name: postgres
-        image: appademin/sci-pg:1.0.1
+        image: registry.k8s.gu.se/appademin-ryggmargsskadecentrum/sci-pg:1.0.1
         ports:
         - containerPort: 5432
         volumeMounts:

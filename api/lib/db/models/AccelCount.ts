@@ -3,9 +3,12 @@ import UserModel from './User.ts'
 import { saveEnergyFromCount } from './Energy.ts'
 import { AccelCount } from '../classes.ts'
 import moment from 'moment'
-import { createBoutFromCounts } from './Bout.ts'
+import { createBoutFromCounts, createBoutsFromBatch } from './Bout.ts'
 
-const afterCreate = async (count: AccelCount) => {
+const afterCreate = async (count: AccelCount, options?: any) => {
+  // Allow callers to bypass the hook (for bulk/batch flows)
+  if (options?.context?.skipBoutProcessing) return
+
   if (!count.UserId || !(count.hr > 0)) return
   const user = await UserModel.get(count.UserId)
 
@@ -71,6 +74,24 @@ const Model = {
         })
       )
     ),
+  bulkSave: async (data: any[], userId: string) => {
+    const rows = data
+      .map((d) => ({ t: d.t, a: d.a, hr: d.hr, UserId: userId }))
+      .sort((x, y) => new Date(x.t).getTime() - new Date(y.t).getTime())
+
+    await AccelCountModel.bulkCreate(rows, {
+      validate: true,
+      hooks: false, // <— important
+      logging: false,
+    })
+
+    const user = await UserModel.get(userId)
+    if (user) {
+      await createBoutsFromBatch(user, rows) // implemented below
+    }
+
+    return rows
+  },
   find: ({
     userId,
     from,

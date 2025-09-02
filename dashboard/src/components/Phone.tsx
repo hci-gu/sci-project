@@ -2,8 +2,12 @@ import frame from '../assets/frame.svg'
 
 const API_KEY = import.meta.env.VITE_API_KEY
 
-function Phone({ userId = '', selectedMonth = '' }) {
-  const src = `https://hci-gu.github.io/sci-web-deployment/#/forced-login?userId=${userId}&apiKey=${API_KEY}&date=${selectedMonth}-01T00:00:00.000Z`
+function Phone({ userId = '', selectedDay = '' }) {
+  const src = `https://hci-gu.github.io/sci-web-deployment/#/forced-login?userId=${userId}&apiKey=${API_KEY}&date=${selectedDay}T00:00:00.000Z`
+
+  console.log(
+    `/forced-login?userId=${userId}&apiKey=${API_KEY}&date=${selectedDay}T00:00:00.000Z`
+  )
 
   return (
     <div className="relative min-h-screen">

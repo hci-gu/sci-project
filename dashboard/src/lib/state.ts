@@ -10,15 +10,46 @@ import {
 } from 'date-fns'
 
 const API_KEY = import.meta.env.VITE_API_KEY || ''
+const API_URL =
+  import.meta.env.VITE_API_URL || 'https://sci-api.prod.appadem.in'
+
+export const numberOfDataPointsForUser = async (user: any) => {
+  const response = await fetch(
+    `${API_URL}/energy/${user.id}?to=${new Date().toISOString()}&from=${subDays(
+      new Date(),
+      365 * 5
+    ).toISOString()}&group=year`,
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': API_KEY,
+      },
+    }
+  )
+  const energy: { t: string; kcal: number }[] = await response.json()
+
+  if (!Array.isArray(energy)) {
+    return 0
+  }
+
+  return energy.length
+}
 
 export const usersAtom = atom(async (_) => {
-  const response = await fetch('https://sci-api.prod.appadem.in/users', {
+  const response = await fetch(`${API_URL}/users`, {
     headers: {
       'Content-Type': 'application/json',
       'x-api-key': API_KEY,
     },
   })
   const users = await response.json()
+
+  for (const user of users) {
+    user.numberOfDataPoints = await numberOfDataPointsForUser(user)
+  }
+
+  // sort users by number of data points in descending order
+  users.sort((a: any, b: any) => b.numberOfDataPoints - a.numberOfDataPoints)
 
   return users
 })
@@ -30,15 +61,12 @@ export const currentUserAtom = atom(async (get) => {
   if (!userId) {
     return null
   }
-  const response = await fetch(
-    `https://sci-api.prod.appadem.in/users/${userId}`,
-    {
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': API_KEY,
-      },
-    }
-  )
+  const response = await fetch(`${API_URL}/users/${userId}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': API_KEY,
+    },
+  })
   const user = await response.json()
 
   return user
@@ -60,7 +88,7 @@ export const userEnergyAtom = atom(async (get) => {
   const toVar = to.toISOString()
 
   const response = await fetch(
-    `https://sci-api.prod.appadem.in/energy/${userId}?to=${toVar}&from=${fromVar}&group=month`,
+    `${API_URL}/energy/${userId}?to=${toVar}&from=${fromVar}&group=month`,
     {
       headers: {
         'Content-Type': 'application/json',
@@ -120,7 +148,7 @@ export const userDailyEnergyAtom = atom(async (get) => {
   const toVar = to.toISOString()
 
   const response = await fetch(
-    `https://sci-api.prod.appadem.in/energy/${userId}?to=${toVar}&from=${fromVar}&group=day`,
+    `${API_URL}/energy/${userId}?to=${toVar}&from=${fromVar}&group=day`,
     {
       headers: {
         'Content-Type': 'application/json',

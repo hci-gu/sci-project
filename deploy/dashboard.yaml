@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sci-dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sci-dashboard
+  template:
+    metadata:
+      labels:
+        app: sci-dashboard
+    spec:
+      containers:
+        - name: sci-dashboard
+          image: 'registry.k8s.gu.se/appademin-ryggmargsskadecentrum/sci-dashboard:0.1.1'
+          ports:
+            - containerPort: 8080
+              name: web
+              protocol: TCP
+          imagePullPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sci-dashboard-service
+spec:
+  selector:
+    app: sci-dashboard
+  ports:
+    - protocol: TCP
+      port: 8080
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: dashboard
+  namespace: appademin-ryggmargsskadecentrum
+  annotations:
+    kubernetes.io/tls-acme: "true"
+spec:
+  host: sci-dashboard.prod.appadem.in
+  to:
+    kind: Service
+    name: sci-dashboard-service
+    weight: 100
+  port:
+    targetPort: 8080
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None

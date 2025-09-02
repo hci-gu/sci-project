@@ -14,8 +14,13 @@ const User = ({ user }: any) => {
   return (
     <Card className="w-full max-w-sm">
       <CardHeader>
-        <CardTitle>{user.email}</CardTitle>
+        <CardTitle>{user.id}</CardTitle>
       </CardHeader>
+      <div className="px-6">
+        <p className="text-sm text-gray-500">
+          months with data past 5 years: {user.numberOfDataPoints}
+        </p>
+      </div>
       <CardFooter>
         <CardAction>
           <Link to={`/users/${user.id}`}>
@@ -32,7 +37,7 @@ function App() {
   return (
     <div className="flex min-h-svh flex-col items-center justify-center m-16">
       <h1 className="text-2xl font-bold mb-4">Users</h1>
-      <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="w-full grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4">
         {users.map((user: any) => (
           <User key={user.id} user={user} />
         ))}

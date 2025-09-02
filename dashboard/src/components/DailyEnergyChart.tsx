@@ -4,6 +4,8 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart'
+import { useSetAtom } from 'jotai'
+import { selectedDayAtom } from '@/lib/state'
 
 const chartConfig = {
   energy: {
@@ -17,9 +19,15 @@ export function DailyEnergyChart({
 }: {
   data: { day: string; energy: number }[]
 }) {
+  const setSelectedDay = useSetAtom(selectedDayAtom)
+
   return (
     <ChartContainer config={chartConfig} className="min-h-64 w-full">
-      <BarChart accessibilityLayer data={data}>
+      <BarChart
+        accessibilityLayer
+        data={data}
+        onClick={(d) => d && setSelectedDay(d.activeLabel as string)}
+      >
         <CartesianGrid vertical={false} />
         <XAxis
           dataKey="day"
