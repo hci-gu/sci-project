@@ -18,10 +18,10 @@ class ConnectedWatch {
     this.connected = false,
   });
 
-  void initialize() {
+  void initialize() async {
     if (type == WatchType.polar) {
       PolarService.initialize(id);
-      PolarService.instance.start();
+      await PolarService.instance.start();
     }
   }
 
@@ -92,32 +92,29 @@ class ConnectedWatchNotifier extends Notifier<ConnectedWatch?> {
           print("pre upload");
           await Api().uploadCounts(counts);
           print("post upload");
-
-          await PolarService.instance.deleteAllRecordings();
-          print("delete all recordings");
         }
-        // restart offline recording
-        await PolarService.instance.startRecording(PolarDataType.acc);
-        await PolarService.instance.startRecording(PolarDataType.hr);
-        print("start recording");
-
-        ref.read(lastSyncProvider.notifier).setLastSync(DateTime.now());
+        await startRecording();
 
         return true;
       } catch (e) {
         print("error caught, deleting all recordings: $e");
-        await PolarService.instance.deleteAllRecordings();
-
-        print("restart recording");
-
-        // restart offline recording
-        await PolarService.instance.startRecording(PolarDataType.acc);
-        await PolarService.instance.startRecording(PolarDataType.hr);
-        print("restarted");
+        await startRecording();
       }
     }
 
     return false;
+  }
+
+  Future startRecording() async {
+    await PolarService.instance.deleteAllRecordings();
+    ref.read(lastSyncProvider.notifier).setLastSync(DateTime.now());
+
+    print("restart recording");
+
+    // restart offline recording
+    await PolarService.instance.startRecording(PolarDataType.acc);
+    await PolarService.instance.startRecording(PolarDataType.hr);
+    print("restarted");
   }
 }
 

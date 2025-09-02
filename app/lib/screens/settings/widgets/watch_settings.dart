@@ -27,7 +27,7 @@ class WatchSettings extends ConsumerWidget {
       children: [
         FutureBuilder(
           future: PolarService.instance.getState(),
-          builder: (_, snapshot) {
+          builder: (ctx, snapshot) {
             return Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -54,7 +54,20 @@ class WatchSettings extends ConsumerWidget {
                               ),
                     ),
                     AppTheme.spacer2x,
-                    Text(watch.id, style: AppTheme.paragraphMedium),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(watch.id, style: AppTheme.paragraphMedium),
+                        Text(
+                          snapshot.hasData == false
+                              ? '-'
+                              : snapshot.data?.isRecording == true
+                              ? 'Recording...'
+                              : 'Stopped',
+                          style: AppTheme.paragraphSmall,
+                        ),
+                      ],
+                    ),
                   ],
                 ),
                 Button(

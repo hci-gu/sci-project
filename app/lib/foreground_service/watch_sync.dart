@@ -26,32 +26,51 @@ class WatchSyncHandler extends TaskHandler {
   @override
   void onRepeatEvent(DateTime timestamp) async {
     print("WatchSyncHandler repeat event at $timestamp");
+    await Storage().reloadPrefs();
     final prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getString("userId");
+    Credentials? credentials = Storage().getCredentials();
     final watchId = prefs.getString("connectedWatchId");
 
-    if (userId == null || watchId == null) {
+    print("WatchSyncHandler credentials: $credentials, watchId: $watchId");
+
+    if (credentials == null || watchId == null) {
       return;
     }
 
+    await Api().login(credentials.email, credentials.password);
+
     PolarService.initialize(watchId);
-    bool connected = await PolarService.instance.start();
+    await PolarService.instance.start(requestPermissions: false);
+    await Future.delayed(Duration(seconds: 3));
+    bool connected = PolarService.instance.connected;
+
+    print("WatchSyncHandler connected: $connected");
 
     if (connected == false) {
       return;
     }
+
+    print("WatchSyncHandler stopping recordings");
 
     await PolarService.instance.stopRecording(PolarDataType.acc);
     await PolarService.instance.stopRecording(PolarDataType.hr);
 
     await Future.delayed(Duration(seconds: 3));
 
+    print("WatchSyncHandler listing recordings");
+
     List<PolarOfflineRecordingEntry> entries =
         await PolarService.instance.listRecordings();
+
+    print("WatchSyncHandler found recordings: ${entries.length}");
 
     (AccOfflineRecording?, HrOfflineRecording?) records = await PolarService
         .instance
         .getRecordings(entries);
+
+    print(
+      "WatchSyncHandler found recordings: ${records.$1 != null}, ${records.$2 != null}",
+    );
 
     if (records.$1 != null && records.$2 != null) {
       List<Counts> counts = countsFromPolarData(records.$1!, records.$2!);
@@ -65,6 +84,8 @@ class WatchSyncHandler extends TaskHandler {
 
       Storage().setLastSync(DateTime.now());
     }
+
+    print("DONE");
     // PolarService.instance.
   }
 

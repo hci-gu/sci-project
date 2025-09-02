@@ -34,7 +34,7 @@ class PolarService {
     _instance = null;
   }
 
-  Future start() async {
+  Future start({bool requestPermissions = true}) async {
     // polar.batteryLevel.listen((e) => print('Battery: ${e.level}'));
     // polar.deviceConnecting.listen((_) => print('Device connecting'));
     polar.deviceConnected.listen((_) {
@@ -44,7 +44,10 @@ class PolarService {
       connected = false;
     });
 
-    await polar.connectToDevice(identifier);
+    await polar.connectToDevice(
+      identifier,
+      requestPermissions: requestPermissions,
+    );
 
     // await startRecording(PolarDataType.acc);
     // await startRecording(PolarDataType.hr);
