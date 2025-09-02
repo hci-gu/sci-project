@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: 'appademin/sci-api:1.11.1'
+          image: 'registry.k8s.gu.se/appademin-ryggmargsskadecentrum/sci-api:1.19.0'
           imagePullPolicy: Always
           ports:
             - containerPort: 4000
@@ -50,11 +50,12 @@ spec:
           - name: APN_TOPIC
             value: com.appademin.sci-movement
           - name: GCM_KEY
+            value: AAAAj3CFwnk:APA91bFy6bfEBPkRnrFf645tuCyXra1h8xFyNzQmXXvQKbEu-vqbXDaS_iWXFSLj8-AiioAgoBcTeYYyQWl0O4sS12CbKkJeZu1GzOp81ocTBTHvAZanmEcobdm2HY_1go8R27Upthhw
+          - name: API_KEY
             valueFrom:
               secretKeyRef:
                 name: api-secret
-                key: gcm-key
-            value: AAAAj3CFwnk:APA91bFy6bfEBPkRnrFf645tuCyXra1h8xFyNzQmXXvQKbEu-vqbXDaS_iWXFSLj8-AiioAgoBcTeYYyQWl0O4sS12CbKkJeZu1GzOp81ocTBTHvAZanmEcobdm2HY_1go8R27Upthhw
+                key: api-key
 ---
 apiVersion: v1
 kind: Service

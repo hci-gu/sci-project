@@ -1,11 +1,12 @@
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { useEffect } from 'react'
-import { useParams } from 'react-router'
+import { Link, useParams } from 'react-router'
 import { DailyEnergyChart } from './components/DailyEnergyChart'
 import { EnergyChart } from './components/EnergyChart'
 import { DatePicker } from './components/ui/date-picker'
 import {
   fromDateAtom,
+  selectedDayAtom,
   selectedMonthAtom,
   toDateAtom,
   userDailyEnergyAtom,
@@ -21,6 +22,7 @@ const UserPage = () => {
   const [fromDate, setFromDate] = useAtom(fromDateAtom)
   const [toDate, setToDate] = useAtom(toDateAtom)
   const selectedMonth = useAtomValue(selectedMonthAtom)
+  const selectedDay = useAtomValue(selectedDayAtom)
   const dailyEnergy = useAtomValue(userDailyEnergyAtom)
 
   useEffect(() => {
@@ -31,9 +33,16 @@ const UserPage = () => {
 
   return (
     <div className="flex flex-col h-screen">
-      <div className="flex items-center justify-end gap-4 p-4 border-b">
-        <DatePicker date={fromDate} onSelect={(d) => d && setFromDate(d)} />
-        <DatePicker date={toDate} onSelect={(d) => d && setToDate(d)} />
+      <div className="flex items-center justify-between gap-4 p-4 border-b">
+        <div>
+          <Link to="/" className="text-blue-500 hover:underline">
+            Back to Users
+          </Link>
+        </div>
+        <div className="flex items-center justify-center gap-4">
+          <DatePicker date={fromDate} onSelect={(d) => d && setFromDate(d)} />
+          <DatePicker date={toDate} onSelect={(d) => d && setToDate(d)} />
+        </div>
       </div>
       <div className="flex flex-1">
         <div className="w-1/2 flex flex-col items-center justify-center p-4">
@@ -51,7 +60,7 @@ const UserPage = () => {
         </div>
         <div className="w-1/2 flex items-center justify-center">
           <div className="flex-col">
-            <Phone selectedMonth={selectedMonth ?? ''} userId={userId} />
+            <Phone selectedDay={selectedDay ?? ''} userId={userId} />
           </div>
         </div>
       </div>

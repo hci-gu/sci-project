@@ -10,7 +10,6 @@ createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
       <Routes>
         <Route index element={<App />} />
-
         <Route path="users/:userId" element={<UserPage />} />
       </Routes>
     </BrowserRouter>

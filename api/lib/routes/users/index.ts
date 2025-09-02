@@ -66,6 +66,7 @@ router.post('/', userBody, async (req, res) => {
 
 router.get('/:id', async (req, res) => {
   const { id } = req.params
+  console.log('GET /users/:id', id)
 
   try {
     const result = await UserModel.get(id)

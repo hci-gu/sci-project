@@ -173,7 +173,8 @@ export const createBoutFromCounts = async (
     return bout
   }
 
-  const fiveMinAgo = moment().subtract(5, 'minutes')
+  const lastCountTime = counts[counts.length - 1].t
+  const fiveMinAgo = moment(lastCountTime).subtract(5, 'minutes')
   const boutEnd = moment(lastBout.t).add(lastBout.minutes, 'minutes')
 
   // if activity is different from current bout, create a new bout
@@ -203,4 +204,112 @@ export const createBoutFromCounts = async (
 
   await lastBout.save()
   return lastBout
+}
+
+export const createBoutsFromBatch = async (
+  user: User,
+  rows: { t: Date; a: number; hr: number }[]
+) => {
+  if (!rows?.length) return
+
+  // sort, in case caller forgot
+  rows.sort((x, y) => new Date(x.t).getTime() - new Date(y.t).getTime())
+
+  // use a single transaction to avoid races
+  await sequelizeInstance.transaction(async (t) => {
+    // walk a 5-minute sliding window over the rows
+    for (let i = 4; i < rows.length; i++) {
+      const window = rows.slice(i - 4, i + 1) // 5 items
+      // guard: ensure they are consecutive minutes — optional depending on your data
+      // if (!areConsecutiveMinutes(window)) continue;
+
+      const activities = window.map((c) =>
+        activityForAccAndCondition(c.a, user.condition)
+      )
+
+      // majority vote
+      const activity = activities
+        .sort(
+          (a, b) =>
+            activities.filter((v) => v === a).length -
+            activities.filter((v) => v === b).length
+        )
+        .pop()
+
+      // the "current minute" time is the last element in the window
+      const currentT = window[window.length - 1].t
+
+      // Extend or create bout based on *currentT*
+      await upsertBoutAtMinute(user, activity ?? Activity.sedentary, currentT, {
+        transaction: t,
+      })
+    }
+  })
+}
+
+// Helper: extend or create a bout at the given minute
+const upsertBoutAtMinute = async (
+  user: User,
+  activity: Activity,
+  minuteT: Date,
+  options?: { transaction?: any }
+) => {
+  // fetch latest bout in the activity set (non-sleeping)
+  const lastBout = await BoutModel.findOne({
+    attributes: ['id', 't', 'activity', 'minutes', 'isSleeping'],
+    where: {
+      UserId: user.id,
+      isSleeping: false,
+      activity: {
+        [Op.in]: [Activity.sedentary, Activity.moving, Activity.active],
+      },
+    },
+    order: [['t', 'DESC']],
+    transaction: options?.transaction,
+    lock: options?.transaction ? options.transaction.LOCK.UPDATE : undefined, // pessimistic if supported
+  })
+
+  const fiveMinAgo = moment(minuteT).subtract(5, 'minutes')
+
+  if (
+    !lastBout ||
+    moment(lastBout.t).add(lastBout.minutes, 'minutes').isBefore(fiveMinAgo) ||
+    lastBout.activity !== activity
+  ) {
+    // start a new 1-minute bout at minuteT
+    await BoutModel.create(
+      {
+        t: minuteT,
+        minutes: 1,
+        activity,
+        UserId: user.id,
+        isSleeping: false,
+        data: {},
+      },
+      { transaction: options?.transaction }
+    )
+    return
+  }
+
+  // Same activity & still contiguous → extend
+  await BoutModel.update(
+    { minutes: lastBout.minutes + 1 },
+    { where: { id: lastBout.id }, transaction: options?.transaction }
+  )
+
+  // Sleep flip (optional – same logic but relative to minuteT)
+  const boutEnd = moment(lastBout.t).add(lastBout.minutes + 1, 'minutes')
+  const middleOfTheNight = moment(minuteT)
+    .set('hour', 4)
+    .set('minute', 0)
+    .set('second', 0)
+  if (
+    lastBout.minutes + 1 > MINUTES_FOR_SLEEP &&
+    middleOfTheNight.isBetween(lastBout.t, boutEnd)
+  ) {
+    await BoutModel.update(
+      { isSleeping: true },
+      { where: { id: lastBout.id }, transaction: options?.transaction }
+    )
+  }
 }

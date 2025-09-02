@@ -43,7 +43,7 @@ router.post('/:id', async (req, res) => {
   const counts = req.body
 
   try {
-    await AccelCountModel.save(counts, id)
+    await AccelCountModel.bulkSave(counts, id)
     return res.sendStatus(200)
   } catch (e) {
     console.log('POST /counts/:id', e)
