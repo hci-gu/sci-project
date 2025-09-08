@@ -21,7 +21,9 @@ RUN pnpm install --frozen-lockfile
 
 # Copy the rest and build
 COPY . .
-RUN pnpm build
+# Remove any host-generated tsc incremental cache so the container does a clean full emit.
+# tsconfig.tsbuildinfo can contain absolute paths that break emits inside Docker.
+RUN rm -f tsconfig.tsbuildinfo && pnpm build
 
 # ---------- runtime (OpenShift-friendly) ----------
 FROM node:23.11.0 AS runner
