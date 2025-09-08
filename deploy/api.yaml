@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: 'registry.k8s.gu.se/appademin-ryggmargsskadecentrum/sci-api:1.19.0'
+          image: 'registry.k8s.gu.se/appademin-ryggmargsskadecentrum/sci-api:1.20.2'
           imagePullPolicy: Always
           ports:
             - containerPort: 4000
