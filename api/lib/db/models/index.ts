@@ -1,13 +1,13 @@
 import { Sequelize } from 'sequelize'
-import Accel from './Accel.ts'
-import AccelCount from './AccelCount.ts'
-import Bout from './Bout.ts'
-import Energy from './Energy.ts'
-import HeartRate from './HeartRate.ts'
-import User from './User.ts'
-import Position from './Position.ts'
-import Journal from './Journal.ts'
-import Goal from './Goal.ts'
+import Accel from './Accel.js'
+import AccelCount from './AccelCount.js'
+import Bout from './Bout.js'
+import Energy from './Energy.js'
+import HeartRate from './HeartRate.js'
+import User from './User.js'
+import Position from './Position.js'
+import Journal from './Journal.js'
+import Goal from './Goal.js'
 
 export async function init(sequelize: Sequelize) {
   await Promise.all([

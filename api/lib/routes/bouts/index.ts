@@ -1,15 +1,15 @@
 import express from 'express'
 import { type ValidatedRequest } from 'express-joi-validation'
-import { getQuery, type GetQuerySchema } from '../validation.ts'
-import { boutsForPeriod, fillMockData, removeBout, saveBout } from './utils.ts'
-import { boutBody, type BoutBodySchema } from './validation.ts'
+import { getQuery, type GetQuerySchema } from '../validation.js'
+import { boutsForPeriod, fillMockData, removeBout, saveBout } from './utils.js'
+import { boutBody, type BoutBodySchema } from './validation.js'
 
 const router = express.Router()
 
 router.get(
   '/:id',
   getQuery,
-  async (req: ValidatedRequest<GetQuerySchema>, res) => {
+  async (req: ValidatedRequest<GetQuerySchema>, res: any) => {
     const { id } = req.params
     const { from, to, group } = req.query
 
@@ -32,7 +32,7 @@ router.get(
 router.post(
   '/:id',
   boutBody,
-  async (req: ValidatedRequest<BoutBodySchema>, res) => {
+  async (req: ValidatedRequest<BoutBodySchema>, res: any) => {
     try {
       const bout = await saveBout(req.params.id, req.body)
       res.send(bout)

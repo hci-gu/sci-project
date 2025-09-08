@@ -1,5 +1,5 @@
 import { DataTypes, Op, Sequelize, type ModelStatic } from 'sequelize'
-import { Position } from '../classes.ts'
+import { Position } from '../classes.js'
 
 let PositionModel: ModelStatic<Position>
 export default {

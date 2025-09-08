@@ -1,11 +1,11 @@
-import UserModel from '../../db/models/User.ts'
-import { Activity } from '../../constants.ts'
-import EnergyModel from '../../db/models/Energy.ts'
-import AccelCountModel from '../../db/models/AccelCount.ts'
+import UserModel from '../../db/models/User.js'
+import { Activity } from '../../constants.js'
+import EnergyModel from '../../db/models/Energy.js'
+import AccelCountModel from '../../db/models/AccelCount.js'
 import {
   getEnergyForCountAndActivity,
   activityForAccAndCondition,
-} from '../../adapters/energy/index.ts'
+} from '../../adapters/energy/index.js'
 
 export const energyForPeriod = async ({
   from,

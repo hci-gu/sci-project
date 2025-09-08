@@ -1,7 +1,7 @@
 import { DataTypes, Sequelize, type ModelStatic } from 'sequelize'
 import bcrypt from 'bcrypt'
-import { Condition, Gender } from '../../constants.ts'
-import { User } from '../classes.ts'
+import { Condition, Gender } from '../../constants.js'
+import { User } from '../classes.js'
 
 export class NotFoundError extends Error {}
 export class ForbiddenError extends Error {}

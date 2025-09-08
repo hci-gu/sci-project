@@ -1,5 +1,5 @@
-import coeffs from './coeffs.json' assert { type: 'json' }
-import { Activity, Condition } from '../../constants.ts'
+import coeffs from './coeffs.json' with { type: 'json' }
+import { Activity, Condition } from '../../constants.js'
 
 type Coeff = {
   constant: number

@@ -1,14 +1,14 @@
 import express from 'express'
 import { type ValidatedRequest } from 'express-joi-validation'
-import { getQuery, type GetQuerySchema } from '../validation.ts'
-import { activityForPeriod } from './utils.ts'
+import { getQuery, type GetQuerySchema } from '../validation.js'
+import { activityForPeriod } from './utils.js'
 
 const router = express.Router()
 
 router.get(
   '/:id',
   getQuery,
-  async (req: ValidatedRequest<GetQuerySchema>, res) => {
+  async (req: ValidatedRequest<GetQuerySchema>, res: any) => {
     const { id } = req.params
     const { from, to } = req.query
 

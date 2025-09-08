@@ -12,7 +12,7 @@ import {
   TimeFrame,
   GoalType,
   JournalType,
-} from '../constants.ts'
+} from '../constants.js'
 
 export type NotificationSettings = {
   activity: boolean

@@ -2,9 +2,9 @@ import { DataTypes, Op, Sequelize, type ModelStatic } from 'sequelize'
 import {
   activityForAccAndCondition,
   getEnergyForCountAndActivity,
-} from '../../adapters/energy/index.ts'
-import { Activity } from '../../constants.ts'
-import { AccelCount, Energy, User } from '../classes.ts'
+} from '../../adapters/energy/index.js'
+import { Activity } from '../../constants.js'
+import { AccelCount, Energy, User } from '../classes.js'
 
 interface AggregatedEnergy extends Energy {
   minutes: number

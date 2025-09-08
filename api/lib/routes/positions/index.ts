@@ -1,5 +1,5 @@
 import express from 'express'
-import Position from '../../db/models/Position.ts'
+import Position from '../../db/models/Position.js'
 
 const router = express.Router()
 

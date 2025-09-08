@@ -6,7 +6,7 @@ import {
 } from 'express-joi-validation'
 import ejv from 'express-joi-validation'
 const { ContainerTypes } = ejv
-import { Condition, Gender } from '../../constants.ts'
+import { Condition, Gender } from '../../constants.js'
 
 const validator = createValidator({})
 
