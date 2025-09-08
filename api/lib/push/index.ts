@@ -1,13 +1,18 @@
 import PushNotifications from 'node-pushnotifications'
 import fs from 'fs'
 
+let CERT_PATH = './dist/push/cert/cert.p8'
+if (!fs.existsSync(CERT_PATH)) {
+  CERT_PATH = './lib/push/cert/cert.p8'
+}
+
 const settings = {
   gcm: {
     id: process.env.GCM_KEY,
   },
   apn: {
     token: {
-      key: fs.readFileSync('./lib/push/cert/cert.p8'),
+      key: fs.readFileSync(CERT_PATH),
       keyId: '8DLWUFMYJ3',
       teamId: '5KQ3D3FG5H',
     },

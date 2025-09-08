@@ -1,9 +1,9 @@
 import { config } from 'dotenv'
 config()
 
-import db from './db/index.ts'
-import createServer from './server.ts'
-import './cron.ts'
+import db from './db/index.js'
+import createServer from './server.js'
+import './cron.js'
 
 const { DB_HOST, DB_USERNAME, DB_PASSWORD, DB } = process.env
 

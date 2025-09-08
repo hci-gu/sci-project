@@ -1,7 +1,7 @@
 import moment from 'moment'
 import { Op } from 'sequelize'
-import Journal from '../../db/models/Journal.ts'
-import { JournalType } from '../../constants.ts'
+import Journal from '../../db/models/Journal.js'
+import { JournalType } from '../../constants.js'
 import { createNoise2D } from 'simplex-noise'
 
 export const getCurrentPressureUlcers = async (userId: string, to?: Date) => {

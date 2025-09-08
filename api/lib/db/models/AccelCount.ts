@@ -1,9 +1,9 @@
 import { DataTypes, Op, Sequelize, type ModelStatic } from 'sequelize'
-import UserModel from './User.ts'
-import { saveEnergyFromCount } from './Energy.ts'
-import { AccelCount } from '../classes.ts'
+import UserModel from './User.js'
+import { saveEnergyFromCount } from './Energy.js'
+import { AccelCount } from '../classes.js'
 import moment from 'moment'
-import { createBoutFromCounts, createBoutsFromBatch } from './Bout.ts'
+import { createBoutFromCounts, createBoutsFromBatch } from './Bout.js'
 
 const afterCreate = async (count: AccelCount, options?: any) => {
   // Allow callers to bypass the hook (for bulk/batch flows)

@@ -1,14 +1,14 @@
 import express from 'express'
 const router = express.Router()
 
-import userRouter from './users/index.ts'
-import energyRouter from './energy/index.ts'
-import countsRouter from './counts/index.ts'
-import sedentaryRouter from './sedentary/index.ts'
-import boutsRouter from './bouts/index.ts'
-import positionsRouter from './positions/index.ts'
-import journalRouter from './journal/index.ts'
-import goalsRouter from './goals/index.ts'
+import userRouter from './users/index.js'
+import energyRouter from './energy/index.js'
+import countsRouter from './counts/index.js'
+import sedentaryRouter from './sedentary/index.js'
+import boutsRouter from './bouts/index.js'
+import positionsRouter from './positions/index.js'
+import journalRouter from './journal/index.js'
+import goalsRouter from './goals/index.js'
 
 router.get('/ping', (_, res: any) => res.send('pong'))
 

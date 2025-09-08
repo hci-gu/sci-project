@@ -1,12 +1,12 @@
 import express from 'express'
 import { type ValidatedRequest } from 'express-joi-validation'
-import Goal from '../../db/models/Goal.ts'
-import { getQuery, type GetQuerySchema } from '../validation.ts'
-import { getGoalInfo } from './utils.ts'
+import Goal from '../../db/models/Goal.js'
+import { getQuery, type GetQuerySchema } from '../validation.js'
+import { getGoalInfo } from './utils.js'
 
 const router = express.Router()
 
-router.post('/:userId', async (req, res) => {
+router.post('/:userId', async (req, res: any) => {
   const { userId } = req.params
   try {
     const response = await Goal.save(req.body, userId)
@@ -42,7 +42,7 @@ router.patch('/:userId/:id', async (req, res) => {
 router.get(
   '/:id',
   getQuery,
-  async (req: ValidatedRequest<GetQuerySchema>, res) => {
+  async (req: ValidatedRequest<GetQuerySchema>, res: any) => {
     const { id } = req.params
 
     try {

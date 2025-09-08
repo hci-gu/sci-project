@@ -1,14 +1,14 @@
 import express from 'express'
 import { type ValidatedRequest } from 'express-joi-validation'
-import { getQuery, type GetQuerySchema } from '../validation.ts'
-import AccelCountModel from '../../db/models/AccelCount.ts'
+import { getQuery, type GetQuerySchema } from '../validation.js'
+import AccelCountModel from '../../db/models/AccelCount.js'
 
 const router = express.Router()
 
 router.get(
   '/:id',
   getQuery,
-  async (req: ValidatedRequest<GetQuerySchema>, res) => {
+  async (req: ValidatedRequest<GetQuerySchema>, res: any) => {
     const { id } = req.params
     const { from, to, group } = req.query
 
@@ -38,7 +38,7 @@ router.get(
   }
 )
 
-router.post('/:id', async (req, res) => {
+router.post('/:id', async (req, res: any) => {
   const { id } = req.params
   const counts = req.body
 

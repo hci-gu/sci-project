@@ -1,14 +1,14 @@
 import express from 'express'
 import { type ValidatedRequest } from 'express-joi-validation'
-import { getQuery, type GetQuerySchema } from '../validation.ts'
-import { energyForPeriod, fillEnergyFromCounts } from './utils.ts'
+import { getQuery, type GetQuerySchema } from '../validation.js'
+import { energyForPeriod, fillEnergyFromCounts } from './utils.js'
 
 const router = express.Router()
 
 router.get(
   '/:id',
   getQuery,
-  async (req: ValidatedRequest<GetQuerySchema>, res) => {
+  async (req: ValidatedRequest<GetQuerySchema>, res: any) => {
     const { id } = req.params
     const { from, to, activity, watt, group } = req.query
 
@@ -37,7 +37,7 @@ router.get('/:id/stats', async (req, res) => {
 router.get(
   '/:id/fill',
   getQuery,
-  async (req: ValidatedRequest<GetQuerySchema>, res) => {
+  async (req: ValidatedRequest<GetQuerySchema>, res: any) => {
     const { id } = req.params
     const { from, to } = req.query
     try {

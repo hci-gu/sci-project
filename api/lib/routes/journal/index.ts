@@ -1,20 +1,20 @@
 import express from 'express'
 import { type ValidatedRequest } from 'express-joi-validation'
-import Journal from '../../db/models/Journal.ts'
-import { getQuery, type GetQuerySchema } from '../validation.ts'
-import { JournalType } from '../../constants.ts'
+import Journal from '../../db/models/Journal.js'
+import { getQuery, type GetQuerySchema } from '../validation.js'
+import { JournalType } from '../../constants.js'
 import {
   fillMockData,
   getCurrentPain,
   getCurrentPressureUlcers,
   getCurrentSpasticity,
   getCurrentUTI,
-} from './utils.ts'
-import { removeBout, saveBout } from '../bouts/utils.ts'
+} from './utils.js'
+import { removeBout, saveBout } from '../bouts/utils.js'
 
 const router = express.Router()
 
-router.post('/:userId', async (req, res) => {
+router.post('/:userId', async (req, res: any) => {
   const { userId } = req.params
   try {
     if (req.body.type == JournalType.exercise) {
@@ -73,7 +73,7 @@ router.patch('/:userId/:id', async (req, res) => {
 router.get(
   '/:id',
   getQuery,
-  async (req: ValidatedRequest<GetQuerySchema>, res) => {
+  async (req: ValidatedRequest<GetQuerySchema>, res: any) => {
     const { id } = req.params
     const { from, to, type } = req.query
 
@@ -105,7 +105,7 @@ router.get('/:id/mock', async (req, res) => {
 router.get(
   '/:id/:type',
   getQuery,
-  async (req: ValidatedRequest<GetQuerySchema>, res) => {
+  async (req: ValidatedRequest<GetQuerySchema>, res: any) => {
     const { id, type } = req.params
     const { to } = req.query
 

@@ -1,11 +1,11 @@
-import * as redis from '../../adapters/redis.ts'
-import AccelCountModel from '../../db/models/AccelCount.ts'
+import * as redis from '../../adapters/redis.js'
+import AccelCountModel from '../../db/models/AccelCount.js'
 
-import { calculateCounts } from '../../adapters/counts.ts'
+import { calculateCounts } from '../../adapters/counts.js'
 
-import * as utils from '../../utils/index.ts'
-import { type AccelData } from '../../db/models/Accel.ts'
-import { type HeartRateData } from '../../db/models/HeartRate.ts'
+import * as utils from '../../utils/index.js'
+import { type AccelData } from '../../db/models/Accel.js'
+import { type HeartRateData } from '../../db/models/HeartRate.js'
 
 export const countsCacheKey = (userId: string, minute: string) =>
   `${userId}-${minute}`

@@ -5,10 +5,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "clean": "rimraf dist/",
-    "copy-files": "copyfiles -u 1 lib/**/*.json dist/",
+    "clean": "rm -rf dist/",
+    "copy-files": "copyfiles -u 1 lib/**/*.json dist/ && copyfiles -u 1 lib/push/cert/*.p8 dist/",
     "dev": "node --experimental-transform-types --watch lib/index.ts",
-    "build": "yarn clean && tsc && yarn copy-files",
+    "build": "pnpm clean && pnpm exec tsc -p tsconfig.json && pnpm copy-files",
     "start-prod": "NODE_ENV=production node ./dist/index.js",
     "test": "jest --runInBand --testTimeout=30000",
     "summarize": "node ./summarize.js",
@@ -41,7 +41,12 @@
     "@types/bcrypt": "^5.0.2",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
-    "@types/moment-timezone": "^0.5.30"
+    "@types/moment-timezone": "^0.5.30",
+    "@types/node": "^24.3.1",
+    "@types/node-pushnotifications": "^3.1.1",
+    "copyfiles": "^2.4.1",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.9.2"
   },
   "jest": {
     "moduleFileExtensions": [

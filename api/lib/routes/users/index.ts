@@ -1,20 +1,20 @@
 import express from 'express'
 import { type ValidatedRequest } from 'express-joi-validation'
-import AccelCountModel from '../../db/models/AccelCount.ts'
-import AccelModel from '../../db/models/Accel.ts'
-import HeartRateModel from '../../db/models/HeartRate.ts'
+import AccelCountModel from '../../db/models/AccelCount.js'
+import AccelModel from '../../db/models/Accel.js'
+import HeartRateModel from '../../db/models/HeartRate.js'
 
 const router = express.Router()
 
-import handleFitbitData from '../../adapters/fitbit.ts'
-import { checkAndSaveCounts } from './utils.ts'
-import { userBody, type UserBodySchema } from './validation.ts'
+import handleFitbitData from '../../adapters/fitbit.js'
+import { checkAndSaveCounts } from './utils.js'
+import { userBody, type UserBodySchema } from './validation.js'
 import UserModel, {
   ForbiddenError,
   hashPassword,
   NotFoundError,
-} from '../../db/models/User.ts'
-import { User } from '../../db/classes.ts'
+} from '../../db/models/User.js'
+import { User } from '../../db/classes.js'
 import { type Request, type Response, type NextFunction } from 'express'
 
 const stripSensitive = (user: User) => {
@@ -52,7 +52,7 @@ router.get('/', apiKeyMiddleware, async (_, res) => {
   }
 })
 
-router.post('/', userBody, async (req, res) => {
+router.post('/', userBody, async (req, res: any) => {
   try {
     const result = await UserModel.save(req.body)
     res.send(await returnUser(result))
@@ -64,7 +64,7 @@ router.post('/', userBody, async (req, res) => {
   }
 })
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', async (req, res: any) => {
   const { id } = req.params
   console.log('GET /users/:id', id)
 
@@ -83,7 +83,7 @@ router.get('/:id', async (req, res) => {
 router.patch(
   '/:id',
   userBody,
-  async (req: ValidatedRequest<UserBodySchema>, res) => {
+  async (req: ValidatedRequest<UserBodySchema>, res: any) => {
     const { id } = req.params
 
     try {
@@ -118,7 +118,7 @@ router.patch(
   }
 )
 
-router.post('/:id/data', async (req, res) => {
+router.post('/:id/data', async (req, res: any) => {
   const { id } = req.params
   const { hrDataPoints, accelDataPoints } = handleFitbitData(req.body)
 
@@ -137,7 +137,7 @@ router.post('/:id/data', async (req, res) => {
 router.post(
   '/login',
   userBody,
-  async (req: ValidatedRequest<UserBodySchema>, res) => {
+  async (req: ValidatedRequest<UserBodySchema>, res: any) => {
     const { email, password } = req.body
     console.log('POST /users/login', email)
 
