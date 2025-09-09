@@ -43,7 +43,7 @@ class ForegroundService {
         playSound: false,
       ),
       foregroundTaskOptions: ForegroundTaskOptions(
-        eventAction: ForegroundTaskEventAction.repeat(1000 * 60 * 10),
+        eventAction: ForegroundTaskEventAction.repeat(1000 * 60 * 5),
         autoRunOnBoot: true,
         autoRunOnMyPackageReplaced: true,
         allowWakeLock: true,

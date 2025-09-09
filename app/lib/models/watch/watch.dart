@@ -1,6 +1,7 @@
 import 'package:polar/polar.dart';
 import 'package:scimovement/api/api.dart';
 import 'package:scimovement/api/classes/counts.dart';
+import 'package:scimovement/ble_owner.dart';
 import 'package:scimovement/models/watch/polar.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/storage.dart';
@@ -20,16 +21,15 @@ class ConnectedWatch {
 
   void initialize() async {
     if (type == WatchType.polar) {
-      PolarService.initialize(id);
-      await PolarService.instance.start();
+      await sendBleCommand({'cmd': 'connect'});
     }
   }
 
   void dispose() {
-    if (type == WatchType.polar) {
-      PolarService.instance.stop();
-      PolarService.dispose();
-    }
+    // if (type == WatchType.polar) {
+    //   PolarService.instance.stop();
+    //   PolarService.dispose();
+    // }
   }
 }
 
@@ -67,54 +67,22 @@ class ConnectedWatchNotifier extends Notifier<ConnectedWatch?> {
     }
 
     if (state?.type == WatchType.polar) {
-      print("Stop current recordings");
-      print("current watch: ${state?.id}");
-      try {
-        await PolarService.instance.stopRecording(PolarDataType.acc);
-        await PolarService.instance.stopRecording(PolarDataType.hr);
-      } catch (_) {}
-
-      await Future.delayed(Duration(seconds: 3));
-
-      try {
-        print("list entries");
-        List<PolarOfflineRecordingEntry> entries =
-            await PolarService.instance.listRecordings();
-        print("listed");
-        (AccOfflineRecording?, HrOfflineRecording?) records = await PolarService
-            .instance
-            .getRecordings(entries);
-        print("got recordings");
-
-        if (records.$1 != null && records.$2 != null) {
-          print("calculate counts");
-          List<Counts> counts = countsFromPolarData(records.$1!, records.$2!);
-          print("pre upload");
-          await Api().uploadCounts(counts);
-          print("post upload");
-        }
-        await startRecording();
-
-        return true;
-      } catch (e) {
-        print("error caught, deleting all recordings: $e");
-        await startRecording();
-      }
+      await sendBleCommand({'cmd': 'sync'});
     }
 
     return false;
   }
 
   Future startRecording() async {
-    await PolarService.instance.deleteAllRecordings();
-    ref.read(lastSyncProvider.notifier).setLastSync(DateTime.now());
+    // await PolarService.instance.deleteAllRecordings();
+    // ref.read(lastSyncProvider.notifier).setLastSync(DateTime.now());
 
-    print("restart recording");
+    // print("restart recording");
 
-    // restart offline recording
-    await PolarService.instance.startRecording(PolarDataType.acc);
-    await PolarService.instance.startRecording(PolarDataType.hr);
-    print("restarted");
+    // // restart offline recording
+    // await PolarService.instance.startRecording(PolarDataType.acc);
+    // await PolarService.instance.startRecording(PolarDataType.hr);
+    // print("restarted");
   }
 }
 

@@ -5,6 +5,7 @@ import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:scimovement/app.dart';
+import 'package:scimovement/ble_owner.dart';
 import 'package:scimovement/foreground_service/foreground_service.dart';
 import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/storage.dart';
@@ -24,6 +25,8 @@ void initializeTzAndLocale(String? languageCode) {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Storage().reloadPrefs();
+
+  await BleOwner.instance.initialize();
 
   FlutterForegroundTask.initCommunicationPort();
   ForegroundService.instance.init();
