@@ -14,3 +14,13 @@
 -keepnames class org.joda.time.** { *; }
 -dontwarn org.joda.convert.FromString
 -dontwarn org.joda.convert.ToString
+
+# Keep Gson annotations (harmless even if unused)
+-keepattributes *Annotation*,Signature
+
+# Keep the Polar SDK model classes and their member names
+-keep class com.polar.sdk.api.model.** { *; }
+-keep class com.polar.androidcommunications.api.ble.model.** { *; }  # e.g., DisInfo
+
+# (Optional) If you see enums serialized by .name, keep them too (usually not needed)
+-keepclassmembers enum * { *; }

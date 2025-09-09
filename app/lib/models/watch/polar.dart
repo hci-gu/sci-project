@@ -12,6 +12,8 @@ class PolarService {
   static PolarService? _instance;
   final polar = Polar();
   bool connected = false;
+  bool initialized = false;
+  bool started = false;
 
   final String identifier;
 
@@ -27,7 +29,12 @@ class PolarService {
   }
 
   static void initialize(String identifier) {
+    if (_instance != null && _instance!.initialized) {
+      print('PolarService already initialized');
+      return;
+    }
     _instance = PolarService._(identifier);
+    _instance!.initialized = true;
   }
 
   static void dispose() {
@@ -35,6 +42,11 @@ class PolarService {
   }
 
   Future start({bool requestPermissions = true}) async {
+    if (_instance != null && _instance!.started) {
+      print('PolarService already started');
+      return connected;
+    }
+
     // polar.batteryLevel.listen((e) => print('Battery: ${e.level}'));
     // polar.deviceConnecting.listen((_) => print('Device connecting'));
     polar.deviceConnected.listen((_) {
@@ -49,8 +61,8 @@ class PolarService {
       requestPermissions: requestPermissions,
     );
 
-    // await startRecording(PolarDataType.acc);
-    // await startRecording(PolarDataType.hr);
+    _instance!.started = true;
+
     return connected;
   }
 

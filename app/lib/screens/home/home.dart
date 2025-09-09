@@ -4,6 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:polar/polar.dart';
+import 'package:scimovement/ble_owner.dart';
 import 'package:scimovement/models/app_features.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/models/watch/polar.dart';
@@ -231,8 +232,10 @@ class WatchFeaturesWidget extends HookConsumerWidget {
     }
 
     return FutureBuilder(
-      future: PolarService.instance.getState(),
-      builder: (context, AsyncSnapshot<PolarState> snapshot) {
+      future: sendBleCommand({
+        'cmd': 'get_state',
+      }).then((m) => m['data'] as Map),
+      builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Stack(
             children: [
@@ -242,7 +245,7 @@ class WatchFeaturesWidget extends HookConsumerWidget {
           );
         }
 
-        if (snapshot.data?.isRecording != true) {
+        if (snapshot.data?['isRecording'] != true) {
           return Stack(
             children: [
               Blur(blur: 6, colorOpacity: 0.5, child: activity),

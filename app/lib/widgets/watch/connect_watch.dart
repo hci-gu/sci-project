@@ -42,35 +42,37 @@ class _DevicePickerDialogState extends State<_DevicePickerDialog> {
   }
 
   void _startScan() {
-    _sub?.cancel();
-    setState(() {
-      _devices.clear();
-      _selectedId = null;
-      _scanning = true;
-    });
+    print("start scan");
+    try {
+      _sub?.cancel();
+      setState(() {
+        _devices.clear();
+        _selectedId = null;
+        _scanning = true;
+      });
 
-    _sub = Polar()
-        .searchForDevice()
-        // Optional: ignore duplicates by deviceId
-        .where((d) {
-          final idx = _devices.indexWhere((x) => x.deviceId == d.deviceId);
-          final isNew = idx == -1;
-          if (isNew) _devices.add(d);
-          return isNew;
-        })
-        .listen(
-          (_) => setState(() {}), // list updated
-          onError: (_) => setState(() => _scanning = false),
-          onDone: () => setState(() => _scanning = false),
-        );
+      _sub = Polar()
+          .searchForDevice()
+          .where((d) {
+            final idx = _devices.indexWhere((x) => x.deviceId == d.deviceId);
+            final isNew = idx == -1;
+            if (isNew) _devices.add(d);
+            return isNew;
+          })
+          .listen(
+            (_) => setState(() {}), // list updated
+            onError: (e) => setState(() => _scanning = false),
+            onDone: () => setState(() => _scanning = false),
+          );
 
-    // Optional: auto-stop after 10s
-    Future.delayed(const Duration(seconds: 10), () {
-      if (mounted && _scanning) {
-        _sub?.cancel();
-        setState(() => _scanning = false);
-      }
-    });
+      // Optional: auto-stop after 10s
+      Future.delayed(const Duration(seconds: 10), () {
+        if (mounted && _scanning) {
+          _sub?.cancel();
+          setState(() => _scanning = false);
+        }
+      });
+    } catch (_) {}
   }
 
   @override
@@ -191,84 +193,11 @@ class _DevicePickerDialogState extends State<_DevicePickerDialog> {
   }
 }
 
-// Future<String?> connectWatchDialog(BuildContext context) async {
-//   await Polar().requestPermissions();
-
-//   if (!context.mounted) return null;
-
-//   return showDialog<String?>(
-//     context: context,
-//     builder: (BuildContext ctx) {
-//       return FutureBuilder(
-//         future: Polar().searchForDevice().first,
-//         builder: (ctx, snapshot) {
-//           return AlertDialog(
-//             title: Text('Connect Watch', style: AppTheme.headLine3),
-//             content: Column(
-//               mainAxisSize: MainAxisSize.min,
-//               children: [
-//                 Text(
-//                   snapshot.connectionState == ConnectionState.done
-//                       ? 'Found watch: ${snapshot.data?.name ?? 'Unknown'}'
-//                       : 'Searching for watch...',
-//                   style: AppTheme.paragraphMedium,
-//                 ),
-//               ],
-//             ),
-//             titlePadding: EdgeInsets.symmetric(
-//               horizontal: AppTheme.basePadding * 2,
-//               vertical: AppTheme.basePadding,
-//             ),
-//             contentPadding: EdgeInsets.symmetric(
-//               horizontal: AppTheme.basePadding * 2,
-//             ),
-//             shape: const RoundedRectangleBorder(
-//               borderRadius: BorderRadius.all(Radius.circular(8.0)),
-//             ),
-//             actionsPadding: EdgeInsets.all(AppTheme.basePadding * 2),
-//             actions: [
-//               Row(
-//                 mainAxisAlignment: MainAxisAlignment.spaceAround,
-//                 children: [
-//                   Expanded(
-//                     child: Button(
-//                       onPressed: () => Navigator.of(ctx).pop(null),
-//                       secondary: true,
-//                       rounded: true,
-//                       size: ButtonSize.small,
-//                       title: AppLocalizations.of(context)!.cancel,
-//                     ),
-//                   ),
-//                   SizedBox(width: AppTheme.basePadding * 4),
-//                   Expanded(
-//                     child: Button(
-//                       onPressed:
-//                           () => Navigator.of(ctx).pop(snapshot.data!.deviceId),
-//                       disabled:
-//                           snapshot.connectionState != ConnectionState.done ||
-//                           snapshot.data == null,
-//                       rounded: true,
-//                       size: ButtonSize.small,
-//                       color: AppTheme.colors.error,
-//                       title: AppLocalizations.of(context)!.yes,
-//                     ),
-//                   ),
-//                 ],
-//               ),
-//             ],
-//           );
-//         },
-//       );
-//     },
-//   );
-// }
-
 class ConnectWatch extends HookConsumerWidget {
   const ConnectWatch({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final watchIdController = TextEditingController();
     final watch = ref.watch(connectedWatchProvider);
     final isConnected = watch != null;
 

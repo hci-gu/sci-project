@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:scimovement/ble_owner.dart';
 import 'package:scimovement/models/watch/polar.dart';
 import 'package:scimovement/models/watch/watch.dart';
 import 'package:scimovement/theme/theme.dart';
@@ -26,7 +27,9 @@ class WatchSettings extends ConsumerWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         FutureBuilder(
-          future: PolarService.instance.getState(),
+          future: sendBleCommand({
+            'cmd': 'get_state',
+          }).then((m) => m['data'] as Map),
           builder: (ctx, snapshot) {
             return Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -45,7 +48,7 @@ class WatchSettings extends ConsumerWidget {
                               ? Icon(
                                 Icons.watch,
                                 color:
-                                    snapshot.data?.isRecording == true
+                                    snapshot.data?['isRecording'] == true
                                         ? AppTheme.colors.primary
                                         : Colors.grey[700],
                               )
@@ -61,7 +64,7 @@ class WatchSettings extends ConsumerWidget {
                         Text(
                           snapshot.hasData == false
                               ? '-'
-                              : snapshot.data?.isRecording == true
+                              : snapshot.data?['isRecording'] == true
                               ? 'Recording...'
                               : 'Stopped',
                           style: AppTheme.paragraphSmall,
