@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:scimovement/api/classes/counts.dart';
 import 'package:scimovement/models/app_features.dart';
 import 'package:scimovement/models/watch/watch.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -144,6 +147,37 @@ class Storage {
   Future<void> setLastSync(DateTime dateTime) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setInt('lastSync', dateTime.millisecondsSinceEpoch);
+  }
+
+  Future<void> storePendingCounts(List<Counts> counts) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final List<String> stored =
+        prefs.getStringList('pendingCounts') ?? <String>[];
+    // Store properly encoded JSON strings (not Dart map .toString())
+    final List<String> newCounts =
+        counts.map((e) => jsonEncode(e.toJson())).toList();
+    final List<String> allCounts = [...stored, ...newCounts];
+    await prefs.setStringList('pendingCounts', allCounts);
+  }
+
+  Future<void> clearPendingCounts() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('pendingCounts');
+  }
+
+  List<Counts> getPendingCounts() {
+    final List<String> stored =
+        prefs.getStringList('pendingCounts') ?? <String>[];
+    final List<Counts> parsed = [];
+    for (final s in stored) {
+      try {
+        parsed.add(Counts.fromJson(jsonDecode(s)));
+      } catch (_) {
+        // Skip malformed entries (e.g. legacy Dart map strings)
+        continue;
+      }
+    }
+    return parsed;
   }
 
   static final Storage _instance = Storage._internal();

@@ -2,7 +2,6 @@
 import 'dart:isolate';
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:scimovement/storage.dart';
 import 'package:scimovement/api/api.dart';
 import 'package:scimovement/api/classes/counts.dart';
@@ -73,6 +72,17 @@ class BleOwner {
     }
     await Api().login(credentials.email, credentials.password);
 
+    final pendingCounts = Storage().getPendingCounts();
+    if (pendingCounts.isNotEmpty) {
+      debugPrint('BleOwner: uploading ${pendingCounts.length} pending counts');
+      try {
+        await Api().uploadCounts(pendingCounts);
+        await Storage().clearPendingCounts();
+      } catch (e) {
+        debugPrint('BleOwner: failed to upload pending counts: $e');
+      }
+    }
+
     // Make sure Polar is set up and connected
     final connected = await _ensureConnected();
     if (!connected) {
@@ -80,12 +90,16 @@ class BleOwner {
       return false;
     }
 
-    // === Your existing sync steps ===
     debugPrint('BleOwner: stopping offline recordings');
     await PolarService.instance.stopRecording(PolarDataType.acc);
     await PolarService.instance.stopRecording(PolarDataType.hr);
+    // stop recordings so we can fetch and upload them
 
-    await Future.delayed(const Duration(seconds: 2));
+    // immediately restart so we don't miss data
+    await PolarService.instance.startRecording(PolarDataType.acc);
+    await PolarService.instance.startRecording(PolarDataType.hr);
+
+    await Future.delayed(const Duration(seconds: 1));
 
     debugPrint('BleOwner: listing recordings');
     final entries = await PolarService.instance.listRecordings();
@@ -101,14 +115,15 @@ class BleOwner {
 
     if (gotAcc && gotHr) {
       final counts = countsFromPolarData(recs.$1!, recs.$2!);
-      await Api().uploadCounts(counts);
+
+      try {
+        await Api().uploadCounts(counts);
+      } catch (_) {
+        await Storage().storePendingCounts(counts);
+      }
 
       await PolarService.instance.deleteAllRecordings();
     }
-
-    // restart offline recording
-    await PolarService.instance.startRecording(PolarDataType.acc);
-    await PolarService.instance.startRecording(PolarDataType.hr);
 
     Storage().setLastSync(DateTime.now());
 

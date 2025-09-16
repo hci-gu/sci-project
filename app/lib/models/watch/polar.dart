@@ -50,6 +50,7 @@ class PolarService {
     // polar.batteryLevel.listen((e) => print('Battery: ${e.level}'));
     // polar.deviceConnecting.listen((_) => print('Device connecting'));
     polar.deviceConnected.listen((_) {
+      print("DEVICE IS CONNECTED");
       connected = true;
     });
     polar.deviceDisconnected.listen((_) {
@@ -67,13 +68,18 @@ class PolarService {
   }
 
   Future<PolarState> getState() async {
-    List<PolarOfflineRecordingEntry> entries = await listRecordings();
-    List<PolarDataType> currentRecordings = await polar
-        .getOfflineRecordingStatus(identifier);
+    try {
+      List<PolarOfflineRecordingEntry> entries = await listRecordings();
+      List<PolarDataType> currentRecordings = await polar
+          .getOfflineRecordingStatus(identifier);
 
-    bool isRecording = currentRecordings.isNotEmpty;
+      bool isRecording = currentRecordings.isNotEmpty;
 
-    return PolarState(isRecording: isRecording, recordings: entries);
+      return PolarState(isRecording: isRecording, recordings: entries);
+    } catch (e) {
+      print("Error getting Polar state: $e");
+      return PolarState(isRecording: false, recordings: []);
+    }
   }
 
   Future<List<PolarOfflineRecordingEntry>> listRecordings() async {
