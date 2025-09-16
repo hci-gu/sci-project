@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:polar/polar.dart';
 import 'dart:math';
 
@@ -231,6 +233,10 @@ class Counts {
   final double a;
 
   Counts({required this.t, required this.hr, required this.a});
+
+  static Counts fromJson(Map<String, dynamic> json) {
+    return CountsExtension.fromJson(json);
+  }
 }
 
 extension CountsExtension on Counts {
