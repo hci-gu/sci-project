@@ -2,6 +2,7 @@
 import 'dart:isolate';
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:scimovement/storage.dart';
 import 'package:scimovement/api/api.dart';
 import 'package:scimovement/api/classes/counts.dart';
@@ -50,6 +51,12 @@ class BleOwner {
         } else if (msg is Map && msg['cmd'] == 'get_state') {
           final s = await _getPolarState();
           reply.send({'ok': true, 'data': s});
+        } else if (msg is Map && msg['cmd'] == 'startRecording') {
+          final result = await _handleStartRecording();
+          reply.send({'ok': result, 'error': result ? null : 'start_failed'});
+        } else if (msg is Map && msg['cmd'] == 'debug') {
+          await _handleDebug();
+          reply.send({'ok': true});
         }
       } catch (e, st) {
         debugPrint('BleOwner error: $e\n$st');
@@ -62,19 +69,35 @@ class BleOwner {
     debugPrint('BleOwner: listening on $kBleOwnerPortName');
   }
 
+  Future<bool> _handleStartRecording() async {
+    // Make sure Polar is set up and connected
+    final connected = await _ensureConnected();
+    if (!connected) {
+      return false;
+    }
+
+    // immediately restart so we don't miss data
+    await PolarService.instance.startRecording(PolarDataType.acc);
+    await PolarService.instance.startRecording(PolarDataType.hr);
+
+    return true;
+  }
+
   Future<bool> _handleSync() async {
     // Credentials, login, etc., live in the owner
     await Storage().reloadPrefs();
     final Credentials? credentials = Storage().getCredentials();
     if (credentials == null) {
-      debugPrint('BleOwner: no credentials');
       return false;
     }
-    await Api().login(credentials.email, credentials.password);
+    try {
+      await Api().login(credentials.email, credentials.password);
+    } catch (e) {
+      debugPrint('BleOwner: login failed: $e');
+    }
 
     final pendingCounts = Storage().getPendingCounts();
     if (pendingCounts.isNotEmpty) {
-      debugPrint('BleOwner: uploading ${pendingCounts.length} pending counts');
       try {
         await Api().uploadCounts(pendingCounts);
         await Storage().clearPendingCounts();
@@ -86,43 +109,37 @@ class BleOwner {
     // Make sure Polar is set up and connected
     final connected = await _ensureConnected();
     if (!connected) {
-      debugPrint('BleOwner: unable to connect');
       return false;
     }
 
-    debugPrint('BleOwner: stopping offline recordings');
     await PolarService.instance.stopRecording(PolarDataType.acc);
     await PolarService.instance.stopRecording(PolarDataType.hr);
-    // stop recordings so we can fetch and upload them
+    try {
+      await Future.delayed(const Duration(seconds: 2));
 
-    // immediately restart so we don't miss data
-    await PolarService.instance.startRecording(PolarDataType.acc);
-    await PolarService.instance.startRecording(PolarDataType.hr);
+      final entries = await PolarService.instance.listRecordings();
 
-    await Future.delayed(const Duration(seconds: 1));
+      final (AccOfflineRecording?, HrOfflineRecording?) recs =
+          await PolarService.instance.getRecordings(entries);
 
-    debugPrint('BleOwner: listing recordings');
-    final entries = await PolarService.instance.listRecordings();
-    debugPrint('BleOwner: found ${entries.length} entries');
+      final gotAcc = recs.$1 != null;
+      final gotHr = recs.$2 != null;
 
-    final (AccOfflineRecording?, HrOfflineRecording?) recs = await PolarService
-        .instance
-        .getRecordings(entries);
+      if (gotAcc && gotHr) {
+        final counts = countsFromPolarData(recs.$1!, recs.$2!);
 
-    final gotAcc = recs.$1 != null;
-    final gotHr = recs.$2 != null;
-    debugPrint('BleOwner: got acc=$gotAcc hr=$gotHr');
+        try {
+          await Api().uploadCounts(counts);
+        } catch (_) {
+          await Storage().storePendingCounts(counts);
+        }
 
-    if (gotAcc && gotHr) {
-      final counts = countsFromPolarData(recs.$1!, recs.$2!);
-
-      try {
-        await Api().uploadCounts(counts);
-      } catch (_) {
-        await Storage().storePendingCounts(counts);
+        await PolarService.instance.deleteAllRecordings();
       }
-
-      await PolarService.instance.deleteAllRecordings();
+    } finally {
+      // immediately restart so we don't miss data
+      await PolarService.instance.startRecording(PolarDataType.acc);
+      await PolarService.instance.startRecording(PolarDataType.hr);
     }
 
     Storage().setLastSync(DateTime.now());
@@ -142,7 +159,7 @@ class BleOwner {
 
     PolarService.initialize(stored.id);
 
-    PolarService.instance.start(requestPermissions: false);
+    await PolarService.instance.start(requestPermissions: false);
 
     // Start plugin (set up listeners etc.)
     // NOTE: your PolarService.start should return when connected or time out.
@@ -166,6 +183,7 @@ class BleOwner {
         final ok = await PolarService.instance.start(requestPermissions: false);
         if (ok == true || PolarService.instance.connected) return true;
 
+        await PolarService.instance.toggleBt();
         await Future.delayed(Duration(seconds: 2 * (i + 1)));
       }
       return PolarService.instance.connected;
@@ -184,9 +202,24 @@ class BleOwner {
     final state = await PolarService.instance.getState();
 
     return {
+      'bluetoothEnabled':
+          PolarService.instance.btState == BluetoothAdapterState.on,
+      'connected': PolarService.instance.connected,
       'isRecording': state.isRecording,
-      // add more fields if you want (battery, FW, etc.)
     };
+  }
+
+  Future<void> _handleDebug() async {
+    debugPrint('BleOwner: debug command received');
+    final entries = await PolarService.instance.listRecordings();
+    debugPrint('BleOwner: found ${entries.length} entries');
+
+    final (AccOfflineRecording?, HrOfflineRecording?) recs = await PolarService
+        .instance
+        .getRecordings(entries);
+
+    final counts = countsFromPolarData(recs.$1!, recs.$2!);
+    print("counts.length = ${counts.length}");
   }
 }
 

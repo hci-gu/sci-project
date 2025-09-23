@@ -73,16 +73,10 @@ class ConnectedWatchNotifier extends Notifier<ConnectedWatch?> {
     return false;
   }
 
-  Future startRecording() async {
-    // await PolarService.instance.deleteAllRecordings();
-    // ref.read(lastSyncProvider.notifier).setLastSync(DateTime.now());
+  Future<bool> startRecording() async {
+    Map<String, dynamic> result = await sendBleCommand({'cmd': 'sync'});
 
-    // print("restart recording");
-
-    // // restart offline recording
-    // await PolarService.instance.startRecording(PolarDataType.acc);
-    // await PolarService.instance.startRecording(PolarDataType.hr);
-    // print("restarted");
+    return result['ok'] == true;
   }
 }
 

@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:polar/polar.dart';
 
 class PolarState {
@@ -14,6 +15,7 @@ class PolarService {
   bool connected = false;
   bool initialized = false;
   bool started = false;
+  BluetoothAdapterState? btState;
 
   final String identifier;
 
@@ -57,6 +59,10 @@ class PolarService {
       connected = false;
     });
 
+    FlutterBluePlus.adapterState.listen((BluetoothAdapterState state) {
+      btState = state;
+    });
+
     await polar.connectToDevice(
       identifier,
       requestPermissions: requestPermissions,
@@ -65,6 +71,12 @@ class PolarService {
     _instance!.started = true;
 
     return connected;
+  }
+
+  Future toggleBt() async {
+    await FlutterBluePlus.turnOff();
+    await Future.delayed(const Duration(seconds: 1));
+    await FlutterBluePlus.turnOn();
   }
 
   Future<PolarState> getState() async {
@@ -83,10 +95,14 @@ class PolarService {
   }
 
   Future<List<PolarOfflineRecordingEntry>> listRecordings() async {
-    List<PolarOfflineRecordingEntry> entries = await polar
-        .listOfflineRecordings(identifier);
+    try {
+      List<PolarOfflineRecordingEntry> entries = await polar
+          .listOfflineRecordings(identifier);
 
-    return entries;
+      return entries;
+    } catch (e) {
+      return [];
+    }
   }
 
   Future<void> startRecording(PolarDataType type) async {
@@ -95,7 +111,7 @@ class PolarService {
     if (!currentRecordings.contains(type)) {
       if (type == PolarDataType.acc) {
         Map<PolarSettingType, int> settings = {
-          PolarSettingType.sampleRate: 52,
+          PolarSettingType.sampleRate: 50,
           PolarSettingType.resolution: 16,
           PolarSettingType.range: 8,
           PolarSettingType.channels: 3,
@@ -142,6 +158,7 @@ class PolarService {
   Future<(AccOfflineRecording?, HrOfflineRecording?)> getRecordings(
     List<PolarOfflineRecordingEntry> entries,
   ) async {
+    entries.sort((a, b) => b.size.compareTo(a.size));
     PolarOfflineRecordingEntry? accEntry = entries.firstWhereOrNull(
       (e) => e.type == PolarDataType.acc,
     );
