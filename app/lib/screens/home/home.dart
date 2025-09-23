@@ -252,13 +252,24 @@ class WatchFeaturesWidget extends HookConsumerWidget {
               Center(
                 child: Button(
                   onPressed: () async {
-                    await ref
-                        .read(connectedWatchProvider.notifier)
-                        .startRecording();
+                    bool started =
+                        await ref
+                            .read(connectedWatchProvider.notifier)
+                            .startRecording();
                     if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Watch recording started')),
-                      );
+                      if (started) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Watch recording started')),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Failed to start watch recording, please try again',
+                            ),
+                          ),
+                        );
+                      }
                     }
                   },
                   icon: Icons.watch,

@@ -180,10 +180,11 @@ class _DevicePickerDialogState extends State<_DevicePickerDialog> {
                     Navigator.of(context).pop(_selectedId);
                   }
                 },
+                disabled: _selectedId == null,
                 rounded: true,
                 size: ButtonSize.small,
-                color: AppTheme.colors.error,
-                title: AppLocalizations.of(context)!.yes,
+                color: AppTheme.colors.primary,
+                title: 'Connect',
               ),
             ),
           ],

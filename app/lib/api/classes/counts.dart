@@ -308,8 +308,13 @@ List<Counts> countsFromPolarData(
   // sort ACC samples by time
   accRecording.data.samples.sort((a, b) => a.timeStamp.compareTo(b.timeStamp));
 
+  if (hrRecording.data.samples.isEmpty) {
+    return [];
+  }
+
   final DateTime start = hrRecording.startTime;
   final int hrMinutes = (hrRecording.data.samples.length / 60).ceil();
+  final int totalHr = hrRecording.data.samples.length;
 
   final List<Counts> counts = [];
   for (int i = 0; i <= hrMinutes; i++) {
@@ -328,31 +333,26 @@ List<Counts> countsFromPolarData(
     }
 
     final List<double> xs = resampleAccelerometerData(
-      accSamplesInSameMinute
-          .map((s) => (s.x / 1000 / 9.82).toDouble())
-          .toList(),
-      26,
+      accSamplesInSameMinute.map((s) => (s.x / 9.82).toDouble()).toList(),
+      50,
       30,
     );
     final List<double> ys = resampleAccelerometerData(
-      accSamplesInSameMinute
-          .map((s) => (s.y / 1000 / 9.82).toDouble())
-          .toList(),
-      26,
+      accSamplesInSameMinute.map((s) => (s.y / 9.82).toDouble()).toList(),
+      50,
       30,
     );
     final List<double> zs = resampleAccelerometerData(
-      accSamplesInSameMinute
-          .map((s) => (s.z / 1000 / 9.82).toDouble())
-          .toList(),
-      26,
+      accSamplesInSameMinute.map((s) => (s.z / 9.82).toDouble()).toList(),
+      50,
       30,
     );
 
     final double accVM = computeAccVM(xs, ys, zs);
 
     final int hrIndexStart = i * 60;
-    final int hrIndexEnd = min((i + 1) * 60, hrRecording.data.samples.length);
+    if (hrIndexStart >= totalHr) break;
+    final int hrIndexEnd = min((i + 1) * 60, totalHr);
     final List<PolarHrSample> hrSamplesInSameMinute = hrRecording.data.samples
         .sublist(hrIndexStart, hrIndexEnd);
 
@@ -366,6 +366,7 @@ List<Counts> countsFromPolarData(
 
     counts.add(Counts(t: t0, hr: avgHr, a: accVM));
   }
+  print("done counts, length = ${counts.length}");
 
   return counts;
 }
