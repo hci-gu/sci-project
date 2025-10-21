@@ -1,12 +1,18 @@
 import 'package:collection/collection.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:polar/polar.dart';
 
 class PolarState {
   final bool isRecording;
+  final bool connected;
   final List<PolarOfflineRecordingEntry> recordings;
 
-  PolarState({required this.isRecording, required this.recordings});
+  PolarState({
+    required this.isRecording,
+    required this.recordings,
+    this.connected = false,
+  });
 }
 
 class PolarService {
@@ -44,53 +50,91 @@ class PolarService {
   }
 
   Future start({bool requestPermissions = true}) async {
+    print("Starting PolarService for $identifier");
     if (_instance != null && _instance!.started) {
       print('PolarService already started');
-      return connected;
+      return;
     }
 
     // polar.batteryLevel.listen((e) => print('Battery: ${e.level}'));
     // polar.deviceConnecting.listen((_) => print('Device connecting'));
-    polar.deviceConnected.listen((_) {
+    polar.deviceConnected.listen((_) async {
       print("DEVICE IS CONNECTED");
       connected = true;
+
+      try {
+        DateTime? watchTime = await polar.getLocalTime(identifier);
+        print("Current watch time: $watchTime");
+        DateTime now = DateTime.now();
+        print("Current system time: $now");
+
+        if (watchTime != null && watchTime.year < now.year) {
+          polar.setLocalTime(identifier, now);
+          print("Setting watch time to current time");
+        }
+      } catch (e) {
+        print("Error setting watch time: $e");
+      }
     });
     polar.deviceDisconnected.listen((_) {
+      print("DEVICE DISCONNECTED");
       connected = false;
     });
 
     FlutterBluePlus.adapterState.listen((BluetoothAdapterState state) {
+      print("Bluetooth state changed: $state");
       btState = state;
     });
 
+    polar.deviceConnecting.listen((PolarDeviceInfo deviceInfo) async {
+      print("Device connecting...");
+      print("Device info: $deviceInfo");
+    });
+
+    _instance!.started = true;
+
+    await initialConnection();
     await polar.connectToDevice(
       identifier,
       requestPermissions: requestPermissions,
     );
-
-    _instance!.started = true;
-
-    return connected;
   }
 
-  Future toggleBt() async {
-    await FlutterBluePlus.turnOff();
-    await Future.delayed(const Duration(seconds: 1));
-    await FlutterBluePlus.turnOn();
+  Future<void> initialConnection([int attempts = 0]) async {
+    if (attempts > 5) {
+      return;
+    }
+
+    if (await FlutterBluePlus.adapterState.first ==
+        BluetoothAdapterState.unknown) {
+      await Future.delayed(const Duration(seconds: 1));
+      return initialConnection(attempts + 1);
+    }
+
+    return;
   }
 
   Future<PolarState> getState() async {
+    print("getState called for $identifier");
     try {
       List<PolarOfflineRecordingEntry> entries = await listRecordings();
       List<PolarDataType> currentRecordings = await polar
           .getOfflineRecordingStatus(identifier);
 
       bool isRecording = currentRecordings.isNotEmpty;
+      int batteryLevel = await polar.batteryLevel
+          .firstWhere((level) => level.identifier == identifier)
+          .then((level) => level.level);
 
-      return PolarState(isRecording: isRecording, recordings: entries);
+      connected = true;
+      return PolarState(
+        isRecording: isRecording,
+        recordings: entries,
+        connected: connected,
+      );
     } catch (e) {
       print("Error getting Polar state: $e");
-      return PolarState(isRecording: false, recordings: []);
+      return PolarState(isRecording: false, connected: false, recordings: []);
     }
   }
 
@@ -101,6 +145,7 @@ class PolarService {
 
       return entries;
     } catch (e) {
+      print("is the error here? $e");
       return [];
     }
   }
@@ -143,9 +188,10 @@ class PolarService {
     }
   }
 
-  Future<void> deleteAllRecordings() async {
+  Future<void> deleteAllRecordings(
+    List<PolarOfflineRecordingEntry> entries,
+  ) async {
     print("Deleting all recordings for $identifier");
-    List<PolarOfflineRecordingEntry> entries = await listRecordings();
     for (var entry in entries) {
       await polar.removeOfflineRecord(identifier, entry);
     }

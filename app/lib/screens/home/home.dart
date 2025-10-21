@@ -21,6 +21,7 @@ import 'package:scimovement/screens/onboarding/widgets/onboarding_stepper.dart';
 import 'package:scimovement/storage.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/activity_wheel/activity_wheel.dart';
+import 'package:scimovement/widgets/ai/generated_image.dart';
 import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/date_select.dart';
 import 'package:scimovement/gen_l10n/app_localizations.dart';
@@ -57,7 +58,9 @@ class PagedWidgets extends HookConsumerWidget {
         features.contains(AppFeature.bladderAndBowel) ||
         features.contains(AppFeature.pressureRelease);
     int page = ref.watch(homeWidgetPageProvider);
-    bool centerAlignDate = page == 0 && hasLogFeatures;
+    bool centerAlignDate = page == 1 && hasLogFeatures;
+    double pageSize = page == 0 ? 560 : 440;
+    double topPadding = page == 0 ? 0 : 80;
     PageController controller = useMemoized(
       () => PageController(initialPage: page),
       [page],
@@ -66,7 +69,7 @@ class PagedWidgets extends HookConsumerWidget {
     return Column(
       children: [
         SizedBox(
-          height: 440,
+          height: pageSize,
           child: Stack(
             children: [
               Positioned(
@@ -90,82 +93,93 @@ class PagedWidgets extends HookConsumerWidget {
                 ),
               ),
               Positioned(
-                top: 80,
-                child: SizedBox(
-                  width: MediaQuery.of(context).size.width,
-                  height: 360,
-                  child: PageView(
-                    controller: controller,
-                    onPageChanged: (value) {
-                      ref.read(homeWidgetPageProvider.notifier).setPage(value);
-                    },
-                    scrollDirection: Axis.horizontal,
-                    children: [
-                      if (hasLogFeatures)
-                        Padding(
-                          padding: EdgeInsets.only(
-                            top: 120,
-                            left: AppTheme.basePadding * 2,
-                            right: AppTheme.basePadding * 2,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SizedBox(
-                                height: 91,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.max,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
-                                  children: [
-                                    features.contains(
-                                          AppFeature.pressureRelease,
-                                        )
-                                        ? const PressureUlcerWidget()
-                                        : const SizedBox.shrink(),
-                                    if (features.contains(
-                                          AppFeature.bladderAndBowel,
-                                        ) &&
-                                        features.contains(
-                                          AppFeature.pressureRelease,
-                                        ))
-                                      AppTheme.spacer,
-                                    features.contains(
-                                          AppFeature.bladderAndBowel,
-                                        )
-                                        ? const UTIWidget()
-                                        : const Expanded(
+                top: topPadding,
+                child: AnimatedSize(
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.decelerate,
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width,
+                    height: pageSize - topPadding,
+                    child: PageView(
+                      controller: controller,
+                      onPageChanged: (value) {
+                        ref
+                            .read(homeWidgetPageProvider.notifier)
+                            .setPage(value);
+                      },
+                      scrollDirection: Axis.horizontal,
+                      children: [
+                        SizedBox(height: pageSize, child: GeneratedImageView()),
+                        if (hasLogFeatures)
+                          Padding(
+                            padding: EdgeInsets.only(
+                              top: 120,
+                              left: AppTheme.basePadding * 2,
+                              right: AppTheme.basePadding * 2,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(
+                                  height: 91,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.max,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceAround,
+                                    children: [
+                                      features.contains(
+                                            AppFeature.pressureRelease,
+                                          )
+                                          ? const PressureUlcerWidget()
+                                          : const SizedBox.shrink(),
+                                      if (features.contains(
+                                            AppFeature.bladderAndBowel,
+                                          ) &&
+                                          features.contains(
+                                            AppFeature.pressureRelease,
+                                          ))
+                                        AppTheme.spacer,
+                                      features.contains(
+                                            AppFeature.bladderAndBowel,
+                                          )
+                                          ? const UTIWidget()
+                                          : const Expanded(
+                                            child: SizedBox.shrink(),
+                                          ),
+                                      if (features.contains(
+                                            AppFeature.bladderAndBowel,
+                                          ) &&
+                                          !features.contains(
+                                            AppFeature.pressureRelease,
+                                          ))
+                                        const Expanded(
                                           child: SizedBox.shrink(),
                                         ),
-                                    if (features.contains(
-                                          AppFeature.bladderAndBowel,
-                                        ) &&
-                                        !features.contains(
-                                          AppFeature.pressureRelease,
-                                        ))
-                                      const Expanded(child: SizedBox.shrink()),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              AppTheme.spacer,
-                              Text(
-                                AppLocalizations.of(context)!.painAndDiscomfort,
-                                style: AppTheme.labelLarge,
-                              ),
-                              AppTheme.spacer,
-                              SizedBox(
-                                height: 110,
-                                child: ListView(
-                                  shrinkWrap: true,
-                                  scrollDirection: Axis.horizontal,
-                                  children: const [NeuroPathicPainWidgets()],
+                                AppTheme.spacer,
+                                Text(
+                                  AppLocalizations.of(
+                                    context,
+                                  )!.painAndDiscomfort,
+                                  style: AppTheme.labelLarge,
                                 ),
-                              ),
-                            ],
+                                AppTheme.spacer,
+                                SizedBox(
+                                  height: 110,
+                                  child: ListView(
+                                    shrinkWrap: true,
+                                    scrollDirection: Axis.horizontal,
+                                    children: const [NeuroPathicPainWidgets()],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      WatchFeaturesWidget(),
-                    ],
+                        WatchFeaturesWidget(),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -174,7 +188,7 @@ class PagedWidgets extends HookConsumerWidget {
         ),
         if (hasWatchFeatures && hasLogFeatures) AppTheme.spacer2x,
         if (hasWatchFeatures && hasLogFeatures)
-          StepIndicator(index: page, count: 2),
+          StepIndicator(index: page, count: 3),
       ],
     );
   }
@@ -245,47 +259,7 @@ class WatchFeaturesWidget extends HookConsumerWidget {
           );
         }
 
-        if (snapshot.data?['isRecording'] != true) {
-          return Stack(
-            children: [
-              Blur(blur: 6, colorOpacity: 0.5, child: activity),
-              Center(
-                child: Button(
-                  onPressed: () async {
-                    bool started =
-                        await ref
-                            .read(connectedWatchProvider.notifier)
-                            .startRecording();
-                    if (context.mounted) {
-                      if (started) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Watch recording started')),
-                        );
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'Failed to start watch recording, please try again',
-                            ),
-                          ),
-                        );
-                      }
-                    }
-                  },
-                  icon: Icons.watch,
-                  title: "Start watch",
-                ),
-              ),
-            ],
-          );
-        }
-
-        return Stack(
-          children: [
-            Blur(blur: 6, colorOpacity: 0.5, child: activity),
-            const SyncWatchData(),
-          ],
-        );
+        return activity;
       },
     );
   }

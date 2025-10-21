@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/api/classes/counts.dart';
@@ -312,6 +314,26 @@ class Api {
       '/counts/$_userId',
       data: counts.map((c) => c.toJson()).toList(),
     );
+  }
+
+  Future<Uint8List?> getGeneratedImage({String? userId}) async {
+    final response = await dio.get(
+      '/chat/$_userId/image',
+      options: Options(
+        responseType: ResponseType.bytes,
+        headers: {
+          'Accept':
+              'image/*,application/octet-stream,application/json,text/plain',
+        },
+        sendTimeout: const Duration(minutes: 2),
+        receiveTimeout: const Duration(minutes: 5),
+      ),
+    );
+
+    if (response.statusCode == 200) {
+      return response.data;
+    }
+    return null;
   }
 
   String chartModeToGroup(ChartMode mode) {

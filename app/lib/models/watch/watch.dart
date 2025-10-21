@@ -1,3 +1,7 @@
+import 'dart:isolate';
+import 'dart:ui';
+
+import 'package:flutter/cupertino.dart';
 import 'package:polar/polar.dart';
 import 'package:scimovement/api/api.dart';
 import 'package:scimovement/api/classes/counts.dart';
@@ -6,7 +10,7 @@ import 'package:scimovement/models/watch/polar.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/storage.dart';
 
-enum WatchType { polar }
+enum WatchType { polar, demo }
 
 class ConnectedWatch {
   final String id;
@@ -74,9 +78,32 @@ class ConnectedWatchNotifier extends Notifier<ConnectedWatch?> {
   }
 
   Future<bool> startRecording() async {
-    Map<String, dynamic> result = await sendBleCommand({'cmd': 'sync'});
+    final SendPort? owner = IsolateNameServer.lookupPortByName(
+      'ble_owner_port',
+    );
 
-    return result['ok'] == true;
+    if (owner == null) {
+      print('WatchSyncHandler: BLE owner port not available');
+      return false;
+    }
+
+    final rp = ReceivePort();
+    owner.send({'cmd': 'sync', 'reply': rp.sendPort});
+
+    // Wait for result (add a timeout so we don't hang forever)
+    try {
+      final result = await rp.first.timeout(const Duration(minutes: 2));
+      print('WatchSyncHandler sync result: $result');
+      return result['ok'] == true;
+    } catch (e) {
+      print('WatchSyncHandler sync timed out or failed: $e');
+    } finally {
+      rp.close();
+    }
+
+    return false;
+
+    // Map<String, dynamic> result = await sendBleCommand({'cmd': 'sync'});
   }
 }
 

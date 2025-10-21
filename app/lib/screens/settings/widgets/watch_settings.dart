@@ -1,19 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/ble_owner.dart';
-import 'package:scimovement/models/watch/polar.dart';
 import 'package:scimovement/models/watch/watch.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/confirm_dialog.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
-class WatchSettings extends ConsumerWidget {
+class WatchSettings extends HookConsumerWidget {
   const WatchSettings({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final watch = ref.watch(connectedWatchProvider);
+    final refresh = useState(
+      Future.wait([
+        sendBleCommand({'cmd': 'get_state'}).then((m) => m['data'] as Map),
+        Future.delayed(const Duration(seconds: 1)),
+      ]),
+    );
 
     if (watch == null) {
       return Padding(
@@ -27,42 +33,64 @@ class WatchSettings extends ConsumerWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         FutureBuilder(
-          future: sendBleCommand({
-            'cmd': 'get_state',
-          }).then((m) => m['data'] as Map),
+          future: refresh.value,
           builder: (ctx, snapshot) {
+            final data = snapshot.data?[0] as Map<dynamic, dynamic>? ?? {};
+
             return Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                snapshot.hasData
-                    ? _watchConnectionRow(snapshot.data ?? {}, watch)
+                snapshot.connectionState == ConnectionState.done
+                    ? _watchConnectionRow(data, watch)
                     : _loadingRow(),
-                Button(
-                  onPressed: () async {
-                    bool? disconnect = await confirmDialog(
-                      context,
-                      title: 'Are you sure?',
-                      message:
-                          'Disconnecting your watch will stop all recordings and remove the connection. Do you want to proceed?',
-                    );
-                    if (disconnect == true) {
-                      ref
-                          .read(connectedWatchProvider.notifier)
-                          .removeConnectedWatch();
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Watch disconnected successfully'),
-                          ),
+                Column(
+                  children: [
+                    Button(
+                      onPressed: () async {
+                        bool? disconnect = await confirmDialog(
+                          context,
+                          title: 'Are you sure?',
+                          message:
+                              'Disconnecting your watch will stop all recordings and remove the connection. Do you want to proceed?',
                         );
-                      }
-                    }
-                  },
-                  title: 'Disconnect',
-                  icon: Icons.watch_off_outlined,
-                  width: 120,
-                  secondary: true,
-                  size: ButtonSize.tiny,
+                        if (disconnect == true) {
+                          ref
+                              .read(connectedWatchProvider.notifier)
+                              .removeConnectedWatch();
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Watch disconnected successfully',
+                                ),
+                              ),
+                            );
+                          }
+                        }
+                      },
+                      title: 'Disconnect',
+                      icon: Icons.watch_off_outlined,
+                      width: 120,
+                      secondary: true,
+                      size: ButtonSize.tiny,
+                    ),
+                    AppTheme.spacer2x,
+                    Button(
+                      onPressed: () {
+                        refresh.value = Future.wait([
+                          sendBleCommand({
+                            'cmd': 'get_state',
+                          }).then((m) => m['data'] as Map),
+                          Future.delayed(const Duration(seconds: 1)),
+                        ]);
+                      },
+                      title: 'Refresh',
+                      icon: Icons.refresh,
+                      width: 120,
+                      secondary: true,
+                      size: ButtonSize.tiny,
+                    ),
+                  ],
                 ),
               ],
             );
@@ -141,7 +169,7 @@ class WatchSettings extends ConsumerWidget {
           child: Icon(
             Icons.watch,
             color:
-                data['isRecording'] == true
+                data['connected'] == true
                     ? AppTheme.colors.primary
                     : Colors.grey[700],
           ),
@@ -152,7 +180,11 @@ class WatchSettings extends ConsumerWidget {
           children: [
             Text(watch.id, style: AppTheme.paragraphMedium),
             Text(
-              data['isRecording'] == true ? 'Recording...' : 'Stopped',
+              data['isRecording'] == true
+                  ? 'Recording...'
+                  : data['connected'] == true
+                  ? 'Connected'
+                  : 'Disconnected',
               style: AppTheme.paragraphSmall,
             ),
           ],

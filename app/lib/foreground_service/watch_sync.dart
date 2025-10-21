@@ -2,6 +2,7 @@
 import 'dart:isolate';
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:polar/polar.dart';
 import 'package:scimovement/api/api.dart';
@@ -19,13 +20,11 @@ class WatchSyncHandler extends TaskHandler {
   @override
   Future<void> onStart(DateTime timestamp, TaskStarter starter) async {
     DartPluginRegistrant.ensureInitialized();
-    print("WatchSyncHandler started at $timestamp");
+    debugPrint("WatchSyncHandler started at $timestamp");
   }
 
   @override
   void onRepeatEvent(DateTime timestamp) async {
-    print("WatchSyncHandler repeat event at $timestamp");
-
     // Do *non-BLE* prep here (prefs reload, auth if you want),
     // but let the BLE owner handle actual BLE + sync.
     final SendPort? owner = IsolateNameServer.lookupPortByName(
@@ -33,7 +32,7 @@ class WatchSyncHandler extends TaskHandler {
     );
 
     if (owner == null) {
-      print('WatchSyncHandler: BLE owner port not available');
+      debugPrint('WatchSyncHandler: BLE owner port not available');
       return;
     }
 
@@ -42,10 +41,10 @@ class WatchSyncHandler extends TaskHandler {
 
     // Wait for result (add a timeout so we don't hang forever)
     try {
-      final result = await rp.first.timeout(const Duration(minutes: 2));
-      print('WatchSyncHandler sync result: $result');
+      final _ = await rp.first.timeout(const Duration(minutes: 3));
+      Storage().setLastSync(DateTime.now());
     } catch (e) {
-      print('WatchSyncHandler sync timed out or failed: $e');
+      debugPrint('WatchSyncHandler sync timed out or failed: $e');
     } finally {
       rp.close();
     }
@@ -53,6 +52,8 @@ class WatchSyncHandler extends TaskHandler {
 
   @override
   Future<void> onDestroy(DateTime timestamp, bool isTimeout) async {
-    print("WatchSyncHandler destroyed at $timestamp, isTimeout: $isTimeout");
+    debugPrint(
+      "WatchSyncHandler destroyed at $timestamp, isTimeout: $isTimeout",
+    );
   }
 }

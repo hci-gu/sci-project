@@ -302,15 +302,12 @@ List<Counts> countsFromPolarData(
   HrOfflineRecording hrRecording,
 ) {
   if (accRecording.data.samples.isEmpty || hrRecording.data.samples.isEmpty) {
+    print("countsFromPolarData: empty recordings");
     return [];
   }
 
   // sort ACC samples by time
   accRecording.data.samples.sort((a, b) => a.timeStamp.compareTo(b.timeStamp));
-
-  if (hrRecording.data.samples.isEmpty) {
-    return [];
-  }
 
   final DateTime start = hrRecording.startTime;
   final int hrMinutes = (hrRecording.data.samples.length / 60).ceil();
@@ -333,17 +330,17 @@ List<Counts> countsFromPolarData(
     }
 
     final List<double> xs = resampleAccelerometerData(
-      accSamplesInSameMinute.map((s) => (s.x / 9.82).toDouble()).toList(),
+      accSamplesInSameMinute.map((s) => (s.x / 1000).toDouble()).toList(),
       50,
       30,
     );
     final List<double> ys = resampleAccelerometerData(
-      accSamplesInSameMinute.map((s) => (s.y / 9.82).toDouble()).toList(),
+      accSamplesInSameMinute.map((s) => (s.y / 1000).toDouble()).toList(),
       50,
       30,
     );
     final List<double> zs = resampleAccelerometerData(
-      accSamplesInSameMinute.map((s) => (s.z / 9.82).toDouble()).toList(),
+      accSamplesInSameMinute.map((s) => (s.z / 1000).toDouble()).toList(),
       50,
       30,
     );

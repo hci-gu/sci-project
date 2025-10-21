@@ -18,6 +18,7 @@ plugins {
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -65,6 +66,10 @@ android {
 
 dependencies {
     implementation("joda-time:joda-time:2.10.10")
+    // Use Firebase BoM to manage versions
+    implementation(platform("com.google.firebase:firebase-bom:34.4.0"))
+    // Add FCM dependency
+    implementation("com.google.firebase:firebase-messaging")
 }
 
 flutter {

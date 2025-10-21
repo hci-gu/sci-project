@@ -26,8 +26,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Storage().reloadPrefs();
 
-  await BleOwner.instance.initialize();
-
   FlutterForegroundTask.initCommunicationPort();
   ForegroundService.instance.init();
 
@@ -45,6 +43,14 @@ void main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
+
+  WidgetsBinding.instance.addPostFrameCallback((_) async {
+    try {
+      await BleOwner.instance.initialize();
+    } catch (e) {
+      debugPrint('BLE init failed: $e');
+    }
+  });
 
   runApp(
     ProviderScope(
