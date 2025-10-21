@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:isolate';
 
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:polar/polar.dart';
+import 'package:scimovement/ble_owner.dart';
 import 'package:scimovement/models/watch/polar.dart';
 import 'package:scimovement/models/watch/watch.dart';
 import 'package:scimovement/theme/theme.dart';
@@ -11,7 +13,7 @@ import 'package:scimovement/widgets/confirm_dialog.dart';
 import 'package:scimovement/gen_l10n/app_localizations.dart';
 
 Future<String?> showDevicePicker(BuildContext context) async {
-  await Polar().requestPermissions();
+  await sendBleCommand({'cmd': 'request_permissions'});
 
   if (!context.mounted) return null;
 
@@ -30,9 +32,11 @@ class _DevicePickerDialog extends StatefulWidget {
 }
 
 class _DevicePickerDialogState extends State<_DevicePickerDialog> {
-  final List<PolarDeviceInfo> _devices = [];
-  StreamSubscription<PolarDeviceInfo>? _sub;
-  bool _scanning = true;
+  final List<Map<String, String>> _devices = [];
+  final Set<String> _seen = {};
+  ReceivePort? _scanPort;
+  StreamSubscription? _scanSub;
+  bool _scanning = false;
   String? _selectedId;
 
   @override
@@ -41,43 +45,65 @@ class _DevicePickerDialogState extends State<_DevicePickerDialog> {
     _startScan();
   }
 
-  void _startScan() {
-    print("start scan");
+  Future<void> _startScan() async {
     try {
-      _sub?.cancel();
+      await _stopScan();
+
       setState(() {
         _devices.clear();
+        _seen.clear();
         _selectedId = null;
         _scanning = true;
       });
 
-      _sub = Polar()
-          .searchForDevice()
-          .where((d) {
-            final idx = _devices.indexWhere((x) => x.deviceId == d.deviceId);
-            final isNew = idx == -1;
-            if (isNew) _devices.add(d);
-            return isNew;
-          })
-          .listen(
-            (_) => setState(() {}), // list updated
-            onError: (e) => setState(() => _scanning = false),
-            onDone: () => setState(() => _scanning = false),
-          );
-
-      // Optional: auto-stop after 10s
-      Future.delayed(const Duration(seconds: 10), () {
-        if (mounted && _scanning) {
-          _sub?.cancel();
-          setState(() => _scanning = false);
+      _scanPort = ReceivePort();
+      // route raw port messages into a StreamSubscription for clean dispose
+      _scanSub = _scanPort!.listen((msg) {
+        if (msg is Map && msg['type'] == 'scan') {
+          final event = msg['event'];
+          if (event == 'device') {
+            final Map<String, dynamic> dev =
+                (msg['device'] as Map).cast<String, dynamic>();
+            final id = dev['id'] as String;
+            final name = (dev['name'] as String?) ?? 'Unknown';
+            if (_seen.add(id)) {
+              _devices.add({'id': id, 'name': name});
+              if (mounted) setState(() {}); // list updated
+            }
+          } else if (event == 'done') {
+            if (mounted) setState(() => _scanning = false);
+          }
         }
       });
+
+      // tell owner to start scanning; it will stream devices to our port
+      final resp = await sendBleCommand({
+        'cmd': 'scan_start',
+        'sink': _scanPort!.sendPort,
+        'autoStopMs': 10000, // optional auto-stop (10s) just like before
+      });
+
+      if (resp['ok'] != true) {
+        setState(() => _scanning = false);
+      }
+    } catch (_) {
+      if (mounted) setState(() => _scanning = false);
+    }
+  }
+
+  Future<void> _stopScan() async {
+    try {
+      await sendBleCommand({'cmd': 'scan_stop'});
     } catch (_) {}
+    await _scanSub?.cancel();
+    _scanSub = null;
+    _scanPort?.close();
+    _scanPort = null;
   }
 
   @override
   void dispose() {
-    _sub?.cancel();
+    _stopScan();
     super.dispose();
   }
 
@@ -123,13 +149,13 @@ class _DevicePickerDialogState extends State<_DevicePickerDialog> {
                   separatorBuilder: (_, _) => const Divider(height: 1),
                   itemBuilder: (ctx, i) {
                     final d = _devices[i];
-                    final selected = d.deviceId == _selectedId;
+                    final selected = d["id"] == _selectedId;
                     return ListTile(
                       dense: true,
-                      title: Text(d.name),
-                      subtitle: Text(d.deviceId),
+                      title: Text(d["name"] ?? 'Unknown'),
+                      subtitle: Text(d["id"] ?? ''),
                       trailing: selected ? const Icon(Icons.check) : null,
-                      onTap: () => setState(() => _selectedId = d.deviceId),
+                      onTap: () => setState(() => _selectedId = d["id"]),
                     );
                   },
                 ),

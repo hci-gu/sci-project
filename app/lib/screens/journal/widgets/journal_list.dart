@@ -29,11 +29,8 @@ class JournalListItem extends ConsumerWidget {
             AppTheme.spacer,
             Padding(
               padding: EdgeInsets.only(right: AppTheme.basePadding * 2),
-              child: const Icon(
-                Icons.delete,
-                color: Colors.white,
-              ),
-            )
+              child: const Icon(Icons.delete, color: Colors.white),
+            ),
           ],
         ),
       ),
@@ -46,16 +43,10 @@ class JournalListItem extends ConsumerWidget {
       child: Tappable(
         onTap: () => onTap(context),
         child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: AppTheme.basePadding * 2,
-          ),
+          padding: EdgeInsets.symmetric(horizontal: AppTheme.basePadding * 2),
           child: Container(
             decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(
-                  color: Colors.grey.shade300,
-                ),
-              ),
+              border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
             ),
             child: ListTile(
               leading: SizedBox(
@@ -70,7 +61,7 @@ class JournalListItem extends ConsumerWidget {
                           ? (entry as PainLevelEntry).bodyPart
                           : null,
                       32,
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -91,10 +82,9 @@ class JournalListItem extends ConsumerWidget {
       useRootNavigator: true,
       useSafeArea: true,
       context: context,
-      builder: (context) => EditJournalEntryScreen(
-        shouldCreateEntry: false,
-        entry: entry,
-      ),
+      builder:
+          (context) =>
+              EditJournalEntryScreen(shouldCreateEntry: false, entry: entry),
     );
   }
 
@@ -120,7 +110,9 @@ class JournalList extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     DateTime date = ref.watch(journalSelectedDateProvider);
 
-    return ref.watch(journalForDayProvider(date)).when(
+    return ref
+        .watch(journalForDayProvider(date))
+        .when(
           data: (data) {
             if (data.isEmpty && !isToday(date)) {
               return Container(
@@ -133,11 +125,7 @@ class JournalList extends ConsumerWidget {
 
             return Container(
               decoration: BoxDecoration(
-                border: Border(
-                  top: BorderSide(
-                    color: Colors.grey.shade300,
-                  ),
-                ),
+                border: Border(top: BorderSide(color: Colors.grey.shade300)),
               ),
               child: Column(
                 children: [
@@ -148,10 +136,8 @@ class JournalList extends ConsumerWidget {
               ),
             );
           },
-          error: (_, __) => Container(),
-          loading: () => const Center(
-            child: CircularProgressIndicator(),
-          ),
+          error: (_, _) => Container(),
+          loading: () => const Center(child: CircularProgressIndicator()),
         );
   }
 

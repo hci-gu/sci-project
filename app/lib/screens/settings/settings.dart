@@ -45,10 +45,7 @@ class SettingsScreen extends ConsumerWidget {
             AppLocalizations.of(context)!.watchSettings,
             style: AppTheme.labelXLarge,
           ),
-          RebuildOnTimer(
-            duration: const Duration(seconds: 30),
-            child: const WatchSettings(),
-          ),
+          const WatchSettings(),
           AppTheme.separator,
           Text(
             AppLocalizations.of(context)!.appSettings,

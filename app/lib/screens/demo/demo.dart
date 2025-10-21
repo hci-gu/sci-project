@@ -11,6 +11,7 @@ import 'package:scimovement/models/goals.dart';
 import 'package:scimovement/models/journal/journal.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/models/energy.dart';
+import 'package:scimovement/models/watch/watch.dart';
 import 'package:scimovement/screens/home/widgets/energy_widget.dart';
 import 'package:scimovement/screens/home/widgets/exercise_widget.dart';
 import 'package:scimovement/screens/home/widgets/sedentary_widget.dart';
@@ -40,9 +41,10 @@ List<Energy> mockEnergyFromBouts(Pagination pagination, List<Bout> bouts) {
       energy.add(
         Energy(
           time: bout.time,
-          value: bout.activity != Activity.sedentary
-              ? randVal() * bout.minutes
-              : 0,
+          value:
+              bout.activity != Activity.sedentary
+                  ? randVal() * bout.minutes
+                  : 0,
           minutes: bout.minutes,
           activity: bout.activity,
         ),
@@ -80,12 +82,14 @@ List<Bout> mockBoutsForPagination(Pagination pagination) {
       int start = 60 * 6 + 30;
       for (Activity activity in activities) {
         int minutes = durationForActivity(activity);
-        bouts.add(Bout(
-          id: -1,
-          time: day.add(Duration(minutes: start)),
-          minutes: minutes,
-          activity: activity,
-        ));
+        bouts.add(
+          Bout(
+            id: -1,
+            time: day.add(Duration(minutes: start)),
+            minutes: minutes,
+            activity: activity,
+          ),
+        );
         start += minutes;
       }
       break;
@@ -100,22 +104,19 @@ List<Bout> mockBoutsForPagination(Pagination pagination) {
 
         bouts.addAll([
           Bout(
-              id: -1,
-              activity: Activity.sedentary,
-              time: day,
-              minutes: 60 * (5 + _random.nextInt(5))),
+            id: -1,
+            activity: Activity.sedentary,
+            time: day,
+            minutes: 60 * (5 + _random.nextInt(5)),
+          ),
           Bout(
-              id: -1,
-              activity: Activity.moving,
-              time: day,
-              minutes: 60 * (2 + _random.nextInt(3))),
+            id: -1,
+            activity: Activity.moving,
+            time: day,
+            minutes: 60 * (2 + _random.nextInt(3)),
+          ),
           if (_random.nextBool())
-            Bout(
-              id: -1,
-              activity: Activity.active,
-              time: day,
-              minutes: 45,
-            ),
+            Bout(id: -1, activity: Activity.active, time: day, minutes: 45),
         ]);
       }
       break;
@@ -172,73 +173,94 @@ class DemoWrapper extends ConsumerWidget {
           ),
         ),
         energyProvider.overrideWithProvider(
-          (argument) => FutureProvider<List<Energy>>(
-            (ref) async {
-              List<Bout> bouts = mockBoutsForPagination(argument);
-              return mockEnergyFromBouts(argument, bouts);
-            },
-          ),
+          (argument) => FutureProvider<List<Energy>>((ref) async {
+            List<Bout> bouts = mockBoutsForPagination(argument);
+            return mockEnergyFromBouts(argument, bouts);
+          }),
         ),
         boutsProvider.overrideWithProvider(
-          (argument) => FutureProvider<List<Bout>>(
-            (ref) async {
-              return mockBoutsForPagination(argument);
-            },
-          ),
+          (argument) => FutureProvider<List<Bout>>((ref) async {
+            return mockBoutsForPagination(argument);
+          }),
         ),
         excerciseBoutsProvider.overrideWithProvider(
-          (argument) => FutureProvider<List<Bout>>(
-            (ref) async {
-              return [
-                Bout(
-                  activity: Activity.weights,
-                  minutes: 30,
-                  time: DateTime.now(),
-                  id: 1,
-                ),
-              ];
-            },
-          ),
+          (argument) => FutureProvider<List<Bout>>((ref) async {
+            return [
+              Bout(
+                activity: Activity.weights,
+                minutes: 30,
+                time: DateTime.now(),
+                id: 1,
+              ),
+            ];
+          }),
         ),
-        journalProvider.overrideWith((ref, _) => []),
+        journalProvider.overrideWith(
+          (ref, _) => [
+            PressureUlcerEntry(
+              id: 0,
+              time: DateTime.now().subtract(Duration(days: 6)),
+              type: JournalType.pressureUlcer,
+              comment: '',
+              pressureUlcerType: PressureUlcerType.category2,
+              location: PressureUlcerLocation.ancle,
+            ),
+          ],
+        ),
         journalMonthlyProvider.overrideWith((ref, _) => []),
         journalForDayProvider.overrideWith((ref, _) => []),
-        pressureUlcerProvider.overrideWith((ref) => [
-              PressureUlcerEntry(
-                id: 0,
-                time: DateTime.now(),
-                type: JournalType.pressureUlcer,
-                comment: '',
-                pressureUlcerType: PressureUlcerType.category2,
-                location: PressureUlcerLocation.ancle,
-              )
-            ]),
+        pressureUlcerProvider.overrideWith(
+          (ref) => [
+            PressureUlcerEntry(
+              id: 0,
+              time: DateTime.now().subtract(Duration(days: 6)),
+              type: JournalType.pressureUlcer,
+              comment: '',
+              pressureUlcerType: PressureUlcerType.category2,
+              location: PressureUlcerLocation.ancle,
+            ),
+          ],
+        ),
+        neuroPathicPainAndSpasticityProvider.overrideWith(
+          (ref) => [
+            PainLevelEntry(
+              id: 0,
+              time: DateTime.now(),
+              type: JournalType.neuropathicPain,
+              painLevel: 4,
+              comment: '',
+              bodyPart: BodyPart(BodyPartType.neuropathic, null),
+            ),
+          ],
+        ),
         utiProvider.overrideWith((ref) => null),
         pressureReleaseCountProvider.overrideWith((ref, arg) => 0),
         bladderEmptyingCountProvider.overrideWith((ref, arg) => 0),
         movementBarChartProvider,
         notificationsEnabledProvider.overrideWithValue(false),
         userHasDataProvider.overrideWithValue(true),
-        goalsProvider.overrideWith((ref) => [
-              JournalGoal(
-                id: 0,
-                value: 8,
-                progress: 2,
-                reminder: DateTime.now().add(const Duration(hours: 1)),
-                start: Duration.zero,
-                recurrence: const Duration(hours: 1),
-                type: JournalType.pressureRelease,
-              ),
-              JournalGoal(
-                id: 1,
-                value: 6,
-                progress: 4,
-                reminder: DateTime.now().add(const Duration(minutes: 30)),
-                start: Duration.zero,
-                recurrence: const Duration(hours: 1),
-                type: JournalType.bladderEmptying,
-              ),
-            ]),
+        goalsProvider.overrideWith(
+          (ref) => [
+            JournalGoal(
+              id: 0,
+              value: 8,
+              progress: 2,
+              reminder: DateTime.now().add(const Duration(hours: 1)),
+              start: Duration.zero,
+              recurrence: const Duration(hours: 1),
+              type: JournalType.pressureRelease,
+            ),
+            JournalGoal(
+              id: 1,
+              value: 6,
+              progress: 4,
+              reminder: DateTime.now().add(const Duration(minutes: 30)),
+              start: Duration.zero,
+              recurrence: const Duration(hours: 1),
+              type: JournalType.bladderEmptying,
+            ),
+          ],
+        ),
         exerciseWidgetProvider,
         averageSedentaryBout,
         totalEnergyProvider,
@@ -254,7 +276,10 @@ class DemoWrapper extends ConsumerWidget {
         totalMovementMinutesProvider,
         averageMovementMinutesProvider,
         uniqueEntriesProvider,
-        updateJournalProvider
+        updateJournalProvider,
+        // connectedWatchProvider.overrideWith((ref) {
+
+        // }),
       ],
       child: child,
     );

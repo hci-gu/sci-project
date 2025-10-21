@@ -30,10 +30,6 @@ class ForegroundService {
   }
 
   void init() {
-    if (Platform.isIOS) {
-      return;
-    }
-
     FlutterForegroundTask.initCommunicationPort();
     FlutterForegroundTask.addTaskDataCallback(_onReceiveTaskData);
     FlutterForegroundTask.init(
