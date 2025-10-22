@@ -69,14 +69,14 @@ class ForegroundService {
     }
   }
 
-  Future<void> stop() async {
-    final ServiceRequestResult result =
-        await FlutterForegroundTask.stopService();
+  // Future<void> stop() async {
+  //   final ServiceRequestResult result =
+  //       await FlutterForegroundTask.stopService();
 
-    if (result is ServiceRequestFailure) {
-      throw result.error;
-    }
-  }
+  //   if (result is ServiceRequestFailure) {
+  //     throw result.error;
+  //   }
+  // }
 
   Future<bool> get isRunningService => FlutterForegroundTask.isRunningService;
 
