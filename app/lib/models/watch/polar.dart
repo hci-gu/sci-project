@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -22,6 +24,10 @@ class PolarService {
   bool initialized = false;
   bool started = false;
   BluetoothAdapterState? btState;
+  StreamSubscription? _connSub;
+  StreamSubscription? _discSub;
+  StreamSubscription? _connectingSub;
+  StreamSubscription? _btStateSub;
 
   final String identifier;
 
@@ -36,6 +42,8 @@ class PolarService {
     return _instance!;
   }
 
+  static Polar get sdk => PolarService.instance.polar;
+
   static void initialize(String identifier) {
     if (_instance != null && _instance!.initialized) {
       print('PolarService already initialized');
@@ -46,6 +54,31 @@ class PolarService {
   }
 
   static void dispose() {
+    if (_instance != null) {
+      try {
+        _instance?.disposeSubs();
+      } catch (_) {}
+      _instance = null;
+    }
+  }
+
+  void disposeSubs() {
+    _connSub?.cancel();
+    _connSub = null;
+
+    _discSub?.cancel();
+    _discSub = null;
+
+    _connectingSub?.cancel();
+    _connectingSub = null;
+
+    _btStateSub?.cancel();
+    _btStateSub = null;
+
+    started = false;
+    connected = false;
+    initialized = false;
+
     _instance = null;
   }
 
@@ -58,7 +91,7 @@ class PolarService {
 
     // polar.batteryLevel.listen((e) => print('Battery: ${e.level}'));
     // polar.deviceConnecting.listen((_) => print('Device connecting'));
-    polar.deviceConnected.listen((_) async {
+    _connSub = polar.deviceConnected.listen((_) async {
       print("DEVICE IS CONNECTED");
       connected = true;
 
@@ -76,17 +109,21 @@ class PolarService {
         print("Error setting watch time: $e");
       }
     });
-    polar.deviceDisconnected.listen((_) {
+    _discSub = polar.deviceDisconnected.listen((_) {
       print("DEVICE DISCONNECTED");
       connected = false;
     });
 
-    FlutterBluePlus.adapterState.listen((BluetoothAdapterState state) {
+    _btStateSub = FlutterBluePlus.adapterState.listen((
+      BluetoothAdapterState state,
+    ) {
       print("Bluetooth state changed: $state");
       btState = state;
     });
 
-    polar.deviceConnecting.listen((PolarDeviceInfo deviceInfo) async {
+    _connectingSub = polar.deviceConnecting.listen((
+      PolarDeviceInfo deviceInfo,
+    ) async {
       print("Device connecting...");
       print("Device info: $deviceInfo");
     });
@@ -98,6 +135,11 @@ class PolarService {
       identifier,
       requestPermissions: requestPermissions,
     );
+
+    // test log on an interval
+    Timer.periodic(Duration(seconds: 10), (_) async {
+      print("PolarService heartbeat for $identifier");
+    });
   }
 
   Future<void> initialConnection([int attempts = 0]) async {
@@ -122,9 +164,6 @@ class PolarService {
           .getOfflineRecordingStatus(identifier);
 
       bool isRecording = currentRecordings.isNotEmpty;
-      int batteryLevel = await polar.batteryLevel
-          .firstWhere((level) => level.identifier == identifier)
-          .then((level) => level.level);
 
       connected = true;
       return PolarState(

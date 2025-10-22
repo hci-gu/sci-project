@@ -67,7 +67,7 @@ class BleOwner {
                 : (throw 'missing_reply_port');
 
         if (msg['cmd'] == 'request_permissions') {
-          await Polar().requestPermissions();
+          await PolarService.sdk.requestPermissions();
           reply.send({'ok': true});
         } else if (msg['cmd'] == 'scan_start') {
           // UI must pass a SendPort sink for streaming results
@@ -145,15 +145,17 @@ class BleOwner {
     await PolarService.instance.start(requestPermissions: false);
 
     // If a connection is already in progress, wait briefly for it to complete
-    if (_connecting) {
-      for (int i = 0; i < 10; i++) {
-        // up to ~10s
-        await Future.delayed(const Duration(milliseconds: 1000));
-        await PolarService.instance.getState();
-        if (PolarService.instance.connected) {
-          break;
-        }
-      }
+    await Future.delayed(_settle);
+    await PolarService.instance.getState();
+    if (PolarService.instance.connected) {
+      _connecting = false;
+      return true;
+    }
+    await PolarService.instance.getState();
+    await Future.delayed(_settle);
+    if (PolarService.instance.connected) {
+      _connecting = false;
+      return true;
     }
 
     _connecting = false;
@@ -294,7 +296,7 @@ class BleOwner {
     final seen = <String>{};
 
     try {
-      _scanSub = Polar().searchForDevice().listen(
+      _scanSub = PolarService.sdk.searchForDevice().listen(
         (d) {
           if (seen.add(d.deviceId)) {
             _sendScanEvent(sink, {
@@ -418,8 +420,8 @@ class BleOwner {
     for (int i = 0; i < 3; i++) {
       final s = await PolarService.instance.getState();
       bool ok = s.isRecording;
-      bool needAcc = false;
-      bool needHr = false;
+      bool needAcc = true;
+      bool needHr = true;
       try {
         for (PolarOfflineRecordingEntry e in s.recordings) {
           if (e.type == PolarDataType.acc) needAcc = false;
