@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:scimovement/api/api.dart'; // adjust if your path differs
+import 'package:scimovement/gen_l10n/app_localizations.dart';
 
 class GeneratedImageView extends StatefulWidget {
   const GeneratedImageView({super.key, this.userId, this.title});
@@ -27,7 +28,8 @@ class _GeneratedImageViewState extends State<GeneratedImageView> {
 
   @override
   Widget build(BuildContext context) {
-    final title = widget.title ?? 'Generated Image';
+    final localizations = AppLocalizations.of(context)!;
+    final title = widget.title ?? localizations.generatedImageTitle;
 
     return FutureBuilder<Uint8List?>(
       future: _future,
@@ -40,10 +42,9 @@ class _GeneratedImageViewState extends State<GeneratedImageView> {
         // Error or null result
         if (snapshot.hasError || snapshot.data == null) {
           return _ErrorScaffold(
-            message:
-                snapshot.hasError
-                    ? '${snapshot.error}'
-                    : 'No image returned from server.',
+            message: snapshot.hasError
+                ? '${snapshot.error}'
+                : localizations.noImageFromServer,
             onRetry: () => setState(() => _future = _load()),
           );
         }
@@ -75,7 +76,7 @@ class _LoadingScaffold extends StatelessWidget {
         children: [
           CircularProgressIndicator(),
           SizedBox(height: 12),
-          Text('Generating image…'),
+          Text(AppLocalizations.of(context)!.generatingImage),
         ],
       ),
     );
@@ -99,7 +100,7 @@ class _ErrorScaffold extends StatelessWidget {
             const Icon(Icons.error_outline, size: 48),
             const SizedBox(height: 12),
             Text(
-              'Failed to load image',
+              AppLocalizations.of(context)!.failedToLoadImage,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
@@ -112,7 +113,7 @@ class _ErrorScaffold extends StatelessWidget {
             FilledButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh),
-              label: const Text('Try again'),
+              label: Text(AppLocalizations.of(context)!.tryAgain),
             ),
           ],
         ),

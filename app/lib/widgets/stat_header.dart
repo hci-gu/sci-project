@@ -50,7 +50,7 @@ class StatHeader extends ConsumerWidget {
                   loading: () => const CircularProgressIndicator(),
                 ),
             Text(
-              ' ${unit.displayString()}',
+              ' ${unit.displayString(context)}',
               style: AppTheme.paragraphMedium.copyWith(
                 color: AppTheme.colors.gray,
               ),

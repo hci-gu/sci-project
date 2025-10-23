@@ -76,7 +76,8 @@ class LoginScreen extends HookConsumerWidget {
   Widget _header(BuildContext context) {
     return Column(
       children: [
-        Text('RullaPå', style: AppTheme.headLine1.copyWith(height: 0.5)),
+        Text(AppLocalizations.of(context)!.appName,
+            style: AppTheme.headLine1.copyWith(height: 0.5)),
         Text(
           AppLocalizations.of(context)!.introductionScreenHeader,
           style: AppTheme.headLine3Light.copyWith(

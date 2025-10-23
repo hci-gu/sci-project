@@ -94,7 +94,7 @@ class PressureUlcerModal extends ConsumerWidget {
               AppTheme.spacer2x,
             ],
           ),
-          error: (_, __) => const Text('error'),
+          error: (_, __) => Text(AppLocalizations.of(context)!.error),
           loading: () => const Center(
             child: CircularProgressIndicator(),
           ),

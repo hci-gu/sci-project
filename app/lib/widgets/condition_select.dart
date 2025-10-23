@@ -2,6 +2,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/theme/theme.dart';
+import 'package:scimovement/gen_l10n/app_localizations.dart';
 
 class ConditionDisplay {
   final String title;
@@ -37,7 +38,8 @@ class ConditionSelect extends ConsumerWidget {
                 onTap: () => _openModal(context),
                 child: _body(_row(context, data)),
               ),
-          error: (_, _) => _body(const Text('error')),
+          error: (_, _) =>
+              _body(Text(AppLocalizations.of(context)!.error)),
           loading:
               () => _body(const Center(child: CircularProgressIndicator())),
         );
