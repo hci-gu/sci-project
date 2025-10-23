@@ -145,3 +145,16 @@ export class Position extends Model<
 
   declare UserId?: ForeignKey<User['id']>
 }
+
+export class Image extends Model<
+  InferAttributes<Image>,
+  InferCreationAttributes<Image>
+> {
+  declare id: CreationOptional<number>
+  declare data: CreationOptional<Buffer>
+  declare prompt: CreationOptional<string>
+  declare createdAt: CreationOptional<Date>
+  declare updatedAt: CreationOptional<Date>
+
+  declare UserId?: ForeignKey<User['id']>
+}

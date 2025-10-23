@@ -81,13 +81,14 @@ const Model = {
 
     await AccelCountModel.bulkCreate(rows, {
       validate: true,
-      hooks: false, // <— important
+      individualHooks: true,
+      hooks: false,
       logging: false,
     })
 
     const user = await UserModel.get(userId)
     if (user) {
-      await createBoutsFromBatch(user, rows) // implemented below
+      await createBoutsFromBatch(user, rows)
     }
 
     return rows
