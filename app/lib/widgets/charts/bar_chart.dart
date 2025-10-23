@@ -52,7 +52,7 @@ class CustomBarChart extends StatelessWidget {
                 var value =
                     group.value.fold<double>(0, (a, b) => a + b.value).toInt();
                 return BarTooltipItem(
-                  '${displayDate(context, group.key)}\n$value ${unit.displayString()}',
+                  '${displayDate(context, group.key)}\n$value ${unit.displayString(context)}',
                   AppTheme.labelMedium,
                 );
               },

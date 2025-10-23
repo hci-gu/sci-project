@@ -29,6 +29,7 @@ import 'package:scimovement/screens/register.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/snackbar_message.dart';
+import 'package:scimovement/gen_l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 List<String> detailRoutes = [
@@ -349,7 +350,8 @@ class RedirectScreen extends HookConsumerWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackbarMessage(
               context: context,
-              message: 'You need to be logged in to sync with your watch.',
+              message:
+                  AppLocalizations.of(context)!.watchSyncLoginRequired,
               type: SnackbarType.error,
             ),
           );
@@ -360,7 +362,8 @@ class RedirectScreen extends HookConsumerWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackbarMessage(
               context: context,
-              message: 'Got invalid information from the Fitbit app.',
+              message:
+                  AppLocalizations.of(context)!.watchSyncInvalidFitbitInfo,
               type: SnackbarType.error,
             ),
           );
@@ -370,7 +373,11 @@ class RedirectScreen extends HookConsumerWidget {
       return () => {};
     }, [user]);
 
-    return const Scaffold(body: Center(child: Text('Redirecting...')));
+    return Scaffold(
+      body: Center(
+        child: Text(AppLocalizations.of(context)!.redirecting),
+      ),
+    );
   }
 }
 
@@ -405,7 +412,7 @@ class LoadingScreen extends HookConsumerWidget {
                         ref.read(userProvider.notifier).logout();
                         context.goNamed('introduction');
                       },
-                      title: 'Abort',
+                      title: AppLocalizations.of(context)!.abort,
                     ),
                   ),
                 ],
@@ -455,7 +462,8 @@ class ForcedLoginScreen extends HookConsumerWidget {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackbarMessage(
                       context: context,
-                      message: 'Failed to login with provided credentials.',
+                      message:
+                          AppLocalizations.of(context)!.forcedLoginFailed,
                       type: SnackbarType.error,
                     ),
                   );
@@ -466,7 +474,8 @@ class ForcedLoginScreen extends HookConsumerWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackbarMessage(
               context: context,
-              message: 'Missing userId or apiKey parameters.',
+              message:
+                  AppLocalizations.of(context)!.missingUserIdOrApiKey,
               type: SnackbarType.error,
             ),
           );
@@ -476,6 +485,10 @@ class ForcedLoginScreen extends HookConsumerWidget {
       return () => {};
     }, [userId, apiKey, date, user]);
 
-    return const Scaffold(body: Center(child: Text('Authenticating...')));
+    return Scaffold(
+      body: Center(
+        child: Text(AppLocalizations.of(context)!.authenticating),
+      ),
+    );
   }
 }
