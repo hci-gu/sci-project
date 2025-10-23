@@ -9,6 +9,7 @@ import boutsRouter from './bouts/index.js'
 import positionsRouter from './positions/index.js'
 import journalRouter from './journal/index.js'
 import goalsRouter from './goals/index.js'
+import chatRouter from './chat/index.js'
 
 router.get('/ping', (_, res: any) => res.send('pong'))
 
@@ -20,5 +21,6 @@ router.use('/bouts', boutsRouter)
 router.use('/positions', positionsRouter)
 router.use('/journal', journalRouter)
 router.use('/goals', goalsRouter)
+router.use('/chat', chatRouter)
 
 export default router

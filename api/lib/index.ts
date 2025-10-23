@@ -5,6 +5,8 @@ import db from './db/index.js'
 import createServer from './server.js'
 import './cron.js'
 
+import './adapters/openai.js'
+
 const { DB_HOST, DB_USERNAME, DB_PASSWORD, DB } = process.env
 
 const [host, port] = DB_HOST?.split(':') ?? ['localhost', '5678']
