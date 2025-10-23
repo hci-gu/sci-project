@@ -6,6 +6,7 @@ import 'package:scimovement/models/energy.dart';
 import 'package:scimovement/models/pagination.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/activity_wheel/circle_painter.dart';
+import 'package:scimovement/gen_l10n/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 
 class ActivityGroup {
@@ -109,7 +110,9 @@ class ActivityWheel extends ConsumerWidget {
   }
 
   Widget _error(dynamic _, dynamic __) {
-    return const Text('Error');
+    return Builder(
+      builder: (context) => Text(AppLocalizations.of(context)!.error),
+    );
   }
 
   Widget _loading() {
@@ -167,7 +170,7 @@ class AnimatedWheel extends HookWidget {
                           ),
                         ),
                         Text(
-                          'kcal',
+                          AppLocalizations.of(context)!.kcal,
                           style: AppTheme.labelMedium.copyWith(
                             color: AppTheme.colors
                                 .activityLevelToColor(e.activity),

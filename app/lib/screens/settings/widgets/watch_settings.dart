@@ -6,6 +6,7 @@ import 'package:scimovement/models/watch/watch.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/confirm_dialog.dart';
+import 'package:scimovement/gen_l10n/app_localizations.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class WatchSettings extends HookConsumerWidget {
@@ -24,7 +25,9 @@ class WatchSettings extends HookConsumerWidget {
     if (watch == null) {
       return Padding(
         padding: AppTheme.elementPadding,
-        child: Center(child: Text('No watch connected')),
+        child: Center(
+          child: Text(AppLocalizations.of(context)!.noWatchConnected),
+        ),
       );
     }
 
@@ -49,9 +52,10 @@ class WatchSettings extends HookConsumerWidget {
                       onPressed: () async {
                         bool? disconnect = await confirmDialog(
                           context,
-                          title: 'Are you sure?',
-                          message:
-                              'Disconnecting your watch will stop all recordings and remove the connection. Do you want to proceed?',
+                          title: AppLocalizations.of(context)!
+                              .confirmDisconnectWatchTitle,
+                          message: AppLocalizations.of(context)!
+                              .disconnectWatchConfirmation,
                         );
                         if (disconnect == true) {
                           ref
@@ -61,14 +65,15 @@ class WatchSettings extends HookConsumerWidget {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                  'Watch disconnected successfully',
+                                  AppLocalizations.of(context)!
+                                      .watchDisconnected,
                                 ),
                               ),
                             );
                           }
                         }
                       },
-                      title: 'Disconnect',
+                      title: AppLocalizations.of(context)!.disconnect,
                       icon: Icons.watch_off_outlined,
                       width: 120,
                       secondary: true,
@@ -84,7 +89,7 @@ class WatchSettings extends HookConsumerWidget {
                           Future.delayed(const Duration(seconds: 1)),
                         ]);
                       },
-                      title: 'Refresh',
+                      title: AppLocalizations.of(context)!.refresh,
                       icon: Icons.refresh,
                       width: 120,
                       secondary: true,
@@ -97,9 +102,17 @@ class WatchSettings extends HookConsumerWidget {
           },
         ),
         AppTheme.spacer2x,
-        Text(
-          'Last synced: ${ref.watch(lastSyncProvider) != null ? timeago.format(ref.watch(lastSyncProvider)!) : 'Never'}',
-          style: AppTheme.paragraphSmall,
+        Builder(
+          builder: (context) {
+            final lastSync = ref.watch(lastSyncProvider);
+            final lastSyncValue = lastSync != null
+                ? timeago.format(lastSync)
+                : AppLocalizations.of(context)!.never;
+            return Text(
+              AppLocalizations.of(context)!.lastSynced(lastSyncValue),
+              style: AppTheme.paragraphSmall,
+            );
+          },
         ),
       ],
     );
@@ -148,7 +161,7 @@ class WatchSettings extends HookConsumerWidget {
             children: [
               Text(watch.id, style: AppTheme.paragraphMedium),
               Text(
-                'Bluetooth is off',
+                AppLocalizations.of(context)!.bluetoothOff,
                 style: AppTheme.paragraphSmall.copyWith(color: Colors.red[700]),
               ),
             ],
@@ -181,10 +194,10 @@ class WatchSettings extends HookConsumerWidget {
             Text(watch.id, style: AppTheme.paragraphMedium),
             Text(
               data['isRecording'] == true
-                  ? 'Recording...'
+                  ? AppLocalizations.of(context)!.recordingInProgress
                   : data['connected'] == true
-                  ? 'Connected'
-                  : 'Disconnected',
+                      ? AppLocalizations.of(context)!.connected
+                      : AppLocalizations.of(context)!.disconnected,
               style: AppTheme.paragraphSmall,
             ),
           ],
