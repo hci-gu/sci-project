@@ -10,7 +10,7 @@
   "fitbit": {
     "appUUID": "1c0a1dfd-e31d-4ed7-bb74-b653337a9e8d",
     "appType": "app",
-    "appDisplayName": "RullaPå",
+    "appDisplayName": "Wheelability",
     "iconFile": "resources/icon.png",
     "wipeColor": "#f44336",
     "requestedPermissions": [
@@ -25,7 +25,7 @@
     ],
     "i18n": {
       "en-US": {
-        "name": "RullaPå"
+        "name": "Wheelability"
       }
     },
     "defaultLanguage": "en-US"
