@@ -9,7 +9,7 @@ class AppLocalizationsSv extends AppLocalizations {
   AppLocalizationsSv([String locale = 'sv']) : super(locale);
 
   @override
-  String get appName => 'RullaPå';
+  String get appName => 'Wheelability';
 
   @override
   String get redirecting => 'Omdirigerar...';
@@ -422,7 +422,7 @@ class AppLocalizationsSv extends AppLocalizations {
   String get introductionScreenHeader => 'Spåra din rörelse';
 
   @override
-  String get introductionWelcome => 'Välkommen till RullaPå-appen!';
+  String get introductionWelcome => 'Välkommen till Wheelability-appen!';
 
   @override
   String get registerDataTitle => 'Hur appen använder din data';
@@ -442,11 +442,11 @@ class AppLocalizationsSv extends AppLocalizations {
   String get intro => 'Intro';
 
   @override
-  String get onboardingTitle => 'Välkommen till RullaPå';
+  String get onboardingTitle => 'Välkommen till Wheelability';
 
   @override
   String get onboardingIntro =>
-      'Hej och välkommen till RullaPå, den här guiden kommer att visa vad det finns för funktioner.\n\nDu kan välja om du är intresserad av att använda de eller inte, om du väljer bort en funktion så syns inte den på hemskärmen. Du kan alltid ångra dig genom att göra om det här från inställningarna i appen.\n\n Tryck på \"Nästa\" för att gå vidare.';
+      'Hej och välkommen till Wheelability, den här guiden kommer att visa vad det finns för funktioner.\n\nDu kan välja om du är intresserad av att använda de eller inte, om du väljer bort en funktion så syns inte den på hemskärmen. Du kan alltid ångra dig genom att göra om det här från inställningarna i appen.\n\n Tryck på \"Nästa\" för att gå vidare.';
 
   @override
   String get watchFunctions => 'Klockfunktioner';

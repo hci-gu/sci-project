@@ -9,7 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appName => 'RullaPå';
+  String get appName => 'Wheelability';
 
   @override
   String get redirecting => 'Redirecting...';
@@ -422,7 +422,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get introductionScreenHeader => 'Track your movement';
 
   @override
-  String get introductionWelcome => 'Welcome to the RullaPå app!';
+  String get introductionWelcome => 'Welcome to the Wheelability app!';
 
   @override
   String get registerDataTitle => 'How the app uses your data';
@@ -442,11 +442,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get intro => 'Intro';
 
   @override
-  String get onboardingTitle => 'Welcome to RullaPå';
+  String get onboardingTitle => 'Welcome to Wheelability';
 
   @override
   String get onboardingIntro =>
-      'Hello and welcome to RullaPå, this guide will show you what features are available.\n\nYou can choose whether you are interested in using them or not, if you deselect a feature it will not appear on the home screen. You can always undo this by redoing this from the settings in the app.\n\n Press \"Next\" to continue.';
+      'Hello and welcome to Wheelability, this guide will show you what features are available.\n\nYou can choose whether you are interested in using them or not, if you deselect a feature it will not appear on the home screen. You can always undo this by redoing this from the settings in the app.\n\n Press \"Next\" to continue.';
 
   @override
   String get watchFunctions => 'Watch functions';
