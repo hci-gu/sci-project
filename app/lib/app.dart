@@ -36,7 +36,7 @@ class App extends HookConsumerWidget {
     return NotificationLauncherWrapper(
       router: router,
       child: MaterialApp.router(
-        title: 'RullaPå',
+        title: 'Wheelability',
         theme: AppTheme.theme,
         routerConfig: router,
         debugShowCheckedModeBanner: false,

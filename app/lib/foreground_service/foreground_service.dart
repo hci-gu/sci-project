@@ -35,7 +35,7 @@ class ForegroundService {
     FlutterForegroundTask.init(
       androidNotificationOptions: AndroidNotificationOptions(
         channelId: 'watch_sync_service',
-        channelName: 'RullaPå data sync',
+        channelName: 'Wheelability data sync',
         onlyAlertOnce: true,
       ),
       iosNotificationOptions: const IOSNotificationOptions(

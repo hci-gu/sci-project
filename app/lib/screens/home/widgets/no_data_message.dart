@@ -22,7 +22,7 @@ class NoDataMessage extends StatelessWidget {
         ),
         AppTheme.spacer2x,
         Text(
-          'Om du har en Fitbitklocka kan du trycka på för att ladda ner klockappen som behövs för att använda RullaPå.',
+          'Om du har en Fitbitklocka kan du trycka på för att ladda ner klockappen som behövs för att använda Wheelability.',
           style: AppTheme.paragraphMedium,
         ),
         AppTheme.spacer2x,

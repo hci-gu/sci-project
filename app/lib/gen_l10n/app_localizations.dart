@@ -101,7 +101,7 @@ abstract class AppLocalizations {
   /// No description provided for @appName.
   ///
   /// In en, this message translates to:
-  /// **'RullaPå'**
+  /// **'Wheelability'**
   String get appName;
 
   /// No description provided for @redirecting.
@@ -905,7 +905,7 @@ abstract class AppLocalizations {
   /// No description provided for @introductionWelcome.
   ///
   /// In en, this message translates to:
-  /// **'Welcome to the RullaPå app!'**
+  /// **'Welcome to the Wheelability app!'**
   String get introductionWelcome;
 
   /// No description provided for @registerDataTitle.
@@ -941,13 +941,13 @@ abstract class AppLocalizations {
   /// No description provided for @onboardingTitle.
   ///
   /// In en, this message translates to:
-  /// **'Welcome to RullaPå'**
+  /// **'Welcome to Wheelability'**
   String get onboardingTitle;
 
   /// No description provided for @onboardingIntro.
   ///
   /// In en, this message translates to:
-  /// **'Hello and welcome to RullaPå, this guide will show you what features are available.\n\nYou can choose whether you are interested in using them or not, if you deselect a feature it will not appear on the home screen. You can always undo this by redoing this from the settings in the app.\n\n Press \"Next\" to continue.'**
+  /// **'Hello and welcome to Wheelability, this guide will show you what features are available.\n\nYou can choose whether you are interested in using them or not, if you deselect a feature it will not appear on the home screen. You can always undo this by redoing this from the settings in the app.\n\n Press \"Next\" to continue.'**
   String get onboardingIntro;
 
   /// No description provided for @watchFunctions.
