@@ -696,6 +696,106 @@ class AppLocalizationsEn extends AppLocalizations {
   String get exerciseLengthDescription => 'For how long did you exercise?';
 
   @override
+  String get selfAssessedPhysicalActivity => 'Self-assessed physical activity';
+
+  @override
+  String get selfAssessedPhysicalActivityTrainingTitle => 'Physical training';
+
+  @override
+  String get selfAssessedPhysicalActivityTrainingDescription =>
+      'How much time do you spend in a typical week on physical training, such as individual workouts or organised activities?';
+
+  @override
+  String get selfAssessedPhysicalActivityEverydayTitle =>
+      'Everyday physical activity';
+
+  @override
+  String get selfAssessedPhysicalActivityEverydayDescription =>
+      'How much time do you spend in a typical week on everyday physical activity, for example routine walking or wheeling, cycling, errands or transport related movement?';
+
+  @override
+  String get selfAssessedPhysicalActivitySedentaryTitle => 'Sedentary time';
+
+  @override
+  String get selfAssessedPhysicalActivitySedentaryDescription =>
+      'How much time do you spend sitting still during a day, for example in front of a computer, tablet, TV or similar? Please estimate for an average day.';
+
+  @override
+  String get selfAssessedPhysicalActivityDurationNone => '0 minutes / none';
+
+  @override
+  String get selfAssessedPhysicalActivityDuration1To30Minutes =>
+      '1–30 minutes';
+
+  @override
+  String get selfAssessedPhysicalActivityDuration30To60Minutes =>
+      '30–60 minutes';
+
+  @override
+  String get selfAssessedPhysicalActivityDuration1To3Hours => '1–3 hours';
+
+  @override
+  String get selfAssessedPhysicalActivityDuration3To5Hours => '3–5 hours';
+
+  @override
+  String get selfAssessedPhysicalActivityDuration5To7Hours => '5–7 hours';
+
+  @override
+  String get selfAssessedPhysicalActivityDuration7To10Hours => '7–10 hours';
+
+  @override
+  String get selfAssessedPhysicalActivityDuration10To15Hours => '10–15 hours';
+
+  @override
+  String get selfAssessedPhysicalActivityDuration15To20Hours => '15–20 hours';
+
+  @override
+  String get selfAssessedPhysicalActivityDurationMoreThan20Hours =>
+      'More than 20 hours';
+
+  @override
+  String get selfAssessedSedentaryDurationLessThanOneHour =>
+      'Less than 1 hour';
+
+  @override
+  String get selfAssessedSedentaryDuration1To3Hours => '1–3 hours';
+
+  @override
+  String get selfAssessedSedentaryDuration3To5Hours => '3–5 hours';
+
+  @override
+  String get selfAssessedSedentaryDuration5To7Hours => '5–7 hours';
+
+  @override
+  String get selfAssessedSedentaryDuration7To9Hours => '7–9 hours';
+
+  @override
+  String get selfAssessedSedentaryDuration9To11Hours => '9–11 hours';
+
+  @override
+  String get selfAssessedSedentaryDuration11To13Hours => '11–13 hours';
+
+  @override
+  String get selfAssessedSedentaryDuration13To15Hours => '13–15 hours';
+
+  @override
+  String get selfAssessedSedentaryDuration15To17Hours => '15–17 hours';
+
+  @override
+  String get selfAssessedSedentaryDurationMoreThan17Hours =>
+      'More than 17 hours';
+
+  @override
+  String get selfAssessedPhysicalActivityTrainingLabel => 'Training';
+
+  @override
+  String get selfAssessedPhysicalActivityEverydayLabel =>
+      'Everyday activity';
+
+  @override
+  String get selfAssessedPhysicalActivitySedentaryLabel => 'Sedentary';
+
+  @override
   String get pressureRelease => 'Pressure release';
 
   @override
