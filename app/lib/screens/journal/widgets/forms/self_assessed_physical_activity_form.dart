@@ -36,14 +36,14 @@ class SelfAssessedPhysicalActivityForm extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            ..._pageContent(context, step),
+            AppTheme.spacer2x,
             Center(
               child: StepIndicator(
                 index: step,
                 count: _pageCount,
               ),
             ),
-            AppTheme.spacer2x,
-            ..._pageContent(context, step),
           ],
         );
       },
@@ -145,6 +145,7 @@ class SelfAssessedPhysicalActivityForm extends StatelessWidget {
       builder: (context, control, _) {
         return RadioListTile<T>(
           contentPadding: EdgeInsets.zero,
+          visualDensity: VisualDensity.compact,
           value: value,
           groupValue: control.value,
           onChanged: (selected) {
@@ -212,12 +213,23 @@ class SelfAssessedPhysicalActivityForm extends StatelessWidget {
   static bool _isStepComplete(FormGroup form, int step) {
     switch (step) {
       case 0:
-        return form.control('trainingDuration').valid;
+        return _controlHasValue<SelfAssessedPhysicalActivityDuration>(
+          form,
+          'trainingDuration',
+        );
       case 1:
-        return form.control('everydayActivityDuration').valid;
+        return _controlHasValue<SelfAssessedPhysicalActivityDuration>(
+          form,
+          'everydayActivityDuration',
+        );
       default:
         return false;
     }
+  }
+
+  static bool _controlHasValue<T>(FormGroup form, String controlName) {
+    final control = form.control(controlName) as FormControl<T>;
+    return control.value != null && control.valid;
   }
 
   static Map<String, FormControl> buildForm(
