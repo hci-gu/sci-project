@@ -44,7 +44,7 @@ class WatchSettings extends HookConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 snapshot.connectionState == ConnectionState.done
-                    ? _watchConnectionRow(data, watch)
+                    ? _watchConnectionRow(ctx, data, watch)
                     : _loadingRow(),
                 Column(
                   children: [
@@ -142,7 +142,11 @@ class WatchSettings extends HookConsumerWidget {
     );
   }
 
-  Widget _watchConnectionRow(Map<dynamic, dynamic> data, ConnectedWatch watch) {
+  Widget _watchConnectionRow(
+    BuildContext context,
+    Map<dynamic, dynamic> data,
+    ConnectedWatch watch,
+  ) {
     if (data['bluetoothEnabled'] == false) {
       return Row(
         children: [
