@@ -167,11 +167,11 @@ class SelfAssessedPhysicalActivityForm extends StatelessWidget {
     FormGroup form,
     Function callback,
   ) {
-    return ReactiveValueListenableBuilder<int>(
-      formControlName: _stepControl,
-      builder: (context, control, _) {
+    return ReactiveFormConsumer(
+      builder: (context, formGroup, _) {
         final l10n = AppLocalizations.of(context)!;
-        final int step = control.value ?? 0;
+        final int step =
+            formGroup.control(_stepControl).value as int? ?? 0;
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -180,7 +180,7 @@ class SelfAssessedPhysicalActivityForm extends StatelessWidget {
                 width: 120,
                 secondary: true,
                 onPressed: () {
-                  form.control(_stepControl).value = step - 1;
+                  formGroup.control(_stepControl).value = step - 1;
                 },
                 title: l10n.back,
               )
@@ -189,16 +189,16 @@ class SelfAssessedPhysicalActivityForm extends StatelessWidget {
             if (step < _pageCount - 1)
               Button(
                 width: 120,
-                disabled: !_isStepComplete(form, step),
+                disabled: !_isStepComplete(formGroup, step),
                 onPressed: () {
-                  form.control(_stepControl).value = step + 1;
+                  formGroup.control(_stepControl).value = step + 1;
                 },
                 title: l10n.next,
               )
             else
               Button(
                 width: 160,
-                disabled: !form.valid,
+                disabled: !formGroup.valid,
                 onPressed: () {
                   callback(true, true);
                 },
