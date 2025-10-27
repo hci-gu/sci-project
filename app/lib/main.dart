@@ -26,8 +26,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Storage().reloadPrefs();
 
-  FlutterForegroundTask.initCommunicationPort();
-  ForegroundService.instance.init();
+  if (!kIsWeb) {
+    FlutterForegroundTask.initCommunicationPort();
+    ForegroundService.instance.init();
+  }
 
   bool onboardingDone = Storage().getOnboardingDone();
   Credentials? credentials = Storage().getCredentials();

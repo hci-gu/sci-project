@@ -452,6 +452,9 @@ class BleOwner {
 // ------------------- Public API used by UI code -------------------
 
 Future<Map<String, dynamic>> sendBleCommand(Map<String, dynamic> cmd) async {
+  if (kIsWeb) {
+    return {};
+  }
   final SendPort? owner = IsolateNameServer.lookupPortByName(kBleOwnerPortName);
   if (owner == null) {
     throw Exception('BLE owner not available');
