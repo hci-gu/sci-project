@@ -1400,6 +1400,186 @@ abstract class AppLocalizations {
   /// **'For how long did you exercise?'**
   String get exerciseLengthDescription;
 
+  /// No description provided for @selfAssessedPhysicalActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Self-assessed physical activity'**
+  String get selfAssessedPhysicalActivity;
+
+  /// No description provided for @selfAssessedPhysicalActivityTrainingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Physical training'**
+  String get selfAssessedPhysicalActivityTrainingTitle;
+
+  /// No description provided for @selfAssessedPhysicalActivityTrainingDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'How much time do you spend in a typical week on physical training, such as individual workouts or organised activities?'**
+  String get selfAssessedPhysicalActivityTrainingDescription;
+
+  /// No description provided for @selfAssessedPhysicalActivityEverydayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyday physical activity'**
+  String get selfAssessedPhysicalActivityEverydayTitle;
+
+  /// No description provided for @selfAssessedPhysicalActivityEverydayDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'How much time do you spend in a typical week on everyday physical activity, for example routine walking or wheeling, cycling, errands or transport related movement?'**
+  String get selfAssessedPhysicalActivityEverydayDescription;
+
+  /// No description provided for @selfAssessedPhysicalActivitySedentaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sedentary time'**
+  String get selfAssessedPhysicalActivitySedentaryTitle;
+
+  /// No description provided for @selfAssessedPhysicalActivitySedentaryDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'How much time do you spend sitting still during a day, for example in front of a computer, tablet, TV or similar? Please estimate for an average day.'**
+  String get selfAssessedPhysicalActivitySedentaryDescription;
+
+  /// No description provided for @selfAssessedPhysicalActivityDurationNone.
+  ///
+  /// In en, this message translates to:
+  /// **'0 minutes / none'**
+  String get selfAssessedPhysicalActivityDurationNone;
+
+  /// No description provided for @selfAssessedPhysicalActivityDuration1To30Minutes.
+  ///
+  /// In en, this message translates to:
+  /// **'1–30 minutes'**
+  String get selfAssessedPhysicalActivityDuration1To30Minutes;
+
+  /// No description provided for @selfAssessedPhysicalActivityDuration30To60Minutes.
+  ///
+  /// In en, this message translates to:
+  /// **'30–60 minutes'**
+  String get selfAssessedPhysicalActivityDuration30To60Minutes;
+
+  /// No description provided for @selfAssessedPhysicalActivityDuration1To3Hours.
+  ///
+  /// In en, this message translates to:
+  /// **'1–3 hours'**
+  String get selfAssessedPhysicalActivityDuration1To3Hours;
+
+  /// No description provided for @selfAssessedPhysicalActivityDuration3To5Hours.
+  ///
+  /// In en, this message translates to:
+  /// **'3–5 hours'**
+  String get selfAssessedPhysicalActivityDuration3To5Hours;
+
+  /// No description provided for @selfAssessedPhysicalActivityDuration5To7Hours.
+  ///
+  /// In en, this message translates to:
+  /// **'5–7 hours'**
+  String get selfAssessedPhysicalActivityDuration5To7Hours;
+
+  /// No description provided for @selfAssessedPhysicalActivityDuration7To10Hours.
+  ///
+  /// In en, this message translates to:
+  /// **'7–10 hours'**
+  String get selfAssessedPhysicalActivityDuration7To10Hours;
+
+  /// No description provided for @selfAssessedPhysicalActivityDuration10To15Hours.
+  ///
+  /// In en, this message translates to:
+  /// **'10–15 hours'**
+  String get selfAssessedPhysicalActivityDuration10To15Hours;
+
+  /// No description provided for @selfAssessedPhysicalActivityDuration15To20Hours.
+  ///
+  /// In en, this message translates to:
+  /// **'15–20 hours'**
+  String get selfAssessedPhysicalActivityDuration15To20Hours;
+
+  /// No description provided for @selfAssessedPhysicalActivityDurationMoreThan20Hours.
+  ///
+  /// In en, this message translates to:
+  /// **'More than 20 hours'**
+  String get selfAssessedPhysicalActivityDurationMoreThan20Hours;
+
+  /// No description provided for @selfAssessedSedentaryDurationLessThanOneHour.
+  ///
+  /// In en, this message translates to:
+  /// **'Less than 1 hour'**
+  String get selfAssessedSedentaryDurationLessThanOneHour;
+
+  /// No description provided for @selfAssessedSedentaryDuration1To3Hours.
+  ///
+  /// In en, this message translates to:
+  /// **'1–3 hours'**
+  String get selfAssessedSedentaryDuration1To3Hours;
+
+  /// No description provided for @selfAssessedSedentaryDuration3To5Hours.
+  ///
+  /// In en, this message translates to:
+  /// **'3–5 hours'**
+  String get selfAssessedSedentaryDuration3To5Hours;
+
+  /// No description provided for @selfAssessedSedentaryDuration5To7Hours.
+  ///
+  /// In en, this message translates to:
+  /// **'5–7 hours'**
+  String get selfAssessedSedentaryDuration5To7Hours;
+
+  /// No description provided for @selfAssessedSedentaryDuration7To9Hours.
+  ///
+  /// In en, this message translates to:
+  /// **'7–9 hours'**
+  String get selfAssessedSedentaryDuration7To9Hours;
+
+  /// No description provided for @selfAssessedSedentaryDuration9To11Hours.
+  ///
+  /// In en, this message translates to:
+  /// **'9–11 hours'**
+  String get selfAssessedSedentaryDuration9To11Hours;
+
+  /// No description provided for @selfAssessedSedentaryDuration11To13Hours.
+  ///
+  /// In en, this message translates to:
+  /// **'11–13 hours'**
+  String get selfAssessedSedentaryDuration11To13Hours;
+
+  /// No description provided for @selfAssessedSedentaryDuration13To15Hours.
+  ///
+  /// In en, this message translates to:
+  /// **'13–15 hours'**
+  String get selfAssessedSedentaryDuration13To15Hours;
+
+  /// No description provided for @selfAssessedSedentaryDuration15To17Hours.
+  ///
+  /// In en, this message translates to:
+  /// **'15–17 hours'**
+  String get selfAssessedSedentaryDuration15To17Hours;
+
+  /// No description provided for @selfAssessedSedentaryDurationMoreThan17Hours.
+  ///
+  /// In en, this message translates to:
+  /// **'More than 17 hours'**
+  String get selfAssessedSedentaryDurationMoreThan17Hours;
+
+  /// No description provided for @selfAssessedPhysicalActivityTrainingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Training'**
+  String get selfAssessedPhysicalActivityTrainingLabel;
+
+  /// No description provided for @selfAssessedPhysicalActivityEverydayLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyday activity'**
+  String get selfAssessedPhysicalActivityEverydayLabel;
+
+  /// No description provided for @selfAssessedPhysicalActivitySedentaryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sedentary'**
+  String get selfAssessedPhysicalActivitySedentaryLabel;
+
   /// No description provided for @pressureRelease.
   ///
   /// In en, this message translates to:

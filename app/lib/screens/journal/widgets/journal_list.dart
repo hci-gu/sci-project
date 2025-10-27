@@ -15,6 +15,10 @@ class JournalListItem extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final subtitleText = entry is SelfAssessedPhysicalActivityEntry
+        ? '${_timeLabel} · '
+            '${(entry as SelfAssessedPhysicalActivityEntry).summary(context)}'
+        : _timeLabel;
     return Dismissible(
       key: ValueKey(entry.id),
       background: Container(
@@ -67,7 +71,7 @@ class JournalListItem extends ConsumerWidget {
               ),
               horizontalTitleGap: AppTheme.basePadding * 2,
               title: Text(entry.title(context), style: AppTheme.labelLarge),
-              subtitle: Text(subtitle),
+              subtitle: Text(subtitleText),
               trailing: const Icon(Icons.edit),
             ),
           ),
@@ -99,7 +103,7 @@ class JournalListItem extends ConsumerWidget {
     }
   }
 
-  String get subtitle =>
+  String get _timeLabel =>
       '${entry.time.hour.toString().padLeft(2, '0')}:${entry.time.minute.toString().padLeft(2, '0')}';
 }
 
