@@ -9,6 +9,130 @@ class AppLocalizationsSv extends AppLocalizations {
   AppLocalizationsSv([String locale = 'sv']) : super(locale);
 
   @override
+  String get appName => 'RullaPå';
+
+  @override
+  String get redirecting => 'Omdirigerar...';
+
+  @override
+  String get authenticating => 'Autentiserar...';
+
+  @override
+  String get abort => 'Avbryt';
+
+  @override
+  String get watchSyncLoginRequired =>
+      'Du måste vara inloggad för att synka med din klocka.';
+
+  @override
+  String get watchSyncInvalidFitbitInfo =>
+      'Fick ogiltig information från Fitbit-appen.';
+
+  @override
+  String get forcedLoginFailed =>
+      'Misslyckades med att logga in med angivna uppgifter.';
+
+  @override
+  String get missingUserIdOrApiKey =>
+      'Saknar userId eller apiKey parametrar.';
+
+  @override
+  String get noWatchConnected => 'Ingen klocka ansluten';
+
+  @override
+  String get confirmDisconnectWatchTitle => 'Är du säker?';
+
+  @override
+  String get disconnectWatchConfirmation =>
+      'Att koppla från klockan stoppar alla inspelningar och tar bort anslutningen. Vill du fortsätta?';
+
+  @override
+  String get watchDisconnected => 'Klockan kopplades från';
+
+  @override
+  String get disconnect => 'Koppla från';
+
+  @override
+  String get refresh => 'Uppdatera';
+
+  @override
+  String lastSynced(Object time) {
+    return 'Senast synkad: $time';
+  }
+
+  @override
+  String get never => 'Aldrig';
+
+  @override
+  String get bluetoothOff => 'Bluetooth är av';
+
+  @override
+  String get recordingInProgress => 'Spelar in...';
+
+  @override
+  String get connected => 'Ansluten';
+
+  @override
+  String get disconnected => 'Frånkopplad';
+
+  @override
+  String get syncInstructions => 'Tryck på synkknappen för att ladda upp din data';
+
+  @override
+  String get sync => 'Synka';
+
+  @override
+  String get syncSuccess => 'Inspelningarna synkroniserades!';
+
+  @override
+  String get syncNoData => 'Inga inspelningar hittades att synka.';
+
+  @override
+  String get searchingForWatches => 'Söker efter klockor...';
+
+  @override
+  String get noDevicesFound => 'Inga enheter hittades.';
+
+  @override
+  String get searching => 'Söker...';
+
+  @override
+  String get searchAgain => 'Sök igen';
+
+  @override
+  String get connect => 'Anslut';
+
+  @override
+  String get unknownDevice => 'Okänd';
+
+  @override
+  String get connectWatchPrompt => 'Anslut din klocka för att komma igång!';
+
+  @override
+  String get connectWatch => 'Anslut klocka';
+
+  @override
+  String get generatedImageTitle => 'Genererad bild';
+
+  @override
+  String get noImageFromServer => 'Ingen bild returnerades från servern.';
+
+  @override
+  String get generatingImage => 'Genererar bild…';
+
+  @override
+  String get failedToLoadImage => 'Kunde inte ladda bilden';
+
+  @override
+  String get tryAgain => 'Försök igen';
+
+  @override
+  String get error => 'Fel';
+
+  @override
+  String get kcal => 'kcal';
+
+  @override
   String get login => 'Logga in';
 
   @override

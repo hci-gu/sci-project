@@ -11,9 +11,12 @@ enum Unit {
 }
 
 extension ParseToString on Unit {
-  String displayString() {
+  String displayString([BuildContext? context]) {
     switch (this) {
       case Unit.calories:
+        if (context != null) {
+          return AppLocalizations.of(context)!.kcal;
+        }
         return 'kcal';
       case Unit.time:
         return 'min';
@@ -98,7 +101,7 @@ class StatWidget extends StatelessWidget {
                 ),
               ),
               Text(
-                ' ${unit.displayString()}',
+                ' ${unit.displayString(context)}',
                 style: const TextStyle(
                   color: Colors.grey,
                 ),
@@ -116,7 +119,7 @@ class StatWidget extends StatelessWidget {
                   style: AppTheme.labelLarge.copyWith(height: 1),
                 ),
                 Text(
-                  ' ${unit.displayString()}',
+                  ' ${unit.displayString(context)}',
                   style: const TextStyle(
                     fontSize: 11,
                     color: Colors.grey,
@@ -138,7 +141,7 @@ class StatWidget extends StatelessWidget {
                   child: Text(
                     mode == StatWidgetMode.day
                         ? '${values.percentChange.toStringAsFixed(1)}%'
-                        : '${values.diff.toString()} ${unit.displayString()}',
+                        : '${values.diff.toString()} ${unit.displayString(context)}',
                     style: AppTheme.labelTiny.copyWith(
                       color: colorForChange(change),
                     ),
@@ -210,11 +213,13 @@ class StatWidget extends StatelessWidget {
         ),
       );
 
-  static Widget error([String? asset]) => _emptyContainer([
-        asset != null ? SvgPicture.asset(asset) : Container(),
-        AppTheme.spacer2x,
-        const Text('error'),
-      ]);
+  static Widget error([String? asset]) => Builder(
+        builder: (context) => _emptyContainer([
+          asset != null ? SvgPicture.asset(asset) : Container(),
+          AppTheme.spacer2x,
+          Text(AppLocalizations.of(context)!.error),
+        ]),
+      );
 
   static Widget loading([String? asset]) => _emptyContainer(
         [

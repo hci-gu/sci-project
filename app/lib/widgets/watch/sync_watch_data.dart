@@ -4,6 +4,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/models/watch/watch.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
+import 'package:scimovement/gen_l10n/app_localizations.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class SyncWatchData extends HookConsumerWidget {
@@ -18,12 +19,20 @@ class SyncWatchData extends HookConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            'Last synced: ${ref.watch(lastSyncProvider) != null ? timeago.format(ref.watch(lastSyncProvider)!) : 'Never'}',
-            style: AppTheme.paragraphMedium,
+          Builder(
+            builder: (context) {
+              final lastSync = ref.watch(lastSyncProvider);
+              final lastSyncValue = lastSync != null
+                  ? timeago.format(lastSync)
+                  : AppLocalizations.of(context)!.never;
+              return Text(
+                AppLocalizations.of(context)!.lastSynced(lastSyncValue),
+                style: AppTheme.paragraphMedium,
+              );
+            },
           ),
           Text(
-            'Press the sync button to upload your data',
+            AppLocalizations.of(context)!.syncInstructions,
             style: AppTheme.paragraphMedium,
           ),
           AppTheme.spacer2x,
@@ -35,18 +44,22 @@ class SyncWatchData extends HookConsumerWidget {
               if (context.mounted) {
                 if (success) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Recordings synced successfully!')),
+                    SnackBar(
+                        content: Text(
+                            AppLocalizations.of(context)!.syncSuccess)),
                   );
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('No recordings found to sync.')),
+                    SnackBar(
+                        content: Text(
+                            AppLocalizations.of(context)!.syncNoData)),
                   );
                 }
                 loading.value = false;
               }
             },
             icon: Icons.sync,
-            title: "Sync",
+            title: AppLocalizations.of(context)!.sync,
             loading: loading.value,
           ),
         ],
