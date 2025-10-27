@@ -318,6 +318,12 @@ class AppTheme {
           size: size,
           color: AppTheme.colors.black,
         );
+      case JournalType.selfAssessedPhysicalActivity:
+        return Icon(
+          Icons.self_improvement,
+          size: size,
+          color: AppTheme.colors.black,
+        );
       default:
         return Icon(
           Icons.album_outlined,
