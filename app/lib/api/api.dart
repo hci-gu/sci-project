@@ -206,6 +206,8 @@ class Api {
               return UTIEntry.fromJson(json);
             case JournalType.exercise:
               return ExerciseEntry.fromJson(json);
+            case JournalType.selfAssessedPhysicalActivity:
+              return SelfAssessedPhysicalActivityEntry.fromJson(json);
             case JournalType.spasticity:
               return SpasticityEntry.fromJson(json);
             default:
@@ -250,6 +252,8 @@ class Api {
               return UTIEntry.fromJson(json);
             case JournalType.exercise:
               return ExerciseEntry.fromJson(json);
+            case JournalType.selfAssessedPhysicalActivity:
+              return SelfAssessedPhysicalActivityEntry.fromJson(json);
             case JournalType.spasticity:
               return SpasticityEntry.fromJson(json);
             default:

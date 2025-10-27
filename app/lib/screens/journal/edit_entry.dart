@@ -12,6 +12,7 @@ import 'package:scimovement/models/journal/journal.dart';
 import 'package:scimovement/screens/journal/widgets/forms/bladder_emptying_form.dart';
 import 'package:scimovement/screens/journal/widgets/forms/bowel_emptying_form.dart';
 import 'package:scimovement/screens/journal/widgets/forms/exercise_form.dart';
+import 'package:scimovement/screens/journal/widgets/forms/self_assessed_physical_activity_form.dart';
 import 'package:scimovement/screens/journal/widgets/forms/spasticity_form.dart';
 import 'package:scimovement/screens/journal/widgets/forms/uti_form.dart';
 import 'package:scimovement/screens/journal/widgets/forms/pain_level_form.dart';
@@ -73,7 +74,13 @@ class EditJournalEntryScreen extends ConsumerWidget {
       if (entry is UTIEntry || type == JournalType.urinaryTractInfection)
         ...UTIForm.buildForm(entry as UTIEntry?, shouldCreateEntry),
       if (entry is ExerciseEntry || type == JournalType.exercise)
-        ...ExerciseForm.buildForm(entry as ExerciseEntry?, shouldCreateEntry)
+        ...ExerciseForm.buildForm(entry as ExerciseEntry?, shouldCreateEntry),
+      if (entry is SelfAssessedPhysicalActivityEntry ||
+          type == JournalType.selfAssessedPhysicalActivity)
+        ...SelfAssessedPhysicalActivityForm.buildForm(
+          entry as SelfAssessedPhysicalActivityEntry?,
+          shouldCreateEntry,
+        ),
     });
   }
 
@@ -105,19 +112,52 @@ class EditJournalEntryScreen extends ConsumerWidget {
               const DateTimeButton(formKey: 'time'),
               AppTheme.spacer2x,
               _typeSpecificForm(form),
-              Text(
-                '${AppLocalizations.of(context)!.comment} ( ${AppLocalizations.of(context)!.optional} )',
-                style: AppTheme.labelLarge,
-              ),
-              AppTheme.spacer,
-              StyledTextField(
-                formControlName: 'comment',
-                placeholder:
-                    AppLocalizations.of(context)!.painCommentPlaceholder,
-                helperText: AppLocalizations.of(context)!.painCommentHelper,
-                maxLines: 3,
-              ),
-              AppTheme.spacer2x,
+              if (_isSelfAssessedPhysicalActivity)
+                ReactiveValueListenableBuilder<int>(
+                  formControlName:
+                      SelfAssessedPhysicalActivityForm.stepControlName,
+                  builder: (context, control, _) {
+                    final int step = control.value ?? 0;
+                    if (step < 2) {
+                      return AppTheme.spacer2x;
+                    }
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${AppLocalizations.of(context)!.comment} ( ${AppLocalizations.of(context)!.optional} )',
+                          style: AppTheme.labelLarge,
+                        ),
+                        AppTheme.spacer,
+                        StyledTextField(
+                          formControlName: 'comment',
+                          placeholder: AppLocalizations.of(context)!
+                              .painCommentPlaceholder,
+                          helperText: AppLocalizations.of(context)!
+                              .painCommentHelper,
+                          maxLines: 3,
+                        ),
+                        AppTheme.spacer2x,
+                      ],
+                    );
+                  },
+                )
+              else ...[
+                Text(
+                  '${AppLocalizations.of(context)!.comment} ( ${AppLocalizations.of(context)!.optional} )',
+                  style: AppTheme.labelLarge,
+                ),
+                AppTheme.spacer,
+                StyledTextField(
+                  formControlName: 'comment',
+                  placeholder:
+                      AppLocalizations.of(context)!.painCommentPlaceholder,
+                  helperText:
+                      AppLocalizations.of(context)!.painCommentHelper,
+                  maxLines: 3,
+                ),
+                AppTheme.spacer2x,
+              ],
               _actions(context, ref, form),
             ],
           );
@@ -143,8 +183,23 @@ class EditJournalEntryScreen extends ConsumerWidget {
       );
     }
 
+    if (type == JournalType.selfAssessedPhysicalActivity ||
+        (entry != null &&
+            entry!.type == JournalType.selfAssessedPhysicalActivity)) {
+      return SelfAssessedPhysicalActivityForm.actions(
+        context,
+        form,
+        (goBack, showSnackbar) =>
+            _onSave(context, ref, form, goBack, showSnackbar),
+      );
+    }
+
     return _submitButton(ref);
   }
+
+  bool get _isSelfAssessedPhysicalActivity =>
+      type == JournalType.selfAssessedPhysicalActivity ||
+      (entry?.type == JournalType.selfAssessedPhysicalActivity);
 
   Widget _typeSpecificForm(FormGroup form) {
     if (entry is PainLevelEntry ||
@@ -200,6 +255,14 @@ class EditJournalEntryScreen extends ConsumerWidget {
       return ExerciseForm(
         form: form,
         entry: entry as ExerciseEntry?,
+        shouldCreateEntry: shouldCreateEntry,
+      );
+    }
+    if (entry is SelfAssessedPhysicalActivityEntry ||
+        type == JournalType.selfAssessedPhysicalActivity) {
+      return SelfAssessedPhysicalActivityForm(
+        form: form,
+        entry: entry as SelfAssessedPhysicalActivityEntry?,
         shouldCreateEntry: shouldCreateEntry,
       );
     }

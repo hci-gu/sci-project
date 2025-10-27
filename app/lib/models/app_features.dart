@@ -46,7 +46,10 @@ final Map<AppFeature, List<JournalType>> groupedFeatures = {
     JournalType.leakage,
     JournalType.urinaryTractInfection,
   ],
-  AppFeature.exercise: [JournalType.exercise],
+  AppFeature.exercise: [
+    JournalType.exercise,
+    JournalType.selfAssessedPhysicalActivity,
+  ],
 };
 
 class AppFeaturesNotifier extends Notifier<List<AppFeature>> {

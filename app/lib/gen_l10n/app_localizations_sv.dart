@@ -698,6 +698,104 @@ class AppLocalizationsSv extends AppLocalizations {
   String get exerciseLengthDescription => 'Hur länge har du tränat?';
 
   @override
+  String get selfAssessedPhysicalActivity => 'Självskattad fysisk aktivitet';
+
+  @override
+  String get selfAssessedPhysicalActivityTrainingTitle => 'Fysisk träning';
+
+  @override
+  String get selfAssessedPhysicalActivityTrainingDescription =>
+      'Hur mycket tid ägnar du en vanlig vecka åt fysisk träning, som individuell träning eller organiserade aktiviteter?';
+
+  @override
+  String get selfAssessedPhysicalActivityEverydayTitle => 'Vardagsmotion';
+
+  @override
+  String get selfAssessedPhysicalActivityEverydayDescription =>
+      'Hur mycket tid ägnar du en vanlig vecka åt vardaglig motion, till exempel rutinmässig promenad eller cykling i samband med ärenden, transporter eller fritidsaktiviteter?';
+
+  @override
+  String get selfAssessedPhysicalActivitySedentaryTitle => 'Stillastittande';
+
+  @override
+  String get selfAssessedPhysicalActivitySedentaryDescription =>
+      'Hur mycket tid sitter du stilla under en dag, till exempel framför en dator, surfplatta, TV eller liknande? Ange en genomsnittlig dag.';
+
+  @override
+  String get selfAssessedPhysicalActivityDurationNone => '0 minuter / ingen';
+
+  @override
+  String get selfAssessedPhysicalActivityDuration1To30Minutes =>
+      '1–30 minuter';
+
+  @override
+  String get selfAssessedPhysicalActivityDuration30To60Minutes =>
+      '30–60 minuter';
+
+  @override
+  String get selfAssessedPhysicalActivityDuration1To3Hours => '1–3 timmar';
+
+  @override
+  String get selfAssessedPhysicalActivityDuration3To5Hours => '3–5 timmar';
+
+  @override
+  String get selfAssessedPhysicalActivityDuration5To7Hours => '5–7 timmar';
+
+  @override
+  String get selfAssessedPhysicalActivityDuration7To10Hours => '7–10 timmar';
+
+  @override
+  String get selfAssessedPhysicalActivityDuration10To15Hours => '10–15 timmar';
+
+  @override
+  String get selfAssessedPhysicalActivityDuration15To20Hours => '15–20 timmar';
+
+  @override
+  String get selfAssessedPhysicalActivityDurationMoreThan20Hours =>
+      'Mer än 20 timmar';
+
+  @override
+  String get selfAssessedSedentaryDurationLessThanOneHour =>
+      'Mindre än 1 timme';
+
+  @override
+  String get selfAssessedSedentaryDuration1To3Hours => '1–3 timmar';
+
+  @override
+  String get selfAssessedSedentaryDuration3To5Hours => '3–5 timmar';
+
+  @override
+  String get selfAssessedSedentaryDuration5To7Hours => '5–7 timmar';
+
+  @override
+  String get selfAssessedSedentaryDuration7To9Hours => '7–9 timmar';
+
+  @override
+  String get selfAssessedSedentaryDuration9To11Hours => '9–11 timmar';
+
+  @override
+  String get selfAssessedSedentaryDuration11To13Hours => '11–13 timmar';
+
+  @override
+  String get selfAssessedSedentaryDuration13To15Hours => '13–15 timmar';
+
+  @override
+  String get selfAssessedSedentaryDuration15To17Hours => '15–17 timmar';
+
+  @override
+  String get selfAssessedSedentaryDurationMoreThan17Hours =>
+      'Mer än 17 timmar';
+
+  @override
+  String get selfAssessedPhysicalActivityTrainingLabel => 'Träning';
+
+  @override
+  String get selfAssessedPhysicalActivityEverydayLabel => 'Vardagsmotion';
+
+  @override
+  String get selfAssessedPhysicalActivitySedentaryLabel => 'Stillastittande';
+
+  @override
   String get pressureRelease => 'Tryckavlastning';
 
   @override
