@@ -98,6 +98,240 @@ abstract class AppLocalizations {
     Locale('sv'),
   ];
 
+  /// No description provided for @appName.
+  ///
+  /// In en, this message translates to:
+  /// **'RullaPå'**
+  String get appName;
+
+  /// No description provided for @redirecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Redirecting...'**
+  String get redirecting;
+
+  /// No description provided for @authenticating.
+  ///
+  /// In en, this message translates to:
+  /// **'Authenticating...'**
+  String get authenticating;
+
+  /// No description provided for @abort.
+  ///
+  /// In en, this message translates to:
+  /// **'Abort'**
+  String get abort;
+
+  /// No description provided for @watchSyncLoginRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'You need to be logged in to sync with your watch.'**
+  String get watchSyncLoginRequired;
+
+  /// No description provided for @watchSyncInvalidFitbitInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Got invalid information from the Fitbit app.'**
+  String get watchSyncInvalidFitbitInfo;
+
+  /// No description provided for @forcedLoginFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to login with provided credentials.'**
+  String get forcedLoginFailed;
+
+  /// No description provided for @missingUserIdOrApiKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing userId or apiKey parameters.'**
+  String get missingUserIdOrApiKey;
+
+  /// No description provided for @noWatchConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'No watch connected'**
+  String get noWatchConnected;
+
+  /// No description provided for @confirmDisconnectWatchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure?'**
+  String get confirmDisconnectWatchTitle;
+
+  /// No description provided for @disconnectWatchConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnecting your watch will stop all recordings and remove the connection. Do you want to proceed?'**
+  String get disconnectWatchConfirmation;
+
+  /// No description provided for @watchDisconnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch disconnected successfully'**
+  String get watchDisconnected;
+
+  /// No description provided for @disconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect'**
+  String get disconnect;
+
+  /// No description provided for @refresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get refresh;
+
+  /// No description provided for @lastSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Last synced: {time}'**
+  String lastSynced(Object time);
+
+  /// No description provided for @never.
+  ///
+  /// In en, this message translates to:
+  /// **'Never'**
+  String get never;
+
+  /// No description provided for @bluetoothOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth is off'**
+  String get bluetoothOff;
+
+  /// No description provided for @recordingInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording...'**
+  String get recordingInProgress;
+
+  /// No description provided for @connected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected'**
+  String get connected;
+
+  /// No description provided for @disconnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnected'**
+  String get disconnected;
+
+  /// No description provided for @syncInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Press the sync button to upload your data'**
+  String get syncInstructions;
+
+  /// No description provided for @sync.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync'**
+  String get sync;
+
+  /// No description provided for @syncSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Recordings synced successfully!'**
+  String get syncSuccess;
+
+  /// No description provided for @syncNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'No recordings found to sync.'**
+  String get syncNoData;
+
+  /// No description provided for @searchingForWatches.
+  ///
+  /// In en, this message translates to:
+  /// **'Searching for watches...'**
+  String get searchingForWatches;
+
+  /// No description provided for @noDevicesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No devices found.'**
+  String get noDevicesFound;
+
+  /// No description provided for @searching.
+  ///
+  /// In en, this message translates to:
+  /// **'Searching...'**
+  String get searching;
+
+  /// No description provided for @searchAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Search again'**
+  String get searchAgain;
+
+  /// No description provided for @connect.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect'**
+  String get connect;
+
+  /// No description provided for @unknownDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get unknownDevice;
+
+  /// No description provided for @connectWatchPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect your watch to get started!'**
+  String get connectWatchPrompt;
+
+  /// No description provided for @connectWatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect Watch'**
+  String get connectWatch;
+
+  /// No description provided for @generatedImageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Generated Image'**
+  String get generatedImageTitle;
+
+  /// No description provided for @noImageFromServer.
+  ///
+  /// In en, this message translates to:
+  /// **'No image returned from server.'**
+  String get noImageFromServer;
+
+  /// No description provided for @generatingImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating image…'**
+  String get generatingImage;
+
+  /// No description provided for @failedToLoadImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load image'**
+  String get failedToLoadImage;
+
+  /// No description provided for @tryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get tryAgain;
+
+  /// No description provided for @error.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get error;
+
+  /// No description provided for @kcal.
+  ///
+  /// In en, this message translates to:
+  /// **'kcal'**
+  String get kcal;
+
   /// No description provided for @login.
   ///
   /// In en, this message translates to:
