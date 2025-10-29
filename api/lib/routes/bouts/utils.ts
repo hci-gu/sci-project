@@ -1,5 +1,5 @@
 import UserModel from '../../db/models/User.js'
-import { overwriteEnergy } from '../../db/models/Energy.js'
+import { overwriteEnergy, removeEnergyForPeriod } from '../../db/models/Energy.js'
 import AccelCountModel from '../../db/models/AccelCount.js'
 import BoutModel from '../../db/models/Bout.js'
 import { Activity } from '../../constants.js'
@@ -7,7 +7,7 @@ import {
   activityForAccAndCondition,
   getEnergyForCountAndActivity,
 } from '../../adapters/energy/index.js'
-import { Energy } from '../../db/classes.js'
+import { Bout, Energy, User } from '../../db/classes.js'
 import moment from 'moment'
 
 export const boutsForPeriod = async ({
@@ -46,16 +46,25 @@ export const boutsForPeriod = async ({
   return bouts
 }
 
+export type EnergyGeneratorArgs = {
+  user: User
+  bout: Bout
+}
+
 export const saveBout = async (
   userId: string,
   {
     t,
     minutes,
     activity,
+    data = {},
+    energyGenerator,
   }: {
     t: Date
     minutes: number
     activity: Activity
+    data?: any
+    energyGenerator?: (args: EnergyGeneratorArgs) => Promise<Energy[]> | Energy[]
   }
 ) => {
   const user = await UserModel.get(userId)
@@ -68,28 +77,37 @@ export const saveBout = async (
       t,
       minutes,
       activity,
-      data: {},
+      data,
     },
     userId
   )
 
-  const counts = await AccelCountModel.find({
-    userId,
-    from: bout.t,
-    to: new Date(bout.t.getTime() + bout.minutes * 60 * 1000),
-  })
+  let energy: Energy[] = []
 
-  // get energy for each count
-  const energy = counts.map((count) => {
-    // TODO: for activity that required watt, store that in "data" field for bout
-    const kcal = getEnergyForCountAndActivity(user, count, activity)
+  if (energyGenerator) {
+    const generated = await energyGenerator({ user, bout })
+    if (generated?.length) {
+      energy = generated
+    }
+  } else {
+    const counts = await AccelCountModel.find({
+      userId,
+      from: bout.t,
+      to: new Date(bout.t.getTime() + bout.minutes * 60 * 1000),
+    })
 
-    return {
-      t: count.t,
-      activity,
-      kcal,
-    } as Energy
-  })
+    // get energy for each count
+    energy = counts.map((count) => {
+      // TODO: for activity that required watt, store that in "data" field for bout
+      const kcal = getEnergyForCountAndActivity(user, count, activity)
+
+      return {
+        t: count.t,
+        activity,
+        kcal,
+      } as Energy
+    })
+  }
 
   if (energy.length) {
     await overwriteEnergy(userId, energy)
@@ -110,11 +128,19 @@ export const removeBout = async (userId: string, id: string) => {
     throw new Error('Bout not found')
   }
 
+  const boutEnd = new Date(bout.t.getTime() + bout.minutes * 60 * 1000)
+
+  if ((bout.data as any)?.manual) {
+    await removeEnergyForPeriod(userId, bout.t, boutEnd)
+    await BoutModel.remove(id)
+    return
+  }
+
   // get all counts for this bout
   const counts = await AccelCountModel.find({
     userId,
     from: bout.t,
-    to: new Date(bout.t.getTime() + bout.minutes * 60 * 1000),
+    to: boutEnd,
   })
 
   const energy = counts.map((count) => {
