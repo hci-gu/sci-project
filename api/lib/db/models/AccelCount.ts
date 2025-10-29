@@ -88,6 +88,14 @@ const Model = {
 
     const user = await UserModel.get(userId)
     if (user) {
+      const countsForEnergy = rows.filter((row) => row.hr > 0)
+
+      await Promise.all(
+        countsForEnergy.map((row) =>
+          saveEnergyFromCount(user, row as unknown as AccelCount)
+        )
+      )
+
       await createBoutsFromBatch(user, rows)
     }
 
