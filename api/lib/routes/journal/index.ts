@@ -48,11 +48,32 @@ const ESTIMATED_ACTIVITY_LEVELS: Partial<
   [Activity.active]: { hr: 120, a: 11000 },
 }
 
+const DAYS_PER_WEEK = 7
+const MINUTES_IN_DAY = 24 * 60
+const MILLISECONDS_IN_MINUTE = 60 * 1000
+const MILLISECONDS_IN_DAY = MINUTES_IN_DAY * MILLISECONDS_IN_MINUTE
+
 const minutesFromPhysicalDuration = (value?: string) =>
   PHYSICAL_ACTIVITY_DURATION_TO_MINUTES[value ?? 'none'] ?? 0
 
 const minutesFromSedentaryDuration = (value?: string) =>
   SEDENTARY_DURATION_TO_MINUTES[value ?? 'lessThanOneHour'] ?? 0
+
+const distributeMinutesAcrossWeek = (totalMinutes: number) => {
+  if (totalMinutes <= 0) {
+    return Array<number>(DAYS_PER_WEEK).fill(0)
+  }
+
+  const distribution: number[] = []
+
+  for (let day = 0; day < DAYS_PER_WEEK; day++) {
+    const from = Math.round((day * totalMinutes) / DAYS_PER_WEEK)
+    const to = Math.round(((day + 1) * totalMinutes) / DAYS_PER_WEEK)
+    distribution.push(to - from)
+  }
+
+  return distribution
+}
 
 const createEnergyGenerator = (
   activity: Activity,
@@ -69,7 +90,7 @@ const createEnergyGenerator = (
     const entries: Energy[] = []
 
     for (let i = 0; i < minutes; i++) {
-      const t = new Date(start.getTime() + i * 60 * 1000)
+      const t = new Date(start.getTime() + i * MILLISECONDS_IN_MINUTE)
       const count = {
         t,
         hr: estimate.hr,
@@ -109,33 +130,58 @@ router.post('/:userId', async (req, res: any) => {
       const savedBouts: number[] = []
       const startOfDay = new Date(entryTime)
       startOfDay.setHours(0, 0, 0, 0)
-      let currentStart = startOfDay
+      const weekStart = new Date(startOfDay)
+      weekStart.setDate(weekStart.getDate() - (DAYS_PER_WEEK - 1))
 
-      const manualActivities: Array<{
-        minutes: number
-        activity: Activity
-      }> = [
-        { minutes: sedentaryMinutes, activity: Activity.sedentary },
-        { minutes: everydayMinutes, activity: Activity.moving },
-        { minutes: trainingMinutes, activity: Activity.active },
-      ]
+      const sedentaryDistribution = Array<number>(DAYS_PER_WEEK).fill(
+        sedentaryMinutes
+      )
+      const everydayDistribution = distributeMinutesAcrossWeek(everydayMinutes)
+      const trainingDistribution = distributeMinutesAcrossWeek(trainingMinutes)
 
-      for (const { minutes, activity } of manualActivities) {
-        if (!minutes) {
-          continue
+      for (let dayIndex = 0; dayIndex < DAYS_PER_WEEK; dayIndex++) {
+        const dayStart = new Date(
+          weekStart.getTime() + dayIndex * MILLISECONDS_IN_DAY
+        )
+        let currentStart = dayStart
+
+        const manualActivities: Array<{
+          minutes: number
+          activity: Activity
+        }> = [
+          {
+            minutes: sedentaryDistribution[dayIndex],
+            activity: Activity.sedentary,
+          },
+          {
+            minutes: everydayDistribution[dayIndex],
+            activity: Activity.moving,
+          },
+          {
+            minutes: trainingDistribution[dayIndex],
+            activity: Activity.active,
+          },
+        ]
+
+        for (const { minutes, activity } of manualActivities) {
+          if (!minutes) {
+            continue
+          }
+
+          const boutStart = new Date(currentStart)
+          const bout = await saveBout(userId, {
+            t: boutStart,
+            minutes,
+            activity,
+            data: { manual: true, source: 'selfAssessedPhysicalActivity' },
+            energyGenerator: createEnergyGenerator(activity, boutStart, minutes),
+          })
+
+          savedBouts.push(bout.id)
+          currentStart = new Date(
+            currentStart.getTime() + minutes * MILLISECONDS_IN_MINUTE
+          )
         }
-
-        const boutStart = new Date(currentStart)
-        const bout = await saveBout(userId, {
-          t: boutStart,
-          minutes,
-          activity,
-          data: { manual: true, source: 'selfAssessedPhysicalActivity' },
-          energyGenerator: createEnergyGenerator(activity, boutStart, minutes),
-        })
-
-        savedBouts.push(bout.id)
-        currentStart = new Date(currentStart.getTime() + minutes * 60 * 1000)
       }
 
       req.body.info = {
