@@ -7,6 +7,7 @@ import 'package:scimovement/gen_l10n/app_localizations.dart';
 enum AppFeature { watch, pressureRelease, pain, exercise, bladderAndBowel }
 
 List<AppFeature> defaultAppFeatures = [
+  AppFeature.watch,
   AppFeature.pressureRelease,
   AppFeature.pain,
   AppFeature.exercise,
@@ -68,6 +69,7 @@ class AppFeaturesNotifier extends Notifier<List<AppFeature>> {
   }
 
   void removeFeature(AppFeature feature) {
+    if (feature == AppFeature.watch) return;
     if (!state.contains(feature)) return;
     state = state.where((f) => f != feature).toList();
   }

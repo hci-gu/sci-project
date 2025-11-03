@@ -92,13 +92,19 @@ class Storage {
           return e;
         }).toList();
 
-    return features
+    List<AppFeature> storedFeatures = features
         .map(
           (e) => AppFeature.values.firstWhere(
             (element) => element.toString() == e,
           ),
         )
         .toList();
+
+    if (!storedFeatures.contains(AppFeature.watch)) {
+      storedFeatures = [...storedFeatures, AppFeature.watch];
+    }
+
+    return storedFeatures;
   }
 
   Future storeHomeWidgetPage(int page) async {
