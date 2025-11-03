@@ -7,6 +7,7 @@ import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/confirm_dialog.dart';
 import 'package:scimovement/gen_l10n/app_localizations.dart';
+import 'package:scimovement/widgets/watch/connect_watch.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class WatchSettings extends HookConsumerWidget {
@@ -25,9 +26,7 @@ class WatchSettings extends HookConsumerWidget {
     if (watch == null) {
       return Padding(
         padding: AppTheme.elementPadding,
-        child: Center(
-          child: Text(AppLocalizations.of(context)!.noWatchConnected),
-        ),
+        child: const Center(child: ConnectWatch()),
       );
     }
 

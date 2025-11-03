@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:polar/polar.dart';
 import 'package:scimovement/ble_owner.dart';
 import 'package:scimovement/models/app_features.dart';
 import 'package:scimovement/models/pagination.dart';
@@ -25,7 +24,6 @@ import 'package:scimovement/widgets/ai/generated_image.dart';
 import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/date_select.dart';
 import 'package:scimovement/gen_l10n/app_localizations.dart';
-import 'package:scimovement/widgets/watch/connect_watch.dart';
 import 'package:scimovement/widgets/watch/sync_watch_data.dart';
 
 class HomeWidgetPageNotifier extends Notifier<int> {
@@ -53,18 +51,94 @@ class PagedWidgets extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     List<AppFeature> features = ref.watch(appFeaturesProvider);
-    bool hasWatchFeatures = features.contains(AppFeature.watch);
     bool hasLogFeatures =
         features.contains(AppFeature.bladderAndBowel) ||
         features.contains(AppFeature.pressureRelease);
     int page = ref.watch(homeWidgetPageProvider);
-    bool centerAlignDate = page == 1 && hasLogFeatures;
-    double pageSize = page == 0 ? 560 : 440;
-    double topPadding = page == 0 ? 0 : 80;
-    PageController controller = useMemoized(
-      () => PageController(initialPage: page),
-      [page],
+    int pageCount = 2 + (hasLogFeatures ? 1 : 0);
+    int clampedPage = pageCount > 0 ? page.clamp(0, pageCount - 1) : 0;
+
+    useEffect(
+      () {
+        if (clampedPage != page) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ref
+                .read(homeWidgetPageProvider.notifier)
+                .setPage(clampedPage);
+          });
+        }
+        return null;
+      },
+      [page, clampedPage],
     );
+
+    bool centerAlignDate = hasLogFeatures && clampedPage == 1;
+    double pageSize = clampedPage == 0 ? 560 : 440;
+    double topPadding = clampedPage == 0 ? 0 : 80;
+    PageController controller = useMemoized(
+      () => PageController(initialPage: clampedPage),
+      [clampedPage],
+    );
+
+    final pages = <Widget>[
+      SizedBox(height: pageSize, child: GeneratedImageView()),
+      if (hasLogFeatures)
+        Padding(
+          padding: EdgeInsets.only(
+            top: 120,
+            left: AppTheme.basePadding * 2,
+            right: AppTheme.basePadding * 2,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                height: 91,
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    features.contains(AppFeature.pressureRelease)
+                        ? const PressureUlcerWidget()
+                        : const SizedBox.shrink(),
+                    if (features.contains(AppFeature.bladderAndBowel) &&
+                        features.contains(AppFeature.pressureRelease))
+                      AppTheme.spacer,
+                    features.contains(AppFeature.bladderAndBowel)
+                        ? const UTIWidget()
+                        : const Expanded(
+                            child: SizedBox.shrink(),
+                          ),
+                    if (features.contains(AppFeature.bladderAndBowel) &&
+                        !features.contains(AppFeature.pressureRelease))
+                      const Expanded(
+                        child: SizedBox.shrink(),
+                      ),
+                  ],
+                ),
+              ),
+              AppTheme.spacer,
+              Text(
+                AppLocalizations.of(
+                  context,
+                )!
+                    .painAndDiscomfort,
+                style: AppTheme.labelLarge,
+              ),
+              AppTheme.spacer,
+              SizedBox(
+                height: 110,
+                child: ListView(
+                  shrinkWrap: true,
+                  scrollDirection: Axis.horizontal,
+                  children: const [NeuroPathicPainWidgets()],
+                ),
+              ),
+            ],
+          ),
+        ),
+      const WatchFeaturesWidget(),
+    ];
 
     return Column(
       children: [
@@ -108,77 +182,7 @@ class PagedWidgets extends HookConsumerWidget {
                             .setPage(value);
                       },
                       scrollDirection: Axis.horizontal,
-                      children: [
-                        SizedBox(height: pageSize, child: GeneratedImageView()),
-                        if (hasLogFeatures)
-                          Padding(
-                            padding: EdgeInsets.only(
-                              top: 120,
-                              left: AppTheme.basePadding * 2,
-                              right: AppTheme.basePadding * 2,
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SizedBox(
-                                  height: 91,
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.max,
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceAround,
-                                    children: [
-                                      features.contains(
-                                            AppFeature.pressureRelease,
-                                          )
-                                          ? const PressureUlcerWidget()
-                                          : const SizedBox.shrink(),
-                                      if (features.contains(
-                                            AppFeature.bladderAndBowel,
-                                          ) &&
-                                          features.contains(
-                                            AppFeature.pressureRelease,
-                                          ))
-                                        AppTheme.spacer,
-                                      features.contains(
-                                            AppFeature.bladderAndBowel,
-                                          )
-                                          ? const UTIWidget()
-                                          : const Expanded(
-                                            child: SizedBox.shrink(),
-                                          ),
-                                      if (features.contains(
-                                            AppFeature.bladderAndBowel,
-                                          ) &&
-                                          !features.contains(
-                                            AppFeature.pressureRelease,
-                                          ))
-                                        const Expanded(
-                                          child: SizedBox.shrink(),
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                                AppTheme.spacer,
-                                Text(
-                                  AppLocalizations.of(
-                                    context,
-                                  )!.painAndDiscomfort,
-                                  style: AppTheme.labelLarge,
-                                ),
-                                AppTheme.spacer,
-                                SizedBox(
-                                  height: 110,
-                                  child: ListView(
-                                    shrinkWrap: true,
-                                    scrollDirection: Axis.horizontal,
-                                    children: const [NeuroPathicPainWidgets()],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        WatchFeaturesWidget(),
-                      ],
+                      children: pages,
                     ),
                   ),
                 ),
@@ -186,9 +190,10 @@ class PagedWidgets extends HookConsumerWidget {
             ],
           ),
         ),
-        if (hasWatchFeatures && hasLogFeatures) AppTheme.spacer2x,
-        if (hasWatchFeatures && hasLogFeatures)
-          StepIndicator(index: page, count: 3),
+        if (hasLogFeatures) ...[
+          AppTheme.spacer2x,
+          StepIndicator(index: clampedPage, count: pageCount),
+        ],
       ],
     );
   }
@@ -199,12 +204,7 @@ class WatchFeaturesWidget extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    List<AppFeature> features = ref.watch(appFeaturesProvider);
     ConnectedWatch? watch = ref.watch(connectedWatchProvider);
-
-    if (!features.contains(AppFeature.watch)) {
-      return const SizedBox.shrink();
-    }
 
     Widget activity = Padding(
       padding: EdgeInsets.symmetric(horizontal: AppTheme.basePadding * 2),
@@ -230,12 +230,7 @@ class WatchFeaturesWidget extends HookConsumerWidget {
     );
 
     if (watch == null) {
-      return Stack(
-        children: [
-          Blur(blur: 6, colorOpacity: 0.5, child: activity),
-          ConnectWatch(),
-        ],
-      );
+      return activity;
     }
 
     DateTime? lastSync = ref.watch(lastSyncProvider);
