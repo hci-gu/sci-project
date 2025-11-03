@@ -55,14 +55,12 @@ class OnboardingStep extends ConsumerWidget {
       case 0:
         return const OnboardingWelcome();
       case 1:
-        return const WatchFunctions();
-      case 2:
         return const PressureReleaseFunctions();
-      case 3:
+      case 2:
         return const PainFunctions();
-      case 4:
+      case 3:
         return const BladderFunctions();
-      case 5:
+      case 4:
         return const PushNotifications();
       default:
         return Container();
@@ -89,53 +87,6 @@ class OnboardingWelcome extends StatelessWidget {
         AppTheme.spacer2x,
         Text(AppLocalizations.of(context)!.onboardingIntro,
             style: AppTheme.paragraphMedium),
-      ],
-    );
-  }
-}
-
-class WatchFunctions extends ConsumerWidget {
-  const WatchFunctions({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Column(
-      children: [
-        Text(AppLocalizations.of(context)!.watchFunctions,
-            style: AppTheme.headLine3),
-        Image.asset('assets/images/fitbit.png', width: 200),
-        Text(
-          AppLocalizations.of(context)!.onboardingWatchRequirement,
-          style: AppTheme.paragraph,
-        ),
-        AppTheme.spacer,
-        AppFeatureWidget(
-          asset: 'assets/svg/flame.svg',
-          title: AppLocalizations.of(context)!.calories,
-          description:
-              AppLocalizations.of(context)!.onboardingCaloriesDescription,
-        ),
-        AppTheme.spacer,
-        AppFeatureWidget(
-          asset: 'assets/svg/wheelchair.svg',
-          title: AppLocalizations.of(context)!.sedentary,
-          description:
-              AppLocalizations.of(context)!.onboardingSedentaryDescription,
-        ),
-        AppTheme.spacer,
-        AppFeatureWidget(
-          asset: 'assets/svg/wheelchair.svg',
-          title: AppLocalizations.of(context)!.movement,
-          description:
-              AppLocalizations.of(context)!.onboardingMovementDescription,
-        ),
-        AppTheme.spacer4x,
-        FeatureToggle(
-          feature: AppFeature.watch,
-          addText: AppLocalizations.of(context)!.onboardingWantFunctions,
-          removeText:
-              '${AppLocalizations.of(context)!.onboardingNotInterested} / ${AppLocalizations.of(context)!.onboardingDontHaveWatch}',
-        ),
       ],
     );
   }
