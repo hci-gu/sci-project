@@ -88,11 +88,6 @@ class AppFeatureToggles extends ConsumerWidget {
         ),
         AppTheme.spacer,
         _row(
-          AppLocalizations.of(context)!.watchFunctions,
-          AppFeature.watch,
-          ref,
-        ),
-        _row(
           AppLocalizations.of(context)!.onboardingPainFeature,
           AppFeature.pain,
           ref,
