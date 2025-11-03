@@ -31,6 +31,7 @@ export enum JournalType {
   bladderEmptying = 'bladderEmptying',
   bowelEmptying = 'bowelEmptying',
   exercise = 'exercise',
+  selfAssessedPhysicalActivity = 'selfAssessedPhysicalActivity',
 }
 
 export enum GoalType {
