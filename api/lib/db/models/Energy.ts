@@ -154,3 +154,18 @@ export const overwriteEnergy = async (userId: string, energy: Energy[]) => {
   })
   await Model.save(energy, userId)
 }
+
+export const removeEnergyForPeriod = async (
+  userId: string,
+  from: Date,
+  to: Date
+) => {
+  await EnergyModel.destroy({
+    where: {
+      UserId: userId,
+      t: {
+        [Op.between]: [from, to],
+      },
+    },
+  })
+}
