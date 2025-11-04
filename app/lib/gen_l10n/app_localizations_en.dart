@@ -9,130 +9,6 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appName => 'Wheelability';
-
-  @override
-  String get redirecting => 'Redirecting...';
-
-  @override
-  String get authenticating => 'Authenticating...';
-
-  @override
-  String get abort => 'Abort';
-
-  @override
-  String get watchSyncLoginRequired =>
-      'You need to be logged in to sync with your watch.';
-
-  @override
-  String get watchSyncInvalidFitbitInfo =>
-      'Got invalid information from the Fitbit app.';
-
-  @override
-  String get forcedLoginFailed =>
-      'Failed to login with provided credentials.';
-
-  @override
-  String get missingUserIdOrApiKey =>
-      'Missing userId or apiKey parameters.';
-
-  @override
-  String get noWatchConnected => 'No watch connected';
-
-  @override
-  String get confirmDisconnectWatchTitle => 'Are you sure?';
-
-  @override
-  String get disconnectWatchConfirmation =>
-      'Disconnecting your watch will stop all recordings and remove the connection. Do you want to proceed?';
-
-  @override
-  String get watchDisconnected => 'Watch disconnected successfully';
-
-  @override
-  String get disconnect => 'Disconnect';
-
-  @override
-  String get refresh => 'Refresh';
-
-  @override
-  String lastSynced(Object time) {
-    return 'Last synced: $time';
-  }
-
-  @override
-  String get never => 'Never';
-
-  @override
-  String get bluetoothOff => 'Bluetooth is off';
-
-  @override
-  String get recordingInProgress => 'Recording...';
-
-  @override
-  String get connected => 'Connected';
-
-  @override
-  String get disconnected => 'Disconnected';
-
-  @override
-  String get syncInstructions => 'Press the sync button to upload your data';
-
-  @override
-  String get sync => 'Sync';
-
-  @override
-  String get syncSuccess => 'Recordings synced successfully!';
-
-  @override
-  String get syncNoData => 'No recordings found to sync.';
-
-  @override
-  String get searchingForWatches => 'Searching for watches...';
-
-  @override
-  String get noDevicesFound => 'No devices found.';
-
-  @override
-  String get searching => 'Searching...';
-
-  @override
-  String get searchAgain => 'Search again';
-
-  @override
-  String get connect => 'Connect';
-
-  @override
-  String get unknownDevice => 'Unknown';
-
-  @override
-  String get connectWatchPrompt => 'Connect your watch to get started!';
-
-  @override
-  String get connectWatch => 'Connect Watch';
-
-  @override
-  String get generatedImageTitle => 'Generated Image';
-
-  @override
-  String get noImageFromServer => 'No image returned from server.';
-
-  @override
-  String get generatingImage => 'Generating image…';
-
-  @override
-  String get failedToLoadImage => 'Failed to load image';
-
-  @override
-  String get tryAgain => 'Try again';
-
-  @override
-  String get error => 'Error';
-
-  @override
-  String get kcal => 'kcal';
-
-  @override
   String get login => 'Login';
 
   @override
@@ -773,6 +649,15 @@ class AppLocalizationsEn extends AppLocalizations {
       'More than 300 minutes';
 
   @override
+  String get selfAssessedPhysicalActivityWeekInfoInstruction =>
+      'To submit an earlier week, change the date below to any day within that week.';
+
+  @override
+  String selfAssessedPhysicalActivityWeekInfoRange(Object start, Object end) {
+    return 'With the current date, your answers will be saved for $start to $end.';
+  }
+
+  @override
   String get selfAssessedSedentaryDurationAlmostAllDay =>
       'Almost the entire day';
 
@@ -798,8 +683,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selfAssessedPhysicalActivityTrainingLabel => 'Training';
 
   @override
-  String get selfAssessedPhysicalActivityEverydayLabel =>
-      'Everyday activity';
+  String get selfAssessedPhysicalActivityEverydayLabel => 'Everyday activity';
 
   @override
   String get selfAssessedPhysicalActivitySedentaryLabel => 'Sedentary';
@@ -1144,4 +1028,126 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get spasticityLevelDescription => 'Choose a number between 1-10';
+
+  @override
+  String get appName => 'Wheelability';
+
+  @override
+  String get redirecting => 'Redirecting...';
+
+  @override
+  String get authenticating => 'Authenticating...';
+
+  @override
+  String get abort => 'Abort';
+
+  @override
+  String get watchSyncLoginRequired =>
+      'You need to be logged in to sync with your watch.';
+
+  @override
+  String get watchSyncInvalidFitbitInfo =>
+      'Got invalid information from the Fitbit app.';
+
+  @override
+  String get forcedLoginFailed => 'Failed to login with provided credentials.';
+
+  @override
+  String get missingUserIdOrApiKey => 'Missing userId or apiKey parameters.';
+
+  @override
+  String get noWatchConnected => 'No watch connected';
+
+  @override
+  String get confirmDisconnectWatchTitle => 'Are you sure?';
+
+  @override
+  String get disconnectWatchConfirmation =>
+      'Disconnecting your watch will stop all recordings and remove the connection. Do you want to proceed?';
+
+  @override
+  String get watchDisconnected => 'Watch disconnected successfully';
+
+  @override
+  String get disconnect => 'Disconnect';
+
+  @override
+  String get refresh => 'Refresh';
+
+  @override
+  String lastSynced(Object time) {
+    return 'Last synced: $time';
+  }
+
+  @override
+  String get never => 'Never';
+
+  @override
+  String get bluetoothOff => 'Bluetooth is off';
+
+  @override
+  String get recordingInProgress => 'Recording...';
+
+  @override
+  String get connected => 'Connected';
+
+  @override
+  String get disconnected => 'Disconnected';
+
+  @override
+  String get syncInstructions => 'Press the sync button to upload your data';
+
+  @override
+  String get sync => 'Sync';
+
+  @override
+  String get syncSuccess => 'Recordings synced successfully!';
+
+  @override
+  String get syncNoData => 'No recordings found to sync.';
+
+  @override
+  String get searchingForWatches => 'Searching for watches...';
+
+  @override
+  String get noDevicesFound => 'No devices found.';
+
+  @override
+  String get searching => 'Searching...';
+
+  @override
+  String get searchAgain => 'Search again';
+
+  @override
+  String get connect => 'Connect';
+
+  @override
+  String get unknownDevice => 'Unknown';
+
+  @override
+  String get connectWatchPrompt => 'Connect your watch to get started!';
+
+  @override
+  String get connectWatch => 'Connect Watch';
+
+  @override
+  String get generatedImageTitle => 'Generated Image';
+
+  @override
+  String get noImageFromServer => 'No image returned from server.';
+
+  @override
+  String get generatingImage => 'Generating image…';
+
+  @override
+  String get failedToLoadImage => 'Failed to load image';
+
+  @override
+  String get tryAgain => 'Try again';
+
+  @override
+  String get error => 'Error';
+
+  @override
+  String get kcal => 'kcal';
 }

@@ -41,9 +41,10 @@ class EditJournalEntryScreen extends ConsumerWidget {
   FormGroup buildForm() {
     Map<String, FormControl> defaultFields = {
       'time': FormControl<DateTime>(
-        value: shouldCreateEntry
-            ? initialDate ?? DateTime.now()
-            : entry?.time ?? DateTime.now(),
+        value:
+            shouldCreateEntry
+                ? initialDate ?? DateTime.now()
+                : entry?.time ?? DateTime.now(),
         validators: [Validators.required],
       ),
       'comment': FormControl<String>(
@@ -61,16 +62,24 @@ class EditJournalEntryScreen extends ConsumerWidget {
         ...SpasticityForm.buildForm(entry as SpasticityEntry?),
       if (entry is PressureReleaseEntry || type == JournalType.pressureRelease)
         ...PressureReleaseForm.buildForm(
-            entry as PressureReleaseEntry?, shouldCreateEntry),
+          entry as PressureReleaseEntry?,
+          shouldCreateEntry,
+        ),
       if (entry is PressureUlcerEntry || type == JournalType.pressureUlcer)
         ...PressureUlcerForm.buildForm(
-            entry as PressureUlcerEntry?, shouldCreateEntry),
+          entry as PressureUlcerEntry?,
+          shouldCreateEntry,
+        ),
       if (entry is BladderEmptyingEntry || type == JournalType.bladderEmptying)
         ...BladderEmptyingForm.buildForm(
-            entry as BladderEmptyingEntry?, shouldCreateEntry),
+          entry as BladderEmptyingEntry?,
+          shouldCreateEntry,
+        ),
       if (entry is BowelEmptyingEntry || type == JournalType.bowelEmptying)
         ...BowelEmptyingForm.buildForm(
-            entry as BowelEmptyingEntry?, shouldCreateEntry),
+          entry as BowelEmptyingEntry?,
+          shouldCreateEntry,
+        ),
       if (entry is UTIEntry || type == JournalType.urinaryTractInfection)
         ...UTIForm.buildForm(entry as UTIEntry?, shouldCreateEntry),
       if (entry is ExerciseEntry || type == JournalType.exercise)
@@ -104,12 +113,7 @@ class EditJournalEntryScreen extends ConsumerWidget {
           return ListView(
             padding: AppTheme.screenPadding,
             children: [
-              Text(
-                AppLocalizations.of(context)!.dateAndTime,
-                style: AppTheme.labelLarge,
-              ),
-              AppTheme.spacer,
-              const DateTimeButton(formKey: 'time'),
+              if (!_isSelfAssessedPhysicalActivity) _dateTime(context, form),
               AppTheme.spacer2x,
               _typeSpecificForm(form),
               if (_isSelfAssessedPhysicalActivity)
@@ -118,12 +122,14 @@ class EditJournalEntryScreen extends ConsumerWidget {
                       SelfAssessedPhysicalActivityForm.stepControlName,
                   builder: (context, control, _) {
                     final int step = control.value ?? 0;
-                    if (step < 2) {
+                    if (step < 3) {
                       return AppTheme.spacer2x;
                     }
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        _dateTime(context, form),
+                        AppTheme.spacer,
                         Text(
                           '${AppLocalizations.of(context)!.comment} ( ${AppLocalizations.of(context)!.optional} )',
                           style: AppTheme.labelLarge,
@@ -131,10 +137,12 @@ class EditJournalEntryScreen extends ConsumerWidget {
                         AppTheme.spacer,
                         StyledTextField(
                           formControlName: 'comment',
-                          placeholder: AppLocalizations.of(context)!
-                              .painCommentPlaceholder,
-                          helperText: AppLocalizations.of(context)!
-                              .painCommentHelper,
+                          placeholder:
+                              AppLocalizations.of(
+                                context,
+                              )!.painCommentPlaceholder,
+                          helperText:
+                              AppLocalizations.of(context)!.painCommentHelper,
                           maxLines: 3,
                         ),
                         AppTheme.spacer2x,
@@ -152,8 +160,7 @@ class EditJournalEntryScreen extends ConsumerWidget {
                   formControlName: 'comment',
                   placeholder:
                       AppLocalizations.of(context)!.painCommentPlaceholder,
-                  helperText:
-                      AppLocalizations.of(context)!.painCommentHelper,
+                  helperText: AppLocalizations.of(context)!.painCommentHelper,
                   maxLines: 3,
                 ),
                 AppTheme.spacer2x,
@@ -166,6 +173,20 @@ class EditJournalEntryScreen extends ConsumerWidget {
     );
   }
 
+  Widget _dateTime(BuildContext context, FormGroup form) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          AppLocalizations.of(context)!.dateAndTime,
+          style: AppTheme.labelLarge,
+        ),
+        AppTheme.spacer,
+        const DateTimeButton(formKey: 'time'),
+      ],
+    );
+  }
+
   Widget _actions(BuildContext context, WidgetRef ref, FormGroup form) {
     if (type == JournalType.pressureRelease ||
         (entry != null && entry!.type == JournalType.pressureRelease) &&
@@ -173,13 +194,8 @@ class EditJournalEntryScreen extends ConsumerWidget {
       return PressureReleaseForm.actions(
         context,
         form,
-        (goBack, showSnackbar) => _onSave(
-          context,
-          ref,
-          form,
-          goBack,
-          showSnackbar,
-        ),
+        (goBack, showSnackbar) =>
+            _onSave(context, ref, form, goBack, showSnackbar),
       );
     }
 
@@ -212,10 +228,7 @@ class EditJournalEntryScreen extends ConsumerWidget {
       );
     }
     if (entry is SpasticityEntry || type == JournalType.spasticity) {
-      return SpasticityForm(
-        form: form,
-        entry: entry as SpasticityEntry?,
-      );
+      return SpasticityForm(form: form, entry: entry as SpasticityEntry?);
     }
     if (entry is PressureReleaseEntry || type == JournalType.pressureRelease) {
       return PressureReleaseForm(
@@ -270,8 +283,13 @@ class EditJournalEntryScreen extends ConsumerWidget {
     return Container();
   }
 
-  Future _onSave(BuildContext context, WidgetRef ref, FormGroup form,
-      [bool shouldPop = true, bool showSnackbar = true]) async {
+  Future _onSave(
+    BuildContext context,
+    WidgetRef ref,
+    FormGroup form, [
+    bool shouldPop = true,
+    bool showSnackbar = true,
+  ]) async {
     if (shouldCreateEntry) {
       await ref
           .read(updateJournalProvider.notifier)
@@ -300,7 +318,8 @@ class EditJournalEntryScreen extends ConsumerWidget {
     }
 
     if (context.mounted && showSnackbar) {
-      String typeTitle = entry?.type.displayString(context) ??
+      String typeTitle =
+          entry?.type.displayString(context) ??
           type?.displayString(context) ??
           '';
       ScaffoldMessenger.of(context).showSnackBar(
@@ -333,14 +352,16 @@ class EditJournalEntryScreen extends ConsumerWidget {
 
   Widget _submitButton(WidgetRef ref) {
     return ReactiveFormConsumer(
-      builder: ((context, form, child) => Center(
+      builder:
+          ((context, form, child) => Center(
             child: Button(
               width: 160,
               disabled: !form.valid,
               onPressed: () => _onSave(context, ref, form),
-              title: shouldCreateEntry
-                  ? AppLocalizations.of(context)!.save
-                  : AppLocalizations.of(context)!.update,
+              title:
+                  shouldCreateEntry
+                      ? AppLocalizations.of(context)!.save
+                      : AppLocalizations.of(context)!.update,
             ),
           )),
     );
@@ -350,44 +371,45 @@ class EditJournalEntryScreen extends ConsumerWidget {
 class DateTimeButton extends StatelessWidget {
   final String formKey;
 
-  const DateTimeButton({
-    super.key,
-    required this.formKey,
-  });
+  const DateTimeButton({super.key, required this.formKey});
 
   @override
   Widget build(BuildContext context) {
     return ReactiveFormConsumer(
-      builder: (context, form, _) => Button(
-        title: DateFormat('yyyy-MM-dd HH:mm')
-            .format(form.control(formKey).value ?? DateTime.now()),
-        width: 160,
-        icon: Icons.calendar_month_outlined,
-        onPressed: () async {
-          DateTime? date = await showDatePicker(
-            context: context,
-            initialDate: form.control(formKey).value,
-            firstDate: DateTime.now().subtract(const Duration(days: 365)),
-            lastDate: DateTime.now(),
-          );
-          if (context.mounted) {
-            TimeOfDay? time = await showTimePicker(
-              context: context,
-              initialTime: TimeOfDay.fromDateTime(form.control(formKey).value),
-            );
-            if (date != null && time != null) {
-              DateTime timestamp = DateTime(
-                date.year,
-                date.month,
-                date.day,
-                time.hour,
-                time.minute,
+      builder:
+          (context, form, _) => Button(
+            title: DateFormat(
+              'yyyy-MM-dd HH:mm',
+            ).format(form.control(formKey).value ?? DateTime.now()),
+            width: 170,
+            icon: Icons.calendar_month_outlined,
+            onPressed: () async {
+              DateTime? date = await showDatePicker(
+                context: context,
+                initialDate: form.control(formKey).value,
+                firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                lastDate: DateTime.now(),
               );
-              form.control(formKey).value = timestamp;
-            }
-          }
-        },
-      ),
+              if (context.mounted) {
+                TimeOfDay? time = await showTimePicker(
+                  context: context,
+                  initialTime: TimeOfDay.fromDateTime(
+                    form.control(formKey).value,
+                  ),
+                );
+                if (date != null && time != null) {
+                  DateTime timestamp = DateTime(
+                    date.year,
+                    date.month,
+                    date.day,
+                    time.hour,
+                    time.minute,
+                  );
+                  form.control(formKey).value = timestamp;
+                }
+              }
+            },
+          ),
     );
   }
 }

@@ -113,8 +113,10 @@ class _DevicePickerDialogState extends State<_DevicePickerDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(AppLocalizations.of(context)!.connectWatch,
-          style: AppTheme.headLine3),
+      title: Text(
+        AppLocalizations.of(context)!.connectWatch,
+        style: AppTheme.headLine3,
+      ),
       content: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 420),
         child: Column(
@@ -135,8 +137,7 @@ class _DevicePickerDialogState extends State<_DevicePickerDialog> {
                     Expanded(
                       child: Text(
                         _scanning
-                            ? AppLocalizations.of(context)!
-                                .searchingForWatches
+                            ? AppLocalizations.of(context)!.searchingForWatches
                             : AppLocalizations.of(context)!.noDevicesFound,
                         style: AppTheme.paragraphMedium,
                       ),
@@ -157,8 +158,10 @@ class _DevicePickerDialogState extends State<_DevicePickerDialog> {
                     final selected = d["id"] == _selectedId;
                     return ListTile(
                       dense: true,
-                      title: Text(d["name"] ??
-                          AppLocalizations.of(context)!.unknownDevice),
+                      title: Text(
+                        d["name"] ??
+                            AppLocalizations.of(context)!.unknownDevice,
+                      ),
                       subtitle: Text(d["id"] ?? ''),
                       trailing: selected ? const Icon(Icons.check) : null,
                       onTap: () => setState(() => _selectedId = d["id"]),
@@ -201,9 +204,10 @@ class _DevicePickerDialogState extends State<_DevicePickerDialog> {
                 },
                 rounded: true,
                 size: ButtonSize.small,
-                title: _scanning
-                    ? AppLocalizations.of(context)!.searching
-                    : AppLocalizations.of(context)!.searchAgain,
+                title:
+                    _scanning
+                        ? AppLocalizations.of(context)!.searching
+                        : AppLocalizations.of(context)!.searchAgain,
               ),
             ),
             SizedBox(width: AppTheme.basePadding * 2),

@@ -24,11 +24,10 @@ class JournalScreen extends HookConsumerWidget {
     bool showTimeline = ref.watch(showTimelineProvider);
 
     return Scaffold(
-      appBar: showTimeline
-          ? null
-          : AppTheme.appBar(
-              AppLocalizations.of(context)!.logbook,
-              [
+      appBar:
+          showTimeline
+              ? null
+              : AppTheme.appBar(AppLocalizations.of(context)!.logbook, [
                 IconButton(
                   onPressed: () {
                     ref.read(journalSelectedDateProvider.notifier).state =
@@ -42,55 +41,53 @@ class JournalScreen extends HookConsumerWidget {
                   },
                   icon: const Icon(Icons.timeline_outlined),
                 ),
-              ],
-            ),
+              ]),
       body: LayoutBuilder(
         builder: (context, constraints) {
-          return JournalScroller(
-            height: constraints.maxHeight - 18,
-          );
+          return JournalScroller(height: constraints.maxHeight - 18);
         },
       ),
-      floatingActionButton: showTimeline
-          ? Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                FloatingActionButton(
-                  onPressed: () {
-                    // ref.read(showTimelineProvider.notifier).state = false;
-                    showTimelineFilterModal(context);
-                  },
-                  child: const Icon(Icons.filter_alt),
-                ),
-                AppTheme.spacer,
-                FloatingActionButton(
-                  onPressed: () {
-                    ref.read(showTimelineProvider.notifier).toggle();
-                  },
-                  child: const Icon(Icons.undo),
-                ),
-              ],
-            )
-          : isToday(ref.watch(journalSelectedDateProvider))
+      floatingActionButton:
+          showTimeline
+              ? Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  FloatingActionButton(
+                    onPressed: () {
+                      showTimelineFilterModal(context);
+                    },
+                    child: const Icon(Icons.filter_alt),
+                  ),
+                  AppTheme.spacer,
+                  FloatingActionButton(
+                    onPressed: () {
+                      ref.read(showTimelineProvider.notifier).toggle();
+                    },
+                    child: const Icon(Icons.undo),
+                  ),
+                ],
+              )
+              : isToday(ref.watch(journalSelectedDateProvider))
               ? null
               : FloatingActionButton(
-                  onPressed: () {
-                    DateTime selectedDate =
-                        ref.watch(journalSelectedDateProvider);
-                    GoRouter.of(context).goNamed(
-                      'select-journal-type',
-                      extra: {
-                        'date': DateTime(
-                          selectedDate.year,
-                          selectedDate.month,
-                          selectedDate.day,
-                          12,
-                        ),
-                      },
-                    );
-                  },
-                  child: const Icon(Icons.add),
-                ),
+                onPressed: () {
+                  DateTime selectedDate = ref.watch(
+                    journalSelectedDateProvider,
+                  );
+                  GoRouter.of(context).goNamed(
+                    'select-journal-type',
+                    extra: {
+                      'date': DateTime(
+                        selectedDate.year,
+                        selectedDate.month,
+                        selectedDate.day,
+                        12,
+                      ),
+                    },
+                  );
+                },
+                child: const Icon(Icons.add),
+              ),
     );
   }
 
@@ -105,17 +102,15 @@ class JournalScreen extends HookConsumerWidget {
 class JournalScroller extends HookConsumerWidget {
   final double height;
 
-  const JournalScroller({
-    super.key,
-    required this.height,
-  });
+  const JournalScroller({super.key, required this.height});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     DateTime selectedDate = ref.watch(journalSelectedDateProvider);
     ValueNotifier<int> currentPage = useState(0);
-    InfiniteScrollController scrollController =
-        useMemoized(() => InfiniteScrollController());
+    InfiniteScrollController scrollController = useMemoized(
+      () => InfiniteScrollController(),
+    );
 
     useEffect(() {
       scrollController.addListener(() {
@@ -155,10 +150,7 @@ class JournalScroller extends HookConsumerWidget {
         Expanded(
           child: Stack(
             children: [
-              JournalCalendar(
-                controller: scrollController,
-                height: height,
-              ),
+              JournalCalendar(controller: scrollController, height: height),
               Positioned(
                 top: JournalCalendar.heightForPage(context, currentPage.value),
                 child: AnimatedSize(
@@ -200,10 +192,7 @@ class ListBottomSheet extends HookConsumerWidget {
     return Container(
       decoration: BoxDecoration(
         border: Border(
-          top: BorderSide(
-            color: AppTheme.colors.lightGray,
-            width: 1,
-          ),
+          top: BorderSide(color: AppTheme.colors.lightGray, width: 1),
         ),
         color: AppTheme.colors.background,
       ),
