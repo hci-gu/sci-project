@@ -193,163 +193,197 @@ class JournalEntry {
   TimelineType get timelineType => TimelineType.pain;
 }
 
-enum SelfAssessedPhysicalActivityDuration {
+enum SelfAssessedPhysicalActivityTrainingDuration {
   none,
-  minutes1To30,
+  lessThan30Minutes,
   minutes30To60,
-  hours1To3,
-  hours3To5,
-  hours5To7,
-  hours7To10,
-  hours10To15,
-  hours15To20,
-  moreThan20,
+  minutes60To90,
+  minutes90To120,
+  moreThan120Minutes,
 }
 
-SelfAssessedPhysicalActivityDuration
-    selfAssessedPhysicalActivityDurationFromString(String value) {
+SelfAssessedPhysicalActivityTrainingDuration
+    selfAssessedPhysicalActivityTrainingDurationFromString(String value) {
   switch (value) {
+    case 'none':
+      return SelfAssessedPhysicalActivityTrainingDuration.none;
     case 'minutes1To30':
-      return SelfAssessedPhysicalActivityDuration.minutes1To30;
+    case 'lessThan30Minutes':
+      return SelfAssessedPhysicalActivityTrainingDuration.lessThan30Minutes;
     case 'minutes30To60':
-      return SelfAssessedPhysicalActivityDuration.minutes30To60;
+      return SelfAssessedPhysicalActivityTrainingDuration.minutes30To60;
+    case 'minutes60To90':
+      return SelfAssessedPhysicalActivityTrainingDuration.minutes60To90;
+    case 'minutes90To120':
     case 'hours1To3':
-      return SelfAssessedPhysicalActivityDuration.hours1To3;
+      return SelfAssessedPhysicalActivityTrainingDuration.minutes90To120;
+    case 'moreThan120Minutes':
     case 'hours3To5':
-      return SelfAssessedPhysicalActivityDuration.hours3To5;
     case 'hours5To7':
-      return SelfAssessedPhysicalActivityDuration.hours5To7;
     case 'hours7To10':
-      return SelfAssessedPhysicalActivityDuration.hours7To10;
     case 'hours10To15':
-      return SelfAssessedPhysicalActivityDuration.hours10To15;
     case 'hours15To20':
-      return SelfAssessedPhysicalActivityDuration.hours15To20;
     case 'moreThan20':
-      return SelfAssessedPhysicalActivityDuration.moreThan20;
+      return SelfAssessedPhysicalActivityTrainingDuration.moreThan120Minutes;
     default:
-      return SelfAssessedPhysicalActivityDuration.none;
+      return SelfAssessedPhysicalActivityTrainingDuration.none;
   }
 }
 
-extension SelfAssessedPhysicalActivityDurationExtension
-    on SelfAssessedPhysicalActivityDuration {
+extension SelfAssessedPhysicalActivityTrainingDurationExtension
+    on SelfAssessedPhysicalActivityTrainingDuration {
   String displayString(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     switch (this) {
-      case SelfAssessedPhysicalActivityDuration.none:
-        return AppLocalizations.of(context)!
-            .selfAssessedPhysicalActivityDurationNone;
-      case SelfAssessedPhysicalActivityDuration.minutes1To30:
-        return AppLocalizations.of(context)!
-            .selfAssessedPhysicalActivityDuration1To30Minutes;
-      case SelfAssessedPhysicalActivityDuration.minutes30To60:
-        return AppLocalizations.of(context)!
-            .selfAssessedPhysicalActivityDuration30To60Minutes;
-      case SelfAssessedPhysicalActivityDuration.hours1To3:
-        return AppLocalizations.of(context)!
-            .selfAssessedPhysicalActivityDuration1To3Hours;
-      case SelfAssessedPhysicalActivityDuration.hours3To5:
-        return AppLocalizations.of(context)!
-            .selfAssessedPhysicalActivityDuration3To5Hours;
-      case SelfAssessedPhysicalActivityDuration.hours5To7:
-        return AppLocalizations.of(context)!
-            .selfAssessedPhysicalActivityDuration5To7Hours;
-      case SelfAssessedPhysicalActivityDuration.hours7To10:
-        return AppLocalizations.of(context)!
-            .selfAssessedPhysicalActivityDuration7To10Hours;
-      case SelfAssessedPhysicalActivityDuration.hours10To15:
-        return AppLocalizations.of(context)!
-            .selfAssessedPhysicalActivityDuration10To15Hours;
-      case SelfAssessedPhysicalActivityDuration.hours15To20:
-        return AppLocalizations.of(context)!
-            .selfAssessedPhysicalActivityDuration15To20Hours;
-      case SelfAssessedPhysicalActivityDuration.moreThan20:
-        return AppLocalizations.of(context)!
-            .selfAssessedPhysicalActivityDurationMoreThan20Hours;
+      case SelfAssessedPhysicalActivityTrainingDuration.none:
+        return l10n.selfAssessedPhysicalActivityTrainingDurationNone;
+      case SelfAssessedPhysicalActivityTrainingDuration.lessThan30Minutes:
+        return l10n
+            .selfAssessedPhysicalActivityTrainingDurationLessThan30Minutes;
+      case SelfAssessedPhysicalActivityTrainingDuration.minutes30To60:
+        return l10n.selfAssessedPhysicalActivityTrainingDuration30To60Minutes;
+      case SelfAssessedPhysicalActivityTrainingDuration.minutes60To90:
+        return l10n.selfAssessedPhysicalActivityTrainingDuration60To90Minutes;
+      case SelfAssessedPhysicalActivityTrainingDuration.minutes90To120:
+        return l10n.selfAssessedPhysicalActivityTrainingDuration90To120Minutes;
+      case SelfAssessedPhysicalActivityTrainingDuration.moreThan120Minutes:
+        return l10n
+            .selfAssessedPhysicalActivityTrainingDurationMoreThan120Minutes;
+    }
+  }
+}
+
+enum SelfAssessedPhysicalActivityEverydayDuration {
+  none,
+  lessThan30Minutes,
+  minutes30To60,
+  minutes60To90,
+  minutes90To150,
+  minutes150To300,
+  moreThan300Minutes,
+}
+
+SelfAssessedPhysicalActivityEverydayDuration
+    selfAssessedPhysicalActivityEverydayDurationFromString(String value) {
+  switch (value) {
+    case 'none':
+      return SelfAssessedPhysicalActivityEverydayDuration.none;
+    case 'minutes1To30':
+    case 'lessThan30Minutes':
+      return SelfAssessedPhysicalActivityEverydayDuration.lessThan30Minutes;
+    case 'minutes30To60':
+      return SelfAssessedPhysicalActivityEverydayDuration.minutes30To60;
+    case 'minutes60To90':
+      return SelfAssessedPhysicalActivityEverydayDuration.minutes60To90;
+    case 'minutes90To150':
+    case 'hours1To3':
+      return SelfAssessedPhysicalActivityEverydayDuration.minutes90To150;
+    case 'minutes150To300':
+    case 'hours3To5':
+      return SelfAssessedPhysicalActivityEverydayDuration.minutes150To300;
+    case 'moreThan300Minutes':
+    case 'hours5To7':
+    case 'hours7To10':
+    case 'hours10To15':
+    case 'hours15To20':
+    case 'moreThan20':
+      return SelfAssessedPhysicalActivityEverydayDuration.moreThan300Minutes;
+    default:
+      return SelfAssessedPhysicalActivityEverydayDuration.none;
+  }
+}
+
+extension SelfAssessedPhysicalActivityEverydayDurationExtension
+    on SelfAssessedPhysicalActivityEverydayDuration {
+  String displayString(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (this) {
+      case SelfAssessedPhysicalActivityEverydayDuration.none:
+        return l10n.selfAssessedPhysicalActivityEverydayDurationNone;
+      case SelfAssessedPhysicalActivityEverydayDuration.lessThan30Minutes:
+        return l10n
+            .selfAssessedPhysicalActivityEverydayDurationLessThan30Minutes;
+      case SelfAssessedPhysicalActivityEverydayDuration.minutes30To60:
+        return l10n.selfAssessedPhysicalActivityEverydayDuration30To60Minutes;
+      case SelfAssessedPhysicalActivityEverydayDuration.minutes60To90:
+        return l10n.selfAssessedPhysicalActivityEverydayDuration60To90Minutes;
+      case SelfAssessedPhysicalActivityEverydayDuration.minutes90To150:
+        return l10n.selfAssessedPhysicalActivityEverydayDuration90To150Minutes;
+      case SelfAssessedPhysicalActivityEverydayDuration.minutes150To300:
+        return l10n.selfAssessedPhysicalActivityEverydayDuration150To300Minutes;
+      case SelfAssessedPhysicalActivityEverydayDuration.moreThan300Minutes:
+        return l10n
+            .selfAssessedPhysicalActivityEverydayDurationMoreThan300Minutes;
     }
   }
 }
 
 enum SelfAssessedSedentaryDuration {
-  lessThanOneHour,
-  hours1To3,
-  hours3To5,
-  hours5To7,
-  hours7To9,
-  hours9To11,
-  hours11To13,
+  almostAllDay,
   hours13To15,
-  hours15To17,
-  moreThan17,
+  hours10To12,
+  hours7To9,
+  hours4To6,
+  hours1To3,
+  never,
 }
 
 SelfAssessedSedentaryDuration selfAssessedSedentaryDurationFromString(
     String value) {
   switch (value) {
-    case 'hours1To3':
-      return SelfAssessedSedentaryDuration.hours1To3;
-    case 'hours3To5':
-      return SelfAssessedSedentaryDuration.hours3To5;
-    case 'hours5To7':
-      return SelfAssessedSedentaryDuration.hours5To7;
-    case 'hours7To9':
-      return SelfAssessedSedentaryDuration.hours7To9;
-    case 'hours9To11':
-      return SelfAssessedSedentaryDuration.hours9To11;
-    case 'hours11To13':
-      return SelfAssessedSedentaryDuration.hours11To13;
+    case 'almostAllDay':
+    case 'hours15To17':
+    case 'moreThan17':
+      return SelfAssessedSedentaryDuration.almostAllDay;
     case 'hours13To15':
       return SelfAssessedSedentaryDuration.hours13To15;
-    case 'hours15To17':
-      return SelfAssessedSedentaryDuration.hours15To17;
-    case 'moreThan17':
-      return SelfAssessedSedentaryDuration.moreThan17;
+    case 'hours11To13':
+    case 'hours9To11':
+    case 'hours10To12':
+      return SelfAssessedSedentaryDuration.hours10To12;
+    case 'hours7To9':
+      return SelfAssessedSedentaryDuration.hours7To9;
+    case 'hours5To7':
+    case 'hours4To6':
+      return SelfAssessedSedentaryDuration.hours4To6;
+    case 'hours3To5':
+    case 'hours1To3':
+      return SelfAssessedSedentaryDuration.hours1To3;
+    case 'lessThanOneHour':
+      return SelfAssessedSedentaryDuration.hours1To3;
+    case 'never':
+      return SelfAssessedSedentaryDuration.never;
     default:
-      return SelfAssessedSedentaryDuration.lessThanOneHour;
+      return SelfAssessedSedentaryDuration.hours1To3;
   }
 }
 
 extension SelfAssessedSedentaryDurationExtension
     on SelfAssessedSedentaryDuration {
   String displayString(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     switch (this) {
-      case SelfAssessedSedentaryDuration.lessThanOneHour:
-        return AppLocalizations.of(context)!
-            .selfAssessedSedentaryDurationLessThanOneHour;
-      case SelfAssessedSedentaryDuration.hours1To3:
-        return AppLocalizations.of(context)!
-            .selfAssessedSedentaryDuration1To3Hours;
-      case SelfAssessedSedentaryDuration.hours3To5:
-        return AppLocalizations.of(context)!
-            .selfAssessedSedentaryDuration3To5Hours;
-      case SelfAssessedSedentaryDuration.hours5To7:
-        return AppLocalizations.of(context)!
-            .selfAssessedSedentaryDuration5To7Hours;
-      case SelfAssessedSedentaryDuration.hours7To9:
-        return AppLocalizations.of(context)!
-            .selfAssessedSedentaryDuration7To9Hours;
-      case SelfAssessedSedentaryDuration.hours9To11:
-        return AppLocalizations.of(context)!
-            .selfAssessedSedentaryDuration9To11Hours;
-      case SelfAssessedSedentaryDuration.hours11To13:
-        return AppLocalizations.of(context)!
-            .selfAssessedSedentaryDuration11To13Hours;
+      case SelfAssessedSedentaryDuration.almostAllDay:
+        return l10n.selfAssessedSedentaryDurationAlmostAllDay;
       case SelfAssessedSedentaryDuration.hours13To15:
-        return AppLocalizations.of(context)!
-            .selfAssessedSedentaryDuration13To15Hours;
-      case SelfAssessedSedentaryDuration.hours15To17:
-        return AppLocalizations.of(context)!
-            .selfAssessedSedentaryDuration15To17Hours;
-      case SelfAssessedSedentaryDuration.moreThan17:
-        return AppLocalizations.of(context)!
-            .selfAssessedSedentaryDurationMoreThan17Hours;
+        return l10n.selfAssessedSedentaryDuration13To15Hours;
+      case SelfAssessedSedentaryDuration.hours10To12:
+        return l10n.selfAssessedSedentaryDuration10To12Hours;
+      case SelfAssessedSedentaryDuration.hours7To9:
+        return l10n.selfAssessedSedentaryDuration7To9Hours;
+      case SelfAssessedSedentaryDuration.hours4To6:
+        return l10n.selfAssessedSedentaryDuration4To6Hours;
+      case SelfAssessedSedentaryDuration.hours1To3:
+        return l10n.selfAssessedSedentaryDuration1To3Hours;
+      case SelfAssessedSedentaryDuration.never:
+        return l10n.selfAssessedSedentaryDurationNever;
     }
   }
 }
 
 class SelfAssessedPhysicalActivityEntry extends JournalEntry {
-  final SelfAssessedPhysicalActivityDuration trainingDuration;
-  final SelfAssessedPhysicalActivityDuration everydayActivityDuration;
+  final SelfAssessedPhysicalActivityTrainingDuration trainingDuration;
+  final SelfAssessedPhysicalActivityEverydayDuration everydayActivityDuration;
   final SelfAssessedSedentaryDuration sedentaryDuration;
 
   SelfAssessedPhysicalActivityEntry({
@@ -370,14 +404,16 @@ class SelfAssessedPhysicalActivityEntry extends JournalEntry {
       time: DateTime.parse(json['t']),
       type: journalTypeFromString(json['type']),
       comment: json['comment'] ?? '',
-      trainingDuration: selfAssessedPhysicalActivityDurationFromString(
+      trainingDuration:
+          selfAssessedPhysicalActivityTrainingDurationFromString(
         info['trainingDuration'] ?? 'none',
       ),
-      everydayActivityDuration: selfAssessedPhysicalActivityDurationFromString(
+      everydayActivityDuration:
+          selfAssessedPhysicalActivityEverydayDurationFromString(
         info['everydayActivityDuration'] ?? 'none',
       ),
       sedentaryDuration: selfAssessedSedentaryDurationFromString(
-        info['sedentaryDuration'] ?? 'lessThanOneHour',
+        info['sedentaryDuration'] ?? 'hours1To3',
       ),
     );
   }
@@ -401,10 +437,10 @@ class SelfAssessedPhysicalActivityEntry extends JournalEntry {
       type: type,
       time: values['time'] as DateTime,
       comment: values['comment'] as String,
-      trainingDuration:
-          values['trainingDuration'] as SelfAssessedPhysicalActivityDuration,
+      trainingDuration: values['trainingDuration']
+          as SelfAssessedPhysicalActivityTrainingDuration,
       everydayActivityDuration: values['everydayActivityDuration']
-          as SelfAssessedPhysicalActivityDuration,
+          as SelfAssessedPhysicalActivityEverydayDuration,
       sedentaryDuration:
           values['sedentaryDuration'] as SelfAssessedSedentaryDuration,
     );

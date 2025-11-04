@@ -75,8 +75,9 @@ class SelfAssessedPhysicalActivityForm extends StatelessWidget {
         style: AppTheme.paragraphMedium,
       ),
       AppTheme.spacer2x,
-      ...SelfAssessedPhysicalActivityDuration.values.map(
-        (value) => _radioTile<SelfAssessedPhysicalActivityDuration>(
+      ...SelfAssessedPhysicalActivityTrainingDuration.values.map(
+        (value) =>
+            _radioTile<SelfAssessedPhysicalActivityTrainingDuration>(
           context: context,
           value: value,
           groupControlName: 'trainingDuration',
@@ -99,8 +100,9 @@ class SelfAssessedPhysicalActivityForm extends StatelessWidget {
         style: AppTheme.paragraphMedium,
       ),
       AppTheme.spacer2x,
-      ...SelfAssessedPhysicalActivityDuration.values.map(
-        (value) => _radioTile<SelfAssessedPhysicalActivityDuration>(
+      ...SelfAssessedPhysicalActivityEverydayDuration.values.map(
+        (value) =>
+            _radioTile<SelfAssessedPhysicalActivityEverydayDuration>(
           context: context,
           value: value,
           groupControlName: 'everydayActivityDuration',
@@ -213,12 +215,12 @@ class SelfAssessedPhysicalActivityForm extends StatelessWidget {
   static bool _isStepComplete(FormGroup form, int step) {
     switch (step) {
       case 0:
-        return _controlHasValue<SelfAssessedPhysicalActivityDuration>(
+        return _controlHasValue<SelfAssessedPhysicalActivityTrainingDuration>(
           form,
           'trainingDuration',
         );
       case 1:
-        return _controlHasValue<SelfAssessedPhysicalActivityDuration>(
+        return _controlHasValue<SelfAssessedPhysicalActivityEverydayDuration>(
           form,
           'everydayActivityDuration',
         );
@@ -237,12 +239,13 @@ class SelfAssessedPhysicalActivityForm extends StatelessWidget {
     bool shouldCreateEntry,
   ) {
     return {
-      'trainingDuration': FormControl<SelfAssessedPhysicalActivityDuration>(
+      'trainingDuration':
+          FormControl<SelfAssessedPhysicalActivityTrainingDuration>(
         value: entry?.trainingDuration,
         validators: [Validators.required],
       ),
-      'everydayActivityDuration':
-          FormControl<SelfAssessedPhysicalActivityDuration>(
+      'everydayActivityDuration': FormControl<
+          SelfAssessedPhysicalActivityEverydayDuration>(
         value: entry?.everydayActivityDuration,
         validators: [Validators.required],
       ),
