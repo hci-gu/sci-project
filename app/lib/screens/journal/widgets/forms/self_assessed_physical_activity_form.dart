@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import 'package:scimovement/api/classes/journal/journal.dart';
 import 'package:scimovement/gen_l10n/app_localizations.dart';
@@ -12,8 +13,8 @@ class SelfAssessedPhysicalActivityForm extends StatelessWidget {
     required this.form,
     SelfAssessedPhysicalActivityEntry? entry,
     bool shouldCreateEntry = true,
-  })  : _entry = entry,
-        _shouldCreateEntry = shouldCreateEntry;
+  }) : _entry = entry,
+       _shouldCreateEntry = shouldCreateEntry;
 
   final FormGroup form;
   // ignore: unused_field
@@ -23,7 +24,7 @@ class SelfAssessedPhysicalActivityForm extends StatelessWidget {
 
   static const String _stepControl = 'sapStep';
 
-  static const int _pageCount = 3;
+  static const int _pageCount = 4;
 
   static String get stepControlName => _stepControl;
 
@@ -38,12 +39,8 @@ class SelfAssessedPhysicalActivityForm extends StatelessWidget {
           children: [
             ..._pageContent(context, step),
             AppTheme.spacer2x,
-            Center(
-              child: StepIndicator(
-                index: step,
-                count: _pageCount,
-              ),
-            ),
+            if (step < 3)
+              Center(child: StepIndicator(index: step, count: _pageCount)),
           ],
         );
       },
@@ -57,8 +54,9 @@ class SelfAssessedPhysicalActivityForm extends StatelessWidget {
       case 1:
         return _everydayActivityContent(context);
       case 2:
-      default:
         return _sedentaryContent(context);
+      default:
+        return _weekInformationContent(context);
     }
   }
 
@@ -75,8 +73,8 @@ class SelfAssessedPhysicalActivityForm extends StatelessWidget {
         style: AppTheme.paragraphMedium,
       ),
       AppTheme.spacer2x,
-      ...SelfAssessedPhysicalActivityDuration.values.map(
-        (value) => _radioTile<SelfAssessedPhysicalActivityDuration>(
+      ...SelfAssessedPhysicalActivityTrainingDuration.values.map(
+        (value) => _radioTile<SelfAssessedPhysicalActivityTrainingDuration>(
           context: context,
           value: value,
           groupControlName: 'trainingDuration',
@@ -99,8 +97,8 @@ class SelfAssessedPhysicalActivityForm extends StatelessWidget {
         style: AppTheme.paragraphMedium,
       ),
       AppTheme.spacer2x,
-      ...SelfAssessedPhysicalActivityDuration.values.map(
-        (value) => _radioTile<SelfAssessedPhysicalActivityDuration>(
+      ...SelfAssessedPhysicalActivityEverydayDuration.values.map(
+        (value) => _radioTile<SelfAssessedPhysicalActivityEverydayDuration>(
           context: context,
           value: value,
           groupControlName: 'everydayActivityDuration',
@@ -153,13 +151,36 @@ class SelfAssessedPhysicalActivityForm extends StatelessWidget {
               form.control(groupControlName).value = selected;
             }
           },
-          title: Text(
-            label,
-            style: AppTheme.labelLarge,
-          ),
+          title: Text(label, style: AppTheme.labelLarge),
         );
       },
     );
+  }
+
+  List<Widget> _weekInformationContent(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final timeControl = form.control('time') as FormControl<DateTime>;
+    final DateTime selectedDate = timeControl.value ?? DateTime.now();
+    final int daysFromMonday = selectedDate.weekday - DateTime.monday;
+    final DateTime weekStart = selectedDate.subtract(
+      Duration(days: daysFromMonday),
+    );
+    final DateTime weekEnd = weekStart.add(const Duration(days: 6));
+    final dateFormatter = DateFormat('EEEE d MMMM', l10n.localeName);
+    final String startText = dateFormatter.format(weekStart);
+    final String endText = dateFormatter.format(weekEnd);
+
+    return [
+      Text(
+        l10n.selfAssessedPhysicalActivityWeekInfoInstruction,
+        style: AppTheme.paragraphMedium,
+      ),
+      AppTheme.spacer,
+      Text(
+        l10n.selfAssessedPhysicalActivityWeekInfoRange(startText, endText),
+        style: AppTheme.paragraphMedium,
+      ),
+    ];
   }
 
   static Widget actions(
@@ -170,8 +191,7 @@ class SelfAssessedPhysicalActivityForm extends StatelessWidget {
     return ReactiveFormConsumer(
       builder: (context, formGroup, _) {
         final l10n = AppLocalizations.of(context)!;
-        final int step =
-            formGroup.control(_stepControl).value as int? ?? 0;
+        final int step = formGroup.control(_stepControl).value as int? ?? 0;
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -213,14 +233,19 @@ class SelfAssessedPhysicalActivityForm extends StatelessWidget {
   static bool _isStepComplete(FormGroup form, int step) {
     switch (step) {
       case 0:
-        return _controlHasValue<SelfAssessedPhysicalActivityDuration>(
+        return _controlHasValue<SelfAssessedPhysicalActivityTrainingDuration>(
           form,
           'trainingDuration',
         );
       case 1:
-        return _controlHasValue<SelfAssessedPhysicalActivityDuration>(
+        return _controlHasValue<SelfAssessedPhysicalActivityEverydayDuration>(
           form,
           'everydayActivityDuration',
+        );
+      case 2:
+        return _controlHasValue<SelfAssessedSedentaryDuration>(
+          form,
+          'sedentaryDuration',
         );
       default:
         return false;
@@ -237,15 +262,16 @@ class SelfAssessedPhysicalActivityForm extends StatelessWidget {
     bool shouldCreateEntry,
   ) {
     return {
-      'trainingDuration': FormControl<SelfAssessedPhysicalActivityDuration>(
-        value: entry?.trainingDuration,
-        validators: [Validators.required],
-      ),
+      'trainingDuration':
+          FormControl<SelfAssessedPhysicalActivityTrainingDuration>(
+            value: entry?.trainingDuration,
+            validators: [Validators.required],
+          ),
       'everydayActivityDuration':
-          FormControl<SelfAssessedPhysicalActivityDuration>(
-        value: entry?.everydayActivityDuration,
-        validators: [Validators.required],
-      ),
+          FormControl<SelfAssessedPhysicalActivityEverydayDuration>(
+            value: entry?.everydayActivityDuration,
+            validators: [Validators.required],
+          ),
       'sedentaryDuration': FormControl<SelfAssessedSedentaryDuration>(
         value: entry?.sedentaryDuration,
         validators: [Validators.required],
