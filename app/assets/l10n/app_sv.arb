@@ -207,6 +207,14 @@
     "selfAssessedPhysicalActivityEverydayDuration90To150Minutes": "90-150 minuter (1,5-2,5 timmar)",
     "selfAssessedPhysicalActivityEverydayDuration150To300Minutes": "150-300 minuter (2,5-5 timmar)",
     "selfAssessedPhysicalActivityEverydayDurationMoreThan300Minutes": "Mer än 300 minuter",
+    "selfAssessedPhysicalActivityWeekInfoInstruction": "För att rapportera en tidigare vecka ändrar du datumet nedan till en dag i den veckan.",
+    "selfAssessedPhysicalActivityWeekInfoRange": "Med det aktuella datumet sparas dina svar för {start} till {end}.",
+    "@selfAssessedPhysicalActivityWeekInfoRange": {
+      "placeholders": {
+        "start": {},
+        "end": {}
+      }
+    },
     "selfAssessedSedentaryDurationAlmostAllDay": "Så gott som hela dagen",
     "selfAssessedSedentaryDuration13To15Hours": "13-15 timmar",
     "selfAssessedSedentaryDuration10To12Hours": "10-12 timmar",

@@ -25,17 +25,18 @@ class TimeLineEventsData {
 
 final timeLineEventsProvider =
     FutureProvider.family<TimeLineEventsData, TimelinePage>((ref, page) async {
-  List<JournalEntry> events =
-      await ref.watch(timelineEventsProvider(page).future);
-  JournalGoal? goal;
-  if (page.type == TimelineType.pressureRelease) {
-    goal = await ref.watch(pressureReleaseGoalProvider.future);
-  } else if (page.type == TimelineType.bladderEmptying) {
-    goal = await ref.watch(bladderEmptyingGoalProvider.future);
-  }
+      List<JournalEntry> events = await ref.watch(
+        timelineEventsProvider(page).future,
+      );
+      JournalGoal? goal;
+      if (page.type == TimelineType.pressureRelease) {
+        goal = await ref.watch(pressureReleaseGoalProvider.future);
+      } else if (page.type == TimelineType.bladderEmptying) {
+        goal = await ref.watch(bladderEmptyingGoalProvider.future);
+      }
 
-  return TimeLineEventsData(events: events, goal: goal);
-});
+      return TimeLineEventsData(events: events, goal: goal);
+    });
 
 class TimelineEvents extends ConsumerWidget {
   final TimelinePage page;
@@ -44,17 +45,21 @@ class TimelineEvents extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ref.watch(timeLineEventsProvider(page)).when(
+    return ref
+        .watch(timeLineEventsProvider(page))
+        .when(
           data: (data) => _body(context, ref, data.events, data.goal),
-          error: (_, __) => Container(),
-          loading: () => const Center(
-            child: CircularProgressIndicator(),
-          ),
+          error: (_, _) => Container(),
+          loading: () => const Center(child: CircularProgressIndicator()),
         );
   }
 
-  Widget _body(BuildContext context, WidgetRef ref, List<JournalEntry> events,
-      JournalGoal? goal) {
+  Widget _body(
+    BuildContext context,
+    WidgetRef ref,
+    List<JournalEntry> events,
+    JournalGoal? goal,
+  ) {
     double width = pageWidth(context);
     double dayWidth = width / page.pagination.duration.inDays;
 
@@ -62,22 +67,24 @@ class TimelineEvents extends ConsumerWidget {
       height: eventHeight,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: List.generate(
-          page.pagination.duration.inDays,
-          (index) {
-            List<JournalEntry> entries = events
-                .where((e) =>
-                    e.time.isAfter(
-                        page.pagination.from.add(Duration(days: index))) &&
-                    e.time.isBefore(
-                        page.pagination.from.add(Duration(days: index + 1))))
-                .toList();
+        children: List.generate(page.pagination.duration.inDays, (index) {
+          List<JournalEntry> entries =
+              events
+                  .where(
+                    (e) =>
+                        e.time.isAfter(
+                          page.pagination.from.add(Duration(days: index)),
+                        ) &&
+                        e.time.isBefore(
+                          page.pagination.from.add(Duration(days: index + 1)),
+                        ),
+                  )
+                  .toList();
 
-            return entries.isNotEmpty
-                ? _dot(dayWidth, entries, goal)
-                : SizedBox(width: dayWidth);
-          },
-        ),
+          return entries.isNotEmpty
+              ? _dot(dayWidth, entries, goal)
+              : SizedBox(width: dayWidth);
+        }),
       ),
     );
   }
@@ -94,25 +101,30 @@ class TimelineEvents extends ConsumerWidget {
       width: width,
       height: eventHeight,
       child: Center(
-        child: goalProgress == 1
-            ? Icon(
-                Icons.check_circle,
-                size: 14,
-                color: AppTheme.colors.success,
-              )
-            : Container(
-                width: 12,
-                height: 12,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(
-                    color: Color.lerp(AppTheme.colors.lightGray,
-                            AppTheme.colors.success, goalProgress) ??
-                        AppTheme.colors.lightGray,
-                    width: borderWidth,
+        child:
+            goalProgress == 1
+                ? Icon(
+                  Icons.check_circle,
+                  size: 14,
+                  color: AppTheme.colors.success,
+                )
+                : Container(
+                  width: 12,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color:
+                          Color.lerp(
+                            AppTheme.colors.lightGray,
+                            AppTheme.colors.success,
+                            goalProgress,
+                          ) ??
+                          AppTheme.colors.lightGray,
+                      width: borderWidth,
+                    ),
                   ),
                 ),
-              ),
       ),
     );
   }
@@ -125,23 +137,19 @@ class TimelinePeriods extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ref.watch(timelinePeriodsProvider(page)).when(
+    return ref
+        .watch(timelinePeriodsProvider(page))
+        .when(
           data: (data) => _body(context, data),
           error: (_, __) => Container(),
-          loading: () => const Center(
-            child: CircularProgressIndicator(),
-          ),
+          loading: () => const Center(child: CircularProgressIndicator()),
         );
   }
 
   Widget _body(BuildContext context, List<Period> periods) {
     return SizedBox(
       height: eventHeight,
-      child: Stack(
-        children: [
-          ...periods.map((e) => _period(context, e)),
-        ],
-      ),
+      child: Stack(children: [...periods.map((e) => _period(context, e))]),
     );
   }
 
@@ -174,10 +182,7 @@ class TimelinePeriods extends ConsumerWidget {
 class Month extends HookConsumerWidget {
   final Pagination page;
 
-  const Month({
-    super.key,
-    required this.page,
-  });
+  const Month({super.key, required this.page});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -196,9 +201,7 @@ class Month extends HookConsumerWidget {
         width: pageWidth(context),
         child: Column(
           children: [
-            MonthHeader(
-              date: page.from,
-            ),
+            MonthHeader(date: page.from),
             Expanded(
               child: Stack(
                 clipBehavior: Clip.none,
@@ -217,9 +220,11 @@ class Month extends HookConsumerWidget {
                   fetch.when(
                     data: (data) => _list(data),
                     error: (_, __) => const SizedBox.shrink(),
-                    loading: () => cachedResponse.value.isNotEmpty
-                        ? _list(cachedResponse.value)
-                        : const SizedBox.shrink(),
+                    loading:
+                        () =>
+                            cachedResponse.value.isNotEmpty
+                                ? _list(cachedResponse.value)
+                                : const SizedBox.shrink(),
                   ),
                 ],
               ),
@@ -238,7 +243,7 @@ class Month extends HookConsumerWidget {
             padding: const EdgeInsets.only(top: 8.0),
             child: _contentForType(e),
           ),
-        )
+        ),
       ],
     );
   }
@@ -247,28 +252,17 @@ class Month extends HookConsumerWidget {
     switch (timelineDisplayType(type)) {
       case TimelineDisplayType.lineChart:
         return TimelinePainChart(
-          page: TimelinePage(
-            pagination: page,
-            type: type,
-          ),
+          page: TimelinePage(pagination: page, type: type),
         );
       case TimelineDisplayType.barChart:
         return TimelineMovementChart(page: page);
       case TimelineDisplayType.periods:
         return TimelinePeriods(
-          page: TimelinePage(
-            pagination: page,
-            type: type,
-          ),
+          page: TimelinePage(pagination: page, type: type),
         );
       case TimelineDisplayType.events:
       default:
-        return TimelineEvents(
-          page: TimelinePage(
-            pagination: page,
-            type: type,
-          ),
-        );
+        return TimelineEvents(page: TimelinePage(pagination: page, type: type));
     }
   }
 
@@ -277,10 +271,7 @@ class Month extends HookConsumerWidget {
       width: width,
       decoration: BoxDecoration(
         border: Border(
-          left: BorderSide(
-            color: AppTheme.colors.lightGray,
-            width: 1,
-          ),
+          left: BorderSide(color: AppTheme.colors.lightGray, width: 1),
         ),
       ),
     );
@@ -292,10 +283,7 @@ GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
 class JournalTimelineWithEvents extends HookConsumerWidget {
   final int initialPage;
 
-  const JournalTimelineWithEvents({
-    super.key,
-    required this.initialPage,
-  });
+  const JournalTimelineWithEvents({super.key, required this.initialPage});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -338,7 +326,8 @@ class JournalTimelineWithEvents extends HookConsumerWidget {
               ),
               Positioned(
                 top: headerHeight,
-                left: AppTheme.basePadding +
+                left:
+                    AppTheme.basePadding +
                     MediaQuery.of(context).viewPadding.left,
                 height: 600,
                 child: const TimelineSidebar(),
@@ -354,20 +343,15 @@ class JournalTimelineWithEvents extends HookConsumerWidget {
 class JournalTimeline extends HookConsumerWidget {
   final int initialPage;
 
-  const JournalTimeline({
-    super.key,
-    required this.initialPage,
-  });
+  const JournalTimeline({super.key, required this.initialPage});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return MediaQuery(
-      data: MediaQuery.of(context).copyWith(
-        textScaler: const TextScaler.linear(1),
-      ),
-      child: JournalTimelineWithEvents(
-        initialPage: initialPage,
-      ),
+      data: MediaQuery.of(
+        context,
+      ).copyWith(textScaler: const TextScaler.linear(1)),
+      child: JournalTimelineWithEvents(initialPage: initialPage),
     );
   }
 }

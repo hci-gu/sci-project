@@ -207,6 +207,14 @@
     "selfAssessedPhysicalActivityEverydayDuration90To150Minutes": "90-150 minutes (1.5-2.5 hours)",
     "selfAssessedPhysicalActivityEverydayDuration150To300Minutes": "150-300 minutes (2.5-5 hours)",
     "selfAssessedPhysicalActivityEverydayDurationMoreThan300Minutes": "More than 300 minutes",
+    "selfAssessedPhysicalActivityWeekInfoInstruction": "To submit an earlier week, change the date below to any day within that week.",
+    "selfAssessedPhysicalActivityWeekInfoRange": "With the current date, your answers will be saved for {start} to {end}.",
+    "@selfAssessedPhysicalActivityWeekInfoRange": {
+      "placeholders": {
+        "start": {},
+        "end": {}
+      }
+    },
     "selfAssessedSedentaryDurationAlmostAllDay": "Almost the entire day",
     "selfAssessedSedentaryDuration13To15Hours": "13-15 hours",
     "selfAssessedSedentaryDuration10To12Hours": "10-12 hours",
