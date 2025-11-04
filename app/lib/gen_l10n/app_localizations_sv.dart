@@ -9,130 +9,6 @@ class AppLocalizationsSv extends AppLocalizations {
   AppLocalizationsSv([String locale = 'sv']) : super(locale);
 
   @override
-  String get appName => 'Wheelability';
-
-  @override
-  String get redirecting => 'Omdirigerar...';
-
-  @override
-  String get authenticating => 'Autentiserar...';
-
-  @override
-  String get abort => 'Avbryt';
-
-  @override
-  String get watchSyncLoginRequired =>
-      'Du måste vara inloggad för att synka med din klocka.';
-
-  @override
-  String get watchSyncInvalidFitbitInfo =>
-      'Fick ogiltig information från Fitbit-appen.';
-
-  @override
-  String get forcedLoginFailed =>
-      'Misslyckades med att logga in med angivna uppgifter.';
-
-  @override
-  String get missingUserIdOrApiKey =>
-      'Saknar userId eller apiKey parametrar.';
-
-  @override
-  String get noWatchConnected => 'Ingen klocka ansluten';
-
-  @override
-  String get confirmDisconnectWatchTitle => 'Är du säker?';
-
-  @override
-  String get disconnectWatchConfirmation =>
-      'Att koppla från klockan stoppar alla inspelningar och tar bort anslutningen. Vill du fortsätta?';
-
-  @override
-  String get watchDisconnected => 'Klockan kopplades från';
-
-  @override
-  String get disconnect => 'Koppla från';
-
-  @override
-  String get refresh => 'Uppdatera';
-
-  @override
-  String lastSynced(Object time) {
-    return 'Senast synkad: $time';
-  }
-
-  @override
-  String get never => 'Aldrig';
-
-  @override
-  String get bluetoothOff => 'Bluetooth är av';
-
-  @override
-  String get recordingInProgress => 'Spelar in...';
-
-  @override
-  String get connected => 'Ansluten';
-
-  @override
-  String get disconnected => 'Frånkopplad';
-
-  @override
-  String get syncInstructions => 'Tryck på synkknappen för att ladda upp din data';
-
-  @override
-  String get sync => 'Synka';
-
-  @override
-  String get syncSuccess => 'Inspelningarna synkroniserades!';
-
-  @override
-  String get syncNoData => 'Inga inspelningar hittades att synka.';
-
-  @override
-  String get searchingForWatches => 'Söker efter klockor...';
-
-  @override
-  String get noDevicesFound => 'Inga enheter hittades.';
-
-  @override
-  String get searching => 'Söker...';
-
-  @override
-  String get searchAgain => 'Sök igen';
-
-  @override
-  String get connect => 'Anslut';
-
-  @override
-  String get unknownDevice => 'Okänd';
-
-  @override
-  String get connectWatchPrompt => 'Anslut din klocka för att komma igång!';
-
-  @override
-  String get connectWatch => 'Anslut klocka';
-
-  @override
-  String get generatedImageTitle => 'Genererad bild';
-
-  @override
-  String get noImageFromServer => 'Ingen bild returnerades från servern.';
-
-  @override
-  String get generatingImage => 'Genererar bild…';
-
-  @override
-  String get failedToLoadImage => 'Kunde inte ladda bilden';
-
-  @override
-  String get tryAgain => 'Försök igen';
-
-  @override
-  String get error => 'Fel';
-
-  @override
-  String get kcal => 'kcal';
-
-  @override
   String get login => 'Logga in';
 
   @override
@@ -705,86 +581,104 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get selfAssessedPhysicalActivityTrainingDescription =>
-      'Hur mycket tid ägnar du en vanlig vecka åt fysisk träning, som individuell träning eller organiserade aktiviteter?';
+      'Hur mycket tid ägnar du en vanlig vecka åt fysisk träning som får dig att bli anfådd till exempel rulla utomhus, bollsport, motionsgymnastik, cykel eller annat.\n\nTänk på att räkna alla veckans dagar och att det handlar om fysisk träning dvs du skall bli andfådd. På nästa sida följer frågor kring vardgsmotion.';
 
   @override
   String get selfAssessedPhysicalActivityEverydayTitle => 'Vardagsmotion';
 
   @override
   String get selfAssessedPhysicalActivityEverydayDescription =>
-      'Hur mycket tid ägnar du en vanlig vecka åt vardaglig motion, till exempel rutinmässig promenad eller cykling i samband med ärenden, transporter eller fritidsaktiviteter?';
+      'Hur mycket tid ägnar du en vanlig vecka åt vardagsmotion, till exempel rulla utomhus (promenader), hushållsarbete, trädgårdsarbete, handla eller annat.';
 
   @override
   String get selfAssessedPhysicalActivitySedentaryTitle => 'Stillastittande';
 
   @override
   String get selfAssessedPhysicalActivitySedentaryDescription =>
-      'Hur mycket tid sitter du stilla under en dag, till exempel framför en dator, surfplatta, TV eller liknande? Ange en genomsnittlig dag.';
+      'Hur mycket tid sitter du stilla under ett dygn, till exempel tittar på tv, sitter framför en dator, läser eller annat. Om man räknar bort sömn\n\nEftersom frågan baseras på tid per dygn så kommer siffran att gångras med sju för att få tid per vecka';
 
   @override
-  String get selfAssessedPhysicalActivityDurationNone => '0 minuter / ingen';
+  String get selfAssessedPhysicalActivityTrainingDurationNone =>
+      '0 minuter/ingen';
 
   @override
-  String get selfAssessedPhysicalActivityDuration1To30Minutes =>
-      '1–30 minuter';
+  String get selfAssessedPhysicalActivityTrainingDurationLessThan30Minutes =>
+      'Mindre än 30 minuter';
 
   @override
-  String get selfAssessedPhysicalActivityDuration30To60Minutes =>
-      '30–60 minuter';
+  String get selfAssessedPhysicalActivityTrainingDuration30To60Minutes =>
+      '30-60 minuter (0,5-1 timme)';
 
   @override
-  String get selfAssessedPhysicalActivityDuration1To3Hours => '1–3 timmar';
+  String get selfAssessedPhysicalActivityTrainingDuration60To90Minutes =>
+      '60-90 minuter (1-1,5 timmar)';
 
   @override
-  String get selfAssessedPhysicalActivityDuration3To5Hours => '3–5 timmar';
+  String get selfAssessedPhysicalActivityTrainingDuration90To120Minutes =>
+      '90-120 minuter (1,5-2 timmar)';
 
   @override
-  String get selfAssessedPhysicalActivityDuration5To7Hours => '5–7 timmar';
+  String get selfAssessedPhysicalActivityTrainingDurationMoreThan120Minutes =>
+      'Mer än 120 minuter (1,5-2 timmar)';
 
   @override
-  String get selfAssessedPhysicalActivityDuration7To10Hours => '7–10 timmar';
+  String get selfAssessedPhysicalActivityEverydayDurationNone =>
+      '0 minuter/ingen';
 
   @override
-  String get selfAssessedPhysicalActivityDuration10To15Hours => '10–15 timmar';
+  String get selfAssessedPhysicalActivityEverydayDurationLessThan30Minutes =>
+      'Mindre än 30 minuter';
 
   @override
-  String get selfAssessedPhysicalActivityDuration15To20Hours => '15–20 timmar';
+  String get selfAssessedPhysicalActivityEverydayDuration30To60Minutes =>
+      '30-60 minuter (0,5-1 timme)';
 
   @override
-  String get selfAssessedPhysicalActivityDurationMoreThan20Hours =>
-      'Mer än 20 timmar';
+  String get selfAssessedPhysicalActivityEverydayDuration60To90Minutes =>
+      '60-90 minuter (1-1,5 timmar)';
 
   @override
-  String get selfAssessedSedentaryDurationLessThanOneHour =>
-      'Mindre än 1 timme';
+  String get selfAssessedPhysicalActivityEverydayDuration90To150Minutes =>
+      '90-150 minuter (1,5-2,5 timmar)';
 
   @override
-  String get selfAssessedSedentaryDuration1To3Hours => '1–3 timmar';
+  String get selfAssessedPhysicalActivityEverydayDuration150To300Minutes =>
+      '150-300 minuter (2,5-5 timmar)';
 
   @override
-  String get selfAssessedSedentaryDuration3To5Hours => '3–5 timmar';
+  String get selfAssessedPhysicalActivityEverydayDurationMoreThan300Minutes =>
+      'Mer än 300 minuter';
 
   @override
-  String get selfAssessedSedentaryDuration5To7Hours => '5–7 timmar';
+  String get selfAssessedPhysicalActivityWeekInfoInstruction =>
+      'För att rapportera en tidigare vecka ändrar du datumet nedan till en dag i den veckan.';
 
   @override
-  String get selfAssessedSedentaryDuration7To9Hours => '7–9 timmar';
+  String selfAssessedPhysicalActivityWeekInfoRange(Object start, Object end) {
+    return 'Med det aktuella datumet sparas dina svar för $start till $end.';
+  }
 
   @override
-  String get selfAssessedSedentaryDuration9To11Hours => '9–11 timmar';
+  String get selfAssessedSedentaryDurationAlmostAllDay =>
+      'Så gott som hela dagen';
 
   @override
-  String get selfAssessedSedentaryDuration11To13Hours => '11–13 timmar';
+  String get selfAssessedSedentaryDuration13To15Hours => '13-15 timmar';
 
   @override
-  String get selfAssessedSedentaryDuration13To15Hours => '13–15 timmar';
+  String get selfAssessedSedentaryDuration10To12Hours => '10-12 timmar';
 
   @override
-  String get selfAssessedSedentaryDuration15To17Hours => '15–17 timmar';
+  String get selfAssessedSedentaryDuration7To9Hours => '7-9 timmar';
 
   @override
-  String get selfAssessedSedentaryDurationMoreThan17Hours =>
-      'Mer än 17 timmar';
+  String get selfAssessedSedentaryDuration4To6Hours => '4-6 timmar';
+
+  @override
+  String get selfAssessedSedentaryDuration1To3Hours => '1-3 timmar';
+
+  @override
+  String get selfAssessedSedentaryDurationNever => 'Aldrig';
 
   @override
   String get selfAssessedPhysicalActivityTrainingLabel => 'Träning';
@@ -1134,4 +1028,128 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get spasticityLevelDescription => 'Välj en nivå mellan 1-10';
+
+  @override
+  String get appName => 'Wheelability';
+
+  @override
+  String get redirecting => 'Omdirigerar...';
+
+  @override
+  String get authenticating => 'Autentiserar...';
+
+  @override
+  String get abort => 'Avbryt';
+
+  @override
+  String get watchSyncLoginRequired =>
+      'Du måste vara inloggad för att synka med din klocka.';
+
+  @override
+  String get watchSyncInvalidFitbitInfo =>
+      'Fick ogiltig information från Fitbit-appen.';
+
+  @override
+  String get forcedLoginFailed =>
+      'Misslyckades med att logga in med angivna uppgifter.';
+
+  @override
+  String get missingUserIdOrApiKey => 'Saknar userId eller apiKey parametrar.';
+
+  @override
+  String get noWatchConnected => 'Ingen klocka ansluten';
+
+  @override
+  String get confirmDisconnectWatchTitle => 'Är du säker?';
+
+  @override
+  String get disconnectWatchConfirmation =>
+      'Att koppla från klockan stoppar alla inspelningar och tar bort anslutningen. Vill du fortsätta?';
+
+  @override
+  String get watchDisconnected => 'Klockan kopplades från';
+
+  @override
+  String get disconnect => 'Koppla från';
+
+  @override
+  String get refresh => 'Uppdatera';
+
+  @override
+  String lastSynced(Object time) {
+    return 'Senast synkad: $time';
+  }
+
+  @override
+  String get never => 'Aldrig';
+
+  @override
+  String get bluetoothOff => 'Bluetooth är av';
+
+  @override
+  String get recordingInProgress => 'Spelar in...';
+
+  @override
+  String get connected => 'Ansluten';
+
+  @override
+  String get disconnected => 'Frånkopplad';
+
+  @override
+  String get syncInstructions =>
+      'Tryck på synkknappen för att ladda upp din data';
+
+  @override
+  String get sync => 'Synka';
+
+  @override
+  String get syncSuccess => 'Inspelningarna synkroniserades!';
+
+  @override
+  String get syncNoData => 'Inga inspelningar hittades att synka.';
+
+  @override
+  String get searchingForWatches => 'Söker efter klockor...';
+
+  @override
+  String get noDevicesFound => 'Inga enheter hittades.';
+
+  @override
+  String get searching => 'Söker...';
+
+  @override
+  String get searchAgain => 'Sök igen';
+
+  @override
+  String get connect => 'Anslut';
+
+  @override
+  String get unknownDevice => 'Okänd';
+
+  @override
+  String get connectWatchPrompt => 'Anslut din klocka för att komma igång!';
+
+  @override
+  String get connectWatch => 'Anslut klocka';
+
+  @override
+  String get generatedImageTitle => 'Genererad bild';
+
+  @override
+  String get noImageFromServer => 'Ingen bild returnerades från servern.';
+
+  @override
+  String get generatingImage => 'Genererar bild…';
+
+  @override
+  String get failedToLoadImage => 'Kunde inte ladda bilden';
+
+  @override
+  String get tryAgain => 'Försök igen';
+
+  @override
+  String get error => 'Fel';
+
+  @override
+  String get kcal => 'kcal';
 }

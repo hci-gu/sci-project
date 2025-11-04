@@ -77,11 +77,12 @@ class JournalState extends StateNotifier<DateTime> {
         };
         break;
       case JournalType.selfAssessedPhysicalActivity:
-        SelfAssessedPhysicalActivityDuration training =
-            values['trainingDuration'] as SelfAssessedPhysicalActivityDuration;
-        SelfAssessedPhysicalActivityDuration everyday =
+        SelfAssessedPhysicalActivityTrainingDuration training =
+            values['trainingDuration']
+                as SelfAssessedPhysicalActivityTrainingDuration;
+        SelfAssessedPhysicalActivityEverydayDuration everyday =
             values['everydayActivityDuration']
-                as SelfAssessedPhysicalActivityDuration;
+                as SelfAssessedPhysicalActivityEverydayDuration;
         SelfAssessedSedentaryDuration sedentary =
             values['sedentaryDuration'] as SelfAssessedSedentaryDuration;
         info = {
