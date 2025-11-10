@@ -92,62 +92,67 @@ class PolarService {
 
   Future start({bool requestPermissions = true}) async {
     print("Starting PolarService for $identifier");
-    if (_instance != null && _instance!.started) {
-      print('PolarService already started');
-      return;
+
+    if (!started) {
+      // Only attach listeners the first time we start. They stay active across
+      // reconnect attempts.
+      _connSub = polar.deviceConnected.listen((_) async {
+        print("DEVICE IS CONNECTED");
+        connected = true;
+
+        try {
+          DateTime? watchTime = await polar.getLocalTime(identifier);
+          print("Current watch time: $watchTime");
+          DateTime now = DateTime.now();
+          print("Current system time: $now");
+
+          if (watchTime != null && watchTime.year < now.year) {
+            polar.setLocalTime(identifier, now);
+            print("Setting watch time to current time");
+          }
+        } catch (e) {
+          print("Error setting watch time: $e");
+        }
+      });
+      _discSub = polar.deviceDisconnected.listen((_) {
+        print("DEVICE DISCONNECTED");
+        connected = false;
+      });
+
+      _btStateSub = FlutterBluePlus.adapterState.listen((
+        BluetoothAdapterState state,
+      ) {
+        print("Bluetooth state changed: $state");
+        btState = state;
+      });
+
+      _connectingSub = polar.deviceConnecting.listen((
+        PolarDeviceInfo deviceInfo,
+      ) async {
+        print("Device connecting...");
+        print("Device info: $deviceInfo");
+      });
+
+      started = true;
+
+      // test log on an interval
+      Timer.periodic(Duration(seconds: 10), (_) async {
+        print("PolarService heartbeat for $identifier");
+      });
+    } else {
+      print('PolarService already started; reusing existing listeners');
     }
 
-    // polar.batteryLevel.listen((e) => print('Battery: ${e.level}'));
-    // polar.deviceConnecting.listen((_) => print('Device connecting'));
-    _connSub = polar.deviceConnected.listen((_) async {
-      print("DEVICE IS CONNECTED");
-      connected = true;
-
-      try {
-        DateTime? watchTime = await polar.getLocalTime(identifier);
-        print("Current watch time: $watchTime");
-        DateTime now = DateTime.now();
-        print("Current system time: $now");
-
-        if (watchTime != null && watchTime.year < now.year) {
-          polar.setLocalTime(identifier, now);
-          print("Setting watch time to current time");
-        }
-      } catch (e) {
-        print("Error setting watch time: $e");
-      }
-    });
-    _discSub = polar.deviceDisconnected.listen((_) {
-      print("DEVICE DISCONNECTED");
-      connected = false;
-    });
-
-    _btStateSub = FlutterBluePlus.adapterState.listen((
-      BluetoothAdapterState state,
-    ) {
-      print("Bluetooth state changed: $state");
-      btState = state;
-    });
-
-    _connectingSub = polar.deviceConnecting.listen((
-      PolarDeviceInfo deviceInfo,
-    ) async {
-      print("Device connecting...");
-      print("Device info: $deviceInfo");
-    });
-
-    _instance!.started = true;
+    if (connected) {
+      print('PolarService already connected');
+      return;
+    }
 
     await initialConnection();
     await polar.connectToDevice(
       identifier,
       requestPermissions: requestPermissions,
     );
-
-    // test log on an interval
-    Timer.periodic(Duration(seconds: 10), (_) async {
-      print("PolarService heartbeat for $identifier");
-    });
   }
 
   Future<void> initialConnection([int attempts = 0]) async {
