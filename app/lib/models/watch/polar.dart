@@ -44,6 +44,14 @@ class PolarService {
 
   static Polar get sdk => PolarService.instance.polar;
 
+  static Future<void> requestPermissions() async {
+    return Polar().requestPermissions();
+  }
+
+  static Stream<PolarDeviceInfo> searchForDevice() {
+    return Polar().searchForDevice();
+  }
+
   static void initialize(String identifier) {
     if (_instance != null && _instance!.initialized) {
       print('PolarService already initialized');
@@ -200,11 +208,15 @@ class PolarService {
           PolarSettingType.range: 8,
           PolarSettingType.channels: 3,
         };
-        await polar.startOfflineRecording(
-          identifier,
-          type,
-          settings: PolarSensorSetting(settings),
-        );
+        try {
+          await polar.startOfflineRecording(
+            identifier,
+            type,
+            settings: PolarSensorSetting(settings),
+          );
+        } catch (e) {
+          print(e);
+        }
       } else if (type == PolarDataType.hr) {
         Map<PolarSettingType, int> settings = {};
         await polar.startOfflineRecording(
