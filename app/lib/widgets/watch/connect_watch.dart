@@ -13,6 +13,7 @@ import 'package:scimovement/widgets/confirm_dialog.dart';
 import 'package:scimovement/gen_l10n/app_localizations.dart';
 
 Future<String?> showDevicePicker(BuildContext context) async {
+  print("showDevicePicker called");
   await sendBleCommand({'cmd': 'request_permissions'});
 
   if (!context.mounted) return null;

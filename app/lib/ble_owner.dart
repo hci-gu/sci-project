@@ -67,7 +67,7 @@ class BleOwner {
                 : (throw 'missing_reply_port');
 
         if (msg['cmd'] == 'request_permissions') {
-          await PolarService.sdk.requestPermissions();
+          await PolarService.requestPermissions();
           reply.send({'ok': true});
         } else if (msg['cmd'] == 'scan_start') {
           // UI must pass a SendPort sink for streaming results
@@ -296,7 +296,7 @@ class BleOwner {
     final seen = <String>{};
 
     try {
-      _scanSub = PolarService.sdk.searchForDevice().listen(
+      _scanSub = PolarService.searchForDevice().listen(
         (d) {
           if (seen.add(d.deviceId)) {
             _sendScanEvent(sink, {

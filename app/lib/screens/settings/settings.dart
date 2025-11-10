@@ -1,10 +1,13 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:scimovement/api/classes.dart';
+import 'package:scimovement/ble_owner.dart';
 import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/models/onboarding.dart';
+import 'package:scimovement/models/watch/polar.dart';
 import 'package:scimovement/screens/home/widgets/pressure_release_widget.dart';
 import 'package:scimovement/screens/settings/widgets/app_settings.dart';
 import 'package:scimovement/screens/settings/widgets/user_settings.dart';
@@ -46,6 +49,22 @@ class SettingsScreen extends ConsumerWidget {
             style: AppTheme.labelXLarge,
           ),
           const WatchSettings(),
+          if (kDebugMode) ...[
+            AppTheme.separator,
+            Button(
+              onPressed: () async {
+                print("Sending BLE command sync");
+                await sendBleCommand({'cmd': 'sync'});
+                print("BLE command sync sent");
+
+                List<int> disk = await PolarService.instance.polar.getDiskSpace(
+                  PolarService.instance.identifier,
+                );
+                print("Disk space: $disk");
+              },
+              title: 'Debug watch sync',
+            ),
+          ],
           AppTheme.separator,
           Text(
             AppLocalizations.of(context)!.appSettings,

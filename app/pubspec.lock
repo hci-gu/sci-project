@@ -584,11 +584,9 @@ packages:
   polar:
     dependency: "direct main"
     description:
-      path: "."
-      ref: master
-      resolved-ref: "2c7cf34644b6d906b9fadac3b1f74714d95b2342"
-      url: "https://github.com/mikeread-dev/polar.git"
-    source: git
+      path: "../../polar-flutter"
+      relative: true
+    source: path
     version: "7.5.1"
   push:
     dependency: "direct main"
