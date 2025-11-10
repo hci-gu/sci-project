@@ -30,8 +30,8 @@ class PolarService {
   StreamSubscription? _btStateSub;
   StreamSubscription? _featureReadySub;
 
-  final Set<PolarBleSdkFeature> _readyFeatures = {};
-  final Map<PolarBleSdkFeature, List<Completer<void>>> _featureWaiters = {};
+  final Set<PolarSdkFeature> _readyFeatures = {};
+  final Map<PolarSdkFeature, List<Completer<void>>> _featureWaiters = {};
 
   final String identifier;
 
@@ -147,12 +147,12 @@ class PolarService {
 
       started = true;
 
-      _featureReadySub = polar.bleSdkFeatureReady.listen((event) {
+      _featureReadySub = polar.sdkFeatureReady.listen((event) {
         if (event.identifier != identifier) {
           return;
         }
 
-        final PolarBleSdkFeature feature = event.feature;
+        final PolarSdkFeature feature = event.feature;
         _markFeatureReady(feature);
       });
 
@@ -196,7 +196,8 @@ class PolarService {
       final bool offlineReady = await _waitForOfflineRecordingFeature();
       if (!offlineReady) {
         print(
-            'Offline recording feature not ready; returning default PolarState');
+          'Offline recording feature not ready; returning default PolarState',
+        );
         return PolarState(
           isRecording: false,
           recordings: [],
@@ -356,7 +357,7 @@ class PolarService {
     await polar.disconnectFromDevice(identifier);
   }
 
-  void _markFeatureReady(PolarBleSdkFeature feature) {
+  void _markFeatureReady(PolarSdkFeature feature) {
     if (_readyFeatures.contains(feature)) {
       return;
     }
@@ -373,11 +374,11 @@ class PolarService {
   }
 
   Future<bool> _waitForOfflineRecordingFeature() {
-    return _waitForFeature(PolarBleSdkFeature.offlineRecording);
+    return _waitForFeature(PolarSdkFeature.offlineRecording);
   }
 
   Future<bool> _waitForFeature(
-    PolarBleSdkFeature feature, {
+    PolarSdkFeature feature, {
     Duration timeout = const Duration(seconds: 10),
   }) async {
     if (_readyFeatures.contains(feature)) {
@@ -385,8 +386,10 @@ class PolarService {
     }
 
     final completer = Completer<void>();
-    final waiters =
-        _featureWaiters.putIfAbsent(feature, () => <Completer<void>>[]);
+    final waiters = _featureWaiters.putIfAbsent(
+      feature,
+      () => <Completer<void>>[],
+    );
     waiters.add(completer);
 
     try {
