@@ -28,6 +28,10 @@ class PolarService {
   StreamSubscription? _discSub;
   StreamSubscription? _connectingSub;
   StreamSubscription? _btStateSub;
+  StreamSubscription? _featureReadySub;
+
+  final Set<PolarBleSdkFeature> _readyFeatures = {};
+  final Map<PolarBleSdkFeature, List<Completer<void>>> _featureWaiters = {};
 
   final String identifier;
 
@@ -83,6 +87,11 @@ class PolarService {
     _btStateSub?.cancel();
     _btStateSub = null;
 
+    _featureReadySub?.cancel();
+    _featureReadySub = null;
+
+    _resetFeatureState();
+
     started = false;
     connected = false;
     initialized = false;
@@ -117,6 +126,9 @@ class PolarService {
       _discSub = polar.deviceDisconnected.listen((_) {
         print("DEVICE DISCONNECTED");
         connected = false;
+        _resetFeatureState(
+          StateError('Device disconnected before features became ready'),
+        );
       });
 
       _btStateSub = FlutterBluePlus.adapterState.listen((
@@ -134,6 +146,15 @@ class PolarService {
       });
 
       started = true;
+
+      _featureReadySub = polar.bleSdkFeatureReady.listen((event) {
+        if (event.identifier != identifier) {
+          return;
+        }
+
+        final PolarBleSdkFeature feature = event.feature;
+        _markFeatureReady(feature);
+      });
 
       // test log on an interval
       Timer.periodic(Duration(seconds: 10), (_) async {
@@ -172,6 +193,17 @@ class PolarService {
   Future<PolarState> getState() async {
     print("getState called for $identifier");
     try {
+      final bool offlineReady = await _waitForOfflineRecordingFeature();
+      if (!offlineReady) {
+        print(
+            'Offline recording feature not ready; returning default PolarState');
+        return PolarState(
+          isRecording: false,
+          recordings: [],
+          connected: connected,
+        );
+      }
+
       List<PolarOfflineRecordingEntry> entries = await listRecordings();
       List<PolarDataType> currentRecordings = await polar
           .getOfflineRecordingStatus(identifier);
@@ -191,6 +223,12 @@ class PolarService {
   }
 
   Future<List<PolarOfflineRecordingEntry>> listRecordings() async {
+    final bool offlineReady = await _waitForOfflineRecordingFeature();
+    if (!offlineReady) {
+      print('Offline recording feature not ready; returning empty list');
+      return [];
+    }
+
     try {
       List<PolarOfflineRecordingEntry> entries = await polar
           .listOfflineRecordings(identifier);
@@ -203,6 +241,12 @@ class PolarService {
   }
 
   Future<void> startRecording(PolarDataType type) async {
+    final bool offlineReady = await _waitForOfflineRecordingFeature();
+    if (!offlineReady) {
+      print('Cannot start recording; offline recording feature not ready');
+      return;
+    }
+
     List<PolarDataType> currentRecordings = await polar
         .getOfflineRecordingStatus(identifier);
     if (!currentRecordings.contains(type)) {
@@ -236,6 +280,12 @@ class PolarService {
   }
 
   Future<void> stopRecording(PolarDataType type) async {
+    final bool offlineReady = await _waitForOfflineRecordingFeature();
+    if (!offlineReady) {
+      print('Cannot stop recording; offline recording feature not ready');
+      return;
+    }
+
     List<PolarDataType> currentRecordings = await polar
         .getOfflineRecordingStatus(identifier);
 
@@ -247,6 +297,12 @@ class PolarService {
   Future<void> deleteAllRecordings(
     List<PolarOfflineRecordingEntry> entries,
   ) async {
+    final bool offlineReady = await _waitForOfflineRecordingFeature();
+    if (!offlineReady) {
+      print('Cannot delete recordings; offline recording feature not ready');
+      return;
+    }
+
     print("Deleting all recordings for $identifier");
     for (var entry in entries) {
       await polar.removeOfflineRecord(identifier, entry);
@@ -254,12 +310,24 @@ class PolarService {
   }
 
   Future<void> deleteRecording(PolarOfflineRecordingEntry entry) async {
+    final bool offlineReady = await _waitForOfflineRecordingFeature();
+    if (!offlineReady) {
+      print('Cannot delete recording; offline recording feature not ready');
+      return;
+    }
+
     await polar.removeOfflineRecord(identifier, entry);
   }
 
   Future<(AccOfflineRecording?, HrOfflineRecording?)> getRecordings(
     List<PolarOfflineRecordingEntry> entries,
   ) async {
+    final bool offlineReady = await _waitForOfflineRecordingFeature();
+    if (!offlineReady) {
+      print('Cannot fetch recordings; offline recording feature not ready');
+      return (null, null);
+    }
+
     entries.sort((a, b) => b.size.compareTo(a.size));
     PolarOfflineRecordingEntry? accEntry = entries.firstWhereOrNull(
       (e) => e.type == PolarDataType.acc,
@@ -286,5 +354,80 @@ class PolarService {
 
   Future stop() async {
     await polar.disconnectFromDevice(identifier);
+  }
+
+  void _markFeatureReady(PolarBleSdkFeature feature) {
+    if (_readyFeatures.contains(feature)) {
+      return;
+    }
+
+    _readyFeatures.add(feature);
+    final waiters = _featureWaiters.remove(feature);
+    if (waiters != null) {
+      for (final completer in waiters) {
+        if (!completer.isCompleted) {
+          completer.complete();
+        }
+      }
+    }
+  }
+
+  Future<bool> _waitForOfflineRecordingFeature() {
+    return _waitForFeature(PolarBleSdkFeature.offlineRecording);
+  }
+
+  Future<bool> _waitForFeature(
+    PolarBleSdkFeature feature, {
+    Duration timeout = const Duration(seconds: 10),
+  }) async {
+    if (_readyFeatures.contains(feature)) {
+      return true;
+    }
+
+    final completer = Completer<void>();
+    final waiters =
+        _featureWaiters.putIfAbsent(feature, () => <Completer<void>>[]);
+    waiters.add(completer);
+
+    try {
+      await completer.future.timeout(timeout);
+      return _readyFeatures.contains(feature);
+    } on TimeoutException catch (e) {
+      waiters.remove(completer);
+      if (waiters.isEmpty) {
+        _featureWaiters.remove(feature);
+      }
+      print('Timed out waiting for feature $feature: $e');
+      return false;
+    } catch (error, stackTrace) {
+      waiters.remove(completer);
+      if (waiters.isEmpty) {
+        _featureWaiters.remove(feature);
+      }
+      print('Error waiting for feature $feature: $error');
+      print(stackTrace);
+      return false;
+    }
+  }
+
+  void _resetFeatureState([Object? error]) {
+    if (_featureWaiters.isNotEmpty) {
+      for (final waiters in _featureWaiters.values) {
+        for (final completer in waiters) {
+          if (!completer.isCompleted) {
+            if (error != null) {
+              completer.completeError(error);
+            } else {
+              completer.completeError(
+                StateError('Feature readiness wait was reset'),
+              );
+            }
+          }
+        }
+      }
+      _featureWaiters.clear();
+    }
+
+    _readyFeatures.clear();
   }
 }
