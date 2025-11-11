@@ -1,15 +1,16 @@
+import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:scimovement/foreground_service/watch_sync.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class ForegroundService {
   ForegroundService._();
 
   static final ForegroundService instance = ForegroundService._();
+  Completer<void>? _startCompleter;
 
   Future<void> _requestPlatformPermissions() async {
     final NotificationPermission notificationPermission =
@@ -53,6 +54,9 @@ class ForegroundService {
   }
 
   Future<void> start() async {
+    if (await isRunningService) {
+      return;
+    }
     await _requestPlatformPermissions();
 
     final ServiceRequestResult result =
@@ -69,14 +73,25 @@ class ForegroundService {
     }
   }
 
-  // Future<void> stop() async {
-  //   final ServiceRequestResult result =
-  //       await FlutterForegroundTask.stopService();
+  Future<void> ensureStarted() async {
+    if (await isRunningService) {
+      return;
+    }
+    if (_startCompleter != null) {
+      return _startCompleter!.future;
+    }
 
-  //   if (result is ServiceRequestFailure) {
-  //     throw result.error;
-  //   }
-  // }
+    _startCompleter = Completer<void>();
+    try {
+      await start();
+      _startCompleter!.complete();
+    } catch (e, st) {
+      _startCompleter!.completeError(e, st);
+      rethrow;
+    } finally {
+      _startCompleter = null;
+    }
+  }
 
   Future<bool> get isRunningService => FlutterForegroundTask.isRunningService;
 

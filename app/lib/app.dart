@@ -62,11 +62,7 @@ class App extends HookConsumerWidget {
 
   void _startForeGroundService() async {
     try {
-      if (await ForegroundService.instance.isRunningService) {
-        return;
-      }
-
-      ForegroundService.instance.start();
+      await ForegroundService.instance.ensureStarted();
     } catch (e) {
       print("Error starting foreground service: $e");
     }

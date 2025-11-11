@@ -7,9 +7,9 @@ import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:polar/polar.dart';
 import 'package:scimovement/api/api.dart';
 import 'package:scimovement/api/classes/counts.dart';
+import 'package:scimovement/ble_owner.dart';
 import 'package:scimovement/models/watch/polar.dart';
 import 'package:scimovement/storage.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 @pragma('vm:entry-point')
 void startSyncWatchService() {
@@ -21,6 +21,12 @@ class WatchSyncHandler extends TaskHandler {
   Future<void> onStart(DateTime timestamp, TaskStarter starter) async {
     DartPluginRegistrant.ensureInitialized();
     debugPrint("WatchSyncHandler started at $timestamp");
+    try {
+      await BleOwner.instance.initialize();
+      debugPrint('BleOwner initialized in foreground service isolate');
+    } catch (e, st) {
+      debugPrint('BleOwner init failed in service: $e\n$st');
+    }
   }
 
   @override
