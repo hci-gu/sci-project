@@ -1,13 +1,10 @@
+import 'dart:async';
 import 'dart:isolate';
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
-import 'package:polar/polar.dart';
-import 'package:scimovement/api/api.dart';
-import 'package:scimovement/api/classes/counts.dart';
-import 'package:scimovement/ble_owner.dart';
-import 'package:scimovement/models/watch/polar.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:scimovement/ble_owner.dart';
 import 'package:scimovement/storage.dart';
 
 enum WatchType { polar, demo }
@@ -16,6 +13,8 @@ class ConnectedWatch {
   final String id;
   final WatchType type;
   final bool connected;
+  static const int _maxConnectAttempts = 3;
+  bool _disposed = false;
 
   ConnectedWatch({
     required this.id,
@@ -23,13 +22,31 @@ class ConnectedWatch {
     this.connected = false,
   });
 
-  void initialize() async {
-    if (type == WatchType.polar) {
+  Future<void> initialize() async {
+    if (type != WatchType.polar || _disposed) {
+      return;
+    }
+
+    await _connectWithRetry();
+  }
+
+  Future<void> _connectWithRetry([int attempt = 0]) async {
+    if (_disposed) return;
+
+    try {
       await sendBleCommand({'cmd': 'connect'});
+    } catch (e) {
+      debugPrint('ConnectedWatch: connect attempt ${attempt + 1} failed: $e');
+      if (attempt + 1 >= _maxConnectAttempts || _disposed) {
+        return;
+      }
+      await Future.delayed(Duration(milliseconds: 500 * (attempt + 1)));
+      await _connectWithRetry(attempt + 1);
     }
   }
 
   void dispose() {
+    _disposed = true;
     // if (type == WatchType.polar) {
     //   PolarService.instance.stop();
     //   PolarService.dispose();
@@ -43,14 +60,16 @@ class ConnectedWatchNotifier extends Notifier<ConnectedWatch?> {
     listenSelf((previous, next) {
       if (previous == null && next != null) {
         Storage().storeConnectedWatch(next);
-        next.initialize();
+        unawaited(next.initialize());
       } else {
         previous?.dispose();
       }
     });
 
     final stored = Storage().getConnectedWatch();
-    stored?.initialize();
+    if (stored != null) {
+      unawaited(stored.initialize());
+    }
 
     return stored;
   }

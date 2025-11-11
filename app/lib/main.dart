@@ -46,13 +46,13 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  WidgetsBinding.instance.addPostFrameCallback((_) async {
+  if (!kIsWeb) {
     try {
       await BleOwner.instance.initialize();
     } catch (e) {
       debugPrint('BLE init failed: $e');
     }
-  });
+  }
 
   runApp(
     ProviderScope(
