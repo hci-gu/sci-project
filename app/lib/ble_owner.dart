@@ -455,7 +455,7 @@ Future<Map<String, dynamic>> sendBleCommand(Map<String, dynamic> cmd) async {
   if (kIsWeb) {
     return {};
   }
-  final SendPort? owner = IsolateNameServer.lookupPortByName(kBleOwnerPortName);
+  final SendPort? owner = await _waitForBleOwnerPort();
   if (owner == null) {
     throw Exception('BLE owner not available');
   }
@@ -466,4 +466,24 @@ Future<Map<String, dynamic>> sendBleCommand(Map<String, dynamic> cmd) async {
   final result = await rp.first as Map<String, dynamic>;
   rp.close();
   return result;
+}
+
+Future<SendPort?> _waitForBleOwnerPort({
+  Duration timeout = const Duration(seconds: 3),
+  Duration pollInterval = const Duration(milliseconds: 100),
+}) async {
+  SendPort? owner = IsolateNameServer.lookupPortByName(kBleOwnerPortName);
+  if (owner != null) {
+    return owner;
+  }
+
+  final DateTime deadline = DateTime.now().add(timeout);
+  while (DateTime.now().isBefore(deadline)) {
+    await Future.delayed(pollInterval);
+    owner = IsolateNameServer.lookupPortByName(kBleOwnerPortName);
+    if (owner != null) {
+      return owner;
+    }
+  }
+  return null;
 }

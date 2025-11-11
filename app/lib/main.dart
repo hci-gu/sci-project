@@ -5,7 +5,6 @@ import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:scimovement/app.dart';
-import 'package:scimovement/ble_owner.dart';
 import 'package:scimovement/foreground_service/foreground_service.dart';
 import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/storage.dart';
@@ -29,6 +28,11 @@ void main() async {
   if (!kIsWeb) {
     FlutterForegroundTask.initCommunicationPort();
     ForegroundService.instance.init();
+    try {
+      await ForegroundService.instance.ensureStarted();
+    } catch (e) {
+      debugPrint('Foreground service start failed: $e');
+    }
   }
 
   bool onboardingDone = Storage().getOnboardingDone();
@@ -45,14 +49,6 @@ void main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-
-  if (!kIsWeb) {
-    try {
-      await BleOwner.instance.initialize();
-    } catch (e) {
-      debugPrint('BLE init failed: $e');
-    }
-  }
 
   runApp(
     ProviderScope(
