@@ -205,7 +205,7 @@ class BleOwner {
       // if entries are too large just delete them and restart
       bool tooLarge = false;
       for (PolarOfflineRecordingEntry e in entries) {
-        if (e.size > 2.5 * 1024 * 1024) {
+        if (e.size > 4 * 1024 * 1024) {
           tooLarge = true;
           break;
         }
