@@ -12,9 +12,27 @@ Future<bool?> confirmDialog(
   return showDialog<bool?>(
     context: context,
     builder: (BuildContext ctx) {
+      final Widget dialogContent = body ??
+          Text(
+            message,
+            style: AppTheme.paragraphMedium,
+          );
+
+      final double maxHeight = MediaQuery.of(ctx).size.height * 0.65;
+
       return AlertDialog(
         title: Text(title, style: AppTheme.headLine3),
-        content: body ?? Text(message, style: AppTheme.paragraphMedium),
+        content: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: maxHeight,
+          ),
+          child: SingleChildScrollView(
+            child: SizedBox(
+              width: double.maxFinite,
+              child: dialogContent,
+            ),
+          ),
+        ),
         titlePadding: EdgeInsets.symmetric(
           horizontal: AppTheme.basePadding * 2,
           vertical: AppTheme.basePadding,

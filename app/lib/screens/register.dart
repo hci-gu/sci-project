@@ -196,6 +196,7 @@ class RegisterScreen extends HookConsumerWidget {
       title: AppLocalizations.of(context)!.registerDataTitle,
       message: '',
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
