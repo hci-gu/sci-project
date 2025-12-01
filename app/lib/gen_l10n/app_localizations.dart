@@ -2198,6 +2198,30 @@ abstract class AppLocalizations {
   /// **'Connect Watch'**
   String get connectWatch;
 
+  /// No description provided for @selectWatchType.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Watch Type'**
+  String get selectWatchType;
+
+  /// No description provided for @polarWatchDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Polar Verity Sense or compatible device'**
+  String get polarWatchDescription;
+
+  /// No description provided for @pineTimeWatchDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'PineTime/InfiniTime smart watch'**
+  String get pineTimeWatchDescription;
+
+  /// No description provided for @readyToSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to sync'**
+  String get readyToSync;
+
   /// No description provided for @generatedImageTitle.
   ///
   /// In en, this message translates to:

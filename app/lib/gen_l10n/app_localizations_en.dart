@@ -1131,6 +1131,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get connectWatch => 'Connect Watch';
 
   @override
+  String get selectWatchType => 'Select Watch Type';
+
+  @override
+  String get polarWatchDescription => 'Polar Verity Sense or compatible device';
+
+  @override
+  String get pineTimeWatchDescription => 'PineTime/InfiniTime smart watch';
+
+  @override
+  String get readyToSync => 'Ready to sync';
+
+  @override
   String get generatedImageTitle => 'Generated Image';
 
   @override

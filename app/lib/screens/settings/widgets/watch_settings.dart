@@ -18,7 +18,15 @@ class WatchSettings extends HookConsumerWidget {
     final watch = ref.watch(connectedWatchProvider);
     final refresh = useState(
       Future.wait([
-        sendBleCommand({'cmd': 'get_state'}).then((m) => m['data'] as Map),
+        sendBleCommand({'cmd': 'get_state'})
+            .then((m) {
+              final data = m['data'];
+              if (data is Map) {
+                return data;
+              }
+              return <String, dynamic>{};
+            })
+            .catchError((_) => <String, dynamic>{}),
         Future.delayed(const Duration(seconds: 1)),
       ]),
     );
@@ -43,7 +51,7 @@ class WatchSettings extends HookConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 snapshot.connectionState == ConnectionState.done
-                    ? _watchConnectionRow(ctx, data, watch)
+                    ? _watchConnectionRow(ctx, ref, data, watch)
                     : _loadingRow(),
                 Column(
                   children: [
@@ -51,10 +59,14 @@ class WatchSettings extends HookConsumerWidget {
                       onPressed: () async {
                         bool? disconnect = await confirmDialog(
                           context,
-                          title: AppLocalizations.of(context)!
-                              .confirmDisconnectWatchTitle,
-                          message: AppLocalizations.of(context)!
-                              .disconnectWatchConfirmation,
+                          title:
+                              AppLocalizations.of(
+                                context,
+                              )!.confirmDisconnectWatchTitle,
+                          message:
+                              AppLocalizations.of(
+                                context,
+                              )!.disconnectWatchConfirmation,
                         );
                         if (disconnect == true) {
                           ref
@@ -64,8 +76,9 @@ class WatchSettings extends HookConsumerWidget {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                  AppLocalizations.of(context)!
-                                      .watchDisconnected,
+                                  AppLocalizations.of(
+                                    context,
+                                  )!.watchDisconnected,
                                 ),
                               ),
                             );
@@ -104,9 +117,10 @@ class WatchSettings extends HookConsumerWidget {
         Builder(
           builder: (context) {
             final lastSync = ref.watch(lastSyncProvider);
-            final lastSyncValue = lastSync != null
-                ? timeago.format(lastSync)
-                : AppLocalizations.of(context)!.never;
+            final lastSyncValue =
+                lastSync != null
+                    ? timeago.format(lastSync)
+                    : AppLocalizations.of(context)!.never;
             return Text(
               AppLocalizations.of(context)!.lastSynced(lastSyncValue),
               style: AppTheme.paragraphSmall,
@@ -143,6 +157,7 @@ class WatchSettings extends HookConsumerWidget {
 
   Widget _watchConnectionRow(
     BuildContext context,
+    WidgetRef ref,
     Map<dynamic, dynamic> data,
     ConnectedWatch watch,
   ) {
@@ -173,6 +188,19 @@ class WatchSettings extends HookConsumerWidget {
       );
     }
 
+    // Determine status text based on watch type and connection state
+    String statusText;
+    if (data['isRecording'] == true) {
+      statusText = AppLocalizations.of(context)!.recordingInProgress;
+    } else if (data['connected'] == true) {
+      statusText = AppLocalizations.of(context)!.connected;
+    } else if (watch.type == WatchType.pinetime) {
+      // PineTime uses manual sync - show ready status instead of disconnected
+      statusText = AppLocalizations.of(context)!.readyToSync;
+    } else {
+      statusText = AppLocalizations.of(context)!.disconnected;
+    }
+
     return Row(
       children: [
         Container(
@@ -185,26 +213,32 @@ class WatchSettings extends HookConsumerWidget {
           child: Icon(
             Icons.watch,
             color:
-                data['connected'] == true
+                data['connected'] == true || watch.type == WatchType.pinetime
                     ? AppTheme.colors.primary
                     : Colors.grey[700],
           ),
         ),
         AppTheme.spacer2x,
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(watch.id, style: AppTheme.paragraphMedium),
-            Text(
-              data['isRecording'] == true
-                  ? AppLocalizations.of(context)!.recordingInProgress
-                  : data['connected'] == true
-                      ? AppLocalizations.of(context)!.connected
-                      : AppLocalizations.of(context)!.disconnected,
-              style: AppTheme.paragraphSmall,
-            ),
-          ],
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                watch.type == WatchType.pinetime ? 'PineTime' : watch.id,
+                style: AppTheme.paragraphMedium,
+              ),
+              Text(statusText, style: AppTheme.paragraphSmall),
+            ],
+          ),
         ),
+        if (watch.type == WatchType.pinetime && data['connected'] != true)
+          TextButton.icon(
+            onPressed: () {
+              sendBleCommand({'cmd': 'sync'});
+            },
+            icon: const Icon(Icons.sync),
+            label: Text(AppLocalizations.of(context)!.sync),
+          ),
       ],
     );
   }

@@ -155,17 +155,9 @@ class PolarService {
         final PolarSdkFeature feature = event.feature;
         _markFeatureReady(feature);
       });
-
-      // test log on an interval
-      Timer.periodic(Duration(seconds: 10), (_) async {
-        print("PolarService heartbeat for $identifier");
-      });
-    } else {
-      print('PolarService already started; reusing existing listeners');
     }
 
     if (connected) {
-      print('PolarService already connected');
       return;
     }
 
@@ -295,19 +287,29 @@ class PolarService {
     }
   }
 
-  Future<void> deleteAllRecordings(
+  Future<bool> deleteAllRecordings(
     List<PolarOfflineRecordingEntry> entries,
   ) async {
     final bool offlineReady = await _waitForOfflineRecordingFeature();
     if (!offlineReady) {
       print('Cannot delete recordings; offline recording feature not ready');
-      return;
+      return false;
     }
 
     print("Deleting all recordings for $identifier");
     for (var entry in entries) {
       await polar.removeOfflineRecord(identifier, entry);
     }
+
+    await Future.delayed(Duration(seconds: 1));
+
+    // get entries again
+    entries = await listRecordings();
+    if (entries.isNotEmpty) {
+      return false;
+    }
+
+    return true;
   }
 
   Future<void> deleteRecording(PolarOfflineRecordingEntry entry) async {

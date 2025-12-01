@@ -7,7 +7,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/ble_owner.dart';
 import 'package:scimovement/storage.dart';
 
-enum WatchType { polar, demo }
+enum WatchType { polar, pinetime, demo }
 
 class ConnectedWatch {
   final String id;
@@ -23,11 +23,16 @@ class ConnectedWatch {
   });
 
   Future<void> initialize() async {
-    if (type != WatchType.polar || _disposed) {
+    if (_disposed) {
       return;
     }
 
-    await _connectWithRetry();
+    // For Polar, we auto-connect and start recording
+    // For PineTime, connection happens during manual sync only
+    if (type == WatchType.polar) {
+      await _connectWithRetry();
+    }
+    // PineTime doesn't need initialization - sync is manual
   }
 
   Future<void> _connectWithRetry([int attempt = 0]) async {
@@ -89,8 +94,11 @@ class ConnectedWatchNotifier extends Notifier<ConnectedWatch?> {
       return false;
     }
 
-    if (state?.type == WatchType.polar) {
-      await sendBleCommand({'cmd': 'sync'});
+    // Both Polar and PineTime sync via the same BLE command
+    // BleOwner routes to the correct handler based on watch type
+    if (state?.type == WatchType.polar || state?.type == WatchType.pinetime) {
+      final result = await sendBleCommand({'cmd': 'sync'});
+      return result['ok'] == true;
     }
 
     return false;
