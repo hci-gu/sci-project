@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -5,6 +7,7 @@ import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:scimovement/app.dart';
+import 'package:scimovement/ble_owner.dart';
 import 'package:scimovement/foreground_service/foreground_service.dart';
 import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/storage.dart';
@@ -26,12 +29,21 @@ void main() async {
   await Storage().reloadPrefs();
 
   if (!kIsWeb) {
-    FlutterForegroundTask.initCommunicationPort();
-    ForegroundService.instance.init();
-    try {
-      await ForegroundService.instance.ensureStarted();
-    } catch (e) {
-      debugPrint('Foreground service start failed: $e');
+    if (Platform.isIOS) {
+      // On iOS, initialize BleOwner directly in main isolate
+      // iOS doesn't support true background BLE processing like Android
+      await BleOwner.instance.initialize();
+    } else {
+      // On Android, use foreground service for background BLE operations
+      FlutterForegroundTask.initCommunicationPort();
+      ForegroundService.instance.init();
+      try {
+        await ForegroundService.instance.ensureStarted();
+      } catch (e) {
+        debugPrint('Foreground service start failed: $e');
+        // Fallback: initialize BleOwner in main isolate
+        await BleOwner.instance.initialize();
+      }
     }
   }
 

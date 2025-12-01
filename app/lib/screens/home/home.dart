@@ -55,33 +55,28 @@ class PagedWidgets extends HookConsumerWidget {
         features.contains(AppFeature.bladderAndBowel) ||
         features.contains(AppFeature.pressureRelease);
     int page = ref.watch(homeWidgetPageProvider);
-    int pageCount = 2 + (hasLogFeatures ? 1 : 0);
+    int pageCount = 1 + (hasLogFeatures ? 1 : 0);
     int clampedPage = pageCount > 0 ? page.clamp(0, pageCount - 1) : 0;
 
-    useEffect(
-      () {
-        if (clampedPage != page) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            ref
-                .read(homeWidgetPageProvider.notifier)
-                .setPage(clampedPage);
-          });
-        }
-        return null;
-      },
-      [page, clampedPage],
-    );
+    useEffect(() {
+      if (clampedPage != page) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ref.read(homeWidgetPageProvider.notifier).setPage(clampedPage);
+        });
+      }
+      return null;
+    }, [page, clampedPage]);
 
     bool centerAlignDate = hasLogFeatures && clampedPage == 1;
-    double pageSize = clampedPage == 0 ? 560 : 440;
-    double topPadding = clampedPage == 0 ? 0 : 80;
+    double pageSize = clampedPage == 0 ? 440 : 440;
+    double topPadding = clampedPage == 0 ? 0 : 44;
     PageController controller = useMemoized(
       () => PageController(initialPage: clampedPage),
       [clampedPage],
     );
 
     final pages = <Widget>[
-      SizedBox(height: pageSize, child: GeneratedImageView()),
+      // SizedBox(height: pageSize, child: GeneratedImageView()),
       if (hasLogFeatures)
         Padding(
           padding: EdgeInsets.only(
@@ -106,23 +101,16 @@ class PagedWidgets extends HookConsumerWidget {
                       AppTheme.spacer,
                     features.contains(AppFeature.bladderAndBowel)
                         ? const UTIWidget()
-                        : const Expanded(
-                            child: SizedBox.shrink(),
-                          ),
+                        : const Expanded(child: SizedBox.shrink()),
                     if (features.contains(AppFeature.bladderAndBowel) &&
                         !features.contains(AppFeature.pressureRelease))
-                      const Expanded(
-                        child: SizedBox.shrink(),
-                      ),
+                      const Expanded(child: SizedBox.shrink()),
                   ],
                 ),
               ),
               AppTheme.spacer,
               Text(
-                AppLocalizations.of(
-                  context,
-                )!
-                    .painAndDiscomfort,
+                AppLocalizations.of(context)!.painAndDiscomfort,
                 style: AppTheme.labelLarge,
               ),
               AppTheme.spacer,

@@ -2,18 +2,149 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:polar/polar.dart';
 import 'package:scimovement/ble_owner.dart';
-import 'package:scimovement/models/watch/polar.dart';
+import 'package:scimovement/foreground_service/foreground_service.dart';
 import 'package:scimovement/models/watch/watch.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
-import 'package:scimovement/widgets/confirm_dialog.dart';
 import 'package:scimovement/gen_l10n/app_localizations.dart';
 
-Future<String?> showDevicePicker(BuildContext context) async {
-  print("showDevicePicker called");
+/// Shows a dialog to select watch type (Polar or PineTime)
+Future<WatchType?> showWatchTypePicker(BuildContext context) async {
+  return showDialog<WatchType?>(
+    context: context,
+    barrierDismissible: true,
+    builder: (_) => const _WatchTypePickerDialog(),
+  );
+}
+
+class _WatchTypePickerDialog extends StatelessWidget {
+  const _WatchTypePickerDialog();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return AlertDialog(
+      title: Text(l10n.selectWatchType, style: AppTheme.headLine3),
+      content: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 420),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _WatchTypeOption(
+              title: 'Polar',
+              subtitle: l10n.polarWatchDescription,
+              icon: Icons.watch,
+              onTap: () => Navigator.of(context).pop(WatchType.polar),
+            ),
+            SizedBox(height: AppTheme.basePadding),
+            _WatchTypeOption(
+              title: 'PineTime',
+              subtitle: l10n.pineTimeWatchDescription,
+              icon: Icons.watch_outlined,
+              onTap: () => Navigator.of(context).pop(WatchType.pinetime),
+            ),
+          ],
+        ),
+      ),
+      titlePadding: EdgeInsets.symmetric(
+        horizontal: AppTheme.basePadding * 2,
+        vertical: AppTheme.basePadding,
+      ),
+      contentPadding: EdgeInsets.symmetric(
+        horizontal: AppTheme.basePadding * 2,
+        vertical: AppTheme.basePadding,
+      ),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(8.0)),
+      ),
+      actionsPadding: EdgeInsets.all(AppTheme.basePadding * 2),
+      actions: [
+        Button(
+          onPressed: () => Navigator.of(context).pop(null),
+          secondary: true,
+          rounded: true,
+          size: ButtonSize.small,
+          title: l10n.cancel,
+        ),
+      ],
+    );
+  }
+}
+
+class _WatchTypeOption extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _WatchTypeOption({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: EdgeInsets.all(AppTheme.basePadding),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 40, color: AppTheme.colors.primary),
+            SizedBox(width: AppTheme.basePadding),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: AppTheme.headLine3),
+                  Text(subtitle, style: AppTheme.paragraphSmall),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right, color: Colors.grey),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Shows device picker for the specified watch type
+Future<String?> showDevicePicker(
+  BuildContext context,
+  WatchType watchType,
+) async {
+  print("showDevicePicker called for $watchType");
+
+  // Ensure the foreground service is running and BLE owner is ready
+  final bleReady = await ForegroundService.instance.waitForBleOwner(
+    timeout: const Duration(seconds: 15),
+  );
+  if (!bleReady) {
+    debugPrint('BLE owner not available after waiting');
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Unable to start Bluetooth service. Please restart the app.',
+          ),
+        ),
+      );
+    }
+    return null;
+  }
+
   await sendBleCommand({'cmd': 'request_permissions'});
 
   if (!context.mounted) return null;
@@ -21,12 +152,14 @@ Future<String?> showDevicePicker(BuildContext context) async {
   return showDialog<String?>(
     context: context,
     barrierDismissible: true,
-    builder: (_) => const _DevicePickerDialog(),
+    builder: (_) => _DevicePickerDialog(watchType: watchType),
   );
 }
 
 class _DevicePickerDialog extends StatefulWidget {
-  const _DevicePickerDialog();
+  final WatchType watchType;
+
+  const _DevicePickerDialog({required this.watchType});
 
   @override
   State<_DevicePickerDialog> createState() => _DevicePickerDialogState();
@@ -61,7 +194,6 @@ class _DevicePickerDialogState extends State<_DevicePickerDialog> {
           AppLocalizations.of(context)?.unknownDevice ?? 'Unknown';
 
       _scanPort = ReceivePort();
-      // route raw port messages into a StreamSubscription for clean dispose
       _scanSub = _scanPort!.listen((msg) {
         if (msg is Map && msg['type'] == 'scan') {
           final event = msg['event'];
@@ -72,7 +204,7 @@ class _DevicePickerDialogState extends State<_DevicePickerDialog> {
             final name = (dev['name'] as String?) ?? unknownDeviceName;
             if (_seen.add(id)) {
               _devices.add({'id': id, 'name': name});
-              if (mounted) setState(() {}); // list updated
+              if (mounted) setState(() {});
             }
           } else if (event == 'done') {
             if (mounted) setState(() => _scanning = false);
@@ -80,11 +212,15 @@ class _DevicePickerDialogState extends State<_DevicePickerDialog> {
         }
       });
 
-      // tell owner to start scanning; it will stream devices to our port
+      // Pass the watch type to the scan command
+      final watchTypeStr =
+          widget.watchType == WatchType.pinetime ? 'pinetime' : 'polar';
+
       final resp = await sendBleCommand({
         'cmd': 'scan_start',
         'sink': _scanPort!.sendPort,
-        'autoStopMs': 10000, // optional auto-stop (10s) just like before
+        'watchType': watchTypeStr,
+        'autoStopMs': 10000,
       });
 
       if (resp['ok'] != true) {
@@ -113,9 +249,13 @@ class _DevicePickerDialogState extends State<_DevicePickerDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final watchTypeName =
+        widget.watchType == WatchType.pinetime ? 'PineTime' : 'Polar';
+
     return AlertDialog(
       title: Text(
-        AppLocalizations.of(context)!.connectWatch,
+        '${l10n.connectWatch} ($watchTypeName)',
         style: AppTheme.headLine3,
       ),
       content: ConstrainedBox(
@@ -138,8 +278,8 @@ class _DevicePickerDialogState extends State<_DevicePickerDialog> {
                     Expanded(
                       child: Text(
                         _scanning
-                            ? AppLocalizations.of(context)!.searchingForWatches
-                            : AppLocalizations.of(context)!.noDevicesFound,
+                            ? l10n.searchingForWatches
+                            : l10n.noDevicesFound,
                         style: AppTheme.paragraphMedium,
                       ),
                     ),
@@ -153,16 +293,13 @@ class _DevicePickerDialogState extends State<_DevicePickerDialog> {
                 child: ListView.separated(
                   shrinkWrap: true,
                   itemCount: _devices.length,
-                  separatorBuilder: (_, _) => const Divider(height: 1),
+                  separatorBuilder: (_, __) => const Divider(height: 1),
                   itemBuilder: (ctx, i) {
                     final d = _devices[i];
                     final selected = d["id"] == _selectedId;
                     return ListTile(
                       dense: true,
-                      title: Text(
-                        d["name"] ??
-                            AppLocalizations.of(context)!.unknownDevice,
-                      ),
+                      title: Text(d["name"] ?? l10n.unknownDevice),
                       subtitle: Text(d["id"] ?? ''),
                       trailing: selected ? const Icon(Icons.check) : null,
                       onTap: () => setState(() => _selectedId = d["id"]),
@@ -194,7 +331,7 @@ class _DevicePickerDialogState extends State<_DevicePickerDialog> {
                 secondary: true,
                 rounded: true,
                 size: ButtonSize.small,
-                title: AppLocalizations.of(context)!.cancel,
+                title: l10n.cancel,
               ),
             ),
             SizedBox(width: AppTheme.basePadding * 2),
@@ -205,10 +342,7 @@ class _DevicePickerDialogState extends State<_DevicePickerDialog> {
                 },
                 rounded: true,
                 size: ButtonSize.small,
-                title:
-                    _scanning
-                        ? AppLocalizations.of(context)!.searching
-                        : AppLocalizations.of(context)!.searchAgain,
+                title: _scanning ? l10n.searching : l10n.searchAgain,
               ),
             ),
             SizedBox(width: AppTheme.basePadding * 2),
@@ -223,7 +357,7 @@ class _DevicePickerDialogState extends State<_DevicePickerDialog> {
                 rounded: true,
                 size: ButtonSize.small,
                 color: AppTheme.colors.primary,
-                title: AppLocalizations.of(context)!.connect,
+                title: l10n.connect,
               ),
             ),
           ],
@@ -240,9 +374,10 @@ class ConnectWatch extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final watch = ref.watch(connectedWatchProvider);
     final isConnected = watch != null;
+    final l10n = AppLocalizations.of(context)!;
 
     if (isConnected) {
-      return SizedBox();
+      return const SizedBox();
     }
 
     return Column(
@@ -251,7 +386,7 @@ class ConnectWatch extends HookConsumerWidget {
       children: [
         Center(
           child: Text(
-            AppLocalizations.of(context)!.connectWatchPrompt,
+            l10n.connectWatchPrompt,
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w700,
@@ -262,18 +397,29 @@ class ConnectWatch extends HookConsumerWidget {
         AppTheme.spacer2x,
         Button(
           onPressed: () async {
-            String? watchID = await showDevicePicker(context);
+            // Check if Bluetooth is supported
+            if (await FlutterBluePlus.isSupported == false) {
+              print("Bluetooth not supported by this device");
+              return;
+            }
+
+            // First, show the watch type picker
+            final WatchType? watchType = await showWatchTypePicker(context);
+            if (watchType == null || !context.mounted) return;
+
+            // Then show the device picker for the selected watch type
+            final String? watchID = await showDevicePicker(context, watchType);
 
             if (watchID != null) {
               ref
                   .read(connectedWatchProvider.notifier)
                   .setConnectedWatch(
-                    ConnectedWatch(id: watchID, type: WatchType.polar),
+                    ConnectedWatch(id: watchID, type: watchType),
                   );
             }
           },
           icon: Icons.watch,
-          title: AppLocalizations.of(context)!.connectWatch,
+          title: l10n.connectWatch,
         ),
       ],
     );

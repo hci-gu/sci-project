@@ -1133,6 +1133,19 @@ class AppLocalizationsSv extends AppLocalizations {
   String get connectWatch => 'Anslut klocka';
 
   @override
+  String get selectWatchType => 'Välj klocktyp';
+
+  @override
+  String get polarWatchDescription =>
+      'Polar Verity Sense eller kompatibel enhet';
+
+  @override
+  String get pineTimeWatchDescription => 'PineTime/InfiniTime smartklocka';
+
+  @override
+  String get readyToSync => 'Redo att synka';
+
+  @override
   String get generatedImageTitle => 'Genererad bild';
 
   @override

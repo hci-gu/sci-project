@@ -1,10 +1,9 @@
 import 'dart:async';
-import 'dart:developer';
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:scimovement/foreground_service/watch_sync.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class ForegroundService {
   ForegroundService._();
@@ -31,6 +30,7 @@ class ForegroundService {
   }
 
   void init() {
+    print("ForegroundService: init called");
     FlutterForegroundTask.initCommunicationPort();
     FlutterForegroundTask.addTaskDataCallback(_onReceiveTaskData);
     FlutterForegroundTask.init(
@@ -94,6 +94,22 @@ class ForegroundService {
   }
 
   Future<bool> get isRunningService => FlutterForegroundTask.isRunningService;
+
+  /// Waits for the BLE owner port to become available.
+  /// This ensures the foreground service has fully initialized.
+  Future<bool> waitForBleOwner({
+    Duration timeout = const Duration(seconds: 10),
+  }) async {
+    final deadline = DateTime.now().add(timeout);
+    while (DateTime.now().isBefore(deadline)) {
+      final owner = IsolateNameServer.lookupPortByName('ble_owner_port');
+      if (owner != null) {
+        return true;
+      }
+      await Future.delayed(const Duration(milliseconds: 200));
+    }
+    return false;
+  }
 
   void _onReceiveTaskData(Object data) async {
     print("ForegroundService::_onReceiveTaskData: $data");

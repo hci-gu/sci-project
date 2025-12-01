@@ -10,6 +10,8 @@ import 'package:scimovement/storage.dart';
 import 'package:scimovement/api/api.dart';
 import 'package:scimovement/api/classes/counts.dart';
 import 'package:scimovement/models/watch/polar.dart';
+import 'package:scimovement/models/watch/pinetime.dart';
+import 'package:scimovement/models/watch/watch.dart';
 
 import 'package:polar/polar.dart';
 
@@ -25,8 +27,7 @@ class BleOwner {
   static final BleOwner instance = BleOwner._();
 
   ReceivePort? _rx;
-  StreamSubscription<PolarDeviceInfo>? _scanSub;
-  bool _connecting = false;
+  StreamSubscription? _scanSub;
   bool _initialized = false;
   bool _scanning = false;
 
@@ -43,6 +44,7 @@ class BleOwner {
 
   /// Call this from main() once.
   Future<void> initialize() async {
+    print("BleOwner: initialize called");
     if (_initialized) return;
     await Storage().reloadPrefs();
 
@@ -73,6 +75,9 @@ class BleOwner {
           // UI must pass a SendPort sink for streaming results
           final SendPort? sink = msg['sink'];
           final int? autoStopMs = msg['autoStopMs'];
+          final String? watchTypeStr = msg['watchType'];
+          final WatchType watchType =
+              watchTypeStr == 'pinetime' ? WatchType.pinetime : WatchType.polar;
           if (sink == null) {
             reply.send({'ok': false, 'error': 'missing_sink'});
           } else {
@@ -88,6 +93,7 @@ class BleOwner {
               // start and ACK immediately so UI can render
               _handleScanStart(
                 sink,
+                watchType: watchType,
                 autoStopAfter:
                     autoStopMs != null
                         ? Duration(milliseconds: autoStopMs)
@@ -108,7 +114,7 @@ class BleOwner {
         } else if (msg['cmd'] == 'ping') {
           reply.send({'ok': true});
         } else if (msg['cmd'] == 'get_state') {
-          final s = await _getPolarState();
+          final s = await _getWatchState();
           reply.send({'ok': true, 'data': s});
         } else if (msg['cmd'] == 'startRecording') {
           final result = await _handleStartRecording();
@@ -141,24 +147,20 @@ class BleOwner {
     // If already connected, we're done
     if (PolarService.instance.connected) return true;
 
-    _connecting = true;
     await PolarService.instance.start(requestPermissions: false);
 
     // If a connection is already in progress, wait briefly for it to complete
     await Future.delayed(_settle);
     await PolarService.instance.getState();
     if (PolarService.instance.connected) {
-      _connecting = false;
       return true;
     }
     await PolarService.instance.getState();
     await Future.delayed(_settle);
     if (PolarService.instance.connected) {
-      _connecting = false;
       return true;
     }
 
-    _connecting = false;
     return PolarService.instance.connected;
   }
 
@@ -189,7 +191,18 @@ class BleOwner {
         }
       }
 
-      // 2) Connect
+      // Check watch type and route to appropriate sync
+      final stored = Storage().getConnectedWatch();
+      if (stored == null) {
+        debugPrint('BleOwner: no stored watch');
+        return false;
+      }
+
+      if (stored.type == WatchType.pinetime) {
+        return _handlePineTimeSync();
+      }
+
+      // 2) Connect (Polar)
       final connected = await _ensureConnected();
       debugPrint("Ensure connected: $connected");
       if (!connected) return false;
@@ -205,7 +218,7 @@ class BleOwner {
       // if entries are too large just delete them and restart
       bool tooLarge = false;
       for (PolarOfflineRecordingEntry e in entries) {
-        if (e.size > 4 * 1024 * 1024) {
+        if (e.size > 5 * 1024 * 1024) {
           tooLarge = true;
           break;
         }
@@ -213,10 +226,17 @@ class BleOwner {
 
       if (tooLarge) {
         debugPrint('BleOwner: found too large recordings -> purging all');
+        bool deleteSuccess = false;
         try {
-          await PolarService.instance.deleteAllRecordings(entries);
+          deleteSuccess = await PolarService.instance.deleteAllRecordings(
+            entries,
+          );
         } catch (e) {
           debugPrint('BleOwner: deleteAllRecordings failed: $e');
+        }
+        if (!deleteSuccess) {
+          debugPrint('BleOwner: purge failed; aborting sync');
+          return false;
         }
         await _startBoth();
         Storage().setLastSync(DateTime.now());
@@ -256,7 +276,7 @@ class BleOwner {
         } else {
           // One-sided data present – don't upload; just ensure both are running going forward
           debugPrint(
-            'BleOwner: recordings present but missing one modality (acc=$gotAcc hr=$gotHr) – skipping upload',
+            'BleOwner: recordings present but missing one modality (acc=$gotAcc hr=$gotHr) - skipping upload',
           );
         }
       } catch (e, st) {
@@ -274,6 +294,54 @@ class BleOwner {
     });
   }
 
+  /// Handle sync for PineTime watch
+  Future<bool> _handlePineTimeSync() async {
+    try {
+      final stored = Storage().getConnectedWatch();
+      if (stored == null) return false;
+
+      // Initialize and connect to PineTime
+      PineTimeService.initialize(stored.id);
+      await PineTimeService.instance.start();
+
+      if (!PineTimeService.instance.connected) {
+        debugPrint('BleOwner: PineTime connection failed');
+        return false;
+      }
+
+      // Read all entries from the watch
+      final entries = await PineTimeService.instance.readAllEntries();
+      debugPrint('BleOwner: read ${entries.length} entries from PineTime');
+
+      if (entries.isEmpty) {
+        Storage().setLastSync(DateTime.now());
+        return true;
+      }
+
+      // Convert to Counts and upload
+      final counts = countsFromPineTimeData(entries);
+
+      if (counts.isNotEmpty) {
+        try {
+          await Api().uploadCounts(counts);
+        } catch (_) {
+          await Storage().storePendingCounts(counts);
+        }
+
+        // Clear data on watch after successful read
+        final cleared = await PineTimeService.instance.clearData();
+        debugPrint('BleOwner: PineTime data cleared: $cleared');
+      }
+
+      Storage().setLastSync(DateTime.now());
+      debugPrint('BleOwner: PineTime sync done');
+      return true;
+    } catch (e, st) {
+      debugPrint('BleOwner: PineTime sync failed: $e\n$st');
+      return false;
+    }
+  }
+
   // ------------------- Public-ish command handlers -------------------
 
   Future<bool> _handleStartRecording() async {
@@ -287,6 +355,7 @@ class BleOwner {
 
   Future<void> _handleScanStart(
     SendPort sink, {
+    WatchType watchType = WatchType.polar,
     Duration? autoStopAfter,
   }) async {
     if (_scanning) return; // ignore if already scanning
@@ -296,24 +365,45 @@ class BleOwner {
     final seen = <String>{};
 
     try {
-      _scanSub = PolarService.searchForDevice().listen(
-        (d) {
-          if (seen.add(d.deviceId)) {
-            _sendScanEvent(sink, {
-              'event': 'device',
-              'device': _deviceToMap(d),
-            });
-          }
-        },
-        onError: (e, st) {
-          _sendScanEvent(sink, {'event': 'done', 'error': e.toString()});
-          _scanning = false;
-        },
-        onDone: () {
-          _sendScanEvent(sink, {'event': 'done'});
-          _scanning = false;
-        },
-      );
+      if (watchType == WatchType.pinetime) {
+        // Scan for PineTime/InfiniTime devices
+        _scanSub = PineTimeService.searchForDevice().listen(
+          (d) {
+            if (seen.add(d['id']!)) {
+              _sendScanEvent(sink, {'event': 'device', 'device': d});
+            }
+          },
+          onError: (e, st) {
+            PineTimeService.stopScan();
+            _sendScanEvent(sink, {'event': 'done', 'error': e.toString()});
+            _scanning = false;
+          },
+          onDone: () {
+            _sendScanEvent(sink, {'event': 'done'});
+            _scanning = false;
+          },
+        );
+      } else {
+        // Scan for Polar devices
+        _scanSub = PolarService.searchForDevice().listen(
+          (d) {
+            if (seen.add(d.deviceId)) {
+              _sendScanEvent(sink, {
+                'event': 'device',
+                'device': _deviceToMap(d),
+              });
+            }
+          },
+          onError: (e, st) {
+            _sendScanEvent(sink, {'event': 'done', 'error': e.toString()});
+            _scanning = false;
+          },
+          onDone: () {
+            _sendScanEvent(sink, {'event': 'done'});
+            _scanning = false;
+          },
+        );
+      }
 
       // Optional auto stop
       if (autoStopAfter != null) {
@@ -322,6 +412,9 @@ class BleOwner {
             _scanSub?.cancel();
             _scanSub = null;
             _scanning = false;
+            if (watchType == WatchType.pinetime) {
+              PineTimeService.stopScan();
+            }
             _sendScanEvent(sink, {'event': 'done'});
           }
         });
@@ -345,28 +438,86 @@ class BleOwner {
     return {'ok': ok};
   }
 
-  Future<Map<String, dynamic>> _getPolarState() async {
-    final state = await PolarService.instance.getState();
+  /// Get watch state based on connected watch type
+  Future<Map<String, dynamic>> _getWatchState() async {
+    await Storage().reloadPrefs();
+    final stored = Storage().getConnectedWatch();
 
-    // Try to read per-modality flags if available; else fall back to .isRecording
-    bool accRec = false;
-    bool hrRec = false;
-    try {
-      // If your PolarService.getState() exposes these booleans:
-      accRec = (state as dynamic).accRecording == true;
-      hrRec = (state as dynamic).hrRecording == true;
-    } catch (_) {
-      // ignore; will return only isRecording below
+    if (stored == null) {
+      return {
+        'bluetoothEnabled': false,
+        'connected': false,
+        'isRecording': false,
+      };
     }
 
-    return {
-      'bluetoothEnabled':
-          PolarService.instance.btState == BluetoothAdapterState.on,
-      'connected': PolarService.instance.connected,
-      'isRecording': state.isRecording,
-      'accRecording': accRec,
-      'hrRecording': hrRec,
-    };
+    if (stored.type == WatchType.pinetime) {
+      return _getPineTimeState();
+    }
+
+    return _getPolarState();
+  }
+
+  Future<Map<String, dynamic>> _getPineTimeState() async {
+    try {
+      // Check if PineTimeService is initialized before accessing instance
+      final service = PineTimeService.instanceOrNull;
+      if (service == null || !service.connected) {
+        return {
+          'bluetoothEnabled': true,
+          'connected': false,
+          'isRecording': false,
+        };
+      }
+
+      final state = await service.getState();
+      return {
+        'bluetoothEnabled': true,
+        'connected': state.connected,
+        'isRecording': false, // PineTime doesn't have continuous recording
+        'storedEntries': state.storedEntries,
+      };
+    } catch (e) {
+      debugPrint('Error getting PineTime state: $e');
+      return {
+        'bluetoothEnabled': true,
+        'connected': false,
+        'isRecording': false,
+      };
+    }
+  }
+
+  Future<Map<String, dynamic>> _getPolarState() async {
+    try {
+      final state = await PolarService.instance.getState();
+
+      // Try to read per-modality flags if available; else fall back to .isRecording
+      bool accRec = false;
+      bool hrRec = false;
+      try {
+        // If your PolarService.getState() exposes these booleans:
+        accRec = (state as dynamic).accRecording == true;
+        hrRec = (state as dynamic).hrRecording == true;
+      } catch (_) {
+        // ignore; will return only isRecording below
+      }
+
+      return {
+        'bluetoothEnabled':
+            PolarService.instance.btState == BluetoothAdapterState.on,
+        'connected': PolarService.instance.connected,
+        'isRecording': state.isRecording,
+        'accRecording': accRec,
+        'hrRecording': hrRec,
+      };
+    } catch (e) {
+      debugPrint('Error getting Polar state: $e');
+      return {
+        'bluetoothEnabled': false,
+        'connected': false,
+        'isRecording': false,
+      };
+    }
   }
 
   // ------------------- Core helpers -------------------
@@ -451,13 +602,44 @@ class BleOwner {
 
 // ------------------- Public API used by UI code -------------------
 
-Future<Map<String, dynamic>> sendBleCommand(Map<String, dynamic> cmd) async {
+/// Sends a command to the BLE owner running in the foreground service.
+/// The foreground service must be running for this to work.
+///
+/// If [ensureService] is true (default), will attempt to start the foreground
+/// service if the BLE owner port is not available.
+Future<Map<String, dynamic>> sendBleCommand(
+  Map<String, dynamic> cmd, {
+  bool ensureService = true,
+}) async {
   if (kIsWeb) {
     return {};
   }
-  final SendPort? owner = await _waitForBleOwnerPort();
+
+  SendPort? owner = await _waitForBleOwnerPort(
+    timeout: const Duration(seconds: 5),
+  );
+
+  // If port not found and we should ensure service, try to start it
+  if (owner == null && ensureService) {
+    debugPrint(
+      'BLE owner port not found, attempting to start foreground service...',
+    );
+
+    // Import and start the foreground service
+    // This is a bit of a workaround - ideally the service should already be running
+    try {
+      // Try waiting a bit longer - the service might be starting
+      owner = await _waitForBleOwnerPort(timeout: const Duration(seconds: 10));
+    } catch (e) {
+      debugPrint('Failed to wait for BLE owner: $e');
+    }
+  }
+
   if (owner == null) {
-    throw Exception('BLE owner not available');
+    throw Exception(
+      'BLE owner not available. Please ensure the app has started properly '
+      'and background services are running.',
+    );
   }
 
   final rp = ReceivePort();
@@ -469,7 +651,7 @@ Future<Map<String, dynamic>> sendBleCommand(Map<String, dynamic> cmd) async {
 }
 
 Future<SendPort?> _waitForBleOwnerPort({
-  Duration timeout = const Duration(seconds: 3),
+  Duration timeout = const Duration(seconds: 5),
   Duration pollInterval = const Duration(milliseconds: 100),
 }) async {
   SendPort? owner = IsolateNameServer.lookupPortByName(kBleOwnerPortName);

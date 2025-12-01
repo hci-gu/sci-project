@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -61,6 +63,10 @@ class App extends HookConsumerWidget {
   }
 
   void _startForeGroundService() async {
+    // On iOS, BleOwner is initialized directly in main.dart
+    // Skip foreground service which is Android-only
+    if (kIsWeb || Platform.isIOS) return;
+
     try {
       await ForegroundService.instance.ensureStarted();
     } catch (e) {
