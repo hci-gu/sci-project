@@ -266,6 +266,7 @@ class BleOwner {
 
       // 5) Fetch ENTIRE recordings only (no ranges) and upload if both modalities exist
       bool uploaded = false;
+      bool deleteAfterUpload = false;
       try {
         debugPrint("BleOwner: fetching recordings");
         final (AccOfflineRecording?, HrOfflineRecording?) recs =
@@ -282,6 +283,7 @@ class BleOwner {
 
           try {
             await Api().uploadCounts(counts);
+            deleteAfterUpload = true;
           } catch (_) {
             await Storage().storePendingCounts(counts);
           }
@@ -296,7 +298,13 @@ class BleOwner {
         debugPrint('BleOwner: getRecordings/upload failed: $e\n$st');
         // On any error, do not delete; we’ll try again next run
       } finally {
-        await PolarService.instance.deleteAllRecordings(entries);
+        if (deleteAfterUpload) {
+          try {
+            await PolarService.instance.deleteAllRecordings(entries);
+          } catch (e) {
+            debugPrint('BleOwner: deleteAllRecordings failed: $e');
+          }
+        }
         // 6) Always restart both & verify – do this regardless of success
         await _startBoth();
       }
@@ -434,6 +442,12 @@ class BleOwner {
       }
       debugPrint('BleOwner: PineTime sync failed: $e\n$st');
       return false;
+    } finally {
+      try {
+        await PineTimeService.instance.stop();
+      } catch (_) {
+        // ignore disconnect errors
+      }
     }
   }
 
@@ -474,6 +488,7 @@ class BleOwner {
             _scanning = false;
           },
           onDone: () {
+            PineTimeService.stopScan();
             _sendScanEvent(sink, {'event': 'done'});
             _scanning = false;
           },
@@ -525,6 +540,7 @@ class BleOwner {
       await _scanSub?.cancel();
       _scanSub = null;
       _scanning = false;
+      PineTimeService.stopScan();
     }
   }
 
@@ -762,12 +778,40 @@ Future<Map<String, dynamic>> sendBleCommand(
     );
   }
 
+  if (cmd['cmd'] != 'ping') {
+    bool ok = await _pingOwner(owner);
+    if (!ok && ensureService) {
+      owner = await _waitForBleOwnerPort(
+        timeout: const Duration(seconds: 5),
+      );
+      if (owner != null) {
+        ok = await _pingOwner(owner);
+      }
+    }
+    if (!ok) {
+      throw Exception('BLE owner not responding');
+    }
+  }
+
   final rp = ReceivePort();
   owner.send({...cmd, 'reply': rp.sendPort});
 
   final result = await rp.first as Map<String, dynamic>;
   rp.close();
   return result;
+}
+
+Future<bool> _pingOwner(SendPort owner) async {
+  final rp = ReceivePort();
+  try {
+    owner.send({'cmd': 'ping', 'reply': rp.sendPort});
+    final result = await rp.first.timeout(const Duration(seconds: 2));
+    return result is Map<String, dynamic> && result['ok'] == true;
+  } catch (_) {
+    return false;
+  } finally {
+    rp.close();
+  }
 }
 
 Future<SendPort?> _waitForBleOwnerPort({

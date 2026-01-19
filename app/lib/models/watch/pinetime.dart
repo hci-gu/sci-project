@@ -170,12 +170,21 @@ class PineTimeService {
     connected = true;
 
     // Discover services and find the accelerometer characteristic
-    await _discoverCharacteristic();
+    bool discovered = await _discoverCharacteristic();
+    if (!discovered) {
+      await Future.delayed(const Duration(milliseconds: 500));
+      discovered = await _discoverCharacteristic();
+    }
+    if (!discovered || _characteristic == null) {
+      await _device?.disconnect();
+      connected = false;
+      throw StateError(kConnectionFailedError);
+    }
     await _syncCurrentTime();
   }
 
-  Future<void> _discoverCharacteristic() async {
-    if (_device == null) return;
+  Future<bool> _discoverCharacteristic() async {
+    if (_device == null) return false;
 
     final services = await _device!.discoverServices();
 
@@ -186,13 +195,14 @@ class PineTimeService {
             _characteristic = c;
             await _characteristic!.setNotifyValue(true);
             debugPrint('Found and enabled accelerometer data characteristic');
-            return;
+            return true;
           }
         }
       }
     }
 
     debugPrint('Accelerometer data service not found!');
+    return false;
   }
 
   Future<void> _discoverCtsCharacteristics() async {
@@ -404,6 +414,9 @@ class PineTimeService {
 
     while (index < totalCount) {
       final entries = await _readEntries(index, chunkSize);
+      if (entries.isEmpty) {
+        throw Exception('Empty entries packet');
+      }
       allEntries.addAll(entries);
       index += entries.length;
       debugPrint('Read ${allEntries.length}/$totalCount entries');
