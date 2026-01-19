@@ -13,8 +13,8 @@ PODS:
     - Flutter
   - polar (0.0.1):
     - Flutter
-    - PolarBleSdk (~> 6.7.0)
-  - PolarBleSdk (6.7.0):
+    - PolarBleSdk (~> 6.9.0)
+  - PolarBleSdk (6.9.0):
     - RxSwift (~> 6.8.0)
     - SwiftProtobuf (~> 1.0)
     - Zip (~> 2.1.2)
@@ -25,7 +25,7 @@ PODS:
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
-  - SwiftProtobuf (1.32.0)
+  - SwiftProtobuf (1.33.3)
   - url_launcher_ios (0.0.1):
     - Flutter
   - Zip (2.1.2)
@@ -78,12 +78,12 @@ SPEC CHECKSUMS:
   flutter_foreground_task: 21ef182ab0a29a3005cc72cd70e5f45cb7f7f817
   package_info_plus: c0502532a26c7662a62a356cebe2692ec5fe4ec4
   permission_handler_apple: 9878588469a2b0d0fc1e048d9f43605f92e6cec2
-  polar: f1e2e9746ce293aee360fad04aed1447f7f9fc9d
-  PolarBleSdk: 0469c83d163b8f4cd1b239047584d20effd9e714
+  polar: 9d33c2d4a68b489866631e5cb79732c9cb1abdcb
+  PolarBleSdk: 3f7c535442f4c41592ed30abbfe522db43c608e1
   push: dab402f84bedfc62b8e5f6d81db808a7502025f7
   RxSwift: 4e28be97cbcfeee614af26d83415febbf2bf6f45
   shared_preferences_foundation: fcdcbc04712aee1108ac7fda236f363274528f78
-  SwiftProtobuf: 81e341191afbddd64aa031bd12862dccfab2f639
+  SwiftProtobuf: e1b437c8e31a4c5577b643249a0bb62ed4f02153
   url_launcher_ios: 5334b05cef931de560670eeae103fd3e431ac3fe
   Zip: b3fef584b147b6e582b2256a9815c897d60ddc67
 

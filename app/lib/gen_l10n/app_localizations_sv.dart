@@ -1103,7 +1103,7 @@ class AppLocalizationsSv extends AppLocalizations {
   String get sync => 'Synka';
 
   @override
-  String get syncSuccess => 'Inspelningarna synkroniserades!';
+  String get syncSuccess => 'Synkronisering slutförd';
 
   @override
   String get syncNoData => 'Inga inspelningar hittades att synka.';
@@ -1144,6 +1144,31 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get readyToSync => 'Redo att synka';
+
+  @override
+  String get syncing => 'Synkar...';
+
+  @override
+  String syncFailed(String error) {
+    return 'Synkronisering misslyckades: $error';
+  }
+
+  @override
+  String get syncPhaseConnecting => 'Ansluter till klocka...';
+
+  @override
+  String syncPhaseReading(int current, int total) {
+    return 'Läser data ($current/$total)';
+  }
+
+  @override
+  String get syncPhaseUploading => 'Laddar upp data...';
+
+  @override
+  String get syncPhaseClearing => 'Rensar klockdata...';
+
+  @override
+  String get syncPhaseDone => 'Synkronisering klar';
 
   @override
   String get generatedImageTitle => 'Genererad bild';

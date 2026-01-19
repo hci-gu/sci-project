@@ -69,8 +69,16 @@ class BleOwner {
                 : (throw 'missing_reply_port');
 
         if (msg['cmd'] == 'request_permissions') {
-          await PolarService.requestPermissions();
-          reply.send({'ok': true});
+          // Permission prompts require an Android Activity (UI isolate). The BLE
+          // owner often runs in the foreground-service isolate, where
+          // permission_handler cannot resolve an Activity and throws:
+          // "Unable to detect current Android Activity."
+          //
+          // Request permissions from the UI isolate instead (see sendBleCommand).
+          reply.send({
+            'ok': false,
+            'error': 'request_permissions_must_be_called_from_ui',
+          });
         } else if (msg['cmd'] == 'scan_start') {
           // UI must pass a SendPort sink for streaming results
           final SendPort? sink = msg['sink'];
@@ -106,7 +114,8 @@ class BleOwner {
           await _handleScanStop();
           reply.send({'ok': true});
         } else if (msg['cmd'] == 'sync') {
-          final result = await _handleSync();
+          final SendPort? progressSink = msg['progressSink'];
+          final result = await _handleSync(progressSink: progressSink);
           reply.send({'ok': result, 'error': result ? null : 'sync_failed'});
         } else if (msg['cmd'] == 'connect') {
           final result = await _ensureConnected();
@@ -164,7 +173,7 @@ class BleOwner {
     return PolarService.instance.connected;
   }
 
-  Future<bool> _handleSync() async {
+  Future<bool> _handleSync({SendPort? progressSink}) async {
     return _runExclusiveSync(() async {
       await Storage().reloadPrefs();
 
@@ -199,7 +208,7 @@ class BleOwner {
       }
 
       if (stored.type == WatchType.pinetime) {
-        return _handlePineTimeSync();
+        return _handlePineTimeSync(progressSink: progressSink);
       }
 
       // 2) Connect (Polar)
@@ -295,10 +304,22 @@ class BleOwner {
   }
 
   /// Handle sync for PineTime watch
-  Future<bool> _handlePineTimeSync() async {
+  Future<bool> _handlePineTimeSync({SendPort? progressSink}) async {
+    void sendProgress(String phase, int current, int total) {
+      progressSink?.send({
+        'type': 'sync_progress',
+        'phase': phase,
+        'current': current,
+        'total': total,
+      });
+    }
+
     try {
       final stored = Storage().getConnectedWatch();
       if (stored == null) return false;
+
+      // Send connecting phase
+      sendProgress('connecting', 0, 0);
 
       // Initialize and connect to PineTime
       PineTimeService.initialize(stored.id);
@@ -309,16 +330,22 @@ class BleOwner {
         return false;
       }
 
-      // Read all entries from the watch
-      final entries = await PineTimeService.instance.readAllEntries();
+      // Read all entries from the watch with progress callback
+      final entries = await PineTimeService.instance.readAllEntries(
+        onProgress: (current, total) {
+          sendProgress('reading', current, total);
+        },
+      );
       debugPrint('BleOwner: read ${entries.length} entries from PineTime');
 
       if (entries.isEmpty) {
+        sendProgress('done', 0, 0);
         Storage().setLastSync(DateTime.now());
         return true;
       }
 
       // Convert to Counts and upload
+      sendProgress('uploading', 0, entries.length);
       final counts = countsFromPineTimeData(entries);
 
       if (counts.isNotEmpty) {
@@ -329,10 +356,12 @@ class BleOwner {
         }
 
         // Clear data on watch after successful read
+        sendProgress('clearing', 0, 0);
         final cleared = await PineTimeService.instance.clearData();
         debugPrint('BleOwner: PineTime data cleared: $cleared');
       }
 
+      sendProgress('done', entries.length, entries.length);
       Storage().setLastSync(DateTime.now());
       debugPrint('BleOwner: PineTime sync done');
       return true;
@@ -459,9 +488,11 @@ class BleOwner {
   }
 
   Future<Map<String, dynamic>> _getPineTimeState() async {
+    print("Getting PineTime state");
     try {
       // Check if PineTimeService is initialized before accessing instance
       final service = PineTimeService.instanceOrNull;
+      print("PineTime service: $service");
       if (service == null || !service.connected) {
         return {
           'bluetoothEnabled': true,
@@ -471,6 +502,7 @@ class BleOwner {
       }
 
       final state = await service.getState();
+      print("PineTime state: $state");
       return {
         'bluetoothEnabled': true,
         'connected': state.connected,
@@ -613,6 +645,15 @@ Future<Map<String, dynamic>> sendBleCommand(
 }) async {
   if (kIsWeb) {
     return {};
+  }
+
+  // Permission prompts must be initiated from the UI isolate (Android Activity).
+  // If this command is forwarded to the BLE owner running in a foreground
+  // service isolate, permission_handler will crash with:
+  // "Unable to detect current Android Activity."
+  if (cmd['cmd'] == 'request_permissions') {
+    await PolarService.requestPermissions();
+    return {'ok': true};
   }
 
   SendPort? owner = await _waitForBleOwnerPort(

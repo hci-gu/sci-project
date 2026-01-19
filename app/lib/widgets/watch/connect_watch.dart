@@ -4,8 +4,10 @@ import 'dart:isolate';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:scimovement/ble_owner.dart';
 import 'package:scimovement/foreground_service/foreground_service.dart';
+import 'package:scimovement/models/watch/polar.dart';
 import 'package:scimovement/models/watch/watch.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
@@ -126,26 +128,26 @@ Future<String?> showDevicePicker(
   WatchType watchType,
 ) async {
   print("showDevicePicker called for $watchType");
+  await PolarService.requestPermissions();
 
   // Ensure the foreground service is running and BLE owner is ready
-  final bleReady = await ForegroundService.instance.waitForBleOwner(
-    timeout: const Duration(seconds: 15),
-  );
-  if (!bleReady) {
-    debugPrint('BLE owner not available after waiting');
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Unable to start Bluetooth service. Please restart the app.',
-          ),
-        ),
-      );
-    }
-    return null;
-  }
 
-  await sendBleCommand({'cmd': 'request_permissions'});
+  // final bleReady = await ForegroundService.instance.waitForBleOwner(
+  //   timeout: const Duration(seconds: 15),
+  // );
+  // if (!bleReady) {
+  //   debugPrint('BLE owner not available after waiting');
+  //   if (context.mounted) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(
+  //         content: Text(
+  //           'Unable to start Bluetooth service. Please restart the app.',
+  //         ),
+  //       ),
+  //     );
+  //   }
+  //   return null;
+  // }
 
   if (!context.mounted) return null;
 

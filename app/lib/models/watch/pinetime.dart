@@ -278,13 +278,11 @@ class PineTimeService {
       final offset = 11 + (i * 10);
       if (offset + 10 > response.length) break;
 
-      // int32 acceleration (little-endian, signed)
-      int accel =
-          response[offset] |
-          (response[offset + 1] << 8) |
-          (response[offset + 2] << 16) |
-          (response[offset + 3] << 24);
-      if (accel >= 0x80000000) accel -= 0x100000000;
+      // float count (little-endian, IEEE 754)
+      final countBytes = ByteData.sublistView(
+        Uint8List.fromList(response.sublist(offset, offset + 4)),
+      );
+      final count = countBytes.getFloat32(0, Endian.little);
 
       // int16 heartRate (little-endian, signed)
       int hr = response[offset + 4] | (response[offset + 5] << 8);
@@ -298,7 +296,11 @@ class PineTimeService {
           (response[offset + 9] << 24);
 
       entries.add(
-        _MinuteEntry(acceleration: accel, heartRate: hr, timestamp: ts),
+        _MinuteEntry(
+          count: count,
+          heartRate: hr,
+          timestamp: ts,
+        ), // renamed from acceleration to counts
       );
     }
 
@@ -306,9 +308,19 @@ class PineTimeService {
   }
 
   /// Read all stored entries from the watch
-  Future<List<_MinuteEntry>> readAllEntries() async {
+  /// [onProgress] is called with (current, total) after each chunk is read
+  Future<List<_MinuteEntry>> readAllEntries({
+    void Function(int current, int total)? onProgress,
+  }) async {
     final totalCount = await _getEntryCount();
     debugPrint('Total entries to read: $totalCount');
+
+    // Report initial progress
+    onProgress?.call(0, totalCount);
+
+    if (totalCount == 0) {
+      return [];
+    }
 
     final allEntries = <_MinuteEntry>[];
     int index = 0;
@@ -319,6 +331,9 @@ class PineTimeService {
       allEntries.addAll(entries);
       index += entries.length;
       debugPrint('Read ${allEntries.length}/$totalCount entries');
+
+      // Report progress after each chunk
+      onProgress?.call(allEntries.length, totalCount);
 
       // Small delay to avoid overwhelming BLE
       await Future.delayed(const Duration(milliseconds: 100));
@@ -361,12 +376,12 @@ class PineTimeService {
 
 /// Internal data structure for minute entries from PineTime
 class _MinuteEntry {
-  final int acceleration; // Pre-computed acceleration value (counts)
+  final double count; // Pre-computed acceleration value (counts)
   final int heartRate;
   final int timestamp; // Unix timestamp in seconds
 
   _MinuteEntry({
-    required this.acceleration,
+    required this.count,
     required this.heartRate,
     required this.timestamp,
   });
@@ -376,7 +391,7 @@ class _MinuteEntry {
 
   @override
   String toString() {
-    return '_MinuteEntry(accel: $acceleration, hr: $heartRate, time: $dateTime)';
+    return '_MinuteEntry(count: $count, hr: $heartRate, time: $dateTime)';
   }
 }
 
@@ -396,11 +411,7 @@ List<Counts> countsFromPineTimeData(List<_MinuteEntry> entries) {
     // PineTime already stores pre-computed acceleration values and heart rate
     // The acceleration value is already "counts" computed on the watch
     counts.add(
-      Counts(
-        t: entry.dateTime,
-        hr: entry.heartRate.toDouble(),
-        a: entry.acceleration.toDouble(),
-      ),
+      Counts(t: entry.dateTime, hr: entry.heartRate.toDouble(), a: entry.count),
     );
   }
 

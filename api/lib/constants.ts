@@ -49,3 +49,8 @@ export const SEDENTARY_THRESHOLD = 2700
 export const MOVING_THRESHOLD_PARA = 9515
 export const MOVING_THRESHOLD_TETRA = 4887
 export const MINUTES_FOR_SLEEP = 240
+
+// Bout configuration
+export const BOUT_GAP_TOLERANCE_MINUTES = 15 // Max gap before creating new bout (same activity)
+export const BOUT_MIN_COUNTS_FOR_PROCESSING = 3 // Minimum counts needed to trigger bout processing
+export const BOUT_MERGE_MAX_GAP_MINUTES = 10 // Max gap when merging adjacent bouts

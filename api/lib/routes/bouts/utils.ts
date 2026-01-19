@@ -1,7 +1,7 @@
 import UserModel from '../../db/models/User.js'
 import { overwriteEnergy, removeEnergyForPeriod } from '../../db/models/Energy.js'
 import AccelCountModel from '../../db/models/AccelCount.js'
-import BoutModel from '../../db/models/Bout.js'
+import BoutModel, { mergeBouts } from '../../db/models/Bout.js'
 import { Activity } from '../../constants.js'
 import {
   activityForAccAndCondition,
@@ -249,4 +249,17 @@ export const fillMockData = async (userId: string, days = 365) => {
       userId
     )
   }
+}
+
+export const mergeBoutsForUser = async (
+  userId: string,
+  options?: { maxGapMinutes?: number; from?: Date; to?: Date }
+) => {
+  const user = await UserModel.get(userId)
+
+  if (!user) {
+    throw new Error('User not found')
+  }
+
+  return mergeBouts(userId, options)
 }

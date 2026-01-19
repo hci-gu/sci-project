@@ -1,7 +1,13 @@
 import express from 'express'
 import { type ValidatedRequest } from 'express-joi-validation'
 import { getQuery, type GetQuerySchema } from '../validation.js'
-import { boutsForPeriod, fillMockData, removeBout, saveBout } from './utils.js'
+import {
+  boutsForPeriod,
+  fillMockData,
+  mergeBoutsForUser,
+  removeBout,
+  saveBout,
+} from './utils.js'
 import { boutBody, type BoutBodySchema } from './validation.js'
 
 const router = express.Router()
@@ -63,6 +69,23 @@ router.get('/:userId/mock', async (req, res) => {
     res.send({ ok: true })
   } catch (e) {
     console.log('GET /bouts/:userId/mock', e)
+    res.sendStatus(500)
+  }
+})
+
+router.post('/:userId/merge', async (req, res) => {
+  const { userId } = req.params
+  const { maxGapMinutes, from, to } = req.body
+
+  try {
+    const result = await mergeBoutsForUser(userId, {
+      maxGapMinutes,
+      from: from ? new Date(from) : undefined,
+      to: to ? new Date(to) : undefined,
+    })
+    res.json(result)
+  } catch (e) {
+    console.log('POST /bouts/:userId/merge', e)
     res.sendStatus(500)
   }
 })

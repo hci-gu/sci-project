@@ -2141,7 +2141,7 @@ abstract class AppLocalizations {
   /// No description provided for @syncSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Recordings synced successfully!'**
+  /// **'Sync completed successfully'**
   String get syncSuccess;
 
   /// No description provided for @syncNoData.
@@ -2221,6 +2221,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Ready to sync'**
   String get readyToSync;
+
+  /// No description provided for @syncing.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing...'**
+  String get syncing;
+
+  /// No description provided for @syncFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync failed: {error}'**
+  String syncFailed(String error);
+
+  /// No description provided for @syncPhaseConnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting to watch...'**
+  String get syncPhaseConnecting;
+
+  /// No description provided for @syncPhaseReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading data ({current}/{total})'**
+  String syncPhaseReading(int current, int total);
+
+  /// No description provided for @syncPhaseUploading.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading data...'**
+  String get syncPhaseUploading;
+
+  /// No description provided for @syncPhaseClearing.
+  ///
+  /// In en, this message translates to:
+  /// **'Clearing watch data...'**
+  String get syncPhaseClearing;
+
+  /// No description provided for @syncPhaseDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync complete'**
+  String get syncPhaseDone;
 
   /// No description provided for @generatedImageTitle.
   ///

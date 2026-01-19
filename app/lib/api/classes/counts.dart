@@ -241,7 +241,12 @@ class Counts {
 
 extension CountsExtension on Counts {
   Map<String, dynamic> toJson() {
-    return {'t': t.toIso8601String(), 'hr': hr, 'a': a};
+    final utc = t.toUtc();
+    final shifted = utc.add(const Duration(hours: 1));
+    final iso = shifted.toIso8601String();
+    final tStr =
+        iso.endsWith('Z') ? iso.replaceFirst('Z', '+01:00') : '$iso+01:00';
+    return {'t': tStr, 'hr': hr, 'a': a};
   }
 
   static Counts fromJson(Map<String, dynamic> json) {

@@ -1,7 +1,12 @@
 import moment from 'moment'
 import { DataTypes, Op, Sequelize, type ModelStatic } from 'sequelize'
 import { activityForAccAndCondition } from '../../adapters/energy/index.js'
-import { Activity, MINUTES_FOR_SLEEP } from '../../constants.js'
+import {
+  Activity,
+  MINUTES_FOR_SLEEP,
+  BOUT_GAP_TOLERANCE_MINUTES,
+  BOUT_MERGE_MAX_GAP_MINUTES,
+} from '../../constants.js'
 import { AccelCount, Bout, User } from '../classes.js'
 
 let sequelizeInstance: Sequelize
@@ -174,11 +179,14 @@ export const createBoutFromCounts = async (
   }
 
   const lastCountTime = counts[counts.length - 1].t
-  const fiveMinAgo = moment(lastCountTime).subtract(5, 'minutes')
+  const gapToleranceAgo = moment(lastCountTime).subtract(
+    BOUT_GAP_TOLERANCE_MINUTES,
+    'minutes'
+  )
   const boutEnd = moment(lastBout.t).add(lastBout.minutes, 'minutes')
 
-  // if activity is different from current bout, create a new bout
-  if (boutEnd.isBefore(fiveMinAgo) || lastBout.activity !== activity) {
+  // if activity is different from current bout, or gap exceeds tolerance, create a new bout
+  if (boutEnd.isBefore(gapToleranceAgo) || lastBout.activity !== activity) {
     const bout = await Model.save(
       {
         t: counts[counts.length - 1].t,
@@ -191,8 +199,9 @@ export const createBoutFromCounts = async (
     return bout
   }
 
-  // if activity is same as current bout, update number of minutes to it
-  lastBout.minutes += 1
+  // if activity is same as current bout, extend by the gap duration (fill the gap)
+  const gapMinutes = moment(lastCountTime).diff(boutEnd, 'minutes')
+  lastBout.minutes += Math.max(1, gapMinutes + 1)
 
   const middleOfTheNight = moment().set('hour', 4)
   if (
@@ -269,11 +278,15 @@ const upsertBoutAtMinute = async (
     lock: options?.transaction ? options.transaction.LOCK.UPDATE : undefined, // pessimistic if supported
   })
 
-  const fiveMinAgo = moment(minuteT).subtract(5, 'minutes')
+  const gapToleranceAgo = moment(minuteT).subtract(
+    BOUT_GAP_TOLERANCE_MINUTES,
+    'minutes'
+  )
+  const boutEnd = moment(lastBout?.t).add(lastBout?.minutes ?? 0, 'minutes')
 
   if (
     !lastBout ||
-    moment(lastBout.t).add(lastBout.minutes, 'minutes').isBefore(fiveMinAgo) ||
+    boutEnd.isBefore(gapToleranceAgo) ||
     lastBout.activity !== activity
   ) {
     // start a new 1-minute bout at minuteT
@@ -291,25 +304,95 @@ const upsertBoutAtMinute = async (
     return
   }
 
-  // Same activity & still contiguous → extend
+  // Same activity & within gap tolerance → extend by filling the gap
+  const gapMinutes = moment(minuteT).diff(boutEnd, 'minutes')
+  const newMinutes = lastBout.minutes + Math.max(1, gapMinutes + 1)
+
   await BoutModel.update(
-    { minutes: lastBout.minutes + 1 },
+    { minutes: newMinutes },
     { where: { id: lastBout.id }, transaction: options?.transaction }
   )
 
   // Sleep flip (optional – same logic but relative to minuteT)
-  const boutEnd = moment(lastBout.t).add(lastBout.minutes + 1, 'minutes')
+  const updatedBoutEnd = moment(lastBout.t).add(newMinutes, 'minutes')
   const middleOfTheNight = moment(minuteT)
     .set('hour', 4)
     .set('minute', 0)
     .set('second', 0)
   if (
-    lastBout.minutes + 1 > MINUTES_FOR_SLEEP &&
-    middleOfTheNight.isBetween(lastBout.t, boutEnd)
+    newMinutes > MINUTES_FOR_SLEEP &&
+    middleOfTheNight.isBetween(lastBout.t, updatedBoutEnd)
   ) {
     await BoutModel.update(
       { isSleeping: true },
       { where: { id: lastBout.id }, transaction: options?.transaction }
     )
   }
+}
+
+/**
+ * Merge adjacent bouts of the same activity type that have small gaps between them.
+ * This repairs fragmented bout data caused by data gaps or timing issues.
+ */
+export const mergeBouts = async (
+  userId: string,
+  options?: { maxGapMinutes?: number; from?: Date; to?: Date }
+) => {
+  const maxGap = options?.maxGapMinutes ?? BOUT_MERGE_MAX_GAP_MINUTES
+
+  const whereClause: any = {
+    UserId: userId,
+    isSleeping: false,
+    activity: {
+      [Op.in]: [Activity.sedentary, Activity.moving, Activity.active],
+    },
+  }
+
+  if (options?.from && options?.to) {
+    whereClause.t = { [Op.between]: [options.from, options.to] }
+  }
+
+  const bouts = await BoutModel.findAll({
+    attributes: ['id', 't', 'activity', 'minutes'],
+    where: whereClause,
+    order: [['t', 'ASC']],
+  })
+
+  if (bouts.length < 2) return { merged: 0, deleted: 0 }
+
+  const toDelete: number[] = []
+  let current = bouts[0]
+  let mergeCount = 0
+
+  for (let i = 1; i < bouts.length; i++) {
+    const bout = bouts[i]
+    const currentEnd = moment(current.t).add(current.minutes, 'minutes')
+    const gap = moment(bout.t).diff(currentEnd, 'minutes')
+
+    // Merge if same activity and gap is within tolerance
+    if (current.activity === bout.activity && gap <= maxGap && gap >= 0) {
+      // Extend current bout to include the gap and the next bout
+      current.minutes += gap + bout.minutes
+      toDelete.push(bout.id)
+      mergeCount++
+    } else {
+      // Save the current bout and move to next
+      if (current.changed()) {
+        await current.save()
+      }
+      current = bout
+    }
+  }
+
+  // Save the last bout if modified
+  if (current.changed()) {
+    await current.save()
+  }
+
+  // Delete merged bouts
+  if (toDelete.length > 0) {
+    await BoutModel.destroy({ where: { id: { [Op.in]: toDelete } } })
+  }
+
+  return { merged: mergeCount, deleted: toDelete.length }
 }

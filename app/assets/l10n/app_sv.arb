@@ -380,6 +380,31 @@
     "polarWatchDescription": "Polar Verity Sense eller kompatibel enhet",
     "pineTimeWatchDescription": "PineTime/InfiniTime smartklocka",
     "readyToSync": "Redo att synka",
+    "syncing": "Synkar...",
+    "syncSuccess": "Synkronisering slutförd",
+    "syncFailed": "Synkronisering misslyckades: {error}",
+    "@syncFailed": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "syncPhaseConnecting": "Ansluter till klocka...",
+    "syncPhaseReading": "Läser data ({current}/{total})",
+    "@syncPhaseReading": {
+        "placeholders": {
+            "current": {
+                "type": "int"
+            },
+            "total": {
+                "type": "int"
+            }
+        }
+    },
+    "syncPhaseUploading": "Laddar upp data...",
+    "syncPhaseClearing": "Rensar klockdata...",
+    "syncPhaseDone": "Synkronisering klar",
     "generatedImageTitle": "Genererad bild",
     "noImageFromServer": "Ingen bild returnerades från servern.",
     "generatingImage": "Genererar bild…",

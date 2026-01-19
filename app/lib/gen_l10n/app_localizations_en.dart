@@ -1101,7 +1101,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sync => 'Sync';
 
   @override
-  String get syncSuccess => 'Recordings synced successfully!';
+  String get syncSuccess => 'Sync completed successfully';
 
   @override
   String get syncNoData => 'No recordings found to sync.';
@@ -1141,6 +1141,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get readyToSync => 'Ready to sync';
+
+  @override
+  String get syncing => 'Syncing...';
+
+  @override
+  String syncFailed(String error) {
+    return 'Sync failed: $error';
+  }
+
+  @override
+  String get syncPhaseConnecting => 'Connecting to watch...';
+
+  @override
+  String syncPhaseReading(int current, int total) {
+    return 'Reading data ($current/$total)';
+  }
+
+  @override
+  String get syncPhaseUploading => 'Uploading data...';
+
+  @override
+  String get syncPhaseClearing => 'Clearing watch data...';
+
+  @override
+  String get syncPhaseDone => 'Sync complete';
 
   @override
   String get generatedImageTitle => 'Generated Image';

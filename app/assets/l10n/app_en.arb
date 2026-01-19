@@ -380,6 +380,31 @@
     "polarWatchDescription": "Polar Verity Sense or compatible device",
     "pineTimeWatchDescription": "PineTime/InfiniTime smart watch",
     "readyToSync": "Ready to sync",
+    "syncing": "Syncing...",
+    "syncSuccess": "Sync completed successfully",
+    "syncFailed": "Sync failed: {error}",
+    "@syncFailed": {
+        "placeholders": {
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+    "syncPhaseConnecting": "Connecting to watch...",
+    "syncPhaseReading": "Reading data ({current}/{total})",
+    "@syncPhaseReading": {
+        "placeholders": {
+            "current": {
+                "type": "int"
+            },
+            "total": {
+                "type": "int"
+            }
+        }
+    },
+    "syncPhaseUploading": "Uploading data...",
+    "syncPhaseClearing": "Clearing watch data...",
+    "syncPhaseDone": "Sync complete",
     "generatedImageTitle": "Generated Image",
     "noImageFromServer": "No image returned from server.",
     "generatingImage": "Generating image…",

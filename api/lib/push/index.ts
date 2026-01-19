@@ -1,5 +1,6 @@
 import PushNotifications from 'node-pushnotifications'
 import fs from 'fs'
+import serviceAccount from './cert/service-account.json' with { type: 'json' }
 
 let CERT_PATH = './dist/push/cert/cert.p8'
 if (!fs.existsSync(CERT_PATH)) {
@@ -7,8 +8,17 @@ if (!fs.existsSync(CERT_PATH)) {
 }
 
 const settings = {
-  gcm: {
-    id: process.env.GCM_KEY,
+  // gcm: {
+  //   id: process.env.GCM_KEY,
+  // },
+  fcm: {
+    appName: 'sci-movement',
+    serviceAccountKey: {
+      projectId: serviceAccount.project_id,
+      clientEmail: serviceAccount.client_email,
+      privateKey: serviceAccount.private_key,
+    },
+    credential: null,
   },
   apn: {
     token: {

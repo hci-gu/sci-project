@@ -4,6 +4,7 @@ import { saveEnergyFromCount } from './Energy.js'
 import { AccelCount } from '../classes.js'
 import moment from 'moment'
 import { createBoutFromCounts, createBoutsFromBatch } from './Bout.js'
+import { BOUT_MIN_COUNTS_FOR_PROCESSING } from '../../constants.js'
 
 const afterCreate = async (count: AccelCount, options?: any) => {
   // Allow callers to bypass the hook (for bulk/batch flows)
@@ -21,7 +22,7 @@ const afterCreate = async (count: AccelCount, options?: any) => {
     from: moment(count.t).subtract(4, 'minutes').toDate(),
     to: count.t,
   })
-  if (countsFromLastFiveMinutes.length === 5) {
+  if (countsFromLastFiveMinutes.length >= BOUT_MIN_COUNTS_FOR_PROCESSING) {
     createBoutFromCounts(user, countsFromLastFiveMinutes)
   }
 }
