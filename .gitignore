@@ -3,4 +3,4 @@ data_old
 .DS_Store
 .npm
 
-deploy/secrets.yaml
+deploy/secrets.yamldeploy/api.yaml
