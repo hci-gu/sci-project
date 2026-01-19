@@ -1087,6 +1087,22 @@ class AppLocalizationsSv extends AppLocalizations {
   String get bluetoothOff => 'Bluetooth är av';
 
   @override
+  String get bluetoothOffRetry =>
+      'Bluetooth är av. Slå på det och försök igen.';
+
+  @override
+  String get watchNotFoundReconnect =>
+      'Klockan hittades inte. Anslut klockan igen i Inställningar.';
+
+  @override
+  String get watchNotConfigured =>
+      'Ingen klocka är ansluten. Anslut din klocka i Inställningar.';
+
+  @override
+  String get watchConnectFailed =>
+      'Kunde inte ansluta till klockan. Flytta närmare och försök igen.';
+
+  @override
   String get recordingInProgress => 'Spelar in...';
 
   @override

@@ -9,6 +9,18 @@ import 'package:scimovement/storage.dart';
 
 enum WatchType { polar, pinetime, demo }
 
+const String kWatchNotFoundError = 'watch_not_found';
+const String kBluetoothOffError = 'bluetooth_off';
+const String kWatchNotConfiguredError = 'watch_not_configured';
+const String kConnectionFailedError = 'watch_connect_failed';
+
+class WatchSyncResult {
+  final bool ok;
+  final String? error;
+
+  const WatchSyncResult({required this.ok, this.error});
+}
+
 class ConnectedWatch {
   final String id;
   final WatchType type;
@@ -89,19 +101,22 @@ class ConnectedWatchNotifier extends Notifier<ConnectedWatch?> {
     Storage().removeConnectedWatch();
   }
 
-  Future<bool> syncData() async {
+  Future<WatchSyncResult> syncData() async {
     if (state == null) {
-      return false;
+      return const WatchSyncResult(ok: false);
     }
 
     // Both Polar and PineTime sync via the same BLE command
     // BleOwner routes to the correct handler based on watch type
     if (state?.type == WatchType.polar || state?.type == WatchType.pinetime) {
       final result = await sendBleCommand({'cmd': 'sync'});
-      return result['ok'] == true;
+      return WatchSyncResult(
+        ok: result['ok'] == true,
+        error: result['error'] as String?,
+      );
     }
 
-    return false;
+    return const WatchSyncResult(ok: false);
   }
 
   Future<bool> startRecording() async {

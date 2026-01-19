@@ -134,7 +134,11 @@ class BleOwner {
       } catch (e, st) {
         debugPrint('BleOwner error: $e\n$st');
         if (msg['reply'] is SendPort) {
-          (msg['reply'] as SendPort).send({'ok': false, 'error': e.toString()});
+          final error =
+              e is StateError && e.message is String
+                  ? e.message as String
+                  : e.toString();
+          (msg['reply'] as SendPort).send({'ok': false, 'error': error});
         }
       }
     });
@@ -316,7 +320,9 @@ class BleOwner {
 
     try {
       final stored = Storage().getConnectedWatch();
-      if (stored == null) return false;
+      if (stored == null) {
+        throw StateError(kWatchNotConfiguredError);
+      }
 
       // Send connecting phase
       sendProgress('connecting', 0, 0);
@@ -327,11 +333,36 @@ class BleOwner {
 
       if (!PineTimeService.instance.connected) {
         debugPrint('BleOwner: PineTime connection failed');
-        return false;
+        throw StateError(kConnectionFailedError);
       }
 
-      // Read all entries from the watch with progress callback
+      final state = await PineTimeService.instance.getState();
+      final int totalCount = state.storedEntries;
+
+      int lastIndex = Storage().getPineTimeLastIndex(stored.id) ?? -1;
+      int lastTimestamp = Storage().getPineTimeLastTimestamp(stored.id) ?? 0;
+      int startIndex = lastIndex + 1;
+
+      if (totalCount == 0) {
+        await Storage().setPineTimeLastIndex(stored.id, null);
+        await Storage().setPineTimeLastTimestamp(stored.id, null);
+        sendProgress('done', 0, 0);
+        Storage().setLastSync(DateTime.now());
+        return true;
+      }
+
+      if (startIndex > totalCount) {
+        // Device likely cleared or rolled over; reset cursor.
+        await Storage().setPineTimeLastIndex(stored.id, null);
+        await Storage().setPineTimeLastTimestamp(stored.id, null);
+        lastIndex = -1;
+        lastTimestamp = 0;
+        startIndex = 0;
+      }
+
+      // Read entries from the watch with progress callback
       final entries = await PineTimeService.instance.readAllEntries(
+        startIndex: startIndex,
         onProgress: (current, total) {
           sendProgress('reading', current, total);
         },
@@ -344,9 +375,20 @@ class BleOwner {
         return true;
       }
 
+      final int maxTimestamp = entries
+          .map((e) => e.timestamp)
+          .reduce((a, b) => a > b ? a : b);
+      final int newLastIndex = startIndex + entries.length - 1;
+
+      // Filter out already-uploaded timestamps as a safety net
+      final filteredEntries =
+          lastTimestamp > 0
+              ? entries.where((e) => e.timestamp > lastTimestamp).toList()
+              : entries;
+
       // Convert to Counts and upload
       sendProgress('uploading', 0, entries.length);
-      final counts = countsFromPineTimeData(entries);
+      final counts = countsFromPineTimeData(filteredEntries);
 
       if (counts.isNotEmpty) {
         try {
@@ -355,10 +397,30 @@ class BleOwner {
           await Storage().storePendingCounts(counts);
         }
 
-        // Clear data on watch after successful read
+        await Storage().setPineTimeLastIndex(stored.id, newLastIndex);
+        await Storage().setPineTimeLastTimestamp(stored.id, maxTimestamp);
+
+        // Clear data on watch after successful upload/persist
         sendProgress('clearing', 0, 0);
-        final cleared = await PineTimeService.instance.clearData();
+        bool cleared = false;
+        for (int i = 0; i < 2; i++) {
+          try {
+            cleared = await PineTimeService.instance.clearData();
+          } catch (_) {
+            cleared = false;
+          }
+          if (cleared) break;
+        }
         debugPrint('BleOwner: PineTime data cleared: $cleared');
+        if (!cleared) {
+          throw StateError('pinetime_clear_failed');
+        }
+
+        await Storage().setPineTimeLastIndex(stored.id, null);
+        await Storage().setPineTimeLastTimestamp(stored.id, null);
+      } else {
+        await Storage().setPineTimeLastIndex(stored.id, newLastIndex);
+        await Storage().setPineTimeLastTimestamp(stored.id, maxTimestamp);
       }
 
       sendProgress('done', entries.length, entries.length);
@@ -366,6 +428,10 @@ class BleOwner {
       debugPrint('BleOwner: PineTime sync done');
       return true;
     } catch (e, st) {
+      if (e is StateError && e.message is String) {
+        debugPrint('BleOwner: PineTime sync failed: ${e.message}');
+        rethrow;
+      }
       debugPrint('BleOwner: PineTime sync failed: $e\n$st');
       return false;
     }
@@ -567,10 +633,23 @@ class BleOwner {
     _syncing = true;
     _syncInflight = Completer<void>();
     try {
-      return await fn().timeout(_syncTimeout, onTimeout: () => false);
+      final result = Completer<bool>();
+      () async {
+        try {
+          result.complete(await fn());
+        } catch (_) {
+          if (!result.isCompleted) {
+            result.complete(false);
+          }
+        } finally {
+          _syncing = false;
+          _syncInflight!.complete();
+        }
+      }();
+
+      return await result.future.timeout(_syncTimeout, onTimeout: () => false);
     } finally {
-      _syncing = false;
-      _syncInflight!.complete();
+      // Lock is released when the sync task actually finishes.
     }
   }
 

@@ -39,14 +39,47 @@ class SyncWatchData extends HookConsumerWidget {
           Button(
             onPressed: () async {
               loading.value = true;
-              bool success =
+              final result =
                   await ref.read(connectedWatchProvider.notifier).syncData();
               if (context.mounted) {
-                if (success) {
+                if (result.ok) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                         content: Text(
                             AppLocalizations.of(context)!.syncSuccess)),
+                  );
+                } else if (result.error == kWatchNotFoundError) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        AppLocalizations.of(context)!
+                            .watchNotFoundReconnect,
+                      ),
+                    ),
+                  );
+                } else if (result.error == kBluetoothOffError) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        AppLocalizations.of(context)!.bluetoothOffRetry,
+                      ),
+                    ),
+                  );
+                } else if (result.error == kWatchNotConfiguredError) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        AppLocalizations.of(context)!.watchNotConfigured,
+                      ),
+                    ),
+                  );
+                } else if (result.error == kConnectionFailedError) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        AppLocalizations.of(context)!.watchConnectFailed,
+                      ),
+                    ),
                   );
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(

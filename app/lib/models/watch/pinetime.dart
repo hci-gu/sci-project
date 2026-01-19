@@ -3,10 +3,16 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:scimovement/api/classes/counts.dart';
+import 'package:scimovement/models/watch/watch.dart';
 
 /// UUIDs for InfiniTime Accelerometer Data Service
 final _accelDataServiceUuid = Guid("adafac00-4669-6c65-5472-616e73666572");
 final _transferCharUuid = Guid("adafac01-4669-6c65-5472-616e73666572");
+
+/// UUIDs for Current Time Service (CTS)
+final _ctsServiceUuid = Guid("00001805-0000-1000-8000-00805f9b34fb");
+final _currentTimeCharUuid = Guid("00002a2b-0000-1000-8000-00805f9b34fb");
+final _localTimeInfoCharUuid = Guid("00002a0f-0000-1000-8000-00805f9b34fb");
 
 /// Device name to scan for
 const String kInfiniTimeDeviceName = 'InfiniTime';
@@ -34,6 +40,8 @@ class PineTimeService {
 
   BluetoothDevice? _device;
   BluetoothCharacteristic? _characteristic;
+  BluetoothCharacteristic? _ctsCurrentTimeChar;
+  BluetoothCharacteristic? _ctsLocalTimeChar;
   bool connected = false;
   bool initialized = false;
   StreamSubscription? _connectionSub;
@@ -80,6 +88,8 @@ class PineTimeService {
     initialized = false;
     _device = null;
     _characteristic = null;
+    _ctsCurrentTimeChar = null;
+    _ctsLocalTimeChar = null;
     _instance = null;
   }
 
@@ -125,29 +135,27 @@ class PineTimeService {
           .first
           .timeout(
             const Duration(seconds: 5),
-            onTimeout: () => throw Exception('Bluetooth not available'),
+            onTimeout: () => throw StateError(kBluetoothOffError),
           );
     }
 
     // Find and connect to the device
     await FlutterBluePlus.startScan(timeout: const Duration(seconds: 10));
 
-    final scanResult = await FlutterBluePlus.scanResults.firstWhere((results) {
-      return results.any(
-        (r) =>
-            r.device.remoteId.str == identifier ||
-            r.device.platformName.contains(kInfiniTimeDeviceName) ||
-            r.advertisementData.localName.contains(kInfiniTimeDeviceName),
+    late final List<ScanResult> scanResult;
+    try {
+      scanResult = await FlutterBluePlus.scanResults.firstWhere((results) {
+        return results.any((r) => r.device.remoteId.str == identifier);
+      }).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () => throw StateError(kWatchNotFoundError),
       );
-    });
-
-    await FlutterBluePlus.stopScan();
+    } finally {
+      await FlutterBluePlus.stopScan();
+    }
 
     final infiniTimeResult = scanResult.firstWhere(
-      (r) =>
-          r.device.remoteId.str == identifier ||
-          r.device.platformName.contains(kInfiniTimeDeviceName) ||
-          r.advertisementData.localName.contains(kInfiniTimeDeviceName),
+      (r) => r.device.remoteId.str == identifier,
     );
 
     _device = infiniTimeResult.device;
@@ -163,6 +171,7 @@ class PineTimeService {
 
     // Discover services and find the accelerometer characteristic
     await _discoverCharacteristic();
+    await _syncCurrentTime();
   }
 
   Future<void> _discoverCharacteristic() async {
@@ -184,6 +193,67 @@ class PineTimeService {
     }
 
     debugPrint('Accelerometer data service not found!');
+  }
+
+  Future<void> _discoverCtsCharacteristics() async {
+    if (_device == null) return;
+
+    final services = await _device!.discoverServices();
+    for (final service in services) {
+      if (service.uuid == _ctsServiceUuid) {
+        for (final c in service.characteristics) {
+          if (c.uuid == _currentTimeCharUuid) {
+            _ctsCurrentTimeChar = c;
+          } else if (c.uuid == _localTimeInfoCharUuid) {
+            _ctsLocalTimeChar = c;
+          }
+        }
+      }
+    }
+  }
+
+  int _toUint8(int value) => value & 0xFF;
+
+  Future<void> _syncCurrentTime() async {
+    if (_device == null) return;
+    try {
+      if (_ctsCurrentTimeChar == null || _ctsLocalTimeChar == null) {
+        await _discoverCtsCharacteristics();
+      }
+      if (_ctsCurrentTimeChar == null || _ctsLocalTimeChar == null) {
+        debugPrint('CTS characteristics not found; skipping time sync');
+        return;
+      }
+
+      final now = DateTime.now();
+      final tzQuarters = (now.timeZoneOffset.inMinutes / 15).round();
+      // Dart DateTime has no DST flag; use 255 (unknown) per CTS spec.
+      const int dst = 255;
+
+      await _ctsLocalTimeChar!.write(
+        [_toUint8(tzQuarters), _toUint8(dst)],
+        withoutResponse: false,
+      );
+
+      final year = now.year;
+      await _ctsCurrentTimeChar!.write(
+        [
+          _toUint8(year),
+          _toUint8(year >> 8),
+          _toUint8(now.month),
+          _toUint8(now.day),
+          _toUint8(now.hour),
+          _toUint8(now.minute),
+          _toUint8(now.second),
+          _toUint8(now.weekday),
+          0, // fractions256
+          0, // adjustReason
+        ],
+        withoutResponse: false,
+      );
+    } catch (e) {
+      debugPrint('Failed to sync watch time: $e');
+    }
   }
 
   /// Get current state of the PineTime
@@ -310,6 +380,7 @@ class PineTimeService {
   /// Read all stored entries from the watch
   /// [onProgress] is called with (current, total) after each chunk is read
   Future<List<_MinuteEntry>> readAllEntries({
+    int startIndex = 0,
     void Function(int current, int total)? onProgress,
   }) async {
     final totalCount = await _getEntryCount();
@@ -323,8 +394,13 @@ class PineTimeService {
     }
 
     final allEntries = <_MinuteEntry>[];
-    int index = 0;
+    int index = startIndex < 0 ? 0 : startIndex;
     const chunkSize = 20;
+
+    if (index >= totalCount) {
+      debugPrint('Start index ($index) >= total ($totalCount); nothing to read');
+      return [];
+    }
 
     while (index < totalCount) {
       final entries = await _readEntries(index, chunkSize);

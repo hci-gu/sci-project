@@ -1086,6 +1086,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bluetoothOff => 'Bluetooth is off';
 
   @override
+  String get bluetoothOffRetry => 'Bluetooth is off. Turn it on and try again.';
+
+  @override
+  String get watchNotFoundReconnect =>
+      'Watch not found. Please reconnect your watch in Settings.';
+
+  @override
+  String get watchNotConfigured =>
+      'No watch is connected. Connect your watch in Settings.';
+
+  @override
+  String get watchConnectFailed =>
+      'Unable to connect to the watch. Move closer and try again.';
+
+  @override
   String get recordingInProgress => 'Recording...';
 
   @override

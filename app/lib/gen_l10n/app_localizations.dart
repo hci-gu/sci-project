@@ -2108,6 +2108,30 @@ abstract class AppLocalizations {
   /// **'Bluetooth is off'**
   String get bluetoothOff;
 
+  /// No description provided for @bluetoothOffRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth is off. Turn it on and try again.'**
+  String get bluetoothOffRetry;
+
+  /// No description provided for @watchNotFoundReconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch not found. Please reconnect your watch in Settings.'**
+  String get watchNotFoundReconnect;
+
+  /// No description provided for @watchNotConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'No watch is connected. Connect your watch in Settings.'**
+  String get watchNotConfigured;
+
+  /// No description provided for @watchConnectFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to connect to the watch. Move closer and try again.'**
+  String get watchConnectFailed;
+
   /// No description provided for @recordingInProgress.
   ///
   /// In en, this message translates to:

@@ -142,6 +142,40 @@ class Storage {
     prefs.remove('connectedWatchType');
   }
 
+  String _pinetimeLastIndexKey(String deviceId) =>
+      'pinetimeLastIndex:$deviceId';
+
+  String _pinetimeLastTimestampKey(String deviceId) =>
+      'pinetimeLastTimestamp:$deviceId';
+
+  int? getPineTimeLastIndex(String deviceId) {
+    return prefs.getInt(_pinetimeLastIndexKey(deviceId));
+  }
+
+  Future<void> setPineTimeLastIndex(String deviceId, int? index) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final key = _pinetimeLastIndexKey(deviceId);
+    if (index == null) {
+      await prefs.remove(key);
+    } else {
+      await prefs.setInt(key, index);
+    }
+  }
+
+  int? getPineTimeLastTimestamp(String deviceId) {
+    return prefs.getInt(_pinetimeLastTimestampKey(deviceId));
+  }
+
+  Future<void> setPineTimeLastTimestamp(String deviceId, int? timestamp) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final key = _pinetimeLastTimestampKey(deviceId);
+    if (timestamp == null) {
+      await prefs.remove(key);
+    } else {
+      await prefs.setInt(key, timestamp);
+    }
+  }
+
   DateTime? getLastSync() {
     final int? timestamp = prefs.getInt('lastSync');
     if (timestamp != null) {
