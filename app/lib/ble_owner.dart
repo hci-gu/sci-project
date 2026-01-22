@@ -9,8 +9,13 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:scimovement/storage.dart';
 import 'package:scimovement/api/api.dart';
 import 'package:scimovement/api/classes/counts.dart';
+import 'package:scimovement/models/watch/dfu/dfu_progress.dart';
+import 'package:scimovement/models/watch/dfu/dfu_transport.dart';
+import 'package:scimovement/models/watch/dfu/dfu_zip.dart';
+import 'package:scimovement/models/watch/dfu/legacy_dfu_controller.dart';
 import 'package:scimovement/models/watch/polar.dart';
 import 'package:scimovement/models/watch/pinetime.dart';
+import 'package:scimovement/models/watch/telemetry.dart';
 import 'package:scimovement/models/watch/watch.dart';
 
 import 'package:polar/polar.dart';
@@ -30,6 +35,15 @@ class BleOwner {
   StreamSubscription? _scanSub;
   bool _initialized = false;
   bool _scanning = false;
+  bool _dfuRunning = false;
+  Completer<void>? _dfuInflight;
+  DfuCancelToken? _dfuCancelToken;
+  Map<String, dynamic>? _stateCache;
+  DateTime? _stateCacheAt;
+  static const Duration _stateCacheTtl = Duration(seconds: 1);
+  String? _firmwareCache;
+  DateTime? _firmwareCacheAt;
+  static const Duration _firmwareCacheTtl = Duration(seconds: 30);
 
   // ---- Sync exclusivity/mutex & tuning knobs ----
   bool _syncing = false;
@@ -37,6 +51,7 @@ class BleOwner {
 
   static const Duration _settle = Duration(seconds: 2);
   static const Duration _syncTimeout = Duration(minutes: 1);
+  static const Duration _dfuTimeout = Duration(minutes: 15);
 
   /// If more than this many recordings (ACC+HR combined) are present,
   /// purge device storage and start fresh.
@@ -89,14 +104,14 @@ class BleOwner {
           if (sink == null) {
             reply.send({'ok': false, 'error': 'missing_sink'});
           } else {
-            // If a sync is in progress, don't start a scan (adapter contention)
-            if (_syncing) {
+            // If a sync or DFU is in progress, don't start a scan (contention)
+            if (_syncing || _dfuRunning) {
               sink.send({
                 'type': 'scan',
                 'event': 'done',
-                'error': 'sync_in_progress',
+                'error': 'busy',
               });
-              reply.send({'ok': false, 'error': 'sync_in_progress'});
+              reply.send({'ok': false, 'error': 'busy'});
             } else {
               // start and ACK immediately so UI can render
               _handleScanStart(
@@ -117,11 +132,25 @@ class BleOwner {
           final SendPort? progressSink = msg['progressSink'];
           final result = await _handleSync(progressSink: progressSink);
           reply.send({'ok': result, 'error': result ? null : 'sync_failed'});
+        } else if (msg['cmd'] == 'dfu_start') {
+          final SendPort? progressSink = msg['progressSink'];
+          final String? version = msg['version'];
+          final result = await _handleDfuStart(
+            progressSink: progressSink,
+            version: version,
+          );
+          reply.send({'ok': result, 'error': result ? null : 'dfu_failed'});
+        } else if (msg['cmd'] == 'dfu_cancel') {
+          _dfuCancelToken?.cancel();
+          reply.send({'ok': true});
         } else if (msg['cmd'] == 'connect') {
           final result = await _ensureConnected();
           reply.send({'ok': result, 'error': result ? null : 'connect_failed'});
         } else if (msg['cmd'] == 'ping') {
           reply.send({'ok': true});
+        } else if (msg['cmd'] == 'get_firmware_version') {
+          final s = await _getFirmwareVersion();
+          reply.send({'ok': true, 'data': s});
         } else if (msg['cmd'] == 'get_state') {
           final s = await _getWatchState();
           reply.send({'ok': true, 'data': s});
@@ -315,6 +344,71 @@ class BleOwner {
     });
   }
 
+  Future<bool> _handleDfuStart({
+    SendPort? progressSink,
+    String? version,
+  }) async {
+    return _runExclusiveDfu(() async {
+      await Storage().reloadPrefs();
+      final stored = Storage().getConnectedWatch();
+      if (stored == null || stored.type != WatchType.pinetime) {
+        return false;
+      }
+
+      PineTimeService.initialize(stored.id);
+      await PineTimeService.instance.start();
+
+      final cancelToken = DfuCancelToken();
+      _dfuCancelToken = cancelToken;
+
+      try {
+        String? targetVersion = version;
+        if (targetVersion == null) {
+          final latest = await Api().getLatestDfuRelease();
+          targetVersion = latest?.version;
+        }
+
+        if (targetVersion == null || targetVersion == 'unknown') {
+          throw StateError('dfu_no_version');
+        }
+
+        progressSink?.send(const DfuProgress(phase: 'downloading').toMap());
+        final zipBytes = await Api().downloadDfuZip(
+          version: targetVersion,
+          onProgress: (received, total) {
+            progressSink?.send(
+              DfuProgress(
+                phase: 'downloading',
+                current: received,
+                total: total,
+              ).toMap(),
+            );
+          },
+        );
+
+        progressSink?.send(const DfuProgress(phase: 'preparing').toMap());
+        final package = DfuZipParser.parse(zipBytes, version: targetVersion);
+
+        final transport = DfuTransport(PineTimeService.instance.device);
+        final controller = LegacyDfuController(
+          transport: transport,
+          cancelToken: cancelToken,
+        );
+
+        await controller.run(
+          package,
+          onProgress: (progress) => progressSink?.send(progress.toMap()),
+        );
+
+        return true;
+      } finally {
+        try {
+          await PineTimeService.instance.stop();
+        } catch (_) {}
+      }
+    });
+  }
+
   /// Handle sync for PineTime watch
   Future<bool> _handlePineTimeSync({SendPort? progressSink}) async {
     void sendProgress(String phase, int current, int total) {
@@ -337,11 +431,41 @@ class BleOwner {
 
       // Initialize and connect to PineTime
       PineTimeService.initialize(stored.id);
-      await PineTimeService.instance.start();
+      for (int attempt = 0; attempt < 3; attempt++) {
+        try {
+          await PineTimeService.instance.start();
+          break;
+        } catch (e) {
+          if (attempt == 2) rethrow;
+          await Future.delayed(const Duration(seconds: 1));
+        }
+      }
 
       if (!PineTimeService.instance.connected) {
         debugPrint('BleOwner: PineTime connection failed');
         throw StateError(kConnectionFailedError);
+      }
+
+      try {
+        debugPrint('BleOwner: telemetry fetch start');
+        final WatchTelemetry? telemetry =
+            await PineTimeService.instance.getTelemetry();
+        if (telemetry != null) {
+          debugPrint('BleOwner: telemetry fetch ok');
+          final firmwareVersion =
+              await PineTimeService.instance.getFirmwareRevision();
+          final enriched = telemetry.withContext(
+            watchId: stored.id,
+            firmwareVersion: firmwareVersion,
+            timestamp: DateTime.now(),
+          );
+          await Api().uploadTelemetry(enriched);
+          debugPrint('BleOwner: telemetry upload ok');
+        } else {
+          debugPrint('BleOwner: telemetry fetch empty');
+        }
+      } catch (e) {
+        debugPrint('BleOwner: telemetry upload failed: $e');
       }
 
       final state = await PineTimeService.instance.getState();
@@ -438,7 +562,7 @@ class BleOwner {
     } catch (e, st) {
       if (e is StateError && e.message is String) {
         debugPrint('BleOwner: PineTime sync failed: ${e.message}');
-        rethrow;
+        return false;
       }
       debugPrint('BleOwner: PineTime sync failed: $e\n$st');
       return false;
@@ -551,30 +675,106 @@ class BleOwner {
 
   /// Get watch state based on connected watch type
   Future<Map<String, dynamic>> _getWatchState() async {
+    final now = DateTime.now();
+    if (_stateCacheAt != null &&
+        now.difference(_stateCacheAt!) < _stateCacheTtl &&
+        _stateCache != null) {
+      return _stateCache!;
+    }
+
     await Storage().reloadPrefs();
     final stored = Storage().getConnectedWatch();
 
     if (stored == null) {
-      return {
+      final state = {
         'bluetoothEnabled': false,
         'connected': false,
         'isRecording': false,
       };
+      _stateCache = state;
+      _stateCacheAt = now;
+      return state;
     }
 
     if (stored.type == WatchType.pinetime) {
-      return _getPineTimeState();
+      final state = await _getPineTimeState();
+      _stateCache = state;
+      _stateCacheAt = now;
+      return state;
     }
 
-    return _getPolarState();
+    final state = await _getPolarState();
+    _stateCache = state;
+    _stateCacheAt = now;
+    return state;
+  }
+
+  Future<Map<String, dynamic>> _getFirmwareVersion() async {
+    if (_syncing || _dfuRunning) {
+      debugPrint('PineTime firmware version skipped: busy');
+      return {'firmwareVersion': _firmwareCache};
+    }
+    if (_firmwareCacheAt != null &&
+        DateTime.now().difference(_firmwareCacheAt!) < _firmwareCacheTtl &&
+        _firmwareCache != null) {
+      return {'firmwareVersion': _firmwareCache};
+    }
+    await Storage().reloadPrefs();
+    final stored = Storage().getConnectedWatch();
+
+    if (stored == null || stored.type != WatchType.pinetime) {
+      return {'firmwareVersion': null};
+    }
+
+    try {
+      final service = PineTimeService.instanceOrNull;
+      bool startedHere = false;
+      if (service == null || !service.connected) {
+        PineTimeService.initialize(stored.id);
+        // Retry once; watch may not be advertising immediately after disconnect.
+        for (int attempt = 0; attempt < 2; attempt++) {
+          try {
+            await PineTimeService.instance.start();
+            startedHere = true;
+            break;
+          } catch (_) {
+            await Future.delayed(const Duration(seconds: 1));
+          }
+        }
+      }
+      if (!PineTimeService.instance.connected) {
+        return {'firmwareVersion': null};
+      }
+      final version =
+          await PineTimeService.instance.getFirmwareRevision(refresh: true);
+      if (version != null) {
+        _firmwareCache = version;
+        _firmwareCacheAt = DateTime.now();
+      }
+      return {'firmwareVersion': version};
+    } catch (e) {
+      if (e is StateError &&
+          (e.message == kWatchNotFoundError ||
+              e.message == kBluetoothOffError)) {
+        debugPrint('PineTime firmware version unavailable: ${e.message}');
+      } else {
+        debugPrint('Error getting PineTime firmware version: $e');
+      }
+      return {'firmwareVersion': null};
+    } finally {
+      try {
+        final service = PineTimeService.instanceOrNull;
+        if (service != null && service.connected) {
+          await service.stop();
+        }
+      } catch (_) {}
+    }
   }
 
   Future<Map<String, dynamic>> _getPineTimeState() async {
-    print("Getting PineTime state");
     try {
       // Check if PineTimeService is initialized before accessing instance
       final service = PineTimeService.instanceOrNull;
-      print("PineTime service: $service");
       if (service == null || !service.connected) {
         return {
           'bluetoothEnabled': true,
@@ -583,13 +783,13 @@ class BleOwner {
         };
       }
 
-      final state = await service.getState();
-      print("PineTime state: $state");
+      final state = await service.getState(refreshFirmware: true);
       return {
         'bluetoothEnabled': true,
         'connected': state.connected,
         'isRecording': false, // PineTime doesn't have continuous recording
         'storedEntries': state.storedEntries,
+        'firmwareVersion': state.firmwareRevision,
       };
     } catch (e) {
       debugPrint('Error getting PineTime state: $e');
@@ -641,6 +841,9 @@ class BleOwner {
   }
 
   Future<bool> _runExclusiveSync(Future<bool> Function() fn) async {
+    if (_dfuRunning) {
+      await _dfuInflight?.future;
+    }
     if (_syncing) {
       // Coalesce: allow caller to "succeed" by piggy-backing on the in-flight sync.
       await _syncInflight?.future;
@@ -666,6 +869,40 @@ class BleOwner {
       return await result.future.timeout(_syncTimeout, onTimeout: () => false);
     } finally {
       // Lock is released when the sync task actually finishes.
+    }
+  }
+
+  Future<bool> _runExclusiveDfu(Future<bool> Function() fn) async {
+    if (_syncing) {
+      await _syncInflight?.future;
+    }
+    if (_dfuRunning) {
+      await _dfuInflight?.future;
+      return true;
+    }
+
+    _dfuRunning = true;
+    _dfuInflight = Completer<void>();
+
+    try {
+      final result = Completer<bool>();
+      () async {
+        try {
+          result.complete(await fn());
+        } catch (_) {
+          if (!result.isCompleted) {
+            result.complete(false);
+          }
+        } finally {
+          _dfuRunning = false;
+          _dfuCancelToken = null;
+          _dfuInflight?.complete();
+        }
+      }();
+
+      return await result.future.timeout(_dfuTimeout, onTimeout: () => false);
+    } finally {
+      // Lock is released when the DFU task actually finishes.
     }
   }
 
@@ -777,6 +1014,7 @@ Future<Map<String, dynamic>> sendBleCommand(
       'and background services are running.',
     );
   }
+  final ownerPort = owner;
 
   if (cmd['cmd'] != 'ping') {
     bool ok = await _pingOwner(owner);
@@ -794,7 +1032,7 @@ Future<Map<String, dynamic>> sendBleCommand(
   }
 
   final rp = ReceivePort();
-  owner.send({...cmd, 'reply': rp.sendPort});
+  ownerPort.send({...cmd, 'reply': rp.sendPort});
 
   final result = await rp.first as Map<String, dynamic>;
   rp.close();

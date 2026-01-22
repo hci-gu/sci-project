@@ -500,6 +500,114 @@ abstract class AppLocalizations {
   /// **'Watch settings'**
   String get watchSettings;
 
+  /// No description provided for @firmwareUpdateConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Update firmware?'**
+  String get firmwareUpdateConfirmTitle;
+
+  /// No description provided for @firmwareUpdateConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The watch will reboot. Keep it nearby and don\'t close the app.'**
+  String get firmwareUpdateConfirmBody;
+
+  /// No description provided for @firmwareUpdateChecking.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking for firmware update...'**
+  String get firmwareUpdateChecking;
+
+  /// No description provided for @firmwareUpdateNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No firmware update information available.'**
+  String get firmwareUpdateNotAvailable;
+
+  /// No description provided for @firmwareUpdateLatest.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest firmware: {version}'**
+  String firmwareUpdateLatest(Object version);
+
+  /// No description provided for @firmwareUpdateAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch has version {current}, latest is {latest}.'**
+  String firmwareUpdateAvailable(Object current, Object latest);
+
+  /// No description provided for @firmwareUpdatePrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you want to update?'**
+  String get firmwareUpdatePrompt;
+
+  /// No description provided for @firmwareUpdateButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Update firmware'**
+  String get firmwareUpdateButton;
+
+  /// No description provided for @firmwareUpdateInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Updating firmware...'**
+  String get firmwareUpdateInProgress;
+
+  /// No description provided for @firmwareUpdateDownloading.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading firmware...'**
+  String get firmwareUpdateDownloading;
+
+  /// No description provided for @firmwareUpdatePreparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing update...'**
+  String get firmwareUpdatePreparing;
+
+  /// No description provided for @firmwareUpdateConnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting to watch...'**
+  String get firmwareUpdateConnecting;
+
+  /// No description provided for @firmwareUpdateInitPacket.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending init packet...'**
+  String get firmwareUpdateInitPacket;
+
+  /// No description provided for @firmwareUpdateTransferring.
+  ///
+  /// In en, this message translates to:
+  /// **'Transferring firmware...'**
+  String get firmwareUpdateTransferring;
+
+  /// No description provided for @firmwareUpdateValidating.
+  ///
+  /// In en, this message translates to:
+  /// **'Validating firmware...'**
+  String get firmwareUpdateValidating;
+
+  /// No description provided for @firmwareUpdateRebooting.
+  ///
+  /// In en, this message translates to:
+  /// **'Rebooting watch...'**
+  String get firmwareUpdateRebooting;
+
+  /// No description provided for @firmwareUpdateDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Update complete. Validate on watch (Settings > Firmware).'**
+  String get firmwareUpdateDone;
+
+  /// No description provided for @firmwareUpdateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Firmware update failed: {error}'**
+  String firmwareUpdateFailed(Object error);
+
   /// No description provided for @paraplegic.
   ///
   /// In en, this message translates to:

@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/api/classes/counts.dart';
@@ -9,6 +10,7 @@ import 'package:scimovement/api/classes/journal/journal.dart';
 import 'package:scimovement/api/classes/journal/spasticity.dart';
 import 'package:scimovement/models/goals.dart';
 import 'package:scimovement/models/pagination.dart';
+import 'package:scimovement/models/watch/telemetry.dart';
 
 const String apiUrl = 'https://sci-api.prod.appadem.in';
 // const String apiUrl = 'http://192.168.0.5:4000';
@@ -177,6 +179,33 @@ class Api {
     return getUser(_userId);
   }
 
+  Future<DfuReleaseInfo?> getLatestDfuRelease() async {
+    try {
+      final response = await dio.get('/dfu/latest');
+      if (response.statusCode == 200 && response.data is Map) {
+        return DfuReleaseInfo.fromJson(
+          (response.data as Map).cast<String, dynamic>(),
+        );
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  Future<Uint8List> downloadDfuZip({
+    required String version,
+    void Function(int, int)? onProgress,
+  }) async {
+    final response = await dio.get(
+      '/dfu/download',
+      queryParameters: {'version': version},
+      options: Options(responseType: ResponseType.bytes),
+      onReceiveProgress: onProgress,
+    );
+
+    final data = response.data as List<int>;
+    return Uint8List.fromList(data);
+  }
+
   Future<List<JournalEntry>> getJournalForType(
     JournalType type,
     DateTime date,
@@ -318,6 +347,16 @@ class Api {
       '/counts/$_userId',
       data: counts.map((c) => c.toJson()).toList(),
     );
+  }
+
+  Future uploadTelemetry(WatchTelemetry telemetry) async {
+    final response = await dio.post(
+      '/telemetry/$_userId',
+      data: telemetry.toJson(),
+    );
+    if (response.statusCode != null) {
+      debugPrint('Api: telemetry upload status ${response.statusCode}');
+    }
   }
 
   Future<Uint8List?> getGeneratedImage({String? userId}) async {

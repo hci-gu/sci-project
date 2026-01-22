@@ -214,6 +214,69 @@ class AppLocalizationsEn extends AppLocalizations {
   String get watchSettings => 'Watch settings';
 
   @override
+  String get firmwareUpdateConfirmTitle => 'Update firmware?';
+
+  @override
+  String get firmwareUpdateConfirmBody =>
+      'The watch will reboot. Keep it nearby and don\'t close the app.';
+
+  @override
+  String get firmwareUpdateChecking => 'Checking for firmware update...';
+
+  @override
+  String get firmwareUpdateNotAvailable =>
+      'No firmware update information available.';
+
+  @override
+  String firmwareUpdateLatest(Object version) {
+    return 'Latest firmware: $version';
+  }
+
+  @override
+  String firmwareUpdateAvailable(Object current, Object latest) {
+    return 'Watch has version $current, latest is $latest.';
+  }
+
+  @override
+  String get firmwareUpdatePrompt => 'Do you want to update?';
+
+  @override
+  String get firmwareUpdateButton => 'Update firmware';
+
+  @override
+  String get firmwareUpdateInProgress => 'Updating firmware...';
+
+  @override
+  String get firmwareUpdateDownloading => 'Downloading firmware...';
+
+  @override
+  String get firmwareUpdatePreparing => 'Preparing update...';
+
+  @override
+  String get firmwareUpdateConnecting => 'Connecting to watch...';
+
+  @override
+  String get firmwareUpdateInitPacket => 'Sending init packet...';
+
+  @override
+  String get firmwareUpdateTransferring => 'Transferring firmware...';
+
+  @override
+  String get firmwareUpdateValidating => 'Validating firmware...';
+
+  @override
+  String get firmwareUpdateRebooting => 'Rebooting watch...';
+
+  @override
+  String get firmwareUpdateDone =>
+      'Update complete. Validate on watch (Settings > Firmware).';
+
+  @override
+  String firmwareUpdateFailed(Object error) {
+    return 'Firmware update failed: $error';
+  }
+
+  @override
   String get paraplegic => 'Paraplegic';
 
   @override

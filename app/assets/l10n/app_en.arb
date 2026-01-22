@@ -68,6 +68,40 @@
     "@_SETTINGS": {},
     "pushPermissionsErrorMessage": "You need to turn on notifications in your phone's app settings.",
     "watchSettings": "Watch settings",
+    "firmwareUpdateConfirmTitle": "Update firmware?",
+    "firmwareUpdateConfirmBody": "The watch will reboot. Keep it nearby and don't close the app.",
+    "firmwareUpdateChecking": "Checking for firmware update...",
+    "firmwareUpdateNotAvailable": "No firmware update information available.",
+    "firmwareUpdateLatest": "Latest firmware: {version}",
+    "@firmwareUpdateLatest": {
+      "placeholders": {
+        "version": {}
+      }
+    },
+    "firmwareUpdateAvailable": "Watch has version {current}, latest is {latest}.",
+    "@firmwareUpdateAvailable": {
+      "placeholders": {
+        "current": {},
+        "latest": {}
+      }
+    },
+    "firmwareUpdatePrompt": "Do you want to update?",
+    "firmwareUpdateButton": "Update firmware",
+    "firmwareUpdateInProgress": "Updating firmware...",
+    "firmwareUpdateDownloading": "Downloading firmware...",
+    "firmwareUpdatePreparing": "Preparing update...",
+    "firmwareUpdateConnecting": "Connecting to watch...",
+    "firmwareUpdateInitPacket": "Sending init packet...",
+    "firmwareUpdateTransferring": "Transferring firmware...",
+    "firmwareUpdateValidating": "Validating firmware...",
+    "firmwareUpdateRebooting": "Rebooting watch...",
+    "firmwareUpdateDone": "Update complete. Validate on watch (Settings > Firmware).",
+    "firmwareUpdateFailed": "Firmware update failed: {error}",
+    "@firmwareUpdateFailed": {
+        "placeholders": {
+            "error": {}
+        }
+    },
     "@_APP_TERMS": {},
     "paraplegic": "Paraplegic",
     "tetraplegic": "Tetraplegic",

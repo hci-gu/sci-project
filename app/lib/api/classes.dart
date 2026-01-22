@@ -402,3 +402,34 @@ class Bout {
     return '${from.hour.toString().padLeft(2, '0')}:${from.minute.toString().padLeft(2, '0')} - ${to.hour.toString().padLeft(2, '0')}:${to.minute.toString().padLeft(2, '0')}, ${DateFormat(DateFormat.YEAR_ABBR_MONTH_DAY).format(time)}';
   }
 }
+
+class DfuReleaseInfo {
+  final String version;
+  final int? sizeBytes;
+  final String? notes;
+  final String? downloadUrl;
+  final DateTime? releasedAt;
+
+  DfuReleaseInfo({
+    required this.version,
+    this.sizeBytes,
+    this.notes,
+    this.downloadUrl,
+    this.releasedAt,
+  });
+
+  factory DfuReleaseInfo.fromJson(Map<String, dynamic> json) {
+    final releasedAtRaw = json['releasedAt'] ?? json['released_at'];
+    DateTime? releasedAt;
+    if (releasedAtRaw is String) {
+      releasedAt = DateTime.tryParse(releasedAtRaw);
+    }
+    return DfuReleaseInfo(
+      version: json['version']?.toString() ?? 'unknown',
+      sizeBytes: json['sizeBytes'] ?? json['size_bytes'],
+      notes: json['notes']?.toString(),
+      downloadUrl: json['downloadUrl']?.toString() ?? json['download_url'],
+      releasedAt: releasedAt,
+    );
+  }
+}

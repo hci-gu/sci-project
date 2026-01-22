@@ -68,6 +68,40 @@
     "@_SETTINGS": {},
     "pushPermissionsErrorMessage": "Du måste slå på notifikationer i telefonens appinställningar.",
     "watchSettings": "Klockinställningar",
+    "firmwareUpdateConfirmTitle": "Uppdatera firmware?",
+    "firmwareUpdateConfirmBody": "Klockan startar om. Ha den nära och stäng inte appen.",
+    "firmwareUpdateChecking": "Kontrollerar firmwareuppdatering...",
+    "firmwareUpdateNotAvailable": "Ingen information om firmwareuppdatering.",
+    "firmwareUpdateLatest": "Senaste firmware: {version}",
+    "@firmwareUpdateLatest": {
+      "placeholders": {
+        "version": {}
+      }
+    },
+    "firmwareUpdateAvailable": "Klockan har version {current}, senaste är {latest}.",
+    "@firmwareUpdateAvailable": {
+      "placeholders": {
+        "current": {},
+        "latest": {}
+      }
+    },
+    "firmwareUpdatePrompt": "Vill du uppdatera?",
+    "firmwareUpdateButton": "Uppdatera firmware",
+    "firmwareUpdateInProgress": "Uppdaterar firmware...",
+    "firmwareUpdateDownloading": "Laddar ner firmware...",
+    "firmwareUpdatePreparing": "Förbereder uppdatering...",
+    "firmwareUpdateConnecting": "Ansluter till klockan...",
+    "firmwareUpdateInitPacket": "Skickar init-paket...",
+    "firmwareUpdateTransferring": "Överför firmware...",
+    "firmwareUpdateValidating": "Validerar firmware...",
+    "firmwareUpdateRebooting": "Startar om klockan...",
+    "firmwareUpdateDone": "Uppdatering klar. Validera på klockan (Inställningar > Firmware).",
+    "firmwareUpdateFailed": "Firmwareuppdatering misslyckades: {error}",
+    "@firmwareUpdateFailed": {
+        "placeholders": {
+            "error": {}
+        }
+    },
     "@_APP_TERMS": {},
     "paraplegic": "Paraplegiker",
     "tetraplegic": "Tetraplegiker",

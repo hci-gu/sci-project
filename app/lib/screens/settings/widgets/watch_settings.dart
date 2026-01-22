@@ -3,6 +3,8 @@ import 'dart:isolate';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:scimovement/api/api.dart';
+import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/ble_owner.dart';
 import 'package:scimovement/models/watch/watch.dart';
 import 'package:scimovement/theme/theme.dart';
@@ -27,6 +29,22 @@ class SyncProgress {
   double get progress => total > 0 ? current / total : 0.0;
 }
 
+class DfuProgressState {
+  final String phase;
+  final int current;
+  final int total;
+  final String? message;
+
+  const DfuProgressState({
+    this.phase = '',
+    this.current = 0,
+    this.total = 0,
+    this.message,
+  });
+
+  double get progress => total > 0 ? current / total : 0.0;
+}
+
 class WatchSettings extends HookConsumerWidget {
   const WatchSettings({super.key});
 
@@ -35,19 +53,35 @@ class WatchSettings extends HookConsumerWidget {
     final watch = ref.watch(connectedWatchProvider);
     final isSyncing = useState(false);
     final syncProgress = useState<SyncProgress>(const SyncProgress());
-    final refresh = useState(
-      Future.wait([
+    final isUpdating = useState(false);
+    final dfuProgress = useState<DfuProgressState>(
+      const DfuProgressState(),
+    );
+    Future<List<dynamic>> fetchWatchState() {
+      final futures = <Future<dynamic>>[
         sendBleCommand({'cmd': 'get_state'})
-            .then((m) {
-              final data = m['data'];
-              if (data is Map) {
-                return data;
-              }
-              return <String, dynamic>{};
-            })
+            .then((m) => m['data'] as Map? ?? {})
             .catchError((_) => <String, dynamic>{}),
-        Future.delayed(const Duration(seconds: 1)),
-      ]),
+      ];
+      if (watch?.type == WatchType.pinetime &&
+          !isSyncing.value &&
+          !isUpdating.value) {
+        futures.add(
+          sendBleCommand({'cmd': 'get_firmware_version'})
+              .then((m) => m['data'] as Map? ?? {})
+              .catchError((_) => <String, dynamic>{}),
+        );
+      } else {
+        futures.add(Future.value(<String, dynamic>{}));
+      }
+      futures.add(Future.delayed(const Duration(seconds: 1)));
+      return Future.wait(futures);
+    }
+    final latestDfu = useState<Future<DfuReleaseInfo?>>(
+      Api().getLatestDfuRelease(),
+    );
+    final refresh = useState(
+      fetchWatchState(),
     );
 
     if (watch == null) {
@@ -55,6 +89,75 @@ class WatchSettings extends HookConsumerWidget {
         padding: AppTheme.elementPadding,
         child: const Center(child: ConnectWatch()),
       );
+    }
+
+    Future<void> handleDfuUpdate(DfuReleaseInfo? releaseInfo) async {
+      final l10n = AppLocalizations.of(context)!;
+      final bool? confirmed = await confirmDialog(
+        context,
+        title: l10n.firmwareUpdateConfirmTitle,
+        message: l10n.firmwareUpdateConfirmBody,
+      );
+      if (confirmed != true) return;
+
+      isUpdating.value = true;
+      dfuProgress.value = const DfuProgressState(phase: 'downloading');
+
+      final progressPort = ReceivePort();
+      progressPort.listen((msg) {
+        if (msg is Map && msg['type'] == 'dfu_progress') {
+          dfuProgress.value = DfuProgressState(
+            phase: msg['phase'] ?? '',
+            current: msg['current'] ?? 0,
+            total: msg['total'] ?? 0,
+            message: msg['message']?.toString(),
+          );
+        }
+      });
+
+      try {
+        final result = await sendBleCommand({
+          'cmd': 'dfu_start',
+          'version': releaseInfo?.version,
+          'progressSink': progressPort.sendPort,
+        });
+        if (context.mounted) {
+          if (result['ok'] == true) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(l10n.firmwareUpdateDone),
+                backgroundColor: Colors.green,
+              ),
+            );
+            latestDfu.value = Api().getLatestDfuRelease();
+            refresh.value = fetchWatchState();
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  l10n.firmwareUpdateFailed(
+                    result['error']?.toString() ?? l10n.genericError,
+                  ),
+                ),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.firmwareUpdateFailed(e.toString())),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } finally {
+        progressPort.close();
+        isUpdating.value = false;
+        dfuProgress.value = const DfuProgressState();
+      }
     }
 
     Future<void> handleSync() async {
@@ -89,12 +192,7 @@ class WatchSettings extends HookConsumerWidget {
               ),
             );
             // Refresh the state after sync
-            refresh.value = Future.wait([
-              sendBleCommand({
-                'cmd': 'get_state',
-              }).then((m) => m['data'] as Map? ?? {}),
-              Future.delayed(const Duration(seconds: 1)),
-            ]);
+            refresh.value = fetchWatchState();
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -134,9 +232,16 @@ class WatchSettings extends HookConsumerWidget {
           future: refresh.value,
           builder: (ctx, snapshot) {
             final data = snapshot.data?[0] as Map<dynamic, dynamic>? ?? {};
+            final firmwareData =
+                snapshot.data?[1] as Map<dynamic, dynamic>? ?? {};
+            final mergedData =
+                firmwareData['firmwareVersion'] != null
+                    ? {...data, 'firmwareVersion': firmwareData['firmwareVersion']}
+                    : data;
             final isLoading =
                 snapshot.connectionState != ConnectionState.done ||
                 isSyncing.value;
+            final firmwareVersion = mergedData['firmwareVersion']?.toString();
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -149,7 +254,7 @@ class WatchSettings extends HookConsumerWidget {
                         : _watchConnectionRow(
                           ctx,
                           ref,
-                          data,
+                          mergedData,
                           watch,
                           isSyncing: isSyncing.value,
                         ),
@@ -195,12 +300,7 @@ class WatchSettings extends HookConsumerWidget {
                         AppTheme.spacer2x,
                         Button(
                           onPressed: () {
-                            refresh.value = Future.wait([
-                              sendBleCommand({
-                                'cmd': 'get_state',
-                              }).then((m) => m['data'] as Map? ?? {}),
-                              Future.delayed(const Duration(seconds: 1)),
-                            ]);
+                            refresh.value = fetchWatchState();
                           },
                           title: AppLocalizations.of(context)!.refresh,
                           icon: Icons.refresh,
@@ -238,6 +338,95 @@ class WatchSettings extends HookConsumerWidget {
                         title: AppLocalizations.of(context)!.sync,
                         icon: Icons.sync,
                         loading: false,
+                        disabled: isUpdating.value,
+                      );
+                    },
+                  ),
+                  AppTheme.spacer2x,
+                  FutureBuilder(
+                    future: latestDfu.value,
+                    builder: (context, snapshot) {
+                      final l10n = AppLocalizations.of(context)!;
+                      final info = snapshot.data;
+                      final currentVersion =
+                          firmwareVersion?.trim().isNotEmpty == true &&
+                                  firmwareVersion != 'unknown'
+                              ? firmwareVersion!.trim()
+                              : null;
+
+                      if (isUpdating.value) {
+                        return _DfuProgressIndicator(
+                          progress: dfuProgress.value,
+                        );
+                      }
+
+                      if (snapshot.connectionState != ConnectionState.done) {
+                        return Row(
+                          children: [
+                            SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppTheme.colors.primary,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              l10n.firmwareUpdateChecking,
+                              style: AppTheme.paragraphSmall,
+                            ),
+                          ],
+                        );
+                      }
+
+                      if (info == null) {
+                        return Text(
+                          l10n.firmwareUpdateNotAvailable,
+                          style: AppTheme.paragraphSmall,
+                        );
+                      }
+
+                      final latestVersion =
+                          info.version.trim().isNotEmpty && info.version != 'unknown'
+                              ? info.version.trim()
+                              : null;
+                      final isUpdateAvailable =
+                          currentVersion != null &&
+                          latestVersion != null &&
+                          _isNewerVersion(latestVersion, currentVersion);
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.firmwareUpdateLatest(info.version),
+                            style: AppTheme.paragraphSmall,
+                          ),
+                          if (isUpdateAvailable) ...[
+                            AppTheme.spacer2x,
+                            Text(
+                              l10n.firmwareUpdateAvailable(
+                                currentVersion!,
+                                latestVersion!,
+                              ),
+                              style: AppTheme.paragraphSmall,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              l10n.firmwareUpdatePrompt,
+                              style: AppTheme.paragraphSmall,
+                            ),
+                            AppTheme.spacer2x,
+                            Button(
+                              onPressed: () => handleDfuUpdate(info),
+                              title: l10n.firmwareUpdateButton,
+                              icon: Icons.system_update,
+                              loading: false,
+                              disabled: isUpdating.value || isSyncing.value,
+                            ),
+                          ],
+                        ],
                       );
                     },
                   ),
@@ -286,6 +475,37 @@ class WatchSettings extends HookConsumerWidget {
         ),
       ],
     );
+  }
+
+  int _compareVersions(String a, String b) {
+    final aParts =
+        RegExp(r'\d+')
+            .allMatches(a)
+            .map((m) => int.parse(m.group(0)!))
+            .toList();
+    final bParts =
+        RegExp(r'\d+')
+            .allMatches(b)
+            .map((m) => int.parse(m.group(0)!))
+            .toList();
+
+    if (aParts.isEmpty || bParts.isEmpty) {
+      return a.compareTo(b);
+    }
+
+    final length = aParts.length > bParts.length ? aParts.length : bParts.length;
+    for (var i = 0; i < length; i++) {
+      final aValue = i < aParts.length ? aParts[i] : 0;
+      final bValue = i < bParts.length ? bParts[i] : 0;
+      if (aValue != bValue) {
+        return aValue.compareTo(bValue);
+      }
+    }
+    return 0;
+  }
+
+  bool _isNewerVersion(String latest, String current) {
+    return _compareVersions(latest, current) > 0;
   }
 
   Widget _watchConnectionRow(
@@ -412,6 +632,80 @@ class _SyncProgressIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final showProgressBar = progress.phase == 'reading' && progress.total > 0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: AppTheme.colors.primary,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              _getPhaseText(context),
+              style: AppTheme.paragraphSmall,
+            ),
+          ],
+        ),
+        if (showProgressBar) ...[
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: progress.progress,
+              backgroundColor: Colors.grey[300],
+              valueColor: AlwaysStoppedAnimation<Color>(
+                AppTheme.colors.primary,
+              ),
+              minHeight: 8,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _DfuProgressIndicator extends StatelessWidget {
+  final DfuProgressState progress;
+
+  const _DfuProgressIndicator({required this.progress});
+
+  String _getPhaseText(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (progress.phase) {
+      case 'downloading':
+        return l10n.firmwareUpdateDownloading;
+      case 'preparing':
+        return l10n.firmwareUpdatePreparing;
+      case 'connecting':
+        return l10n.firmwareUpdateConnecting;
+      case 'init_packet':
+        return l10n.firmwareUpdateInitPacket;
+      case 'transfer':
+        return l10n.firmwareUpdateTransferring;
+      case 'validate':
+        return l10n.firmwareUpdateValidating;
+      case 'reboot':
+        return l10n.firmwareUpdateRebooting;
+      case 'done':
+        return l10n.firmwareUpdateDone;
+      default:
+        return l10n.firmwareUpdateInProgress;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final showProgressBar =
+        (progress.phase == 'transfer' || progress.phase == 'downloading') &&
+            progress.total > 0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

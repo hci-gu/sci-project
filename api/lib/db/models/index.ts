@@ -9,6 +9,7 @@ import Position from './Position.js'
 import Journal from './Journal.js'
 import Goal from './Goal.js'
 import Image from './Image.js'
+import Telemetry from './Telemetry.js'
 
 export async function init(sequelize: Sequelize) {
   await Promise.all([
@@ -22,6 +23,7 @@ export async function init(sequelize: Sequelize) {
     Journal.init(sequelize),
     Goal.init(sequelize),
     Image.init(sequelize),
+    Telemetry.init(sequelize),
   ])
 
   User.associate(sequelize)
@@ -34,4 +36,5 @@ export async function init(sequelize: Sequelize) {
   Journal.associate(sequelize)
   Goal.associate(sequelize)
   Image.associate(sequelize)
+  Telemetry.associate(sequelize)
 }

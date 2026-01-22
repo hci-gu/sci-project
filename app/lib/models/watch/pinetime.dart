@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:scimovement/api/classes/counts.dart';
 import 'package:scimovement/models/watch/watch.dart';
+import 'package:scimovement/models/watch/telemetry.dart';
 
 /// UUIDs for InfiniTime Accelerometer Data Service
 final _accelDataServiceUuid = Guid("adafac00-4669-6c65-5472-616e73666572");
@@ -13,6 +15,14 @@ final _transferCharUuid = Guid("adafac01-4669-6c65-5472-616e73666572");
 final _ctsServiceUuid = Guid("00001805-0000-1000-8000-00805f9b34fb");
 final _currentTimeCharUuid = Guid("00002a2b-0000-1000-8000-00805f9b34fb");
 final _localTimeInfoCharUuid = Guid("00002a0f-0000-1000-8000-00805f9b34fb");
+
+/// UUIDs for Device Information Service (DIS)
+final _deviceInfoServiceUuid = Guid("0000180a-0000-1000-8000-00805f9b34fb");
+final _firmwareRevisionCharUuid = Guid("00002a26-0000-1000-8000-00805f9b34fb");
+
+/// UUIDs for telemetry service/characteristic
+final _telemetryServiceUuid = Guid("adafac02-4669-6c65-5472-616e73666572");
+final _telemetryCharUuid = Guid("adafac03-4669-6c65-5472-616e73666572");
 
 /// Device name to scan for
 const String kInfiniTimeDeviceName = 'InfiniTime';
@@ -26,12 +36,21 @@ class _AccelCommands {
   static const int clearDataResponse = 0x21;
 }
 
+class _TelemetryCommands {
+  static const int getTelemetry = 0x01;
+}
+
 /// State of the PineTime connection
 class PineTimeState {
   final bool connected;
   final int storedEntries;
+  final String? firmwareRevision;
 
-  PineTimeState({required this.connected, this.storedEntries = 0});
+  PineTimeState({
+    required this.connected,
+    this.storedEntries = 0,
+    this.firmwareRevision,
+  });
 }
 
 /// Service to handle communication with InfiniTime/PineTime watches
@@ -42,9 +61,13 @@ class PineTimeService {
   BluetoothCharacteristic? _characteristic;
   BluetoothCharacteristic? _ctsCurrentTimeChar;
   BluetoothCharacteristic? _ctsLocalTimeChar;
+  BluetoothCharacteristic? _firmwareRevisionChar;
+  BluetoothCharacteristic? _telemetryChar;
+  String? _firmwareRevision;
   bool connected = false;
   bool initialized = false;
   StreamSubscription? _connectionSub;
+  Completer<void>? _startInflight;
 
   final String identifier;
 
@@ -62,6 +85,14 @@ class PineTimeService {
   /// Returns the instance if initialized, or null otherwise.
   /// Use this when you need to safely check if the service exists.
   static PineTimeService? get instanceOrNull => _instance;
+
+  BluetoothDevice get device {
+    final d = _device;
+    if (d == null) {
+      throw StateError('pinetime_device_not_connected');
+    }
+    return d;
+  }
 
   static void initialize(String identifier) {
     if (_instance != null && _instance!.initialized) {
@@ -90,6 +121,9 @@ class PineTimeService {
     _characteristic = null;
     _ctsCurrentTimeChar = null;
     _ctsLocalTimeChar = null;
+    _firmwareRevisionChar = null;
+    _telemetryChar = null;
+    _firmwareRevision = null;
     _instance = null;
   }
 
@@ -120,67 +154,93 @@ class PineTimeService {
 
   /// Connect to the PineTime device
   Future<void> start() async {
-    debugPrint("Starting PineTimeService for $identifier");
-
     if (connected) {
       return;
     }
-
-    // Wait for Bluetooth to be ready
-    final adapterState = await FlutterBluePlus.adapterState.first;
-    if (adapterState != BluetoothAdapterState.on) {
-      // Wait up to 5 seconds for Bluetooth to turn on
-      await FlutterBluePlus.adapterState
-          .where((s) => s == BluetoothAdapterState.on)
-          .first
-          .timeout(
-            const Duration(seconds: 5),
-            onTimeout: () => throw StateError(kBluetoothOffError),
-          );
+    if (_startInflight != null) {
+      await _startInflight!.future;
+      return;
     }
+    debugPrint("Starting PineTimeService for $identifier");
+    _startInflight = Completer<void>();
 
-    // Find and connect to the device
-    await FlutterBluePlus.startScan(timeout: const Duration(seconds: 10));
-
-    late final List<ScanResult> scanResult;
     try {
-      scanResult = await FlutterBluePlus.scanResults.firstWhere((results) {
-        return results.any((r) => r.device.remoteId.str == identifier);
-      }).timeout(
-        const Duration(seconds: 10),
-        onTimeout: () => throw StateError(kWatchNotFoundError),
-      );
-    } finally {
-      await FlutterBluePlus.stopScan();
+      // Wait for Bluetooth to be ready
+      final adapterState = await FlutterBluePlus.adapterState.first;
+      if (adapterState != BluetoothAdapterState.on) {
+        // Wait up to 5 seconds for Bluetooth to turn on
+        await FlutterBluePlus.adapterState
+            .where((s) => s == BluetoothAdapterState.on)
+            .first
+            .timeout(
+              const Duration(seconds: 5),
+              onTimeout: () => throw StateError(kBluetoothOffError),
+            );
+      }
+
+      // Try reusing the known device before scanning again.
+      if (_device != null) {
+        try {
+          await _device!
+              .connect(autoConnect: false)
+              .timeout(const Duration(seconds: 5));
+        } catch (_) {
+          _device = null;
+        }
+      }
+
+      if (_device == null) {
+        // Find and connect to the device
+        await FlutterBluePlus.startScan(timeout: const Duration(seconds: 10));
+
+        late final List<ScanResult> scanResult;
+        try {
+          scanResult = await FlutterBluePlus.scanResults.firstWhere((results) {
+            return results.any((r) => r.device.remoteId.str == identifier);
+          }).timeout(
+            const Duration(seconds: 10),
+            onTimeout: () => throw StateError(kWatchNotFoundError),
+          );
+        } finally {
+          await FlutterBluePlus.stopScan();
+        }
+
+        final infiniTimeResult = scanResult.firstWhere(
+          (r) => r.device.remoteId.str == identifier,
+        );
+
+        _device = infiniTimeResult.device;
+        await _device!.connect(autoConnect: false);
+      }
+
+      // Listen for disconnection
+      _connectionSub = _device!.connectionState.listen((state) {
+        connected = state == BluetoothConnectionState.connected;
+        debugPrint('PineTime connection state: $state');
+      });
+
+      connected = true;
+
+      // Discover services and find the accelerometer characteristic
+      bool discovered = await _discoverCharacteristic();
+      if (!discovered) {
+        await Future.delayed(const Duration(milliseconds: 500));
+        discovered = await _discoverCharacteristic();
+      }
+      if (!discovered || _characteristic == null) {
+        await _device?.disconnect();
+        connected = false;
+        throw StateError(kConnectionFailedError);
+      }
+      await _syncCurrentTime();
+      _startInflight?.complete();
+      _startInflight = null;
+      return;
+    } catch (e) {
+      _startInflight?.completeError(e);
+      _startInflight = null;
+      rethrow;
     }
-
-    final infiniTimeResult = scanResult.firstWhere(
-      (r) => r.device.remoteId.str == identifier,
-    );
-
-    _device = infiniTimeResult.device;
-    await _device!.connect(autoConnect: false);
-
-    // Listen for disconnection
-    _connectionSub = _device!.connectionState.listen((state) {
-      connected = state == BluetoothConnectionState.connected;
-      debugPrint('PineTime connection state: $state');
-    });
-
-    connected = true;
-
-    // Discover services and find the accelerometer characteristic
-    bool discovered = await _discoverCharacteristic();
-    if (!discovered) {
-      await Future.delayed(const Duration(milliseconds: 500));
-      discovered = await _discoverCharacteristic();
-    }
-    if (!discovered || _characteristic == null) {
-      await _device?.disconnect();
-      connected = false;
-      throw StateError(kConnectionFailedError);
-    }
-    await _syncCurrentTime();
   }
 
   Future<bool> _discoverCharacteristic() async {
@@ -219,6 +279,46 @@ class PineTimeService {
           }
         }
       }
+    }
+  }
+
+  Future<void> _discoverDeviceInfoCharacteristics() async {
+    if (_device == null) return;
+
+    final services = await _device!.discoverServices();
+    for (final service in services) {
+      if (service.uuid == _deviceInfoServiceUuid) {
+        for (final c in service.characteristics) {
+          if (c.uuid == _firmwareRevisionCharUuid) {
+            _firmwareRevisionChar = c;
+          }
+        }
+      }
+    }
+  }
+
+  Future<void> _discoverTelemetryCharacteristic() async {
+    if (_device == null) return;
+
+    final services = await _device!.discoverServices();
+    debugPrint('PineTime telemetry: discovered ${services.length} services');
+    for (final service in services) {
+      if (service.uuid != _telemetryServiceUuid) continue;
+      debugPrint('PineTime telemetry: service found');
+      for (final c in service.characteristics) {
+        if (c.uuid == _telemetryCharUuid) {
+          _telemetryChar = c;
+          debugPrint('PineTime telemetry: characteristic found ${c.uuid.str}');
+          return;
+        }
+      }
+    }
+
+    if (_telemetryChar == null) {
+      debugPrint(
+        'PineTime telemetry: service/characteristic not found '
+        '(likely older firmware without telemetry)',
+      );
     }
   }
 
@@ -267,17 +367,127 @@ class PineTimeService {
   }
 
   /// Get current state of the PineTime
-  Future<PineTimeState> getState() async {
+  Future<PineTimeState> getState({bool refreshFirmware = false}) async {
     if (!connected || _characteristic == null) {
       return PineTimeState(connected: connected);
     }
 
     try {
       final count = await _getEntryCount();
-      return PineTimeState(connected: connected, storedEntries: count);
+      final firmwareRevision = await getFirmwareRevision(
+        refresh: refreshFirmware,
+      );
+      return PineTimeState(
+        connected: connected,
+        storedEntries: count,
+        firmwareRevision: firmwareRevision,
+      );
     } catch (e) {
       debugPrint('Error getting PineTime state: $e');
       return PineTimeState(connected: connected);
+    }
+  }
+
+  Future<String?> getFirmwareRevision({bool refresh = false}) async {
+    if (!connected || _device == null) return null;
+    if (!refresh && _firmwareRevision != null) {
+      return _firmwareRevision;
+    }
+
+    try {
+      if (_firmwareRevisionChar == null) {
+        await _discoverDeviceInfoCharacteristics();
+      }
+      if (_firmwareRevisionChar == null) {
+        return null;
+      }
+      final value = await _firmwareRevisionChar!.read();
+      if (value.isEmpty) return null;
+      final revision = utf8.decode(value, allowMalformed: true).trim();
+      if (revision.isEmpty) return null;
+      _firmwareRevision = revision;
+      return revision;
+    } catch (e) {
+      debugPrint('Failed to read firmware revision: $e');
+      return _firmwareRevision;
+    }
+  }
+
+  Future<WatchTelemetry?> getTelemetry() async {
+    if (!connected || _device == null) return null;
+
+    try {
+      if (_telemetryChar == null) {
+        await _discoverTelemetryCharacteristic();
+      }
+      if (_telemetryChar == null) {
+        debugPrint('PineTime telemetry: characteristic not found');
+        return null;
+      }
+
+      final char = _telemetryChar!;
+      final supportsNotify = char.properties.notify;
+      final supportsRead = char.properties.read;
+      final supportsWrite = char.properties.write;
+      final supportsWriteNoResp = char.properties.writeWithoutResponse;
+
+      if (supportsNotify) {
+        try {
+          await char.setNotifyValue(true);
+        } catch (e) {
+          debugPrint('PineTime telemetry: notify not permitted: $e');
+        }
+      }
+
+      Future<List<int>>? responseFuture;
+      if (supportsNotify) {
+        responseFuture = char.onValueReceived.first;
+      }
+
+      if (supportsWrite || supportsWriteNoResp) {
+        await char.write([
+          _TelemetryCommands.getTelemetry,
+        ], withoutResponse: !supportsWrite && supportsWriteNoResp);
+      }
+
+      if (responseFuture != null) {
+        final response = await responseFuture.timeout(
+          const Duration(seconds: 5),
+          onTimeout: () => throw TimeoutException('telemetry timed out'),
+        );
+        return WatchTelemetry.fromBytes(response);
+      }
+
+      if (supportsRead) {
+        await Future.delayed(const Duration(milliseconds: 200));
+        final response = await char.read();
+        if (response.length < 22) {
+          debugPrint(
+            'PineTime telemetry: read payload too short (${response.length})',
+          );
+          return null;
+        }
+        return WatchTelemetry.fromBytes(response);
+      }
+
+      debugPrint('PineTime telemetry: no read/notify support');
+      return null;
+    } catch (e) {
+      debugPrint('Failed to read telemetry via notify: $e');
+      try {
+        if (_telemetryChar == null) return null;
+        final response = await _telemetryChar!.read();
+        if (response.length < 22) {
+          debugPrint(
+            'PineTime telemetry: read payload too short (${response.length})',
+          );
+          return null;
+        }
+        return WatchTelemetry.fromBytes(response);
+      } catch (readError) {
+        debugPrint('Failed to read telemetry via read: $readError');
+        return null;
+      }
     }
   }
 
@@ -413,9 +623,20 @@ class PineTimeService {
     }
 
     while (index < totalCount) {
-      final entries = await _readEntries(index, chunkSize);
-      if (entries.isEmpty) {
-        throw Exception('Empty entries packet');
+      List<_MinuteEntry> entries = [];
+      bool gotEntries = false;
+      for (int attempt = 0; attempt < 3; attempt++) {
+        entries = await _readEntries(index, chunkSize);
+        if (entries.isNotEmpty) {
+          gotEntries = true;
+          break;
+        }
+        debugPrint('Empty entries packet at index=$index attempt=$attempt');
+        await Future.delayed(const Duration(milliseconds: 200));
+      }
+      if (!gotEntries) {
+        debugPrint('Giving up on empty entries packet at index=$index');
+        break;
       }
       allEntries.addAll(entries);
       index += entries.length;

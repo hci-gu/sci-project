@@ -158,3 +158,23 @@ export class Image extends Model<
 
   declare UserId?: ForeignKey<User['id']>
 }
+
+export class Telemetry extends Model<
+  InferAttributes<Telemetry>,
+  InferCreationAttributes<Telemetry>
+> {
+  declare id: CreationOptional<number>
+  declare t: CreationOptional<Date>
+  declare batteryPercent: number
+  declare batteryMv: number
+  declare charging: boolean
+  declare powerPresent: boolean
+  declare heapFree: number
+  declare fsTotal: number
+  declare fsFree: number
+  declare accelMinutesCount: number
+  declare watchId: CreationOptional<string>
+  declare firmwareVersion: CreationOptional<string>
+
+  declare UserId?: ForeignKey<User['id']>
+}

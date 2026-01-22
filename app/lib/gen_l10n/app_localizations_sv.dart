@@ -214,6 +214,69 @@ class AppLocalizationsSv extends AppLocalizations {
   String get watchSettings => 'Klockinställningar';
 
   @override
+  String get firmwareUpdateConfirmTitle => 'Uppdatera firmware?';
+
+  @override
+  String get firmwareUpdateConfirmBody =>
+      'Klockan startar om. Ha den nära och stäng inte appen.';
+
+  @override
+  String get firmwareUpdateChecking => 'Kontrollerar firmwareuppdatering...';
+
+  @override
+  String get firmwareUpdateNotAvailable =>
+      'Ingen information om firmwareuppdatering.';
+
+  @override
+  String firmwareUpdateLatest(Object version) {
+    return 'Senaste firmware: $version';
+  }
+
+  @override
+  String firmwareUpdateAvailable(Object current, Object latest) {
+    return 'Klockan har version $current, senaste är $latest.';
+  }
+
+  @override
+  String get firmwareUpdatePrompt => 'Vill du uppdatera?';
+
+  @override
+  String get firmwareUpdateButton => 'Uppdatera firmware';
+
+  @override
+  String get firmwareUpdateInProgress => 'Uppdaterar firmware...';
+
+  @override
+  String get firmwareUpdateDownloading => 'Laddar ner firmware...';
+
+  @override
+  String get firmwareUpdatePreparing => 'Förbereder uppdatering...';
+
+  @override
+  String get firmwareUpdateConnecting => 'Ansluter till klockan...';
+
+  @override
+  String get firmwareUpdateInitPacket => 'Skickar init-paket...';
+
+  @override
+  String get firmwareUpdateTransferring => 'Överför firmware...';
+
+  @override
+  String get firmwareUpdateValidating => 'Validerar firmware...';
+
+  @override
+  String get firmwareUpdateRebooting => 'Startar om klockan...';
+
+  @override
+  String get firmwareUpdateDone =>
+      'Uppdatering klar. Validera på klockan (Inställningar > Firmware).';
+
+  @override
+  String firmwareUpdateFailed(Object error) {
+    return 'Firmwareuppdatering misslyckades: $error';
+  }
+
+  @override
   String get paraplegic => 'Paraplegiker';
 
   @override
