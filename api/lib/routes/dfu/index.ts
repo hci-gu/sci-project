@@ -188,11 +188,3 @@ router.get('/download', async (req, res: any) => {
 })
 
 export default router
-
-/*
-curl -X POST \
-    -H "x-api-key: REDACTED" \
-    -H "Content-Type: application/zip" \
-    --data-binary @pinetime-mcuboot-app-dfu-1.17.0.zip \
-    "https://sci-api.prod.appadem.in/dfu/upload?version=1.17.0"
-*/
