@@ -23,6 +23,8 @@ export default {
         accelMinutesCount: DataTypes.INTEGER,
         watchId: DataTypes.STRING,
         firmwareVersion: DataTypes.STRING,
+        sentToServer: DataTypes.BOOLEAN,
+        backgroundSync: DataTypes.BOOLEAN,
       },
       {
         timestamps: false,
@@ -43,7 +45,7 @@ export default {
   },
   save: (data: any, userId: string) =>
     TelemetryModel.create({
-      t: data.t ? new Date(data.t) : new Date(),
+      t: data.timestamp ? new Date(data.timestamp) : data.t ? new Date(data.t) : new Date(),
       batteryPercent: data.batteryPercent,
       batteryMv: data.batteryMv,
       charging: data.charging,
@@ -54,6 +56,8 @@ export default {
       accelMinutesCount: data.accelMinutesCount,
       watchId: data.watchId,
       firmwareVersion: data.firmwareVersion,
+      sentToServer: data.sentToServer,
+      backgroundSync: data.backgroundSync,
       UserId: userId,
     }),
 }

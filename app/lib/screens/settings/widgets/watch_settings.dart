@@ -1,6 +1,7 @@
 import 'dart:isolate';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api/api.dart';
@@ -20,11 +21,7 @@ class SyncProgress {
   final int current;
   final int total;
 
-  const SyncProgress({
-    this.phase = '',
-    this.current = 0,
-    this.total = 0,
-  });
+  const SyncProgress({this.phase = '', this.current = 0, this.total = 0});
 
   double get progress => total > 0 ? current / total : 0.0;
 }
@@ -54,35 +51,49 @@ class WatchSettings extends HookConsumerWidget {
     final isSyncing = useState(false);
     final syncProgress = useState<SyncProgress>(const SyncProgress());
     final isUpdating = useState(false);
-    final dfuProgress = useState<DfuProgressState>(
-      const DfuProgressState(),
-    );
-    Future<List<dynamic>> fetchWatchState() {
-      final futures = <Future<dynamic>>[
-        sendBleCommand({'cmd': 'get_state'})
-            .then((m) => m['data'] as Map? ?? {})
-            .catchError((_) => <String, dynamic>{}),
-      ];
+    final dfuProgress = useState<DfuProgressState>(const DfuProgressState());
+    Future<List<dynamic>> fetchWatchState() async {
+      print("Fetching watch state...");
+      final stateRaw = await sendBleCommand({'cmd': 'get_state'})
+          .catchError((_) => <String, dynamic>{});
+      final Map<String, dynamic> state =
+          (stateRaw['data'] as Map?)?.cast<String, dynamic>() ??
+          <String, dynamic>{};
+      try {
+        final adapterState = await FlutterBluePlus.adapterState.first;
+        final bool? bluetoothEnabled =
+            adapterState == BluetoothAdapterState.on
+                ? true
+                : adapterState == BluetoothAdapterState.off
+                    ? false
+                    : null;
+        state['bluetoothEnabled'] = bluetoothEnabled;
+      } catch (_) {}
+
+      Map<String, dynamic> firmware = <String, dynamic>{};
       if (watch?.type == WatchType.pinetime &&
+          state['connected'] == true &&
           !isSyncing.value &&
           !isUpdating.value) {
-        futures.add(
-          sendBleCommand({'cmd': 'get_firmware_version'})
-              .then((m) => m['data'] as Map? ?? {})
-              .catchError((_) => <String, dynamic>{}),
-        );
-      } else {
-        futures.add(Future.value(<String, dynamic>{}));
+        final firmwareRaw = await sendBleCommand({'cmd': 'get_firmware_version'})
+            .catchError((_) => <String, dynamic>{});
+        firmware =
+            (firmwareRaw['data'] as Map?)?.cast<String, dynamic>() ??
+            <String, dynamic>{};
       }
-      futures.add(Future.delayed(const Duration(seconds: 1)));
-      return Future.wait(futures);
+
+      await Future.delayed(const Duration(seconds: 1));
+      return [state, firmware, null];
     }
+
     final latestDfu = useState<Future<DfuReleaseInfo?>>(
       Api().getLatestDfuRelease(),
     );
-    final refresh = useState(
-      fetchWatchState(),
-    );
+    final refresh = useState<Future<List<dynamic>>>(Future.value([]));
+    useEffect(() {
+      refresh.value = fetchWatchState();
+      return null;
+    }, [watch?.id, watch?.type]);
 
     if (watch == null) {
       return Padding(
@@ -182,24 +193,54 @@ class WatchSettings extends HookConsumerWidget {
         final result = await sendBleCommand({
           'cmd': 'sync',
           'progressSink': progressPort.sendPort,
+          'backgroundSync': false,
         });
         if (context.mounted) {
           if (result['ok'] == true) {
+            ref.read(lastSyncProvider.notifier).setLastSync(DateTime.now());
+            final int dataCount = (result['dataCount'] as int?) ?? 0;
+            final bool uploaded = (result['uploaded'] as bool?) ?? true;
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(AppLocalizations.of(context)!.syncSuccess),
+                content: Text(
+                  dataCount > 0
+                      ? (uploaded
+                          ? AppLocalizations.of(context)!.syncSuccess
+                          : AppLocalizations.of(context)!.syncSavedPending)
+                      : AppLocalizations.of(context)!.syncNoData,
+                ),
                 backgroundColor: Colors.green,
               ),
             );
             // Refresh the state after sync
             refresh.value = fetchWatchState();
           } else {
+            final l10n = AppLocalizations.of(context)!;
+            final error = result['error']?.toString();
+            String? message;
+            if (error == kPinetimeConnectTimeout) {
+              message = l10n.pinetimeConnectTimeout;
+            } else if (error == kPinetimeReadTimeout) {
+              message = l10n.pinetimeReadTimeout;
+            } else if (error == kPinetimeBleError) {
+              message = l10n.pinetimeBleError;
+            } else if (error == kPinetimeCharacteristicMissing) {
+              message = l10n.pinetimeCharacteristicMissing;
+            } else if (error == kBluetoothOffError) {
+              message = l10n.bluetoothOffRetry;
+            } else if (error == kWatchNotFoundError) {
+              message = l10n.watchNotFoundReconnect;
+            } else if (error == kWatchNotConfiguredError) {
+              message = l10n.watchNotConfigured;
+            } else if (error == kConnectionFailedError) {
+              message = l10n.watchConnectFailed;
+            } else if (error == kWatchSyncLoginRequired) {
+              message = l10n.watchSyncLoginRequired;
+            }
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
-                  AppLocalizations.of(
-                    context,
-                  )!.syncFailed(result['error']?.toString() ?? 'Unknown error'),
+                  message ?? l10n.syncFailed(error ?? 'Unknown error'),
                 ),
                 backgroundColor: Colors.red,
               ),
@@ -236,7 +277,10 @@ class WatchSettings extends HookConsumerWidget {
                 snapshot.data?[1] as Map<dynamic, dynamic>? ?? {};
             final mergedData =
                 firmwareData['firmwareVersion'] != null
-                    ? {...data, 'firmwareVersion': firmwareData['firmwareVersion']}
+                    ? {
+                      ...data,
+                      'firmwareVersion': firmwareData['firmwareVersion'],
+                    }
                     : data;
             final isLoading =
                 snapshot.connectionState != ConnectionState.done ||
@@ -388,7 +432,8 @@ class WatchSettings extends HookConsumerWidget {
                       }
 
                       final latestVersion =
-                          info.version.trim().isNotEmpty && info.version != 'unknown'
+                          info.version.trim().isNotEmpty &&
+                                  info.version != 'unknown'
                               ? info.version.trim()
                               : null;
                       final isUpdateAvailable =
@@ -479,21 +524,20 @@ class WatchSettings extends HookConsumerWidget {
 
   int _compareVersions(String a, String b) {
     final aParts =
-        RegExp(r'\d+')
-            .allMatches(a)
-            .map((m) => int.parse(m.group(0)!))
-            .toList();
+        RegExp(
+          r'\d+',
+        ).allMatches(a).map((m) => int.parse(m.group(0)!)).toList();
     final bParts =
-        RegExp(r'\d+')
-            .allMatches(b)
-            .map((m) => int.parse(m.group(0)!))
-            .toList();
+        RegExp(
+          r'\d+',
+        ).allMatches(b).map((m) => int.parse(m.group(0)!)).toList();
 
     if (aParts.isEmpty || bParts.isEmpty) {
       return a.compareTo(b);
     }
 
-    final length = aParts.length > bParts.length ? aParts.length : bParts.length;
+    final length =
+        aParts.length > bParts.length ? aParts.length : bParts.length;
     for (var i = 0; i < length; i++) {
       final aValue = i < aParts.length ? aParts[i] : 0;
       final bValue = i < bParts.length ? bParts[i] : 0;
@@ -547,7 +591,6 @@ class WatchSettings extends HookConsumerWidget {
     if (isSyncing) {
       statusText = AppLocalizations.of(context)!.syncing;
     } else if (watch.type == WatchType.pinetime) {
-      // PineTime uses manual sync - always show ready status
       statusText = AppLocalizations.of(context)!.readyToSync;
     } else if (data['isRecording'] == true) {
       statusText = AppLocalizations.of(context)!.recordingInProgress;
@@ -614,12 +657,13 @@ class _SyncProgressIndicator extends StatelessWidget {
       case 'connecting':
         return AppLocalizations.of(context)!.syncPhaseConnecting;
       case 'reading':
-        return AppLocalizations.of(context)!.syncPhaseReading(
-          progress.current,
-          progress.total,
-        );
+        return AppLocalizations.of(
+          context,
+        )!.syncPhaseReading(progress.current, progress.total);
       case 'uploading':
         return AppLocalizations.of(context)!.syncPhaseUploading;
+      case 'processing':
+        return AppLocalizations.of(context)!.syncPhaseProcessing;
       case 'clearing':
         return AppLocalizations.of(context)!.syncPhaseClearing;
       case 'done':
@@ -647,10 +691,7 @@ class _SyncProgressIndicator extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            Text(
-              _getPhaseText(context),
-              style: AppTheme.paragraphSmall,
-            ),
+            Text(_getPhaseText(context), style: AppTheme.paragraphSmall),
           ],
         ),
         if (showProgressBar) ...[
@@ -705,7 +746,7 @@ class _DfuProgressIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     final showProgressBar =
         (progress.phase == 'transfer' || progress.phase == 'downloading') &&
-            progress.total > 0;
+        progress.total > 0;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -721,10 +762,7 @@ class _DfuProgressIndicator extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            Text(
-              _getPhaseText(context),
-              style: AppTheme.paragraphSmall,
-            ),
+            Text(_getPhaseText(context), style: AppTheme.paragraphSmall),
           ],
         ),
         if (showProgressBar) ...[

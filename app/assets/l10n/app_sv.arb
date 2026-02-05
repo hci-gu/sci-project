@@ -399,6 +399,10 @@
     "watchNotFoundReconnect": "Klockan hittades inte. Anslut klockan igen i Inställningar.",
     "watchNotConfigured": "Ingen klocka är ansluten. Anslut din klocka i Inställningar.",
     "watchConnectFailed": "Kunde inte ansluta till klockan. Flytta närmare och försök igen.",
+    "pinetimeConnectTimeout": "Anslutningen tog för lång tid. Flytta närmare och försök igen.",
+    "pinetimeReadTimeout": "Tidsgräns vid läsning av data från klockan. Håll den nära och försök igen.",
+    "pinetimeBleError": "Bluetoothfel vid synkronisering. Slå av/på Bluetooth och försök igen.",
+    "pinetimeCharacteristicMissing": "Klockans firmware stöder inte den nödvändiga dataservicen.",
     "recordingInProgress": "Spelar in...",
     "connected": "Ansluten",
     "disconnected": "Frånkopplad",
@@ -420,6 +424,7 @@
     "readyToSync": "Redo att synka",
     "syncing": "Synkar...",
     "syncSuccess": "Synkronisering slutförd",
+    "syncSavedPending": "Synkroniserat från klockan, uppladdning väntar. Kontrollera din anslutning och försök igen.",
     "syncFailed": "Synkronisering misslyckades: {error}",
     "@syncFailed": {
         "placeholders": {
@@ -440,8 +445,9 @@
             }
         }
     },
-    "syncPhaseUploading": "Laddar upp data...",
-    "syncPhaseClearing": "Rensar klockdata...",
+  "syncPhaseUploading": "Laddar upp data...",
+  "syncPhaseProcessing": "Bearbetar data...",
+  "syncPhaseClearing": "Rensar klockdata...",
     "syncPhaseDone": "Synkronisering klar",
     "generatedImageTitle": "Genererad bild",
     "noImageFromServer": "Ingen bild returnerades från servern.",

@@ -3,8 +3,15 @@ import UserModel from './User.js'
 import { saveEnergyFromCount } from './Energy.js'
 import { AccelCount } from '../classes.js'
 import moment from 'moment'
-import { createBoutFromCounts, createBoutsFromBatch } from './Bout.js'
-import { BOUT_MIN_COUNTS_FOR_PROCESSING } from '../../constants.js'
+import {
+  createBoutFromCounts,
+  createBoutsFromBatch,
+  mergeBouts,
+} from './Bout.js'
+import {
+  BOUT_MIN_COUNTS_FOR_PROCESSING,
+  BOUT_MERGE_MAX_GAP_MINUTES,
+} from '../../constants.js'
 
 const afterCreate = async (count: AccelCount, options?: any) => {
   // Allow callers to bypass the hook (for bulk/batch flows)
@@ -98,6 +105,18 @@ const Model = {
       )
 
       await createBoutsFromBatch(user, rows)
+
+      // Merge within the batch window (plus a small buffer) to heal fragmentation.
+      if (rows.length > 0) {
+        const from = moment(rows[0].t)
+          .subtract(BOUT_MERGE_MAX_GAP_MINUTES, 'minutes')
+          .toDate()
+        const to = moment(rows[rows.length - 1].t)
+          .add(BOUT_MERGE_MAX_GAP_MINUTES, 'minutes')
+          .toDate()
+
+        await mergeBouts(user.id, { from, to })
+      }
     }
 
     return rows

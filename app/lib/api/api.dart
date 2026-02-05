@@ -350,12 +350,23 @@ class Api {
   }
 
   Future uploadTelemetry(WatchTelemetry telemetry) async {
-    final response = await dio.post(
-      '/telemetry/$_userId',
-      data: telemetry.toJson(),
-    );
-    if (response.statusCode != null) {
-      debugPrint('Api: telemetry upload status ${response.statusCode}');
+    try {
+      final response = await dio.post(
+        '/telemetry/$_userId',
+        data: telemetry.toJson(),
+      );
+      if (response.statusCode != null) {
+        debugPrint('Api: telemetry upload status ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      final status = e.response?.statusCode;
+      final body = e.response?.data;
+      debugPrint(
+        'Api: telemetry upload failed'
+        '${status != null ? ' (status $status)' : ''}'
+        '${body != null ? ' body=$body' : ''}',
+      );
+      rethrow;
     }
   }
 

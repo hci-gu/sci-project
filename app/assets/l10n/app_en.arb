@@ -399,6 +399,10 @@
     "watchNotFoundReconnect": "Watch not found. Please reconnect your watch in Settings.",
     "watchNotConfigured": "No watch is connected. Connect your watch in Settings.",
     "watchConnectFailed": "Unable to connect to the watch. Move closer and try again.",
+    "pinetimeConnectTimeout": "Connection timed out. Move closer and try again.",
+    "pinetimeReadTimeout": "Timed out while reading data from the watch. Keep it nearby and try again.",
+    "pinetimeBleError": "Bluetooth error while syncing. Turn Bluetooth off/on and try again.",
+    "pinetimeCharacteristicMissing": "Watch firmware does not support required data service.",
     "recordingInProgress": "Recording...",
     "connected": "Connected",
     "disconnected": "Disconnected",
@@ -420,6 +424,7 @@
     "readyToSync": "Ready to sync",
     "syncing": "Syncing...",
     "syncSuccess": "Sync completed successfully",
+    "syncSavedPending": "Synced from watch, upload pending. Check your connection and try again.",
     "syncFailed": "Sync failed: {error}",
     "@syncFailed": {
         "placeholders": {
@@ -440,8 +445,9 @@
             }
         }
     },
-    "syncPhaseUploading": "Uploading data...",
-    "syncPhaseClearing": "Clearing watch data...",
+  "syncPhaseUploading": "Uploading data...",
+  "syncPhaseProcessing": "Processing data...",
+  "syncPhaseClearing": "Clearing watch data...",
     "syncPhaseDone": "Sync complete",
     "generatedImageTitle": "Generated Image",
     "noImageFromServer": "No image returned from server.",

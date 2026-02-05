@@ -43,7 +43,11 @@ class WatchSyncHandler extends TaskHandler {
     }
 
     final rp = ReceivePort();
-    owner.send({'cmd': 'sync', 'reply': rp.sendPort});
+    owner.send({
+      'cmd': 'sync',
+      'reply': rp.sendPort,
+      'backgroundSync': true,
+    });
 
     // Wait for result (add a timeout so we don't hang forever)
     try {

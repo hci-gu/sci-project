@@ -2240,6 +2240,30 @@ abstract class AppLocalizations {
   /// **'Unable to connect to the watch. Move closer and try again.'**
   String get watchConnectFailed;
 
+  /// No description provided for @pinetimeConnectTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection timed out. Move closer and try again.'**
+  String get pinetimeConnectTimeout;
+
+  /// No description provided for @pinetimeReadTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Timed out while reading data from the watch. Keep it nearby and try again.'**
+  String get pinetimeReadTimeout;
+
+  /// No description provided for @pinetimeBleError.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth error while syncing. Turn Bluetooth off/on and try again.'**
+  String get pinetimeBleError;
+
+  /// No description provided for @pinetimeCharacteristicMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch firmware does not support required data service.'**
+  String get pinetimeCharacteristicMissing;
+
   /// No description provided for @recordingInProgress.
   ///
   /// In en, this message translates to:
@@ -2360,6 +2384,12 @@ abstract class AppLocalizations {
   /// **'Syncing...'**
   String get syncing;
 
+  /// No description provided for @syncSavedPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced from watch, upload pending. Check your connection and try again.'**
+  String get syncSavedPending;
+
   /// No description provided for @syncFailed.
   ///
   /// In en, this message translates to:
@@ -2383,6 +2413,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Uploading data...'**
   String get syncPhaseUploading;
+
+  /// No description provided for @syncPhaseProcessing.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing data...'**
+  String get syncPhaseProcessing;
 
   /// No description provided for @syncPhaseClearing.
   ///

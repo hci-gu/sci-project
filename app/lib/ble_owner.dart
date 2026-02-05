@@ -50,12 +50,34 @@ class BleOwner {
   Completer<void>? _syncInflight;
 
   static const Duration _settle = Duration(seconds: 2);
-  static const Duration _syncTimeout = Duration(minutes: 1);
+  static const Duration _syncTimeout = Duration(minutes: 4);
   static const Duration _dfuTimeout = Duration(minutes: 15);
+  static const Duration _bleOpTimeout = Duration(seconds: 45);
+  static const Duration _bleReadTimeout = Duration(minutes: 2);
 
   /// If more than this many recordings (ACC+HR combined) are present,
   /// purge device storage and start fresh.
   static const int _purgeThresholdSegments = 2;
+
+  Map<String, dynamic> _okResult([Map<String, dynamic>? extra]) {
+    return {'ok': true, if (extra != null) ...extra};
+  }
+
+  Map<String, dynamic> _errorResult(String code) {
+    return {'ok': false, 'error': code};
+  }
+
+  Future<T> _withTimeout<T>(
+    Future<T> future,
+    Duration timeout,
+    String code,
+  ) async {
+    try {
+      return await future.timeout(timeout);
+    } catch (_) {
+      throw StateError(code);
+    }
+  }
 
   /// Call this from main() once.
   Future<void> initialize() async {
@@ -130,8 +152,12 @@ class BleOwner {
           reply.send({'ok': true});
         } else if (msg['cmd'] == 'sync') {
           final SendPort? progressSink = msg['progressSink'];
-          final result = await _handleSync(progressSink: progressSink);
-          reply.send({'ok': result, 'error': result ? null : 'sync_failed'});
+          final bool backgroundSync = msg['backgroundSync'] == true;
+          final result = await _handleSync(
+            progressSink: progressSink,
+            backgroundSync: backgroundSync,
+          );
+          reply.send(result);
         } else if (msg['cmd'] == 'dfu_start') {
           final SendPort? progressSink = msg['progressSink'];
           final String? version = msg['version'];
@@ -206,7 +232,10 @@ class BleOwner {
     return PolarService.instance.connected;
   }
 
-  Future<bool> _handleSync({SendPort? progressSink}) async {
+  Future<Map<String, dynamic>> _handleSync({
+    SendPort? progressSink,
+    bool backgroundSync = false,
+  }) async {
     return _runExclusiveSync(() async {
       await Storage().reloadPrefs();
 
@@ -214,12 +243,13 @@ class BleOwner {
       final Credentials? credentials = Storage().getCredentials();
       if (credentials == null) {
         debugPrint('BleOwner: no credentials; skipping sync');
-        return false;
+        return _errorResult(kWatchSyncLoginRequired);
       }
       try {
         await Api().login(credentials.email, credentials.password);
       } catch (e) {
         debugPrint('BleOwner: login failed: $e');
+        return _errorResult(kWatchSyncLoginRequired);
       }
 
       final pendingCounts = Storage().getPendingCounts();
@@ -237,24 +267,35 @@ class BleOwner {
       final stored = Storage().getConnectedWatch();
       if (stored == null) {
         debugPrint('BleOwner: no stored watch');
-        return false;
+        return _errorResult(kWatchNotConfiguredError);
       }
 
       if (stored.type == WatchType.pinetime) {
-        return _handlePineTimeSync(progressSink: progressSink);
+        return _handlePineTimeSync(
+          progressSink: progressSink,
+          backgroundSync: backgroundSync,
+        );
       }
 
       // 2) Connect (Polar)
       final connected = await _ensureConnected();
       debugPrint("Ensure connected: $connected");
-      if (!connected) return false;
+      if (!connected) {
+        if (PolarService.instance.btState == BluetoothAdapterState.off) {
+          return _errorResult(kBluetoothOffError);
+        }
+        return _errorResult(kConnectionFailedError);
+      }
 
       // 3) Stop both, wait for stabilization, list full set
       await _stopBoth();
       debugPrint("Stopped both");
       await Future.delayed(_settle);
-      List<PolarOfflineRecordingEntry> entries =
-          await PolarService.instance.listRecordings();
+      List<PolarOfflineRecordingEntry> entries = await _withTimeout(
+        PolarService.instance.listRecordings(),
+        _bleOpTimeout,
+        'polar_list_timeout',
+      );
       debugPrint("Listed stable recordings: ${entries.length} entries");
 
       // if entries are too large just delete them and restart
@@ -270,20 +311,22 @@ class BleOwner {
         debugPrint('BleOwner: found too large recordings -> purging all');
         bool deleteSuccess = false;
         try {
-          deleteSuccess = await PolarService.instance.deleteAllRecordings(
-            entries,
-          );
+            deleteSuccess = await _withTimeout(
+              PolarService.instance.deleteAllRecordings(entries),
+              _bleOpTimeout,
+              'polar_delete_timeout',
+            );
         } catch (e) {
           debugPrint('BleOwner: deleteAllRecordings failed: $e');
         }
         if (!deleteSuccess) {
           debugPrint('BleOwner: purge failed; aborting sync');
-          return false;
+          return _errorResult('polar_purge_failed');
         }
         await _startBoth();
         Storage().setLastSync(DateTime.now());
         debugPrint('BleOwner: sync done (purged due to large recordings)');
-        return true;
+        return _okResult();
       }
 
       final int totalSegments = entries.length;
@@ -295,11 +338,17 @@ class BleOwner {
 
       // 5) Fetch ENTIRE recordings only (no ranges) and upload if both modalities exist
       bool uploaded = false;
+      bool uploadSucceeded = true;
+      int dataCount = 0;
       bool deleteAfterUpload = false;
       try {
         debugPrint("BleOwner: fetching recordings");
         final (AccOfflineRecording?, HrOfflineRecording?) recs =
-            await PolarService.instance.getRecordings(entries);
+            await _withTimeout(
+              PolarService.instance.getRecordings(entries),
+              _bleReadTimeout,
+              'polar_get_recordings_timeout',
+            );
         debugPrint(
           'BleOwner: got recordings: acc=${recs.$1 != null} hr=${recs.$2 != null}',
         );
@@ -309,12 +358,14 @@ class BleOwner {
 
         if (gotAcc && gotHr) {
           final counts = countsFromPolarData(recs.$1!, recs.$2!);
+          dataCount = counts.length;
 
           try {
             await Api().uploadCounts(counts);
             deleteAfterUpload = true;
           } catch (_) {
             await Storage().storePendingCounts(counts);
+            uploadSucceeded = false;
           }
           uploaded = true;
         } else {
@@ -322,6 +373,7 @@ class BleOwner {
           debugPrint(
             'BleOwner: recordings present but missing one modality (acc=$gotAcc hr=$gotHr) - skipping upload',
           );
+          dataCount = 0;
         }
       } catch (e, st) {
         debugPrint('BleOwner: getRecordings/upload failed: $e\n$st');
@@ -329,7 +381,11 @@ class BleOwner {
       } finally {
         if (deleteAfterUpload) {
           try {
-            await PolarService.instance.deleteAllRecordings(entries);
+            await _withTimeout(
+              PolarService.instance.deleteAllRecordings(entries),
+              _bleOpTimeout,
+              'polar_delete_timeout',
+            );
           } catch (e) {
             debugPrint('BleOwner: deleteAllRecordings failed: $e');
           }
@@ -340,7 +396,10 @@ class BleOwner {
 
       Storage().setLastSync(DateTime.now());
       debugPrint('BleOwner: sync done (uploaded=$uploaded)');
-      return true;
+      return _okResult({
+        'dataCount': dataCount,
+        'uploaded': dataCount == 0 ? true : uploadSucceeded,
+      });
     });
   }
 
@@ -410,7 +469,10 @@ class BleOwner {
   }
 
   /// Handle sync for PineTime watch
-  Future<bool> _handlePineTimeSync({SendPort? progressSink}) async {
+  Future<Map<String, dynamic>> _handlePineTimeSync({
+    SendPort? progressSink,
+    bool backgroundSync = false,
+  }) async {
     void sendProgress(String phase, int current, int total) {
       progressSink?.send({
         'type': 'sync_progress',
@@ -420,91 +482,99 @@ class BleOwner {
       });
     }
 
+    final stored = Storage().getConnectedWatch();
+    String? storedId;
+    WatchTelemetry? preSyncTelemetry;
+
     try {
-      final stored = Storage().getConnectedWatch();
       if (stored == null) {
-        throw StateError(kWatchNotConfiguredError);
+        return _errorResult(kWatchNotConfiguredError);
       }
+      storedId = stored.id;
+      final String watchId = storedId!;
 
       // Send connecting phase
       sendProgress('connecting', 0, 0);
 
       // Initialize and connect to PineTime
-      PineTimeService.initialize(stored.id);
+      PineTimeService.initialize(watchId);
       for (int attempt = 0; attempt < 3; attempt++) {
         try {
           await PineTimeService.instance.start();
           break;
         } catch (e) {
-          if (attempt == 2) rethrow;
+          if (attempt == 2) {
+            PineTimeService.dispose();
+            rethrow;
+          }
           await Future.delayed(const Duration(seconds: 1));
         }
       }
 
       if (!PineTimeService.instance.connected) {
         debugPrint('BleOwner: PineTime connection failed');
-        throw StateError(kConnectionFailedError);
+        PineTimeService.dispose();
+        return _errorResult(kConnectionFailedError);
       }
 
+      // Fetch telemetry before sync so minute counters reflect pre-sync state.
       try {
         debugPrint('BleOwner: telemetry fetch start');
-        final WatchTelemetry? telemetry =
-            await PineTimeService.instance.getTelemetry();
-        if (telemetry != null) {
+        preSyncTelemetry = await PineTimeService.instance.getTelemetry();
+        if (preSyncTelemetry != null) {
           debugPrint('BleOwner: telemetry fetch ok');
-          final firmwareVersion =
-              await PineTimeService.instance.getFirmwareRevision();
-          final enriched = telemetry.withContext(
-            watchId: stored.id,
-            firmwareVersion: firmwareVersion,
-            timestamp: DateTime.now(),
-          );
-          await Api().uploadTelemetry(enriched);
-          debugPrint('BleOwner: telemetry upload ok');
         } else {
           debugPrint('BleOwner: telemetry fetch empty');
         }
       } catch (e) {
-        debugPrint('BleOwner: telemetry upload failed: $e');
+        debugPrint('BleOwner: telemetry fetch failed: $e');
       }
 
-      final state = await PineTimeService.instance.getState();
+      final state = await _withTimeout(
+        PineTimeService.instance.getState(),
+        _bleOpTimeout,
+        'pinetime_state_timeout',
+      );
       final int totalCount = state.storedEntries;
 
-      int lastIndex = Storage().getPineTimeLastIndex(stored.id) ?? -1;
-      int lastTimestamp = Storage().getPineTimeLastTimestamp(stored.id) ?? 0;
+      int lastIndex = Storage().getPineTimeLastIndex(watchId) ?? -1;
+      int lastTimestamp = Storage().getPineTimeLastTimestamp(watchId) ?? 0;
       int startIndex = lastIndex + 1;
 
       if (totalCount == 0) {
-        await Storage().setPineTimeLastIndex(stored.id, null);
-        await Storage().setPineTimeLastTimestamp(stored.id, null);
+        await Storage().setPineTimeLastIndex(watchId, null);
+        await Storage().setPineTimeLastTimestamp(watchId, null);
         sendProgress('done', 0, 0);
         Storage().setLastSync(DateTime.now());
-        return true;
+        return _okResult({'dataCount': 0});
       }
 
       if (startIndex > totalCount) {
         // Device likely cleared or rolled over; reset cursor.
-        await Storage().setPineTimeLastIndex(stored.id, null);
-        await Storage().setPineTimeLastTimestamp(stored.id, null);
+        await Storage().setPineTimeLastIndex(watchId, null);
+        await Storage().setPineTimeLastTimestamp(watchId, null);
         lastIndex = -1;
         lastTimestamp = 0;
         startIndex = 0;
       }
 
       // Read entries from the watch with progress callback
-      final entries = await PineTimeService.instance.readAllEntries(
-        startIndex: startIndex,
-        onProgress: (current, total) {
-          sendProgress('reading', current, total);
-        },
+      final entries = await _withTimeout(
+        PineTimeService.instance.readAllEntries(
+          startIndex: startIndex,
+          onProgress: (current, total) {
+            sendProgress('reading', current, total);
+          },
+        ),
+        _bleReadTimeout,
+        'pinetime_read_timeout',
       );
       debugPrint('BleOwner: read ${entries.length} entries from PineTime');
 
       if (entries.isEmpty) {
         sendProgress('done', 0, 0);
         Storage().setLastSync(DateTime.now());
-        return true;
+        return _okResult({'dataCount': 0});
       }
 
       final int maxTimestamp = entries
@@ -519,18 +589,22 @@ class BleOwner {
               : entries;
 
       // Convert to Counts and upload
-      sendProgress('uploading', 0, entries.length);
+      sendProgress('processing', 0, entries.length);
       final counts = countsFromPineTimeData(filteredEntries);
+      sendProgress('uploading', 0, entries.length);
+      final int dataCount = counts.length;
+      bool uploadSucceeded = true;
 
       if (counts.isNotEmpty) {
         try {
           await Api().uploadCounts(counts);
         } catch (_) {
           await Storage().storePendingCounts(counts);
+          uploadSucceeded = false;
         }
 
-        await Storage().setPineTimeLastIndex(stored.id, newLastIndex);
-        await Storage().setPineTimeLastTimestamp(stored.id, maxTimestamp);
+        await Storage().setPineTimeLastIndex(watchId, newLastIndex);
+        await Storage().setPineTimeLastTimestamp(watchId, maxTimestamp);
 
         // Clear data on watch after successful upload/persist
         sendProgress('clearing', 0, 0);
@@ -545,33 +619,85 @@ class BleOwner {
         }
         debugPrint('BleOwner: PineTime data cleared: $cleared');
         if (!cleared) {
-          throw StateError('pinetime_clear_failed');
+          return _errorResult('pinetime_clear_failed');
         }
 
-        await Storage().setPineTimeLastIndex(stored.id, null);
-        await Storage().setPineTimeLastTimestamp(stored.id, null);
+        await Storage().setPineTimeLastIndex(watchId, null);
+        await Storage().setPineTimeLastTimestamp(watchId, null);
       } else {
-        await Storage().setPineTimeLastIndex(stored.id, newLastIndex);
-        await Storage().setPineTimeLastTimestamp(stored.id, maxTimestamp);
+        await Storage().setPineTimeLastIndex(watchId, newLastIndex);
+        await Storage().setPineTimeLastTimestamp(watchId, maxTimestamp);
       }
 
       sendProgress('done', entries.length, entries.length);
       Storage().setLastSync(DateTime.now());
+      await _uploadPineTimeTelemetry(
+        storedId: watchId,
+        dataCount: dataCount,
+        uploadSucceeded: uploadSucceeded,
+        telemetry: preSyncTelemetry,
+        backgroundSync: backgroundSync,
+      );
       debugPrint('BleOwner: PineTime sync done');
-      return true;
+      return _okResult({
+        'dataCount': dataCount,
+        'uploaded': dataCount == 0 ? true : uploadSucceeded,
+      });
     } catch (e, st) {
       if (e is StateError && e.message is String) {
         debugPrint('BleOwner: PineTime sync failed: ${e.message}');
-        return false;
+        PineTimeService.dispose();
+        return _errorResult(e.message as String);
       }
       debugPrint('BleOwner: PineTime sync failed: $e\n$st');
-      return false;
+      PineTimeService.dispose();
+      return _errorResult('sync_failed');
     } finally {
       try {
-        await PineTimeService.instance.stop();
+        // Attempt telemetry upload even on failure; include "sentToServer=false".
+        if (storedId != null) {
+          await _uploadPineTimeTelemetry(
+            storedId: storedId!,
+            dataCount: 0,
+            uploadSucceeded: false,
+            telemetry: preSyncTelemetry,
+            backgroundSync: backgroundSync,
+          );
+        }
+      } catch (_) {}
+      try {
+        await PineTimeService.instance.stopAndDispose();
       } catch (_) {
         // ignore disconnect errors
       }
+    }
+  }
+
+  Future<void> _uploadPineTimeTelemetry({
+    required String storedId,
+    required int dataCount,
+    required bool uploadSucceeded,
+    WatchTelemetry? telemetry,
+    bool backgroundSync = false,
+  }) async {
+    try {
+      if (telemetry != null) {
+        final firmwareVersion =
+            await PineTimeService.instance.getFirmwareRevision();
+        final enriched = telemetry.withContext(
+          watchId: storedId,
+          firmwareVersion: firmwareVersion,
+          timestamp: DateTime.now(),
+          sentToServer: dataCount > 0 && uploadSucceeded,
+          backgroundSync: backgroundSync,
+        );
+        await Api().uploadTelemetry(enriched);
+        debugPrint('BleOwner: telemetry upload ok');
+      } else {
+        debugPrint('BleOwner: telemetry fetch empty');
+      }
+    } catch (e) {
+      debugPrint('BleOwner: telemetry upload failed: $e');
     }
   }
 
@@ -669,8 +795,7 @@ class BleOwner {
   }
 
   Future<Map<String, dynamic>> debugSyncNow() async {
-    final ok = await _handleSync();
-    return {'ok': ok};
+    return _handleSync();
   }
 
   /// Get watch state based on connected watch type
@@ -728,21 +853,7 @@ class BleOwner {
 
     try {
       final service = PineTimeService.instanceOrNull;
-      bool startedHere = false;
       if (service == null || !service.connected) {
-        PineTimeService.initialize(stored.id);
-        // Retry once; watch may not be advertising immediately after disconnect.
-        for (int attempt = 0; attempt < 2; attempt++) {
-          try {
-            await PineTimeService.instance.start();
-            startedHere = true;
-            break;
-          } catch (_) {
-            await Future.delayed(const Duration(seconds: 1));
-          }
-        }
-      }
-      if (!PineTimeService.instance.connected) {
         return {'firmwareVersion': null};
       }
       final version =
@@ -761,23 +872,23 @@ class BleOwner {
         debugPrint('Error getting PineTime firmware version: $e');
       }
       return {'firmwareVersion': null};
-    } finally {
-      try {
-        final service = PineTimeService.instanceOrNull;
-        if (service != null && service.connected) {
-          await service.stop();
-        }
-      } catch (_) {}
     }
   }
 
   Future<Map<String, dynamic>> _getPineTimeState() async {
+    final adapterState = await FlutterBluePlus.adapterState.first;
+    final bool? bluetoothEnabled =
+        adapterState == BluetoothAdapterState.on
+            ? true
+            : adapterState == BluetoothAdapterState.off
+                ? false
+                : null;
     try {
       // Check if PineTimeService is initialized before accessing instance
       final service = PineTimeService.instanceOrNull;
       if (service == null || !service.connected) {
         return {
-          'bluetoothEnabled': true,
+          'bluetoothEnabled': bluetoothEnabled,
           'connected': false,
           'isRecording': false,
         };
@@ -785,7 +896,7 @@ class BleOwner {
 
       final state = await service.getState(refreshFirmware: true);
       return {
-        'bluetoothEnabled': true,
+        'bluetoothEnabled': bluetoothEnabled,
         'connected': state.connected,
         'isRecording': false, // PineTime doesn't have continuous recording
         'storedEntries': state.storedEntries,
@@ -794,7 +905,7 @@ class BleOwner {
     } catch (e) {
       debugPrint('Error getting PineTime state: $e');
       return {
-        'bluetoothEnabled': true,
+        'bluetoothEnabled': bluetoothEnabled,
         'connected': false,
         'isRecording': false,
       };
@@ -802,6 +913,13 @@ class BleOwner {
   }
 
   Future<Map<String, dynamic>> _getPolarState() async {
+    final adapterState = await FlutterBluePlus.adapterState.first;
+    final bool? bluetoothEnabled =
+        adapterState == BluetoothAdapterState.on
+            ? true
+            : adapterState == BluetoothAdapterState.off
+                ? false
+                : null;
     try {
       final state = await PolarService.instance.getState();
 
@@ -817,8 +935,7 @@ class BleOwner {
       }
 
       return {
-        'bluetoothEnabled':
-            PolarService.instance.btState == BluetoothAdapterState.on,
+        'bluetoothEnabled': bluetoothEnabled,
         'connected': PolarService.instance.connected,
         'isRecording': state.isRecording,
         'accRecording': accRec,
@@ -827,7 +944,7 @@ class BleOwner {
     } catch (e) {
       debugPrint('Error getting Polar state: $e');
       return {
-        'bluetoothEnabled': false,
+        'bluetoothEnabled': bluetoothEnabled,
         'connected': false,
         'isRecording': false,
       };
@@ -840,25 +957,31 @@ class BleOwner {
     sink.send({'type': 'scan', ...event});
   }
 
-  Future<bool> _runExclusiveSync(Future<bool> Function() fn) async {
+  Future<Map<String, dynamic>> _runExclusiveSync(
+    Future<Map<String, dynamic>> Function() fn,
+  ) async {
     if (_dfuRunning) {
       await _dfuInflight?.future;
     }
     if (_syncing) {
       // Coalesce: allow caller to "succeed" by piggy-backing on the in-flight sync.
       await _syncInflight?.future;
-      return true;
+      return _okResult();
     }
     _syncing = true;
     _syncInflight = Completer<void>();
     try {
-      final result = Completer<bool>();
+      final result = Completer<Map<String, dynamic>>();
       () async {
         try {
           result.complete(await fn());
-        } catch (_) {
+        } catch (e) {
           if (!result.isCompleted) {
-            result.complete(false);
+            if (e is StateError && e.message is String) {
+              result.complete(_errorResult(e.message as String));
+            } else {
+              result.complete(_errorResult('sync_failed'));
+            }
           }
         } finally {
           _syncing = false;
@@ -866,7 +989,10 @@ class BleOwner {
         }
       }();
 
-      return await result.future.timeout(_syncTimeout, onTimeout: () => false);
+      return await result.future.timeout(
+        _syncTimeout,
+        onTimeout: () => _errorResult('sync_timeout'),
+      );
     } finally {
       // Lock is released when the sync task actually finishes.
     }
@@ -908,17 +1034,25 @@ class BleOwner {
 
   Future<void> _stopBoth() async {
     try {
-      await Future.wait([
-        PolarService.instance.stopRecording(PolarDataType.acc),
-        PolarService.instance.stopRecording(PolarDataType.hr),
-      ]);
+      await _withTimeout(
+        Future.wait([
+          PolarService.instance.stopRecording(PolarDataType.acc),
+          PolarService.instance.stopRecording(PolarDataType.hr),
+        ]),
+        _bleOpTimeout,
+        'polar_stop_timeout',
+      );
     } catch (_) {
       // tolerate "already stopped"
     }
 
     // Wait until device reports not recording (bounded backoff)
     for (int i = 0; i < 5; i++) {
-      final s = await PolarService.instance.getState();
+      final s = await _withTimeout(
+        PolarService.instance.getState(),
+        _bleOpTimeout,
+        'polar_state_timeout',
+      );
       if (!s.isRecording) break;
       await Future.delayed(Duration(milliseconds: 300 * (i + 1)));
     }
@@ -926,14 +1060,26 @@ class BleOwner {
 
   Future<void> _startBoth() async {
     // Start in parallel
-    await PolarService.instance.startRecording(PolarDataType.acc);
+    await _withTimeout(
+      PolarService.instance.startRecording(PolarDataType.acc),
+      _bleOpTimeout,
+      'polar_start_acc_timeout',
+    );
     await Future.delayed(_settle);
-    await PolarService.instance.startRecording(PolarDataType.hr);
+    await _withTimeout(
+      PolarService.instance.startRecording(PolarDataType.hr),
+      _bleOpTimeout,
+      'polar_start_hr_timeout',
+    );
     await Future.delayed(_settle);
 
     // Verify both are running (best-effort if per-modality flags exist)
     for (int i = 0; i < 3; i++) {
-      final s = await PolarService.instance.getState();
+      final s = await _withTimeout(
+        PolarService.instance.getState(),
+        _bleOpTimeout,
+        'polar_state_timeout',
+      );
       bool ok = s.isRecording;
       bool needAcc = true;
       bool needHr = true;

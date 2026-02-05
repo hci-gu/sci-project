@@ -50,22 +50,29 @@
     "@types/node": "^24.3.1",
     "@types/node-pushnotifications": "^3.1.1",
     "copyfiles": "^2.4.1",
+    "jest": "^30.2.0",
     "rimraf": "^6.0.1",
+    "ts-jest": "^29.4.6",
     "typescript": "^5.9.2"
   },
   "jest": {
+    "testEnvironment": "node",
     "moduleFileExtensions": [
       "ts",
       "tsx",
-      "js"
+      "js",
+      "json"
     ],
     "transform": {
       "^.+\\.(ts|tsx)$": [
         "ts-jest",
         {
-          "tsConfigFile": "tsconfig.json"
+          "tsconfig": "tsconfig.jest.json"
         }
       ]
+    },
+    "moduleNameMapper": {
+      "^(\\.{1,2}/.*)\\.js$": "$1"
     }
   }
 }

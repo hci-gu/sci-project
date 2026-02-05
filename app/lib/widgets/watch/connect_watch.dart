@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:isolate';
 
 import 'package:flutter/material.dart';
@@ -128,34 +129,69 @@ Future<String?> showDevicePicker(
   WatchType watchType,
 ) async {
   print("showDevicePicker called for $watchType");
-  await PolarService.requestPermissions();
+  if (watchType == WatchType.pinetime) {
+    final ok = await _requestPineTimePermissions();
+    print("ok: $ok");
+    if (!ok) return null;
+  } else {
+    await PolarService.requestPermissions();
+  }
 
-  // Ensure the foreground service is running and BLE owner is ready
-
-  // final bleReady = await ForegroundService.instance.waitForBleOwner(
-  //   timeout: const Duration(seconds: 15),
-  // );
-  // if (!bleReady) {
-  //   debugPrint('BLE owner not available after waiting');
-  //   if (context.mounted) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(
-  //         content: Text(
-  //           'Unable to start Bluetooth service. Please restart the app.',
-  //         ),
-  //       ),
-  //     );
-  //   }
-  //   return null;
-  // }
+  print("got permissons");
 
   if (!context.mounted) return null;
+
+  print("show dialog");
 
   return showDialog<String?>(
     context: context,
     barrierDismissible: true,
     builder: (_) => _DevicePickerDialog(watchType: watchType),
   );
+}
+
+Future<bool> _requestPineTimePermissions() async {
+  if (Platform.isAndroid) {
+    final sdk = _androidSdkInt();
+    final osVersion = Platform.operatingSystemVersion;
+    final List<Permission> permissions = [
+      Permission.bluetoothScan,
+      Permission.bluetoothConnect,
+    ];
+    if (sdk != null && sdk < 31) {
+      permissions.add(Permission.locationWhenInUse);
+    }
+
+    final statuses = await permissions.request();
+    print(
+      'PineTime permissions sdk=$sdk os="$osVersion" statuses=$statuses',
+    );
+
+    final bluetoothOk =
+        (statuses[Permission.bluetoothScan]?.isGranted ?? false) &&
+        (statuses[Permission.bluetoothConnect]?.isGranted ?? false);
+    final locationOk =
+        (sdk == null || sdk >= 31) ||
+        (statuses[Permission.locationWhenInUse]?.isGranted ?? false);
+
+    return bluetoothOk && locationOk;
+  }
+
+  if (Platform.isIOS) {
+    final status = await Permission.bluetooth.request();
+    return status.isGranted;
+  }
+
+  return true;
+}
+
+int? _androidSdkInt() {
+  if (!Platform.isAndroid) return null;
+  final match = RegExp(r'SDK (\\d+)').firstMatch(
+    Platform.operatingSystemVersion,
+  );
+  if (match == null) return null;
+  return int.tryParse(match.group(1)!);
 }
 
 class _DevicePickerDialog extends StatefulWidget {

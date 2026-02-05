@@ -95,10 +95,15 @@ class PineTimeService {
   }
 
   static void initialize(String identifier) {
-    if (_instance != null && _instance!.initialized) {
+    if (_instance != null &&
+        _instance!.initialized &&
+        _instance!.identifier == identifier &&
+        _instance!.connected) {
       debugPrint('PineTimeService already initialized');
       return;
     }
+    // Dispose any existing instance to avoid leaking subscriptions/resources.
+    _instance?.disposeSubs();
     _instance = PineTimeService._(identifier);
     _instance!.initialized = true;
   }
@@ -163,6 +168,8 @@ class PineTimeService {
     }
     debugPrint("Starting PineTimeService for $identifier");
     _startInflight = Completer<void>();
+    // Prevent unhandled errors if nobody awaits this completer.
+    _startInflight!.future.catchError((_) {});
 
     try {
       // Wait for Bluetooth to be ready
@@ -213,7 +220,14 @@ class PineTimeService {
         await _device!.connect(autoConnect: false);
       }
 
+      // Wait for an actual connected state before service discovery
+      await _device!.connectionState
+          .where((state) => state == BluetoothConnectionState.connected)
+          .first
+          .timeout(const Duration(seconds: 5));
+
       // Listen for disconnection
+      await _connectionSub?.cancel();
       _connectionSub = _device!.connectionState.listen((state) {
         connected = state == BluetoothConnectionState.connected;
         debugPrint('PineTime connection state: $state');
@@ -230,16 +244,22 @@ class PineTimeService {
       if (!discovered || _characteristic == null) {
         await _device?.disconnect();
         connected = false;
-        throw StateError(kConnectionFailedError);
+        throw StateError(kPinetimeCharacteristicMissing);
       }
       await _syncCurrentTime();
       _startInflight?.complete();
       _startInflight = null;
       return;
     } catch (e) {
-      _startInflight?.completeError(e);
+      if (e is StateError) {
+        _startInflight?.completeError(e);
+        _startInflight = null;
+        rethrow;
+      }
+      final code = _mapBleErrorCode(e, op: 'connect');
+      _startInflight?.completeError(StateError(code));
       _startInflight = null;
-      rethrow;
+      throw StateError(code);
     }
   }
 
@@ -425,53 +445,56 @@ class PineTimeService {
         return null;
       }
 
-      final char = _telemetryChar!;
-      final supportsNotify = char.properties.notify;
-      final supportsRead = char.properties.read;
-      final supportsWrite = char.properties.write;
-      final supportsWriteNoResp = char.properties.writeWithoutResponse;
+      return await _retry<WatchTelemetry?>(() async {
+        final char = _telemetryChar!;
+        final supportsNotify = char.properties.notify;
+        final supportsRead = char.properties.read;
+        final supportsWrite = char.properties.write;
+        final supportsWriteNoResp = char.properties.writeWithoutResponse;
 
-      if (supportsNotify) {
-        try {
-          await char.setNotifyValue(true);
-        } catch (e) {
-          debugPrint('PineTime telemetry: notify not permitted: $e');
+        if (supportsNotify) {
+          try {
+            await char.setNotifyValue(true);
+          } catch (e) {
+            debugPrint('PineTime telemetry: notify not permitted: $e');
+          }
         }
-      }
 
-      Future<List<int>>? responseFuture;
-      if (supportsNotify) {
-        responseFuture = char.onValueReceived.first;
-      }
+        Future<List<int>>? responseFuture;
+        if (supportsNotify) {
+          responseFuture = char.onValueReceived.first;
+        }
 
-      if (supportsWrite || supportsWriteNoResp) {
-        await char.write([
-          _TelemetryCommands.getTelemetry,
-        ], withoutResponse: !supportsWrite && supportsWriteNoResp);
-      }
+        if (supportsWrite || supportsWriteNoResp) {
+          await char.write([
+            _TelemetryCommands.getTelemetry,
+          ], withoutResponse: !supportsWrite && supportsWriteNoResp);
+        }
 
-      if (responseFuture != null) {
-        final response = await responseFuture.timeout(
-          const Duration(seconds: 5),
-          onTimeout: () => throw TimeoutException('telemetry timed out'),
-        );
-        return WatchTelemetry.fromBytes(response);
-      }
-
-      if (supportsRead) {
-        await Future.delayed(const Duration(milliseconds: 200));
-        final response = await char.read();
-        if (response.length < 22) {
-          debugPrint(
-            'PineTime telemetry: read payload too short (${response.length})',
+        if (responseFuture != null) {
+          final response = await responseFuture.timeout(
+            const Duration(seconds: 5),
+            onTimeout: () => throw TimeoutException('telemetry timed out'),
           );
-          return null;
+          return WatchTelemetry.fromBytes(response);
         }
-        return WatchTelemetry.fromBytes(response);
-      }
 
-      debugPrint('PineTime telemetry: no read/notify support');
-      return null;
+        if (supportsRead) {
+          await Future.delayed(const Duration(milliseconds: 200));
+          final response = await char.read();
+          if (response.length < 22) {
+            debugPrint(
+              'PineTime telemetry: read payload too short (${response.length})',
+            );
+            return null;
+          }
+          return WatchTelemetry.fromBytes(response);
+        }
+
+        debugPrint('PineTime telemetry: no read/notify support');
+        return null;
+      }, attempts: 2);
+
     } catch (e) {
       debugPrint('Failed to read telemetry via notify: $e');
       try {
@@ -497,30 +520,35 @@ class PineTimeService {
       throw StateError('Characteristic not available');
     }
 
-    final responseFuture = _characteristic!.onValueReceived.first;
+    try {
+      final responseFuture = _characteristic!.onValueReceived.first;
 
-    await _characteristic!.write([
-      _AccelCommands.getCount,
-    ], withoutResponse: false);
+      await _characteristic!.write([
+        _AccelCommands.getCount,
+      ], withoutResponse: false);
 
-    final response = await responseFuture.timeout(
-      const Duration(seconds: 5),
-      onTimeout: () => throw TimeoutException('getCount timed out'),
-    );
+      final response = await responseFuture.timeout(
+        const Duration(seconds: 5),
+        onTimeout: () => throw TimeoutException('getCount timed out'),
+      );
 
-    if (response.isNotEmpty &&
-        response[0] == _AccelCommands.getCountResponse &&
-        response.length >= 6 &&
-        response[1] == 0x01) {
-      final count =
-          response[2] |
-          (response[3] << 8) |
-          (response[4] << 16) |
-          (response[5] << 24);
-      return count;
+      if (response.isNotEmpty &&
+          response[0] == _AccelCommands.getCountResponse &&
+          response.length >= 6 &&
+          response[1] == 0x01) {
+        final count =
+            response[2] |
+            (response[3] << 8) |
+            (response[4] << 16) |
+            (response[5] << 24);
+        return count;
+      }
+
+      throw Exception('Invalid response for getCount');
+    } catch (e) {
+      if (e is StateError) rethrow;
+      throw StateError(_mapBleErrorCode(e, op: 'read'));
     }
-
-    throw Exception('Invalid response for getCount');
   }
 
   /// Read entries from the watch
@@ -529,72 +557,80 @@ class PineTimeService {
       throw StateError('Characteristic not available');
     }
 
-    final command = [
-      _AccelCommands.readEntries,
-      0x00, // padding
-      startIndex & 0xFF,
-      (startIndex >> 8) & 0xFF,
-      (startIndex >> 16) & 0xFF,
-      (startIndex >> 24) & 0xFF,
-      count & 0xFF,
-    ];
+    return await _retry<List<_MinuteEntry>>(
+      () async {
+      final command = [
+        _AccelCommands.readEntries,
+        0x00, // padding
+        startIndex & 0xFF,
+        (startIndex >> 8) & 0xFF,
+        (startIndex >> 16) & 0xFF,
+        (startIndex >> 24) & 0xFF,
+        count & 0xFF,
+      ];
 
-    final responseFuture = _characteristic!.onValueReceived.first;
+      final responseFuture = _characteristic!.onValueReceived.first;
 
-    await _characteristic!.write(command, withoutResponse: false);
+      await _characteristic!.write(command, withoutResponse: false);
 
-    final response = await responseFuture.timeout(
-      const Duration(seconds: 5),
-      onTimeout: () => throw TimeoutException('readEntries timed out'),
+      final response = await responseFuture.timeout(
+        const Duration(seconds: 5),
+        onTimeout: () => throw TimeoutException('readEntries timed out'),
+      );
+
+      if (response.isEmpty ||
+          response[0] != _AccelCommands.readEntriesResponse) {
+        throw Exception('Invalid response for readEntries');
+      }
+
+      if (response.length < 11) {
+        throw Exception('Response too short');
+      }
+
+      final status = response[1];
+      if (status != 0x01) {
+        throw Exception('Error status: $status');
+      }
+
+      final entriesInPacket = response[10];
+      final entries = <_MinuteEntry>[];
+
+      for (int i = 0; i < entriesInPacket; i++) {
+        final offset = 11 + (i * 10);
+        if (offset + 10 > response.length) break;
+
+        // float count (little-endian, IEEE 754)
+        final countBytes = ByteData.sublistView(
+          Uint8List.fromList(response.sublist(offset, offset + 4)),
+        );
+        final count = countBytes.getFloat32(0, Endian.little);
+
+        // int16 heartRate (little-endian, signed)
+        int hr = response[offset + 4] | (response[offset + 5] << 8);
+        if (hr >= 0x8000) hr -= 0x10000;
+
+        // uint32 timestamp (little-endian)
+        final ts =
+            response[offset + 6] |
+            (response[offset + 7] << 8) |
+            (response[offset + 8] << 16) |
+            (response[offset + 9] << 24);
+
+        entries.add(
+          _MinuteEntry(
+            count: count,
+            heartRate: hr,
+            timestamp: ts,
+          ), // renamed from acceleration to counts
+        );
+      }
+
+        return entries;
+      },
+      attempts: 3,
+      timeoutCode: kPinetimeReadTimeout,
+      bleErrorCode: kPinetimeBleError,
     );
-
-    if (response.isEmpty || response[0] != _AccelCommands.readEntriesResponse) {
-      throw Exception('Invalid response for readEntries');
-    }
-
-    if (response.length < 11) {
-      throw Exception('Response too short');
-    }
-
-    final status = response[1];
-    if (status != 0x01) {
-      throw Exception('Error status: $status');
-    }
-
-    final entriesInPacket = response[10];
-    final entries = <_MinuteEntry>[];
-
-    for (int i = 0; i < entriesInPacket; i++) {
-      final offset = 11 + (i * 10);
-      if (offset + 10 > response.length) break;
-
-      // float count (little-endian, IEEE 754)
-      final countBytes = ByteData.sublistView(
-        Uint8List.fromList(response.sublist(offset, offset + 4)),
-      );
-      final count = countBytes.getFloat32(0, Endian.little);
-
-      // int16 heartRate (little-endian, signed)
-      int hr = response[offset + 4] | (response[offset + 5] << 8);
-      if (hr >= 0x8000) hr -= 0x10000;
-
-      // uint32 timestamp (little-endian)
-      final ts =
-          response[offset + 6] |
-          (response[offset + 7] << 8) |
-          (response[offset + 8] << 16) |
-          (response[offset + 9] << 24);
-
-      entries.add(
-        _MinuteEntry(
-          count: count,
-          heartRate: hr,
-          timestamp: ts,
-        ), // renamed from acceleration to counts
-      );
-    }
-
-    return entries;
   }
 
   /// Read all stored entries from the watch
@@ -681,6 +717,62 @@ class PineTimeService {
   Future<void> stop() async {
     await _device?.disconnect();
     connected = false;
+  }
+
+  /// Disconnect and dispose all resources/subscriptions.
+  Future<void> stopAndDispose() async {
+    try {
+      await stop();
+    } finally {
+      disposeSubs();
+    }
+  }
+
+  Future<T> _retry<T>(
+    Future<T> Function() fn, {
+    int attempts = 2,
+    Duration delay = const Duration(milliseconds: 200),
+    String? timeoutCode,
+    String? bleErrorCode,
+  }) async {
+    Object? lastError;
+    for (int i = 0; i < attempts; i++) {
+      try {
+        return await fn();
+      } catch (e) {
+        lastError = e;
+        if (i + 1 < attempts) {
+          await Future.delayed(delay);
+        }
+      }
+    }
+    if (timeoutCode != null && _isTimeoutError(lastError)) {
+      throw StateError(timeoutCode);
+    }
+    if (bleErrorCode != null && _isBleError(lastError)) {
+      throw StateError(bleErrorCode);
+    }
+    throw lastError ?? StateError('retry_failed');
+  }
+
+  bool _isTimeoutError(Object? e) {
+    if (e is TimeoutException) return true;
+    return e != null && e.toString().contains('Timed out');
+  }
+
+  bool _isBleError(Object? e) {
+    return e is FlutterBluePlusException ||
+        (e != null && e.toString().contains('FlutterBluePlusException'));
+  }
+
+  String _mapBleErrorCode(Object e, {required String op}) {
+    if (_isTimeoutError(e)) {
+      return op == 'connect' ? kPinetimeConnectTimeout : kPinetimeReadTimeout;
+    }
+    if (_isBleError(e)) {
+      return kPinetimeBleError;
+    }
+    return kPinetimeBleError;
   }
 }
 

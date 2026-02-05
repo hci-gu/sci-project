@@ -43,10 +43,22 @@ class SyncWatchData extends HookConsumerWidget {
                   await ref.read(connectedWatchProvider.notifier).syncData();
               if (context.mounted) {
                 if (result.ok) {
+                  ref.read(lastSyncProvider.notifier).setLastSync(
+                        DateTime.now(),
+                      );
+                  final hasData = (result.dataCount ?? 0) > 0;
+                  final uploaded = result.uploaded != false;
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                        content: Text(
-                            AppLocalizations.of(context)!.syncSuccess)),
+                      content: Text(
+                        hasData
+                            ? (uploaded
+                                ? AppLocalizations.of(context)!.syncSuccess
+                                : AppLocalizations.of(context)!
+                                    .syncSavedPending)
+                            : AppLocalizations.of(context)!.syncNoData,
+                      ),
+                    ),
                   );
                 } else if (result.error == kWatchNotFoundError) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -54,6 +66,14 @@ class SyncWatchData extends HookConsumerWidget {
                       content: Text(
                         AppLocalizations.of(context)!
                             .watchNotFoundReconnect,
+                      ),
+                    ),
+                  );
+                } else if (result.error == kWatchSyncLoginRequired) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        AppLocalizations.of(context)!.watchSyncLoginRequired,
                       ),
                     ),
                   );
@@ -81,11 +101,49 @@ class SyncWatchData extends HookConsumerWidget {
                       ),
                     ),
                   );
-                } else {
+                } else if (result.error == kPinetimeConnectTimeout) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                        content: Text(
-                            AppLocalizations.of(context)!.syncNoData)),
+                      content: Text(
+                        AppLocalizations.of(context)!.pinetimeConnectTimeout,
+                      ),
+                    ),
+                  );
+                } else if (result.error == kPinetimeReadTimeout) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        AppLocalizations.of(context)!.pinetimeReadTimeout,
+                      ),
+                    ),
+                  );
+                } else if (result.error == kPinetimeBleError) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        AppLocalizations.of(context)!.pinetimeBleError,
+                      ),
+                    ),
+                  );
+                } else if (result.error == kPinetimeCharacteristicMissing) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        AppLocalizations.of(context)!
+                            .pinetimeCharacteristicMissing,
+                      ),
+                    ),
+                  );
+                } else {
+                  final error = result.error?.toString();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        error != null
+                            ? AppLocalizations.of(context)!.syncFailed(error)
+                            : AppLocalizations.of(context)!.syncNoData,
+                      ),
+                    ),
                   );
                 }
                 loading.value = false;

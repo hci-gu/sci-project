@@ -175,6 +175,8 @@ export class Telemetry extends Model<
   declare accelMinutesCount: number
   declare watchId: CreationOptional<string>
   declare firmwareVersion: CreationOptional<string>
+  declare sentToServer: CreationOptional<boolean>
+  declare backgroundSync: CreationOptional<boolean>
 
   declare UserId?: ForeignKey<User['id']>
 }

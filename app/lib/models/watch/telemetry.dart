@@ -12,6 +12,8 @@ class WatchTelemetry {
   final String? watchId;
   final String? firmwareVersion;
   final DateTime? timestamp;
+  final bool? sentToServer;
+  final bool? backgroundSync;
 
   WatchTelemetry({
     required this.batteryPercent,
@@ -25,6 +27,8 @@ class WatchTelemetry {
     this.watchId,
     this.firmwareVersion,
     this.timestamp,
+    this.sentToServer,
+    this.backgroundSync,
   });
 
   static WatchTelemetry fromBytes(List<int> data) {
@@ -63,6 +67,8 @@ class WatchTelemetry {
     String? watchId,
     String? firmwareVersion,
     DateTime? timestamp,
+    bool? sentToServer,
+    bool? backgroundSync,
   }) {
     return WatchTelemetry(
       batteryPercent: batteryPercent,
@@ -76,6 +82,8 @@ class WatchTelemetry {
       watchId: watchId ?? this.watchId,
       firmwareVersion: firmwareVersion ?? this.firmwareVersion,
       timestamp: timestamp ?? this.timestamp,
+      sentToServer: sentToServer ?? this.sentToServer,
+      backgroundSync: backgroundSync ?? this.backgroundSync,
     );
   }
 
@@ -91,5 +99,7 @@ class WatchTelemetry {
     if (watchId != null) 'watchId': watchId,
     if (firmwareVersion != null) 'firmwareVersion': firmwareVersion,
     if (timestamp != null) 't': timestamp!.toIso8601String(),
+    if (sentToServer != null) 'sentToServer': sentToServer,
+    if (backgroundSync != null) 'backgroundSync': backgroundSync,
   };
 }

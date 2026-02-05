@@ -1164,6 +1164,22 @@ class AppLocalizationsEn extends AppLocalizations {
       'Unable to connect to the watch. Move closer and try again.';
 
   @override
+  String get pinetimeConnectTimeout =>
+      'Connection timed out. Move closer and try again.';
+
+  @override
+  String get pinetimeReadTimeout =>
+      'Timed out while reading data from the watch. Keep it nearby and try again.';
+
+  @override
+  String get pinetimeBleError =>
+      'Bluetooth error while syncing. Turn Bluetooth off/on and try again.';
+
+  @override
+  String get pinetimeCharacteristicMissing =>
+      'Watch firmware does not support required data service.';
+
+  @override
   String get recordingInProgress => 'Recording...';
 
   @override
@@ -1224,6 +1240,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get syncing => 'Syncing...';
 
   @override
+  String get syncSavedPending =>
+      'Synced from watch, upload pending. Check your connection and try again.';
+
+  @override
   String syncFailed(String error) {
     return 'Sync failed: $error';
   }
@@ -1238,6 +1258,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get syncPhaseUploading => 'Uploading data...';
+
+  @override
+  String get syncPhaseProcessing => 'Processing data...';
 
   @override
   String get syncPhaseClearing => 'Clearing watch data...';

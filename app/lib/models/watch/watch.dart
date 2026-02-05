@@ -13,12 +13,24 @@ const String kWatchNotFoundError = 'watch_not_found';
 const String kBluetoothOffError = 'bluetooth_off';
 const String kWatchNotConfiguredError = 'watch_not_configured';
 const String kConnectionFailedError = 'watch_connect_failed';
+const String kWatchSyncLoginRequired = 'watch_sync_login_required';
+const String kPinetimeConnectTimeout = 'pinetime_connect_timeout';
+const String kPinetimeReadTimeout = 'pinetime_read_timeout';
+const String kPinetimeBleError = 'pinetime_ble_error';
+const String kPinetimeCharacteristicMissing = 'pinetime_characteristic_missing';
 
 class WatchSyncResult {
   final bool ok;
   final String? error;
+  final int? dataCount;
+  final bool? uploaded;
 
-  const WatchSyncResult({required this.ok, this.error});
+  const WatchSyncResult({
+    required this.ok,
+    this.error,
+    this.dataCount,
+    this.uploaded,
+  });
 }
 
 class ConnectedWatch {
@@ -109,10 +121,12 @@ class ConnectedWatchNotifier extends Notifier<ConnectedWatch?> {
     // Both Polar and PineTime sync via the same BLE command
     // BleOwner routes to the correct handler based on watch type
     if (state?.type == WatchType.polar || state?.type == WatchType.pinetime) {
-      final result = await sendBleCommand({'cmd': 'sync'});
+      final result = await sendBleCommand({'cmd': 'sync', 'backgroundSync': false});
       return WatchSyncResult(
         ok: result['ok'] == true,
         error: result['error'] as String?,
+        dataCount: result['dataCount'] as int?,
+        uploaded: result['uploaded'] as bool?,
       );
     }
 
@@ -130,7 +144,7 @@ class ConnectedWatchNotifier extends Notifier<ConnectedWatch?> {
     }
 
     final rp = ReceivePort();
-    owner.send({'cmd': 'sync', 'reply': rp.sendPort});
+    owner.send({'cmd': 'startRecording', 'reply': rp.sendPort});
 
     // Wait for result (add a timeout so we don't hang forever)
     try {

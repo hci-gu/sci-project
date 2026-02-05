@@ -152,13 +152,16 @@ export const createBoutFromCounts = async (
   // get the activity level from average acc
   // const activity = activityForAccAndCondition(avgAcc, user.condition)
 
-  // lookup last bout
+  // lookup last bout up to the last count time (backfill-safe)
   const lastBout = await BoutModel.findOne({
     attributes: ['id', 't', 'activity', 'minutes'],
     where: {
       UserId: user.id,
       activity: {
         [Op.in]: [Activity.sedentary, Activity.moving, Activity.active],
+      },
+      t: {
+        [Op.lte]: counts[counts.length - 1].t,
       },
     },
     order: [['t', 'DESC']],
@@ -200,6 +203,11 @@ export const createBoutFromCounts = async (
   }
 
   // if activity is same as current bout, extend by the gap duration (fill the gap)
+  // If the current minute is already within the existing bout, no change is needed.
+  if (moment(lastCountTime).isBefore(boutEnd)) {
+    return lastBout
+  }
+
   const gapMinutes = moment(lastCountTime).diff(boutEnd, 'minutes')
   lastBout.minutes += Math.max(1, gapMinutes + 1)
 
@@ -263,7 +271,7 @@ const upsertBoutAtMinute = async (
   minuteT: Date,
   options?: { transaction?: any }
 ) => {
-  // fetch latest bout in the activity set (non-sleeping)
+  // fetch latest bout at or before the minute (backfill-safe)
   const lastBout = await BoutModel.findOne({
     attributes: ['id', 't', 'activity', 'minutes', 'isSleeping'],
     where: {
@@ -271,6 +279,9 @@ const upsertBoutAtMinute = async (
       isSleeping: false,
       activity: {
         [Op.in]: [Activity.sedentary, Activity.moving, Activity.active],
+      },
+      t: {
+        [Op.lte]: minuteT,
       },
     },
     order: [['t', 'DESC']],
@@ -305,6 +316,11 @@ const upsertBoutAtMinute = async (
   }
 
   // Same activity & within gap tolerance → extend by filling the gap
+  // If minuteT already sits inside the existing bout, do nothing.
+  if (moment(minuteT).isBefore(boutEnd)) {
+    return
+  }
+
   const gapMinutes = moment(minuteT).diff(boutEnd, 'minutes')
   const newMinutes = lastBout.minutes + Math.max(1, gapMinutes + 1)
 

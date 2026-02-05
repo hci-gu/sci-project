@@ -1166,6 +1166,22 @@ class AppLocalizationsSv extends AppLocalizations {
       'Kunde inte ansluta till klockan. Flytta närmare och försök igen.';
 
   @override
+  String get pinetimeConnectTimeout =>
+      'Anslutningen tog för lång tid. Flytta närmare och försök igen.';
+
+  @override
+  String get pinetimeReadTimeout =>
+      'Tidsgräns vid läsning av data från klockan. Håll den nära och försök igen.';
+
+  @override
+  String get pinetimeBleError =>
+      'Bluetoothfel vid synkronisering. Slå av/på Bluetooth och försök igen.';
+
+  @override
+  String get pinetimeCharacteristicMissing =>
+      'Klockans firmware stöder inte den nödvändiga dataservicen.';
+
+  @override
   String get recordingInProgress => 'Spelar in...';
 
   @override
@@ -1228,6 +1244,10 @@ class AppLocalizationsSv extends AppLocalizations {
   String get syncing => 'Synkar...';
 
   @override
+  String get syncSavedPending =>
+      'Synkroniserat från klockan, uppladdning väntar. Kontrollera din anslutning och försök igen.';
+
+  @override
   String syncFailed(String error) {
     return 'Synkronisering misslyckades: $error';
   }
@@ -1242,6 +1262,9 @@ class AppLocalizationsSv extends AppLocalizations {
 
   @override
   String get syncPhaseUploading => 'Laddar upp data...';
+
+  @override
+  String get syncPhaseProcessing => 'Bearbetar data...';
 
   @override
   String get syncPhaseClearing => 'Rensar klockdata...';

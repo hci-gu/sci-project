@@ -54,7 +54,7 @@ class SettingsScreen extends ConsumerWidget {
             Button(
               onPressed: () async {
                 print("Sending BLE command sync");
-                await sendBleCommand({'cmd': 'sync'});
+                await sendBleCommand({'cmd': 'sync', 'backgroundSync': false});
                 print("BLE command sync sent");
 
                 List<int> disk = await PolarService.instance.polar.getDiskSpace(

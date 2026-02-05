@@ -17,6 +17,7 @@ class Storage {
 
   Future reloadPrefs() async {
     prefs = await SharedPreferences.getInstance();
+    await prefs.reload();
   }
 
   Credentials? getCredentials() {

@@ -43,8 +43,39 @@ router.post('/:id', async (req, res: any) => {
   const counts = req.body
 
   try {
-    await AccelCountModel.bulkSave(counts, id)
-    return res.sendStatus(200)
+    if (!Array.isArray(counts)) {
+      return res.sendStatus(400)
+    }
+
+    if (counts.length === 0) {
+      return res.sendStatus(200)
+    }
+
+    const hasInvalidRow = counts.some(
+      (c) =>
+        !c ||
+        !c.t ||
+        typeof c.a !== 'number' ||
+        Number.isNaN(c.a) ||
+        typeof c.hr !== 'number' ||
+        Number.isNaN(c.hr)
+    )
+
+    if (hasInvalidRow) {
+      return res.sendStatus(400)
+    }
+
+    // Respond immediately, then process in the background.
+    res.sendStatus(200)
+
+    setImmediate(async () => {
+      try {
+        await AccelCountModel.bulkSave(counts, id)
+      } catch (e) {
+        console.log('POST /counts/:id async', e)
+      }
+    })
+    return
   } catch (e) {
     console.log('POST /counts/:id', e)
     return res.sendStatus(500)
