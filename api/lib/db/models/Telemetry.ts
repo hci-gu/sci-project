@@ -1,4 +1,4 @@
-import { DataTypes, Sequelize, type ModelStatic } from 'sequelize'
+import { DataTypes, Op, Sequelize, type ModelStatic } from 'sequelize'
 import { Telemetry } from '../classes.js'
 
 let TelemetryModel: ModelStatic<Telemetry>
@@ -59,5 +59,30 @@ export default {
       sentToServer: data.sentToServer,
       backgroundSync: data.backgroundSync,
       UserId: userId,
+    }),
+  find: ({
+    userId,
+    from,
+    to,
+  }: {
+    userId: string
+    from: Date
+    to: Date
+  }): Promise<Telemetry[]> =>
+    TelemetryModel.findAll({
+      attributes: [
+        't',
+        'accelMinutesCount',
+        'sentToServer',
+        'backgroundSync',
+        'batteryPercent',
+      ],
+      where: {
+        UserId: userId,
+        t: {
+          [Op.between]: [from, to],
+        },
+      },
+      order: [['t', 'ASC']],
     }),
 }

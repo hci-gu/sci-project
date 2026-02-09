@@ -128,11 +128,7 @@ class BleOwner {
           } else {
             // If a sync or DFU is in progress, don't start a scan (contention)
             if (_syncing || _dfuRunning) {
-              sink.send({
-                'type': 'scan',
-                'event': 'done',
-                'error': 'busy',
-              });
+              sink.send({'type': 'scan', 'event': 'done', 'error': 'busy'});
               reply.send({'ok': false, 'error': 'busy'});
             } else {
               // start and ACK immediately so UI can render
@@ -157,7 +153,7 @@ class BleOwner {
             progressSink: progressSink,
             backgroundSync: backgroundSync,
           );
-          reply.send(result);
+          reply.send({...result, 'type': 'sync_result'});
         } else if (msg['cmd'] == 'dfu_start') {
           final SendPort? progressSink = msg['progressSink'];
           final String? version = msg['version'];
@@ -193,7 +189,15 @@ class BleOwner {
               e is StateError && e.message is String
                   ? e.message as String
                   : e.toString();
-          (msg['reply'] as SendPort).send({'ok': false, 'error': error});
+          final payload = {'ok': false, 'error': error};
+          if (msg['cmd'] == 'sync') {
+            (msg['reply'] as SendPort).send({
+              ...payload,
+              'type': 'sync_result',
+            });
+          } else {
+            (msg['reply'] as SendPort).send(payload);
+          }
         }
       }
     });
@@ -236,6 +240,7 @@ class BleOwner {
     SendPort? progressSink,
     bool backgroundSync = false,
   }) async {
+    debugPrint('BleOwner: _handleSync called (backgroundSync=$backgroundSync)');
     return _runExclusiveSync(() async {
       await Storage().reloadPrefs();
 
@@ -311,11 +316,11 @@ class BleOwner {
         debugPrint('BleOwner: found too large recordings -> purging all');
         bool deleteSuccess = false;
         try {
-            deleteSuccess = await _withTimeout(
-              PolarService.instance.deleteAllRecordings(entries),
-              _bleOpTimeout,
-              'polar_delete_timeout',
-            );
+          deleteSuccess = await _withTimeout(
+            PolarService.instance.deleteAllRecordings(entries),
+            _bleOpTimeout,
+            'polar_delete_timeout',
+          );
         } catch (e) {
           debugPrint('BleOwner: deleteAllRecordings failed: $e');
         }
@@ -625,8 +630,11 @@ class BleOwner {
         await Storage().setPineTimeLastIndex(watchId, null);
         await Storage().setPineTimeLastTimestamp(watchId, null);
       } else {
-        await Storage().setPineTimeLastIndex(watchId, newLastIndex);
-        await Storage().setPineTimeLastTimestamp(watchId, maxTimestamp);
+        // Don't advance the cursor when nothing was uploaded/persisted.
+        // Advancing here can mark watch data as consumed without upload.
+        debugPrint(
+          'BleOwner: PineTime produced zero counts; leaving cursor unchanged',
+        );
       }
 
       sendProgress('done', entries.length, entries.length);
@@ -856,8 +864,9 @@ class BleOwner {
       if (service == null || !service.connected) {
         return {'firmwareVersion': null};
       }
-      final version =
-          await PineTimeService.instance.getFirmwareRevision(refresh: true);
+      final version = await PineTimeService.instance.getFirmwareRevision(
+        refresh: true,
+      );
       if (version != null) {
         _firmwareCache = version;
         _firmwareCacheAt = DateTime.now();
@@ -881,8 +890,8 @@ class BleOwner {
         adapterState == BluetoothAdapterState.on
             ? true
             : adapterState == BluetoothAdapterState.off
-                ? false
-                : null;
+            ? false
+            : null;
     try {
       // Check if PineTimeService is initialized before accessing instance
       final service = PineTimeService.instanceOrNull;
@@ -918,8 +927,8 @@ class BleOwner {
         adapterState == BluetoothAdapterState.on
             ? true
             : adapterState == BluetoothAdapterState.off
-                ? false
-                : null;
+            ? false
+            : null;
     try {
       final state = await PolarService.instance.getState();
 
@@ -1165,9 +1174,7 @@ Future<Map<String, dynamic>> sendBleCommand(
   if (cmd['cmd'] != 'ping') {
     bool ok = await _pingOwner(owner);
     if (!ok && ensureService) {
-      owner = await _waitForBleOwnerPort(
-        timeout: const Duration(seconds: 5),
-      );
+      owner = await _waitForBleOwnerPort(timeout: const Duration(seconds: 5));
       if (owner != null) {
         ok = await _pingOwner(owner);
       }

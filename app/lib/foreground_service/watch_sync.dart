@@ -31,6 +31,7 @@ class WatchSyncHandler extends TaskHandler {
 
   @override
   void onRepeatEvent(DateTime timestamp) async {
+    debugPrint("WatchSyncHandler repeat event at $timestamp");
     // Do *non-BLE* prep here (prefs reload, auth if you want),
     // but let the BLE owner handle actual BLE + sync.
     final SendPort? owner = IsolateNameServer.lookupPortByName(
@@ -42,20 +43,24 @@ class WatchSyncHandler extends TaskHandler {
       return;
     }
 
+    debugPrint('WatchSyncHandler: sending sync command to BLE owner');
+
     final rp = ReceivePort();
-    owner.send({
-      'cmd': 'sync',
-      'reply': rp.sendPort,
-      'backgroundSync': true,
-    });
+    owner.send({'cmd': 'sync', 'reply': rp.sendPort, 'backgroundSync': true});
 
     // Wait for result (add a timeout so we don't hang forever)
     try {
-      final _ = await rp.first.timeout(const Duration(minutes: 3));
+      final _ = await rp
+          .where((msg) => msg is Map && msg['type'] == 'sync_result')
+          .first
+          .timeout(const Duration(minutes: 3));
       Storage().setLastSync(DateTime.now());
     } catch (e) {
       debugPrint('WatchSyncHandler sync timed out or failed: $e');
     } finally {
+      debugPrint(
+        'WatchSyncHandler: sync command completed, closing receive port',
+      );
       rp.close();
     }
   }
