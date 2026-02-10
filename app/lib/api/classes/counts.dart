@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:polar/polar.dart';
 import 'dart:math';
 
@@ -241,12 +239,7 @@ class Counts {
 
 extension CountsExtension on Counts {
   Map<String, dynamic> toJson() {
-    final utc = t.toUtc();
-    final shifted = utc.add(const Duration(hours: 1));
-    final iso = shifted.toIso8601String();
-    final tStr =
-        iso.endsWith('Z') ? iso.replaceFirst('Z', '+01:00') : '$iso+01:00';
-    return {'t': tStr, 'hr': hr, 'a': a};
+    return {'t': t.toUtc().toIso8601String(), 'hr': hr, 'a': a};
   }
 
   static Counts fromJson(Map<String, dynamic> json) {

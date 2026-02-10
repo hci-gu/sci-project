@@ -20,6 +20,7 @@ class PolarState {
 class PolarService {
   static PolarService? _instance;
   final polar = Polar();
+  static const Duration _watchTimeDriftTolerance = Duration(minutes: 2);
   bool connected = false;
   bool initialized = false;
   bool started = false;
@@ -115,9 +116,14 @@ class PolarService {
           DateTime now = DateTime.now();
           print("Current system time: $now");
 
-          if (watchTime != null && watchTime.year < now.year) {
-            polar.setLocalTime(identifier, now);
-            print("Setting watch time to current time");
+          if (watchTime == null) {
+            return;
+          }
+
+          final drift = now.difference(watchTime).abs();
+          if (drift > _watchTimeDriftTolerance) {
+            await polar.setLocalTime(identifier, now);
+            print("Setting watch time to current time (drift: $drift)");
           }
         } catch (e) {
           print("Error setting watch time: $e");

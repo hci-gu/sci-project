@@ -13,8 +13,7 @@ void startSyncWatchService() {
 }
 
 class WatchSyncHandler extends TaskHandler {
-  void _sendDebugEvent(Map<String, dynamic> data) {
-    if (!kDebugMode) return;
+  void _sendEvent(Map<String, dynamic> data) {
     FlutterForegroundTask.sendDataToMain({'type': 'watch_sync', ...data});
   }
 
@@ -22,7 +21,7 @@ class WatchSyncHandler extends TaskHandler {
   Future<void> onStart(DateTime timestamp, TaskStarter starter) async {
     DartPluginRegistrant.ensureInitialized();
     debugPrint("WatchSyncHandler started at $timestamp");
-    _sendDebugEvent({
+    _sendEvent({
       'event': 'onStart',
       'starter': starter.name,
       'timestamp': timestamp.toIso8601String(),
@@ -30,13 +29,13 @@ class WatchSyncHandler extends TaskHandler {
     try {
       await BleOwner.instance.initialize();
       debugPrint('BleOwner initialized in foreground service isolate');
-      _sendDebugEvent({
+      _sendEvent({
         'event': 'ble_owner_initialized',
         'timestamp': DateTime.now().toIso8601String(),
       });
     } catch (e, st) {
       debugPrint('BleOwner init failed in service: $e\n$st');
-      _sendDebugEvent({
+      _sendEvent({
         'event': 'ble_owner_init_failed',
         'error': e.toString(),
         'timestamp': DateTime.now().toIso8601String(),
@@ -47,7 +46,7 @@ class WatchSyncHandler extends TaskHandler {
   @override
   void onRepeatEvent(DateTime timestamp) async {
     debugPrint("WatchSyncHandler repeat event at $timestamp");
-    _sendDebugEvent({
+    _sendEvent({
       'event': 'onRepeatEvent',
       'timestamp': timestamp.toIso8601String(),
     });
@@ -59,7 +58,7 @@ class WatchSyncHandler extends TaskHandler {
 
     if (owner == null) {
       debugPrint('WatchSyncHandler: BLE owner port not available');
-      _sendDebugEvent({
+      _sendEvent({
         'event': 'ble_owner_port_missing',
         'timestamp': DateTime.now().toIso8601String(),
       });
@@ -78,13 +77,13 @@ class WatchSyncHandler extends TaskHandler {
           .first
           .timeout(const Duration(minutes: 3));
       Storage().setLastSync(DateTime.now());
-      _sendDebugEvent({
+      _sendEvent({
         'event': 'sync_result_received',
         'timestamp': DateTime.now().toIso8601String(),
       });
     } catch (e) {
       debugPrint('WatchSyncHandler sync timed out or failed: $e');
-      _sendDebugEvent({
+      _sendEvent({
         'event': 'sync_failed_or_timeout',
         'error': e.toString(),
         'timestamp': DateTime.now().toIso8601String(),
@@ -93,7 +92,7 @@ class WatchSyncHandler extends TaskHandler {
       debugPrint(
         'WatchSyncHandler: sync command completed, closing receive port',
       );
-      _sendDebugEvent({
+      _sendEvent({
         'event': 'sync_command_completed',
         'timestamp': DateTime.now().toIso8601String(),
       });
@@ -106,7 +105,7 @@ class WatchSyncHandler extends TaskHandler {
     debugPrint(
       "WatchSyncHandler destroyed at $timestamp, isTimeout: $isTimeout",
     );
-    _sendDebugEvent({
+    _sendEvent({
       'event': 'onDestroy',
       'isTimeout': isTimeout,
       'timestamp': timestamp.toIso8601String(),

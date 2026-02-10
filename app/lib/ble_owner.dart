@@ -420,12 +420,12 @@ class BleOwner {
       }
 
       PineTimeService.initialize(stored.id);
-      await PineTimeService.instance.start();
-
-      final cancelToken = DfuCancelToken();
-      _dfuCancelToken = cancelToken;
-
       try {
+        await PineTimeService.instance.start();
+
+        final cancelToken = DfuCancelToken();
+        _dfuCancelToken = cancelToken;
+
         String? targetVersion = version;
         if (targetVersion == null) {
           final latest = await Api().getLatestDfuRelease();
@@ -467,7 +467,7 @@ class BleOwner {
         return true;
       } finally {
         try {
-          await PineTimeService.instance.stop();
+          await PineTimeService.instance.stopAndDispose();
         } catch (_) {}
       }
     });
@@ -501,6 +501,9 @@ class BleOwner {
       // Send connecting phase
       sendProgress('connecting', 0, 0);
 
+      // Avoid scan/connect contention from any in-flight scan workflow.
+      await _handleScanStop();
+
       // Initialize and connect to PineTime
       PineTimeService.initialize(watchId);
       for (int attempt = 0; attempt < 3; attempt++) {
@@ -509,7 +512,6 @@ class BleOwner {
           break;
         } catch (e) {
           if (attempt == 2) {
-            PineTimeService.dispose();
             rethrow;
           }
           await Future.delayed(const Duration(seconds: 1));
@@ -518,22 +520,17 @@ class BleOwner {
 
       if (!PineTimeService.instance.connected) {
         debugPrint('BleOwner: PineTime connection failed');
-        PineTimeService.dispose();
+        try {
+          await PineTimeService.instance.stopAndDispose();
+        } catch (_) {}
         return _errorResult(kConnectionFailedError);
       }
 
       // Fetch telemetry before sync so minute counters reflect pre-sync state.
-      try {
-        debugPrint('BleOwner: telemetry fetch start');
-        preSyncTelemetry = await PineTimeService.instance.getTelemetry();
-        if (preSyncTelemetry != null) {
-          debugPrint('BleOwner: telemetry fetch ok');
-        } else {
-          debugPrint('BleOwner: telemetry fetch empty');
-        }
-      } catch (e) {
-        debugPrint('BleOwner: telemetry fetch failed: $e');
-      }
+      preSyncTelemetry = await _fetchPineTimeTelemetryBeforeSync();
+      // Give Android GATT a brief cooldown to avoid transient BUSY right after
+      // telemetry operations on some devices.
+      await Future.delayed(const Duration(milliseconds: 250));
 
       final state = await _withTimeout(
         PineTimeService.instance.getState(),
@@ -654,11 +651,9 @@ class BleOwner {
     } catch (e, st) {
       if (e is StateError && e.message is String) {
         debugPrint('BleOwner: PineTime sync failed: ${e.message}');
-        PineTimeService.dispose();
         return _errorResult(e.message as String);
       }
       debugPrint('BleOwner: PineTime sync failed: $e\n$st');
-      PineTimeService.dispose();
       return _errorResult('sync_failed');
     } finally {
       try {
@@ -707,6 +702,35 @@ class BleOwner {
     } catch (e) {
       debugPrint('BleOwner: telemetry upload failed: $e');
     }
+  }
+
+  Future<WatchTelemetry?> _fetchPineTimeTelemetryBeforeSync() async {
+    const maxAttempts = 3;
+    for (int attempt = 0; attempt < maxAttempts; attempt++) {
+      try {
+        debugPrint(
+          'BleOwner: telemetry fetch start (attempt ${attempt + 1}/$maxAttempts)',
+        );
+        final telemetry = await PineTimeService.instance.getTelemetry();
+        if (telemetry != null) {
+          debugPrint('BleOwner: telemetry fetch ok');
+          return telemetry;
+        }
+        debugPrint('BleOwner: telemetry fetch empty');
+      } catch (e) {
+        debugPrint('BleOwner: telemetry fetch failed: $e');
+      }
+
+      if (attempt + 1 < maxAttempts) {
+        // Keep the same connection and just back off. Reconnect here increases
+        // watch_not_found risk when advertisement is brief.
+        final bool busy = PineTimeService.instance.lastTelemetryGattBusy;
+        final int delayMs =
+            busy ? (400 * (attempt + 1)) : (250 * (attempt + 1));
+        await Future.delayed(Duration(milliseconds: delayMs));
+      }
+    }
+    return null;
   }
 
   // ------------------- Public-ish command handlers -------------------

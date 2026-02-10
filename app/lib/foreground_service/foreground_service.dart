@@ -10,7 +10,7 @@ class ForegroundService {
   ForegroundService._();
 
   static final ForegroundService instance = ForegroundService._();
-  static const int _repeatIntervalMs = 1000 * 15 * 60;
+  static const int _repeatIntervalMs = 1000 * 5 * 60;
   Completer<void>? _startCompleter;
 
   Future<void> _requestPlatformPermissions() async {
@@ -32,11 +32,9 @@ class ForegroundService {
   }
 
   void init() {
-    debugPrint("ForegroundService: init called");
     FlutterForegroundTask.initCommunicationPort();
-    if (kDebugMode) {
-      FlutterForegroundTask.addTaskDataCallback(_onReceiveTaskData);
-    }
+    FlutterForegroundTask.removeTaskDataCallback(_onReceiveTaskData);
+    FlutterForegroundTask.addTaskDataCallback(_onReceiveTaskData);
     FlutterForegroundTask.init(
       androidNotificationOptions: AndroidNotificationOptions(
         channelId: 'watch_sync_service',
@@ -79,6 +77,7 @@ class ForegroundService {
 
   Future<void> ensureStarted() async {
     if (await isRunningService) {
+      await _syncRunningServiceConfig();
       return;
     }
     if (_startCompleter != null) {
@@ -98,6 +97,26 @@ class ForegroundService {
   }
 
   Future<bool> get isRunningService => FlutterForegroundTask.isRunningService;
+
+  Future<void> _syncRunningServiceConfig() async {
+    final ServiceRequestResult result =
+        await FlutterForegroundTask.updateService(
+          foregroundTaskOptions: ForegroundTaskOptions(
+            eventAction: ForegroundTaskEventAction.repeat(_repeatIntervalMs),
+            autoRunOnBoot: true,
+            autoRunOnMyPackageReplaced: true,
+            allowWakeLock: true,
+            allowWifiLock: true,
+          ),
+          callback: startSyncWatchService,
+          notificationTitle: 'WatchSync is running',
+          notificationText: '',
+        );
+
+    if (result is ServiceRequestFailure) {
+      throw result.error;
+    }
+  }
 
   /// Waits for the BLE owner port to become available.
   /// This ensures the foreground service has fully initialized.
