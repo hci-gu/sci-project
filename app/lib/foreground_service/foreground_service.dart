@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:scimovement/foreground_service/watch_sync.dart';
 
@@ -9,6 +10,7 @@ class ForegroundService {
   ForegroundService._();
 
   static final ForegroundService instance = ForegroundService._();
+  static const int _repeatIntervalMs = 1000 * 15 * 60;
   Completer<void>? _startCompleter;
 
   Future<void> _requestPlatformPermissions() async {
@@ -30,9 +32,11 @@ class ForegroundService {
   }
 
   void init() {
-    print("ForegroundService: init called");
+    debugPrint("ForegroundService: init called");
     FlutterForegroundTask.initCommunicationPort();
-    FlutterForegroundTask.addTaskDataCallback(_onReceiveTaskData);
+    if (kDebugMode) {
+      FlutterForegroundTask.addTaskDataCallback(_onReceiveTaskData);
+    }
     FlutterForegroundTask.init(
       androidNotificationOptions: AndroidNotificationOptions(
         channelId: 'watch_sync_service',
@@ -44,7 +48,7 @@ class ForegroundService {
         playSound: false,
       ),
       foregroundTaskOptions: ForegroundTaskOptions(
-        eventAction: ForegroundTaskEventAction.repeat(1000 * 60 * 5),
+        eventAction: ForegroundTaskEventAction.repeat(_repeatIntervalMs),
         autoRunOnBoot: true,
         autoRunOnMyPackageReplaced: true,
         allowWakeLock: true,
@@ -111,7 +115,7 @@ class ForegroundService {
     return false;
   }
 
-  void _onReceiveTaskData(Object data) async {
-    print("ForegroundService::_onReceiveTaskData: $data");
+  void _onReceiveTaskData(Object data) {
+    debugPrint('ForegroundService::_onReceiveTaskData: $data');
   }
 }

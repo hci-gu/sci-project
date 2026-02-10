@@ -2,13 +2,9 @@
 import 'dart:isolate';
 import 'dart:ui';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
-import 'package:polar/polar.dart';
-import 'package:scimovement/api/api.dart';
-import 'package:scimovement/api/classes/counts.dart';
 import 'package:scimovement/ble_owner.dart';
-import 'package:scimovement/models/watch/polar.dart';
 import 'package:scimovement/storage.dart';
 
 @pragma('vm:entry-point')
@@ -17,21 +13,44 @@ void startSyncWatchService() {
 }
 
 class WatchSyncHandler extends TaskHandler {
+  void _sendDebugEvent(Map<String, dynamic> data) {
+    if (!kDebugMode) return;
+    FlutterForegroundTask.sendDataToMain({'type': 'watch_sync', ...data});
+  }
+
   @override
   Future<void> onStart(DateTime timestamp, TaskStarter starter) async {
     DartPluginRegistrant.ensureInitialized();
     debugPrint("WatchSyncHandler started at $timestamp");
+    _sendDebugEvent({
+      'event': 'onStart',
+      'starter': starter.name,
+      'timestamp': timestamp.toIso8601String(),
+    });
     try {
       await BleOwner.instance.initialize();
       debugPrint('BleOwner initialized in foreground service isolate');
+      _sendDebugEvent({
+        'event': 'ble_owner_initialized',
+        'timestamp': DateTime.now().toIso8601String(),
+      });
     } catch (e, st) {
       debugPrint('BleOwner init failed in service: $e\n$st');
+      _sendDebugEvent({
+        'event': 'ble_owner_init_failed',
+        'error': e.toString(),
+        'timestamp': DateTime.now().toIso8601String(),
+      });
     }
   }
 
   @override
   void onRepeatEvent(DateTime timestamp) async {
     debugPrint("WatchSyncHandler repeat event at $timestamp");
+    _sendDebugEvent({
+      'event': 'onRepeatEvent',
+      'timestamp': timestamp.toIso8601String(),
+    });
     // Do *non-BLE* prep here (prefs reload, auth if you want),
     // but let the BLE owner handle actual BLE + sync.
     final SendPort? owner = IsolateNameServer.lookupPortByName(
@@ -40,6 +59,10 @@ class WatchSyncHandler extends TaskHandler {
 
     if (owner == null) {
       debugPrint('WatchSyncHandler: BLE owner port not available');
+      _sendDebugEvent({
+        'event': 'ble_owner_port_missing',
+        'timestamp': DateTime.now().toIso8601String(),
+      });
       return;
     }
 
@@ -55,12 +78,25 @@ class WatchSyncHandler extends TaskHandler {
           .first
           .timeout(const Duration(minutes: 3));
       Storage().setLastSync(DateTime.now());
+      _sendDebugEvent({
+        'event': 'sync_result_received',
+        'timestamp': DateTime.now().toIso8601String(),
+      });
     } catch (e) {
       debugPrint('WatchSyncHandler sync timed out or failed: $e');
+      _sendDebugEvent({
+        'event': 'sync_failed_or_timeout',
+        'error': e.toString(),
+        'timestamp': DateTime.now().toIso8601String(),
+      });
     } finally {
       debugPrint(
         'WatchSyncHandler: sync command completed, closing receive port',
       );
+      _sendDebugEvent({
+        'event': 'sync_command_completed',
+        'timestamp': DateTime.now().toIso8601String(),
+      });
       rp.close();
     }
   }
@@ -70,5 +106,10 @@ class WatchSyncHandler extends TaskHandler {
     debugPrint(
       "WatchSyncHandler destroyed at $timestamp, isTimeout: $isTimeout",
     );
+    _sendDebugEvent({
+      'event': 'onDestroy',
+      'isTimeout': isTimeout,
+      'timestamp': timestamp.toIso8601String(),
+    });
   }
 }
