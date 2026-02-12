@@ -98,7 +98,7 @@ class WatchTelemetry {
     'accelMinutesCount': accelMinutesCount,
     if (watchId != null) 'watchId': watchId,
     if (firmwareVersion != null) 'firmwareVersion': firmwareVersion,
-    if (timestamp != null) 't': timestamp!.toIso8601String(),
+    if (timestamp != null) 't': timestamp!.toUtc().toIso8601String(),
     if (sentToServer != null) 'sentToServer': sentToServer,
     if (backgroundSync != null) 'backgroundSync': backgroundSync,
   };

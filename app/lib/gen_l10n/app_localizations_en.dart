@@ -272,6 +272,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Update complete. Validate on watch (Settings > Firmware).';
 
   @override
+  String get firmwareValidatePromptTitle => 'Validate Firmware On Watch';
+
+  @override
+  String get firmwareValidatePromptBody =>
+      'After the update, validate firmware on the watch:\nSwipe left -> settings -> scroll down -> firmware -> validate';
+
+  @override
   String firmwareUpdateFailed(Object error) {
     return 'Firmware update failed: $error';
   }

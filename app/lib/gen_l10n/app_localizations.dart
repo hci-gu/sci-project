@@ -602,6 +602,18 @@ abstract class AppLocalizations {
   /// **'Update complete. Validate on watch (Settings > Firmware).'**
   String get firmwareUpdateDone;
 
+  /// No description provided for @firmwareValidatePromptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Validate Firmware On Watch'**
+  String get firmwareValidatePromptTitle;
+
+  /// No description provided for @firmwareValidatePromptBody.
+  ///
+  /// In en, this message translates to:
+  /// **'After the update, validate firmware on the watch:\nSwipe left -> settings -> scroll down -> firmware -> validate'**
+  String get firmwareValidatePromptBody;
+
   /// No description provided for @firmwareUpdateFailed.
   ///
   /// In en, this message translates to:

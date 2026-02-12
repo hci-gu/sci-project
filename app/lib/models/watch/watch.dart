@@ -14,6 +14,8 @@ const String kBluetoothOffError = 'bluetooth_off';
 const String kWatchNotConfiguredError = 'watch_not_configured';
 const String kConnectionFailedError = 'watch_connect_failed';
 const String kWatchSyncLoginRequired = 'watch_sync_login_required';
+const String kSyncSkippedDfuInProgress = 'sync_skipped_dfu_in_progress';
+const String kSyncSkippedSyncInProgress = 'sync_skipped_sync_in_progress';
 const String kPinetimeConnectTimeout = 'pinetime_connect_timeout';
 const String kPinetimeReadTimeout = 'pinetime_read_timeout';
 const String kPinetimeBleError = 'pinetime_ble_error';
@@ -121,7 +123,10 @@ class ConnectedWatchNotifier extends Notifier<ConnectedWatch?> {
     // Both Polar and PineTime sync via the same BLE command
     // BleOwner routes to the correct handler based on watch type
     if (state?.type == WatchType.polar || state?.type == WatchType.pinetime) {
-      final result = await sendBleCommand({'cmd': 'sync', 'backgroundSync': false});
+      final result = await sendBleCommand({
+        'cmd': 'sync',
+        'backgroundSync': false,
+      });
       return WatchSyncResult(
         ok: result['ok'] == true,
         error: result['error'] as String?,

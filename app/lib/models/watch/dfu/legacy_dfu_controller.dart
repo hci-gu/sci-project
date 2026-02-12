@@ -85,7 +85,7 @@ class LegacyDfuController {
     cancelToken.throwIfCancelled();
     onProgress?.call(const DfuProgress(phase: 'reboot'));
 
-    await _activate();
+    await _activateAndReset();
     onProgress?.call(const DfuProgress(phase: 'done'));
   }
 
@@ -125,9 +125,10 @@ class LegacyDfuController {
     while (sent < binBytes.length) {
       cancelToken.throwIfCancelled();
 
-      final next = (sent + chunkSize) > binBytes.length
-          ? binBytes.length
-          : sent + chunkSize;
+      final next =
+          (sent + chunkSize) > binBytes.length
+              ? binBytes.length
+              : sent + chunkSize;
       final chunk = binBytes.sublist(sent, next);
       await transport.writePacket(chunk);
       sent = next;
@@ -144,7 +145,6 @@ class LegacyDfuController {
         DfuProgress(phase: 'transfer', current: sent, total: binBytes.length),
       );
     }
-
   }
 
   Future<void> _sendInChunks(Uint8List bytes) async {
@@ -162,8 +162,28 @@ class LegacyDfuController {
     await transport.writeControlPoint([kDfuOpValidate]);
   }
 
-  Future<void> _activate() async {
-    await transport.writeControlPoint([kDfuOpActivateAndReset]);
+  Future<void> _activateAndReset() async {
+    try {
+      // Bootloaders often disconnect immediately after receiving activate/reset.
+      // Use write-without-response and treat expected disconnect timing as success.
+      await transport.writeControlPoint([
+        kDfuOpActivateAndReset,
+      ], withoutResponse: true);
+    } catch (e) {
+      if (_isExpectedRebootDisconnect(e)) {
+        return;
+      }
+      rethrow;
+    }
+  }
+
+  bool _isExpectedRebootDisconnect(Object error) {
+    final message = error.toString().toLowerCase();
+    return message.contains('disconnect') ||
+        message.contains('not connected') ||
+        message.contains('gatt') ||
+        message.contains('cancelled') ||
+        message.contains('canceled');
   }
 
   Future<void> _awaitResponse(int requestedOp) async {
@@ -174,9 +194,12 @@ class LegacyDfuController {
               value[0] == kDfuResponseOpCode &&
               value[1] == requestedOp,
         )
-        .timeout(timeout, onTimeout: () {
-      throw TimeoutException('dfu_response_timeout');
-    });
+        .timeout(
+          timeout,
+          onTimeout: () {
+            throw TimeoutException('dfu_response_timeout');
+          },
+        );
 
     if (response[2] != kDfuStatusSuccess) {
       throw StateError('dfu_error_status_${response[2]}');
@@ -186,12 +209,14 @@ class LegacyDfuController {
   Future<int> _awaitPacketReceipt() async {
     final response = await transport.controlPointNotifications
         .firstWhere(
-          (value) =>
-              value.isNotEmpty && value[0] == kDfuPacketReceiptNotif,
+          (value) => value.isNotEmpty && value[0] == kDfuPacketReceiptNotif,
         )
-        .timeout(timeout, onTimeout: () {
-      throw TimeoutException('dfu_prn_timeout');
-    });
+        .timeout(
+          timeout,
+          onTimeout: () {
+            throw TimeoutException('dfu_prn_timeout');
+          },
+        );
 
     if (response.length < 5) {
       throw StateError('dfu_prn_malformed');

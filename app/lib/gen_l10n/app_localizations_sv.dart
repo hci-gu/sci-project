@@ -272,6 +272,13 @@ class AppLocalizationsSv extends AppLocalizations {
       'Uppdatering klar. Validera på klockan (Inställningar > Firmware).';
 
   @override
+  String get firmwareValidatePromptTitle => 'Validera Firmware På Klockan';
+
+  @override
+  String get firmwareValidatePromptBody =>
+      'Efter uppdateringen, validera firmware på klockan:\nSwipe left -> settings -> scroll down -> firmware -> validate';
+
+  @override
   String firmwareUpdateFailed(Object error) {
     return 'Firmwareuppdatering misslyckades: $error';
   }

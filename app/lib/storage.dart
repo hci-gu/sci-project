@@ -93,13 +93,14 @@ class Storage {
           return e;
         }).toList();
 
-    List<AppFeature> storedFeatures = features
-        .map(
-          (e) => AppFeature.values.firstWhere(
-            (element) => element.toString() == e,
-          ),
-        )
-        .toList();
+    List<AppFeature> storedFeatures =
+        features
+            .map(
+              (e) => AppFeature.values.firstWhere(
+                (element) => element.toString() == e,
+              ),
+            )
+            .toList();
 
     if (!storedFeatures.contains(AppFeature.watch)) {
       storedFeatures = [...storedFeatures, AppFeature.watch];
@@ -192,13 +193,21 @@ class Storage {
 
   Future<void> storePendingCounts(List<Counts> counts) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final List<String> stored =
-        prefs.getStringList('pendingCounts') ?? <String>[];
-    // Store properly encoded JSON strings (not Dart map .toString())
-    final List<String> newCounts =
-        counts.map((e) => jsonEncode(e.toJson())).toList();
-    final List<String> allCounts = [...stored, ...newCounts];
-    await prefs.setStringList('pendingCounts', allCounts);
+    final existingCounts = getPendingCounts();
+    final Map<String, Counts> byTimestamp = <String, Counts>{};
+
+    for (final count in existingCounts) {
+      byTimestamp[count.t.toUtc().toIso8601String()] = count;
+    }
+    for (final count in counts) {
+      byTimestamp[count.t.toUtc().toIso8601String()] = count;
+    }
+
+    final deduped =
+        byTimestamp.values.toList()..sort((a, b) => a.t.compareTo(b.t));
+    final serialized = deduped.map((e) => jsonEncode(e.toJson())).toList();
+
+    await prefs.setStringList('pendingCounts', serialized);
   }
 
   Future<void> clearPendingCounts() async {

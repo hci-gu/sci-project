@@ -21,6 +21,7 @@ import 'package:scimovement/models/watch/watch.dart';
 import 'package:polar/polar.dart';
 
 const String kBleOwnerPortName = 'ble_owner_port';
+const Duration kBleOwnerSyncTimeout = Duration(minutes: 4);
 
 Map<String, String> _deviceToMap(PolarDeviceInfo d) => {
   'id': d.deviceId,
@@ -50,10 +51,13 @@ class BleOwner {
   Completer<void>? _syncInflight;
 
   static const Duration _settle = Duration(seconds: 2);
-  static const Duration _syncTimeout = Duration(minutes: 4);
+  static const Duration _syncTimeout = kBleOwnerSyncTimeout;
   static const Duration _dfuTimeout = Duration(minutes: 15);
   static const Duration _bleOpTimeout = Duration(seconds: 45);
   static const Duration _bleReadTimeout = Duration(minutes: 2);
+  // Temporary test mode: skip PineTime telemetry BLE reads and upload
+  // a synthetic empty telemetry payload after sync.
+  static const bool _pinetimeTelemetryDebugNoBle = true;
 
   /// If more than this many recordings (ACC+HR combined) are present,
   /// purge device storage and start fresh.
@@ -149,6 +153,22 @@ class BleOwner {
         } else if (msg['cmd'] == 'sync') {
           final SendPort? progressSink = msg['progressSink'];
           final bool backgroundSync = msg['backgroundSync'] == true;
+          if (backgroundSync && _dfuRunning) {
+            reply.send({
+              'ok': false,
+              'error': kSyncSkippedDfuInProgress,
+              'type': 'sync_result',
+            });
+            return;
+          }
+          if (backgroundSync && _syncing) {
+            reply.send({
+              'ok': false,
+              'error': kSyncSkippedSyncInProgress,
+              'type': 'sync_result',
+            });
+            return;
+          }
           final result = await _handleSync(
             progressSink: progressSink,
             backgroundSync: backgroundSync,
@@ -244,30 +264,6 @@ class BleOwner {
     return _runExclusiveSync(() async {
       await Storage().reloadPrefs();
 
-      // 1) Server login & drain pending
-      final Credentials? credentials = Storage().getCredentials();
-      if (credentials == null) {
-        debugPrint('BleOwner: no credentials; skipping sync');
-        return _errorResult(kWatchSyncLoginRequired);
-      }
-      try {
-        await Api().login(credentials.email, credentials.password);
-      } catch (e) {
-        debugPrint('BleOwner: login failed: $e');
-        return _errorResult(kWatchSyncLoginRequired);
-      }
-
-      final pendingCounts = Storage().getPendingCounts();
-      debugPrint('BleOwner: uploading ${pendingCounts.length} pending counts');
-      if (pendingCounts.isNotEmpty) {
-        try {
-          await Api().uploadCounts(pendingCounts);
-          await Storage().clearPendingCounts();
-        } catch (e) {
-          debugPrint('BleOwner: failed to upload pending counts: $e');
-        }
-      }
-
       // Check watch type and route to appropriate sync
       final stored = Storage().getConnectedWatch();
       if (stored == null) {
@@ -329,6 +325,7 @@ class BleOwner {
           return _errorResult('polar_purge_failed');
         }
         await _startBoth();
+        await _tryLoginAndFlushPendingCounts();
         Storage().setLastSync(DateTime.now());
         debugPrint('BleOwner: sync done (purged due to large recordings)');
         return _okResult();
@@ -360,18 +357,16 @@ class BleOwner {
 
         final gotAcc = recs.$1 != null;
         final gotHr = recs.$2 != null;
+        final bool canUploadNow = await _tryLoginAndFlushPendingCounts();
 
         if (gotAcc && gotHr) {
           final counts = countsFromPolarData(recs.$1!, recs.$2!);
           dataCount = counts.length;
-
-          try {
-            await Api().uploadCounts(counts);
-            deleteAfterUpload = true;
-          } catch (_) {
-            await Storage().storePendingCounts(counts);
-            uploadSucceeded = false;
-          }
+          uploadSucceeded = await _uploadCountsOrStorePending(
+            counts,
+            canUploadNow: canUploadNow,
+          );
+          deleteAfterUpload = true;
           uploaded = true;
         } else {
           // One-sided data present – don't upload; just ensure both are running going forward
@@ -406,6 +401,57 @@ class BleOwner {
         'uploaded': dataCount == 0 ? true : uploadSucceeded,
       });
     });
+  }
+
+  Future<bool> _tryLoginAndFlushPendingCounts() async {
+    final Credentials? credentials = Storage().getCredentials();
+    if (credentials == null) {
+      debugPrint('BleOwner: no credentials; cannot upload now');
+      return false;
+    }
+
+    try {
+      await Api().login(credentials.email, credentials.password);
+    } catch (e) {
+      debugPrint('BleOwner: login failed; will keep counts pending: $e');
+      return false;
+    }
+
+    final pendingCounts = Storage().getPendingCounts();
+    debugPrint('BleOwner: uploading ${pendingCounts.length} pending counts');
+    if (pendingCounts.isNotEmpty) {
+      try {
+        await Api().uploadCounts(pendingCounts);
+        await Storage().clearPendingCounts();
+      } catch (e) {
+        debugPrint('BleOwner: failed to upload pending counts: $e');
+      }
+    }
+
+    return true;
+  }
+
+  Future<bool> _uploadCountsOrStorePending(
+    List<Counts> counts, {
+    required bool canUploadNow,
+  }) async {
+    if (counts.isEmpty) {
+      return true;
+    }
+
+    if (!canUploadNow) {
+      await Storage().storePendingCounts(counts);
+      return false;
+    }
+
+    try {
+      await Api().uploadCounts(counts);
+      return true;
+    } catch (e) {
+      debugPrint('BleOwner: upload failed, storing counts pending: $e');
+      await Storage().storePendingCounts(counts);
+      return false;
+    }
   }
 
   Future<bool> _handleDfuStart({
@@ -490,6 +536,7 @@ class BleOwner {
     final stored = Storage().getConnectedWatch();
     String? storedId;
     WatchTelemetry? preSyncTelemetry;
+    bool telemetryUploadAttempted = false;
 
     try {
       if (stored == null) {
@@ -508,7 +555,11 @@ class BleOwner {
       PineTimeService.initialize(watchId);
       for (int attempt = 0; attempt < 3; attempt++) {
         try {
-          await PineTimeService.instance.start();
+          await _withTimeout(
+            PineTimeService.instance.start(),
+            const Duration(seconds: 20),
+            kPinetimeConnectTimeout,
+          );
           break;
         } catch (e) {
           if (attempt == 2) {
@@ -526,11 +577,18 @@ class BleOwner {
         return _errorResult(kConnectionFailedError);
       }
 
-      // Fetch telemetry before sync so minute counters reflect pre-sync state.
-      preSyncTelemetry = await _fetchPineTimeTelemetryBeforeSync();
-      // Give Android GATT a brief cooldown to avoid transient BUSY right after
-      // telemetry operations on some devices.
-      await Future.delayed(const Duration(milliseconds: 250));
+      if (_pinetimeTelemetryDebugNoBle) {
+        debugPrint(
+          'BleOwner: telemetry BLE fetch disabled (debug), using empty payload',
+        );
+        preSyncTelemetry = _emptyPineTimeTelemetry();
+      } else {
+        // Fetch telemetry before sync so minute counters reflect pre-sync state.
+        preSyncTelemetry = await _fetchPineTimeTelemetryBeforeSync();
+        // Give Android GATT a brief cooldown to avoid transient BUSY right after
+        // telemetry operations on some devices.
+        await Future.delayed(const Duration(milliseconds: 250));
+      }
 
       final state = await _withTimeout(
         PineTimeService.instance.getState(),
@@ -544,6 +602,7 @@ class BleOwner {
       int startIndex = lastIndex + 1;
 
       if (totalCount == 0) {
+        await _tryLoginAndFlushPendingCounts();
         await Storage().setPineTimeLastIndex(watchId, null);
         await Storage().setPineTimeLastTimestamp(watchId, null);
         sendProgress('done', 0, 0);
@@ -574,6 +633,7 @@ class BleOwner {
       debugPrint('BleOwner: read ${entries.length} entries from PineTime');
 
       if (entries.isEmpty) {
+        await _tryLoginAndFlushPendingCounts();
         sendProgress('done', 0, 0);
         Storage().setLastSync(DateTime.now());
         return _okResult({'dataCount': 0});
@@ -589,20 +649,43 @@ class BleOwner {
           lastTimestamp > 0
               ? entries.where((e) => e.timestamp > lastTimestamp).toList()
               : entries;
+      final int uniqueTimestampCount =
+          filteredEntries.map((e) => e.timestamp).toSet().length;
+      final bool hasDuplicateTimestamps =
+          filteredEntries.length > uniqueTimestampCount;
+      if (hasDuplicateTimestamps) {
+        debugPrint(
+          'BleOwner: duplicate PineTime timestamps detected '
+          '(entries=${filteredEntries.length}, unique=$uniqueTimestampCount). '
+          'Will not advance cursor or clear watch data.',
+        );
+      }
 
       // Convert to Counts and upload
       sendProgress('processing', 0, entries.length);
       final counts = countsFromPineTimeData(filteredEntries);
       sendProgress('uploading', 0, entries.length);
       final int dataCount = counts.length;
+      final bool canUploadNow = await _tryLoginAndFlushPendingCounts();
       bool uploadSucceeded = true;
 
       if (counts.isNotEmpty) {
-        try {
-          await Api().uploadCounts(counts);
-        } catch (_) {
-          await Storage().storePendingCounts(counts);
-          uploadSucceeded = false;
+        uploadSucceeded = await _uploadCountsOrStorePending(
+          counts,
+          canUploadNow: canUploadNow,
+        );
+
+        if (hasDuplicateTimestamps) {
+          await _uploadPineTimeTelemetry(
+            storedId: watchId,
+            dataCount: dataCount,
+            uploadSucceeded: uploadSucceeded,
+            telemetry: preSyncTelemetry,
+            backgroundSync: backgroundSync,
+            skipFirmwareRead: _pinetimeTelemetryDebugNoBle,
+          );
+          telemetryUploadAttempted = true;
+          return _errorResult('pinetime_duplicate_entries_detected');
         }
 
         await Storage().setPineTimeLastIndex(watchId, newLastIndex);
@@ -642,7 +725,9 @@ class BleOwner {
         uploadSucceeded: uploadSucceeded,
         telemetry: preSyncTelemetry,
         backgroundSync: backgroundSync,
+        skipFirmwareRead: _pinetimeTelemetryDebugNoBle,
       );
+      telemetryUploadAttempted = true;
       debugPrint('BleOwner: PineTime sync done');
       return _okResult({
         'dataCount': dataCount,
@@ -657,15 +742,20 @@ class BleOwner {
       return _errorResult('sync_failed');
     } finally {
       try {
-        // Attempt telemetry upload even on failure; include "sentToServer=false".
-        if (storedId != null) {
+        // Attempt telemetry upload on failure or early return; include "sentToServer=false".
+        if (storedId != null && !telemetryUploadAttempted) {
+          if (_pinetimeTelemetryDebugNoBle && preSyncTelemetry == null) {
+            preSyncTelemetry = _emptyPineTimeTelemetry();
+          }
           await _uploadPineTimeTelemetry(
             storedId: storedId!,
             dataCount: 0,
             uploadSucceeded: false,
             telemetry: preSyncTelemetry,
             backgroundSync: backgroundSync,
+            skipFirmwareRead: _pinetimeTelemetryDebugNoBle,
           );
+          telemetryUploadAttempted = true;
         }
       } catch (_) {}
       try {
@@ -682,11 +772,15 @@ class BleOwner {
     required bool uploadSucceeded,
     WatchTelemetry? telemetry,
     bool backgroundSync = false,
+    bool skipFirmwareRead = false,
   }) async {
     try {
       if (telemetry != null) {
-        final firmwareVersion =
-            await PineTimeService.instance.getFirmwareRevision();
+        String? firmwareVersion;
+        if (!skipFirmwareRead) {
+          firmwareVersion =
+              await PineTimeService.instance.getFirmwareRevision();
+        }
         final enriched = telemetry.withContext(
           watchId: storedId,
           firmwareVersion: firmwareVersion,
@@ -702,6 +796,19 @@ class BleOwner {
     } catch (e) {
       debugPrint('BleOwner: telemetry upload failed: $e');
     }
+  }
+
+  WatchTelemetry _emptyPineTimeTelemetry() {
+    return WatchTelemetry(
+      batteryPercent: 0,
+      batteryMv: 0,
+      charging: false,
+      powerPresent: false,
+      heapFree: 0,
+      fsTotal: 0,
+      fsFree: 0,
+      accelMinutesCount: 0,
+    );
   }
 
   Future<WatchTelemetry?> _fetchPineTimeTelemetryBeforeSync() async {
@@ -883,14 +990,27 @@ class BleOwner {
       return {'firmwareVersion': null};
     }
 
+    PineTimeService? service;
+    bool disconnectAfterRead = false;
     try {
-      final service = PineTimeService.instanceOrNull;
-      if (service == null || !service.connected) {
-        return {'firmwareVersion': null};
+      service = PineTimeService.instanceOrNull;
+      if (service == null || service.identifier != stored.id) {
+        if (service != null) {
+          try {
+            await service.stopAndDispose();
+          } catch (_) {}
+        }
+        PineTimeService.initialize(stored.id);
+        service = PineTimeService.instance;
+        disconnectAfterRead = true;
       }
-      final version = await PineTimeService.instance.getFirmwareRevision(
-        refresh: true,
-      );
+
+      if (!service.connected) {
+        await service.start();
+        disconnectAfterRead = true;
+      }
+
+      final version = await service.getFirmwareRevision(refresh: true);
       if (version != null) {
         _firmwareCache = version;
         _firmwareCacheAt = DateTime.now();
@@ -905,6 +1025,12 @@ class BleOwner {
         debugPrint('Error getting PineTime firmware version: $e');
       }
       return {'firmwareVersion': null};
+    } finally {
+      if (disconnectAfterRead) {
+        try {
+          await service?.stopAndDispose();
+        } catch (_) {}
+      }
     }
   }
 
@@ -1002,32 +1128,42 @@ class BleOwner {
       return _okResult();
     }
     _syncing = true;
-    _syncInflight = Completer<void>();
-    try {
-      final result = Completer<Map<String, dynamic>>();
-      () async {
-        try {
-          result.complete(await fn());
-        } catch (e) {
-          if (!result.isCompleted) {
-            if (e is StateError && e.message is String) {
-              result.complete(_errorResult(e.message as String));
-            } else {
-              result.complete(_errorResult('sync_failed'));
-            }
-          }
-        } finally {
-          _syncing = false;
-          _syncInflight!.complete();
+    final inflight = Completer<void>();
+    _syncInflight = inflight;
+    final runFuture = () async {
+      try {
+        return await fn();
+      } catch (e) {
+        if (e is StateError) {
+          return _errorResult(e.message.toString());
         }
-      }();
+        return _errorResult('sync_failed');
+      }
+    }();
 
-      return await result.future.timeout(
+    runFuture.whenComplete(() {
+      _syncing = false;
+      if (!inflight.isCompleted) {
+        inflight.complete();
+      }
+      if (identical(_syncInflight, inflight)) {
+        _syncInflight = null;
+      }
+    });
+
+    try {
+      return await runFuture.timeout(
         _syncTimeout,
-        onTimeout: () => _errorResult('sync_timeout'),
+        onTimeout: () {
+          debugPrint(
+            'BleOwner: sync timed out after $_syncTimeout; '
+            'keeping lock until in-flight sync finishes',
+          );
+          return _errorResult('sync_timeout');
+        },
       );
     } finally {
-      // Lock is released when the sync task actually finishes.
+      // Lock is released only when the in-flight sync actually finishes.
     }
   }
 

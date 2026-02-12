@@ -50,8 +50,11 @@ class DfuTransport {
   Stream<List<int>> get controlPointNotifications =>
       controlPoint.onValueReceived;
 
-  Future<void> writeControlPoint(List<int> data) async {
-    await controlPoint.write(data, withoutResponse: false);
+  Future<void> writeControlPoint(
+    List<int> data, {
+    bool withoutResponse = false,
+  }) async {
+    await controlPoint.write(data, withoutResponse: withoutResponse);
   }
 
   Future<void> writePacket(List<int> data) async {

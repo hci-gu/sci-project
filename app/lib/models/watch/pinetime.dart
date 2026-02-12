@@ -173,9 +173,18 @@ class PineTimeService {
     if (connected) {
       return;
     }
-    if (_startInflight != null) {
-      await _startInflight!.future;
-      return;
+    final existingStart = _startInflight;
+    if (existingStart != null) {
+      try {
+        await existingStart.future.timeout(
+          const Duration(seconds: 20),
+          onTimeout: () => throw StateError('pinetime_start_inflight_timeout'),
+        );
+        return;
+      } catch (e) {
+        debugPrint('PineTime stale start in-flight, resetting: $e');
+        _startInflight = null;
+      }
     }
     debugPrint("Starting PineTimeService for $identifier");
     _startInflight = Completer<void>();
@@ -243,7 +252,9 @@ class PineTimeService {
         );
 
         _device = infiniTimeResult.device;
-        await _device!.connect(autoConnect: false);
+        await _device!
+            .connect(autoConnect: false)
+            .timeout(const Duration(seconds: 8));
       }
 
       // Wait for an actual connected state before service discovery
@@ -678,6 +689,15 @@ class PineTimeService {
           }
 
           final status = response[1];
+          if (status == 0x00) {
+            // Firmware may now return an explicit read failure packet.
+            // Treat this as retryable at the same startIndex by returning no
+            // entries; caller retries without advancing pagination.
+            debugPrint(
+              'READ_ENTRIES retryable error at startIndex=$startIndex',
+            );
+            return <_MinuteEntry>[];
+          }
           if (status != 0x01) {
             throw Exception('Error status: $status');
           }
@@ -752,6 +772,7 @@ class PineTimeService {
     }
 
     while (index < totalCount) {
+      final requestedIndex = index;
       List<_MinuteEntry> entries = [];
       bool gotEntries = false;
       for (int attempt = 0; attempt < 3; attempt++) {
@@ -764,9 +785,17 @@ class PineTimeService {
         await Future.delayed(const Duration(milliseconds: 200));
       }
       if (!gotEntries) {
-        debugPrint('Giving up on empty entries packet at index=$index');
-        break;
+        debugPrint(
+          'Incomplete PineTime read at index=$index; aborting without clearing',
+        );
+        throw StateError(kPinetimeReadTimeout);
       }
+      final firstTs = entries.first.timestamp;
+      final lastTs = entries.last.timestamp;
+      debugPrint(
+        'PineTime chunk: requestStart=$requestedIndex got=${entries.length} '
+        'firstTs=$firstTs lastTs=$lastTs',
+      );
       allEntries.addAll(entries);
       index += entries.length;
       debugPrint('Read ${allEntries.length}/$totalCount entries');
@@ -937,8 +966,26 @@ class _MinuteEntry {
     required this.timestamp,
   });
 
-  DateTime get dateTime =>
-      DateTime.fromMillisecondsSinceEpoch(timestamp * 1000, isUtc: true);
+  DateTime get dateTime {
+    // PineTime minute entries currently encode wall-clock local time in a Unix
+    // seconds field. Re-interpret that value as local time, then convert to UTC
+    // before upload so DB values represent the correct instant.
+    final rawUtc = DateTime.fromMillisecondsSinceEpoch(
+      timestamp * 1000,
+      isUtc: true,
+    );
+    final localWallClock = DateTime(
+      rawUtc.year,
+      rawUtc.month,
+      rawUtc.day,
+      rawUtc.hour,
+      rawUtc.minute,
+      rawUtc.second,
+      rawUtc.millisecond,
+      rawUtc.microsecond,
+    );
+    return localWallClock.toUtc();
+  }
 
   @override
   String toString() {
@@ -956,9 +1003,30 @@ List<Counts> countsFromPineTimeData(List<_MinuteEntry> entries) {
   // Sort by timestamp
   entries.sort((a, b) => a.timestamp.compareTo(b.timestamp));
 
+  // Guard against duplicated packets/chunks by keeping only the latest
+  // entry per timestamp.
+  final Map<int, _MinuteEntry> uniqueByTimestamp = <int, _MinuteEntry>{};
+  int droppedDuplicates = 0;
+  for (final entry in entries) {
+    if (uniqueByTimestamp.containsKey(entry.timestamp)) {
+      droppedDuplicates++;
+    }
+    uniqueByTimestamp[entry.timestamp] = entry;
+  }
+
+  final List<_MinuteEntry> uniqueEntries =
+      uniqueByTimestamp.values.toList()
+        ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
+
+  if (droppedDuplicates > 0) {
+    debugPrint(
+      "countsFromPineTimeData: dropped $droppedDuplicates duplicate entries",
+    );
+  }
+
   final List<Counts> counts = [];
 
-  for (final entry in entries) {
+  for (final entry in uniqueEntries) {
     // PineTime already stores pre-computed acceleration values and heart rate
     // The acceleration value is already "counts" computed on the watch
     counts.add(

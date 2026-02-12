@@ -96,6 +96,8 @@
     "firmwareUpdateValidating": "Validating firmware...",
     "firmwareUpdateRebooting": "Rebooting watch...",
     "firmwareUpdateDone": "Update complete. Validate on watch (Settings > Firmware).",
+    "firmwareValidatePromptTitle": "Validate Firmware On Watch",
+    "firmwareValidatePromptBody": "After the update, validate firmware on the watch:\nSwipe left -> settings -> scroll down -> firmware -> validate",
     "firmwareUpdateFailed": "Firmware update failed: {error}",
     "@firmwareUpdateFailed": {
         "placeholders": {

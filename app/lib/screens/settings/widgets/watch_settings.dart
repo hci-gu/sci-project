@@ -54,8 +54,9 @@ class WatchSettings extends HookConsumerWidget {
     final dfuProgress = useState<DfuProgressState>(const DfuProgressState());
     Future<List<dynamic>> fetchWatchState() async {
       print("Fetching watch state...");
-      final stateRaw = await sendBleCommand({'cmd': 'get_state'})
-          .catchError((_) => <String, dynamic>{});
+      final stateRaw = await sendBleCommand({
+        'cmd': 'get_state',
+      }).catchError((_) => <String, dynamic>{});
       final Map<String, dynamic> state =
           (stateRaw['data'] as Map?)?.cast<String, dynamic>() ??
           <String, dynamic>{};
@@ -65,18 +66,18 @@ class WatchSettings extends HookConsumerWidget {
             adapterState == BluetoothAdapterState.on
                 ? true
                 : adapterState == BluetoothAdapterState.off
-                    ? false
-                    : null;
+                ? false
+                : null;
         state['bluetoothEnabled'] = bluetoothEnabled;
       } catch (_) {}
 
       Map<String, dynamic> firmware = <String, dynamic>{};
       if (watch?.type == WatchType.pinetime &&
-          state['connected'] == true &&
           !isSyncing.value &&
           !isUpdating.value) {
-        final firmwareRaw = await sendBleCommand({'cmd': 'get_firmware_version'})
-            .catchError((_) => <String, dynamic>{});
+        final firmwareRaw = await sendBleCommand({
+          'cmd': 'get_firmware_version',
+        }).catchError((_) => <String, dynamic>{});
         firmware =
             (firmwareRaw['data'] as Map?)?.cast<String, dynamic>() ??
             <String, dynamic>{};
@@ -91,6 +92,7 @@ class WatchSettings extends HookConsumerWidget {
     );
     final refresh = useState<Future<List<dynamic>>>(Future.value([]));
     useEffect(() {
+      latestDfu.value = Api().getLatestDfuRelease();
       refresh.value = fetchWatchState();
       return null;
     }, [watch?.id, watch?.type]);
@@ -99,6 +101,46 @@ class WatchSettings extends HookConsumerWidget {
       return Padding(
         padding: AppTheme.elementPadding,
         child: const Center(child: ConnectWatch()),
+      );
+    }
+
+    Future<void> showFirmwareValidationPrompt() async {
+      final l10n = AppLocalizations.of(context)!;
+      await showDialog<void>(
+        context: context,
+        builder: (dialogContext) {
+          return AlertDialog(
+            title: Text(
+              l10n.firmwareValidatePromptTitle,
+              style: AppTheme.headLine3,
+            ),
+            content: Text(
+              l10n.firmwareValidatePromptBody,
+              style: AppTheme.paragraphMedium,
+            ),
+            titlePadding: EdgeInsets.symmetric(
+              horizontal: AppTheme.basePadding * 2,
+              vertical: AppTheme.basePadding,
+            ),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: AppTheme.basePadding * 2,
+            ),
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(8.0)),
+            ),
+            actionsPadding: EdgeInsets.all(AppTheme.basePadding * 2),
+            actions: [
+              Button(
+                onPressed: () {
+                  Navigator.of(dialogContext).pop();
+                },
+                rounded: true,
+                size: ButtonSize.small,
+                title: l10n.close,
+              ),
+            ],
+          );
+        },
       );
     }
 
@@ -142,6 +184,7 @@ class WatchSettings extends HookConsumerWidget {
             );
             latestDfu.value = Api().getLatestDfuRelease();
             refresh.value = fetchWatchState();
+            await showFirmwareValidationPrompt();
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -213,6 +256,7 @@ class WatchSettings extends HookConsumerWidget {
               ),
             );
             // Refresh the state after sync
+            latestDfu.value = Api().getLatestDfuRelease();
             refresh.value = fetchWatchState();
           } else {
             final l10n = AppLocalizations.of(context)!;
@@ -344,6 +388,7 @@ class WatchSettings extends HookConsumerWidget {
                         AppTheme.spacer2x,
                         Button(
                           onPressed: () {
+                            latestDfu.value = Api().getLatestDfuRelease();
                             refresh.value = fetchWatchState();
                           },
                           title: AppLocalizations.of(context)!.refresh,

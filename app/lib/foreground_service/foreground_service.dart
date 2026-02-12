@@ -10,7 +10,7 @@ class ForegroundService {
   ForegroundService._();
 
   static final ForegroundService instance = ForegroundService._();
-  static const int _repeatIntervalMs = 1000 * 5 * 60;
+  static const int _repeatIntervalMs = 1000 * 15 * 60;
   Completer<void>? _startCompleter;
 
   Future<void> _requestPlatformPermissions() async {

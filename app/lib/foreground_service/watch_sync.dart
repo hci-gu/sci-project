@@ -5,6 +5,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:scimovement/ble_owner.dart';
+import 'package:scimovement/models/watch/watch.dart';
 import 'package:scimovement/storage.dart';
 
 @pragma('vm:entry-point')
@@ -72,15 +73,36 @@ class WatchSyncHandler extends TaskHandler {
 
     // Wait for result (add a timeout so we don't hang forever)
     try {
-      final _ = await rp
-          .where((msg) => msg is Map && msg['type'] == 'sync_result')
-          .first
-          .timeout(const Duration(minutes: 3));
-      Storage().setLastSync(DateTime.now());
-      _sendEvent({
-        'event': 'sync_result_received',
-        'timestamp': DateTime.now().toIso8601String(),
-      });
+      final result =
+          await rp
+                  .where((msg) => msg is Map && msg['type'] == 'sync_result')
+                  .first
+                  .timeout(kBleOwnerSyncTimeout)
+              as Map;
+      final resultMap = result.cast<String, dynamic>();
+      final bool ok = resultMap['ok'] == true;
+      final String? error = resultMap['error']?.toString();
+
+      if (ok) {
+        Storage().setLastSync(DateTime.now());
+        _sendEvent({
+          'event': 'sync_result_received',
+          'timestamp': DateTime.now().toIso8601String(),
+        });
+      } else if (error == kSyncSkippedDfuInProgress ||
+          error == kSyncSkippedSyncInProgress) {
+        _sendEvent({
+          'event': 'sync_skipped',
+          'reason': error,
+          'timestamp': DateTime.now().toIso8601String(),
+        });
+      } else {
+        _sendEvent({
+          'event': 'sync_result_error',
+          'error': error ?? 'unknown_error',
+          'timestamp': DateTime.now().toIso8601String(),
+        });
+      }
     } catch (e) {
       debugPrint('WatchSyncHandler sync timed out or failed: $e');
       _sendEvent({

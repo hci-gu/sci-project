@@ -96,6 +96,8 @@
     "firmwareUpdateValidating": "Validerar firmware...",
     "firmwareUpdateRebooting": "Startar om klockan...",
     "firmwareUpdateDone": "Uppdatering klar. Validera på klockan (Inställningar > Firmware).",
+    "firmwareValidatePromptTitle": "Validera Firmware På Klockan",
+    "firmwareValidatePromptBody": "Efter uppdateringen, validera firmware på klockan:\nSwipe left -> settings -> scroll down -> firmware -> validate",
     "firmwareUpdateFailed": "Firmwareuppdatering misslyckades: {error}",
     "@firmwareUpdateFailed": {
         "placeholders": {
