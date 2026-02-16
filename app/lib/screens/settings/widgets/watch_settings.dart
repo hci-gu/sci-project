@@ -52,6 +52,8 @@ class WatchSettings extends HookConsumerWidget {
     final syncProgress = useState<SyncProgress>(const SyncProgress());
     final isUpdating = useState(false);
     final dfuProgress = useState<DfuProgressState>(const DfuProgressState());
+    final lastDfuError = useState<String?>(null);
+    final lastDfuErrorAt = useState<DateTime?>(null);
     Future<List<dynamic>> fetchWatchState() async {
       print("Fetching watch state...");
       final stateRaw = await sendBleCommand({
@@ -146,6 +148,40 @@ class WatchSettings extends HookConsumerWidget {
 
     Future<void> handleDfuUpdate(DfuReleaseInfo? releaseInfo) async {
       final l10n = AppLocalizations.of(context)!;
+      String normalizeError(Object error) {
+        final raw = error.toString().trim();
+        const exceptionPrefix = 'Exception: ';
+        if (raw.startsWith(exceptionPrefix)) {
+          return raw.substring(exceptionPrefix.length);
+        }
+        return raw;
+      }
+
+      Future<void> showDfuFailureDialog(String errorCode) async {
+        if (!context.mounted) return;
+        await showDialog<void>(
+          context: context,
+          builder: (dialogContext) {
+            return AlertDialog(
+              title: Text(
+                l10n.firmwareUpdateFailed(errorCode),
+                style: AppTheme.headLine3,
+              ),
+              content: SelectableText(
+                'Error code: $errorCode',
+                style: AppTheme.paragraphSmall,
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: Text(l10n.close),
+                ),
+              ],
+            );
+          },
+        );
+      }
+
       final bool? confirmed = await confirmDialog(
         context,
         title: l10n.firmwareUpdateConfirmTitle,
@@ -155,6 +191,8 @@ class WatchSettings extends HookConsumerWidget {
 
       isUpdating.value = true;
       dfuProgress.value = const DfuProgressState(phase: 'downloading');
+      lastDfuError.value = null;
+      lastDfuErrorAt.value = null;
 
       final progressPort = ReceivePort();
       progressPort.listen((msg) {
@@ -176,6 +214,8 @@ class WatchSettings extends HookConsumerWidget {
         });
         if (context.mounted) {
           if (result['ok'] == true) {
+            lastDfuError.value = null;
+            lastDfuErrorAt.value = null;
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(l10n.firmwareUpdateDone),
@@ -186,26 +226,34 @@ class WatchSettings extends HookConsumerWidget {
             refresh.value = fetchWatchState();
             await showFirmwareValidationPrompt();
           } else {
+            final errorCode = normalizeError(
+              result['error']?.toString() ?? l10n.genericError,
+            );
+            lastDfuError.value = errorCode;
+            lastDfuErrorAt.value = DateTime.now();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
-                  l10n.firmwareUpdateFailed(
-                    result['error']?.toString() ?? l10n.genericError,
-                  ),
+                  l10n.firmwareUpdateFailed(errorCode),
                 ),
                 backgroundColor: Colors.red,
               ),
             );
+            await showDfuFailureDialog(errorCode);
           }
         }
       } catch (e) {
         if (context.mounted) {
+          final errorCode = normalizeError(e);
+          lastDfuError.value = errorCode;
+          lastDfuErrorAt.value = DateTime.now();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(l10n.firmwareUpdateFailed(e.toString())),
+              content: Text(l10n.firmwareUpdateFailed(errorCode)),
               backgroundColor: Colors.red,
             ),
           );
+          await showDfuFailureDialog(errorCode);
         }
       } finally {
         progressPort.close();
@@ -520,6 +568,17 @@ class WatchSettings extends HookConsumerWidget {
                       );
                     },
                   ),
+                  if (lastDfuError.value != null) ...[
+                    AppTheme.spacer2x,
+                    _DfuErrorBanner(
+                      errorCode: lastDfuError.value!,
+                      failedAt: lastDfuErrorAt.value,
+                      onDismiss: () {
+                        lastDfuError.value = null;
+                        lastDfuErrorAt.value = null;
+                      },
+                    ),
+                  ],
                 ],
               ],
             );
@@ -825,6 +884,72 @@ class _DfuProgressIndicator extends StatelessWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+class _DfuErrorBanner extends StatelessWidget {
+  final String errorCode;
+  final DateTime? failedAt;
+  final VoidCallback onDismiss;
+
+  const _DfuErrorBanner({
+    required this.errorCode,
+    required this.failedAt,
+    required this.onDismiss,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final failedAtText =
+        failedAt != null
+            ? MaterialLocalizations.of(context).formatTimeOfDay(
+              TimeOfDay.fromDateTime(failedAt!),
+            )
+            : null;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.red.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.red.withValues(alpha: 0.4)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.firmwareUpdateFailed(errorCode),
+                  style: AppTheme.paragraphSmall,
+                ),
+                if (failedAtText != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    'Failed at $failedAtText',
+                    style: AppTheme.paragraphSmall,
+                  ),
+                ],
+                const SizedBox(height: 4),
+                SelectableText(
+                  'Error code: $errorCode',
+                  style: AppTheme.paragraphSmall,
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            onPressed: onDismiss,
+            icon: const Icon(Icons.close),
+            tooltip: l10n.close,
+          ),
+        ],
+      ),
     );
   }
 }

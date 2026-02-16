@@ -54,11 +54,45 @@ class DfuTransport {
     List<int> data, {
     bool withoutResponse = false,
   }) async {
-    await controlPoint.write(data, withoutResponse: withoutResponse);
+    final c = controlPoint;
+    final supportsWrite = c.properties.write;
+    final supportsWriteNoResp = c.properties.writeWithoutResponse;
+
+    if (withoutResponse && supportsWriteNoResp) {
+      await c.write(data, withoutResponse: true);
+      return;
+    }
+    if (!withoutResponse && supportsWrite) {
+      await c.write(data, withoutResponse: false);
+      return;
+    }
+    if (supportsWrite) {
+      await c.write(data, withoutResponse: false);
+      return;
+    }
+    if (supportsWriteNoResp) {
+      await c.write(data, withoutResponse: true);
+      return;
+    }
+
+    throw StateError('dfu_control_point_write_not_supported');
   }
 
   Future<void> writePacket(List<int> data) async {
-    await packet.write(data, withoutResponse: true);
+    final c = packet;
+    final supportsWriteNoResp = c.properties.writeWithoutResponse;
+    final supportsWrite = c.properties.write;
+
+    if (supportsWriteNoResp) {
+      await c.write(data, withoutResponse: true);
+      return;
+    }
+    if (supportsWrite) {
+      await c.write(data, withoutResponse: false);
+      return;
+    }
+
+    throw StateError('dfu_packet_write_not_supported');
   }
 
   Future<void> requestMtu(int mtu) async {

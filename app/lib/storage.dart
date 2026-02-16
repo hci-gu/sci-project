@@ -149,6 +149,8 @@ class Storage {
 
   String _pinetimeLastTimestampKey(String deviceId) =>
       'pinetimeLastTimestamp:$deviceId';
+  String _pinetimeNeedsClearKey(String deviceId) =>
+      'pinetimeNeedsClear:$deviceId';
 
   int? getPineTimeLastIndex(String deviceId) {
     return prefs.getInt(_pinetimeLastIndexKey(deviceId));
@@ -175,6 +177,20 @@ class Storage {
       await prefs.remove(key);
     } else {
       await prefs.setInt(key, timestamp);
+    }
+  }
+
+  bool getPineTimeNeedsClear(String deviceId) {
+    return prefs.getBool(_pinetimeNeedsClearKey(deviceId)) ?? false;
+  }
+
+  Future<void> setPineTimeNeedsClear(String deviceId, bool needsClear) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final key = _pinetimeNeedsClearKey(deviceId);
+    if (needsClear) {
+      await prefs.setBool(key, true);
+    } else {
+      await prefs.remove(key);
     }
   }
 

@@ -197,12 +197,12 @@ class LegacyDfuController {
         .timeout(
           timeout,
           onTimeout: () {
-            throw TimeoutException('dfu_response_timeout');
+            throw TimeoutException('dfu_response_timeout_op_$requestedOp');
           },
         );
 
     if (response[2] != kDfuStatusSuccess) {
-      throw StateError('dfu_error_status_${response[2]}');
+      throw StateError('dfu_error_status_${response[2]}_op_$requestedOp');
     }
   }
 

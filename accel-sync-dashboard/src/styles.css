@@ -253,7 +253,15 @@ button:hover {
 
 .timeline svg {
   width: 100%;
+  display: block;
+}
+
+.track svg {
   height: 14px;
+}
+
+.track .battery-svg {
+  height: 40px;
 }
 
 .bout-seg {
@@ -284,13 +292,44 @@ button:hover {
   fill: var(--battery-point);
 }
 
+.current-time-line {
+  stroke: #c51f1f;
+  stroke-width: 1;
+  stroke-dasharray: 1.5 2;
+  vector-effect: non-scaling-stroke;
+}
+
 
 .hour-labels {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: repeat(25, minmax(0, 1fr));
   margin-left: 76px;
-  font-size: 11px;
   color: var(--muted);
+  align-items: center;
+}
+
+.hour-labels span {
+  justify-self: center;
+  line-height: 1;
+}
+
+.hour-labels span:first-child {
+  justify-self: start;
+}
+
+.hour-labels span:last-child {
+  justify-self: end;
+}
+
+.hour-major {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.hour-minor {
+  font-size: 7px;
+  font-weight: 500;
+  opacity: 0.68;
 }
 
 .user-footer {

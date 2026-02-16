@@ -175,6 +175,19 @@ const activityClass = (activity: string) => {
   }
 }
 
+const parseBatteryPercent = (value: unknown): number | null => {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return Math.min(100, Math.max(0, value))
+  }
+  if (typeof value === 'string' && value.trim() !== '') {
+    const parsed = Number(value)
+    if (Number.isFinite(parsed)) {
+      return Math.min(100, Math.max(0, parsed))
+    }
+  }
+  return null
+}
+
 const fetchUserData = async (
   userId: string,
   selectedDate: Date
@@ -285,14 +298,11 @@ const fetchUserData = async (
     if (index < 0 || index >= MINUTES_PER_DAY) continue
     telemetryIndexSet.add(index)
 
-    const percent =
-      typeof item.batteryPercent === 'number'
-        ? item.batteryPercent
-        : undefined
-    if (percent != null && !Number.isNaN(percent)) {
+    const percent = parseBatteryPercent(item.batteryPercent)
+    if (percent != null) {
       batteryPoints.push({
         index,
-        percent: Math.min(100, Math.max(0, percent)),
+        percent,
       })
     }
   }
@@ -375,19 +385,35 @@ const UserCard = ({
   const coverage = Math.round(
     (state.data.minutesWithData / MINUTES_PER_DAY) * 100
   )
+  const hourMarkers = Array.from({ length: 25 }, (_, hour) => hour)
+  const isSelectedToday = toInputDate(selectedDate) === toInputDate(new Date())
+  const currentMinuteIndex = isSelectedToday
+    ? new Date().getHours() * 60 + new Date().getMinutes()
+    : null
   const coverageWindow = computeCoverage(state.data.minutes)
   const coverageValue =
     coverageWindow.expectedSpan > 0 ? coverageWindow.coverage : coverage
   const segments = buildSegments(state.data.minutes)
+  const batteryPoints = state.data.batteryPoints
   const batteryPath =
-    state.data.batteryPoints.length > 1
-      ? state.data.batteryPoints
-          .map((point, idx) => {
+    batteryPoints.length > 0
+      ? (() => {
+          const first = batteryPoints[0]
+          const last = batteryPoints[batteryPoints.length - 1]
+          const firstY = 40 - (first.percent / 100) * 40
+          const lastY = 40 - (last.percent / 100) * 40
+          const commands = [`M 0 ${firstY}`, `L ${first.index} ${firstY}`]
+
+          batteryPoints.forEach((point, idx) => {
+            if (idx === 0) return
             const x = point.index
             const y = 40 - (point.percent / 100) * 40
-            return `${idx === 0 ? 'M' : 'L'} ${x} ${y}`
+            commands.push(`L ${x} ${y}`)
           })
-          .join(' ')
+
+          commands.push(`L ${MINUTES_PER_DAY} ${lastY}`)
+          return commands.join(' ')
+        })()
       : ''
 
   const handleExportUser = () => {
@@ -510,7 +536,11 @@ const UserCard = ({
       <div className="timeline">
         <div className="track">
           <span className="track-label">Battery</span>
-          <svg viewBox={`0 0 ${MINUTES_PER_DAY} 40`} role="img">
+          <svg
+            className="battery-svg"
+            viewBox={`0 0 ${MINUTES_PER_DAY} 40`}
+            role="img"
+          >
             <rect
               x="0"
               y="0"
@@ -528,7 +558,7 @@ const UserCard = ({
                 vectorEffect="non-scaling-stroke"
               />
             ) : null}
-            {state.data.batteryPoints.map((point) => (
+            {batteryPoints.map((point) => (
               <circle
                 key={`battery-${point.index}`}
                 cx={point.index}
@@ -537,6 +567,15 @@ const UserCard = ({
                 className="battery-point"
               />
             ))}
+            {currentMinuteIndex != null ? (
+              <line
+                x1={currentMinuteIndex}
+                y1="0"
+                x2={currentMinuteIndex}
+                y2="40"
+                className="current-time-line"
+              />
+            ) : null}
           </svg>
         </div>
         <div className="track">
@@ -560,6 +599,15 @@ const UserCard = ({
                 className="telemetry-tick"
               />
             ))}
+            {currentMinuteIndex != null ? (
+              <line
+                x1={currentMinuteIndex}
+                y1="0"
+                x2={currentMinuteIndex}
+                y2="12"
+                className="current-time-line"
+              />
+            ) : null}
           </svg>
         </div>
         <div className="track">
@@ -583,6 +631,15 @@ const UserCard = ({
                 fill="var(--bar-fill)"
               />
             ))}
+            {currentMinuteIndex != null ? (
+              <line
+                x1={currentMinuteIndex}
+                y1="0"
+                x2={currentMinuteIndex}
+                y2="12"
+                className="current-time-line"
+              />
+            ) : null}
           </svg>
         </div>
         <div className="track">
@@ -606,14 +663,29 @@ const UserCard = ({
                 className={`bout-seg ${activityClass(segment.activity)}`}
               />
             ))}
+            {currentMinuteIndex != null ? (
+              <line
+                x1={currentMinuteIndex}
+                y1="0"
+                x2={currentMinuteIndex}
+                y2="12"
+                className="current-time-line"
+              />
+            ) : null}
           </svg>
         </div>
         <div className="hour-labels">
-          <span>00</span>
-          <span>06</span>
-          <span>12</span>
-          <span>18</span>
-          <span>24</span>
+          {hourMarkers.map((hour) => {
+            const isMajor = hour % 6 === 0 || hour === 24
+            return (
+              <span
+                key={hour}
+                className={isMajor ? 'hour-major' : 'hour-minor'}
+              >
+                {hour.toString().padStart(2, '0')}
+              </span>
+            )
+          })}
         </div>
       </div>
 

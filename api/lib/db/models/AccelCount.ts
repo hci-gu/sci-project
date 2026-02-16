@@ -87,7 +87,44 @@ const Model = {
       .map((d) => ({ t: d.t, a: d.a, hr: d.hr, UserId: userId }))
       .sort((x, y) => new Date(x.t).getTime() - new Date(y.t).getTime())
 
-    await AccelCountModel.bulkCreate(rows, {
+    // Deduplicate within the same batch by exact timestamp.
+    const uniqueRowsByTimestamp = new Map<number, (typeof rows)[number]>()
+    rows.forEach((row) => {
+      uniqueRowsByTimestamp.set(new Date(row.t).getTime(), row)
+    })
+    const dedupedRows = Array.from(uniqueRowsByTimestamp.values()).sort(
+      (x, y) => new Date(x.t).getTime() - new Date(y.t).getTime()
+    )
+
+    if (dedupedRows.length === 0) {
+      return []
+    }
+
+    // Make saves idempotent across repeated uploads by skipping timestamps
+    // that are already persisted for this user.
+    const firstTs = new Date(dedupedRows[0].t)
+    const lastTs = new Date(dedupedRows[dedupedRows.length - 1].t)
+    const existingRows = await AccelCountModel.findAll({
+      where: {
+        UserId: userId,
+        t: {
+          [Op.between]: [firstTs, lastTs],
+        },
+      },
+      attributes: ['t'],
+    })
+    const existingTs = new Set<number>(
+      existingRows.map((row) => new Date(row.t).getTime())
+    )
+    const rowsToInsert = dedupedRows.filter(
+      (row) => !existingTs.has(new Date(row.t).getTime())
+    )
+
+    if (rowsToInsert.length === 0) {
+      return []
+    }
+
+    await AccelCountModel.bulkCreate(rowsToInsert, {
       validate: true,
       individualHooks: true,
       hooks: false,
@@ -96,7 +133,7 @@ const Model = {
 
     const user = await UserModel.get(userId)
     if (user) {
-      const countsForEnergy = rows.filter((row) => row.hr > 0)
+      const countsForEnergy = rowsToInsert.filter((row) => row.hr > 0)
 
       await Promise.all(
         countsForEnergy.map((row) =>
@@ -104,14 +141,14 @@ const Model = {
         )
       )
 
-      await createBoutsFromBatch(user, rows)
+      await createBoutsFromBatch(user, rowsToInsert)
 
       // Merge within the batch window (plus a small buffer) to heal fragmentation.
-      if (rows.length > 0) {
-        const from = moment(rows[0].t)
+      if (rowsToInsert.length > 0) {
+        const from = moment(rowsToInsert[0].t)
           .subtract(BOUT_MERGE_MAX_GAP_MINUTES, 'minutes')
           .toDate()
-        const to = moment(rows[rows.length - 1].t)
+        const to = moment(rowsToInsert[rowsToInsert.length - 1].t)
           .add(BOUT_MERGE_MAX_GAP_MINUTES, 'minutes')
           .toDate()
 
@@ -119,7 +156,7 @@ const Model = {
       }
     }
 
-    return rows
+    return rowsToInsert
   },
   find: ({
     userId,

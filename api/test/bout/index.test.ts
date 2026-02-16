@@ -177,4 +177,36 @@ describe('Bout', () => {
     expect(sedentary).toHaveLength(1)
     expect(sedentary[0].minutes).toBe(20)
   })
+
+  test('bulk save deduplicates duplicate timestamps and is idempotent', async () => {
+    const base = moment().startOf('minute')
+    const rows = [
+      { t: base.toDate(), a: 1000, hr: 60 },
+      { t: base.toDate(), a: 2000, hr: 70 },
+      { t: base.clone().add(1, 'minute').toDate(), a: 3000, hr: 80 },
+      { t: base.clone().add(1, 'minute').toDate(), a: 4000, hr: 90 },
+    ]
+
+    await AccelCountModel.bulkSave(rows, user.id)
+
+    const firstInsert = await AccelCountModel.find({
+      userId: user.id,
+      from: base.clone().subtract(1, 'minute').toDate(),
+      to: base.clone().add(2, 'minutes').toDate(),
+    })
+    expect(firstInsert).toHaveLength(2)
+    expect(firstInsert[0].a).toBe(2000)
+    expect(firstInsert[0].hr).toBe(70)
+    expect(firstInsert[1].a).toBe(4000)
+    expect(firstInsert[1].hr).toBe(90)
+
+    await AccelCountModel.bulkSave(rows, user.id)
+
+    const secondInsert = await AccelCountModel.find({
+      userId: user.id,
+      from: base.clone().subtract(1, 'minute').toDate(),
+      to: base.clone().add(2, 'minutes').toDate(),
+    })
+    expect(secondInsert).toHaveLength(2)
+  })
 })

@@ -652,12 +652,15 @@ class PineTimeService {
   }
 
   /// Read entries from the watch
-  Future<List<_MinuteEntry>> _readEntries(int startIndex, int count) async {
+  Future<List<PineTimeMinuteEntry>> _readEntries(
+    int startIndex,
+    int count,
+  ) async {
     if (_characteristic == null) {
       throw StateError('Characteristic not available');
     }
 
-    return await _retry<List<_MinuteEntry>>(
+    return await _retry<List<PineTimeMinuteEntry>>(
       () async {
         return await _queueGatt(() async {
           final command = [
@@ -696,14 +699,14 @@ class PineTimeService {
             debugPrint(
               'READ_ENTRIES retryable error at startIndex=$startIndex',
             );
-            return <_MinuteEntry>[];
+            return <PineTimeMinuteEntry>[];
           }
           if (status != 0x01) {
             throw Exception('Error status: $status');
           }
 
           final entriesInPacket = response[10];
-          final entries = <_MinuteEntry>[];
+          final entries = <PineTimeMinuteEntry>[];
 
           for (int i = 0; i < entriesInPacket; i++) {
             final offset = 11 + (i * 10);
@@ -727,7 +730,7 @@ class PineTimeService {
                 (response[offset + 9] << 24);
 
             entries.add(
-              _MinuteEntry(
+              PineTimeMinuteEntry(
                 count: count,
                 heartRate: hr,
                 timestamp: ts,
@@ -746,7 +749,7 @@ class PineTimeService {
 
   /// Read all stored entries from the watch
   /// [onProgress] is called with (current, total) after each chunk is read
-  Future<List<_MinuteEntry>> readAllEntries({
+  Future<List<PineTimeMinuteEntry>> readAllEntries({
     int startIndex = 0,
     void Function(int current, int total)? onProgress,
   }) async {
@@ -760,7 +763,7 @@ class PineTimeService {
       return [];
     }
 
-    final allEntries = <_MinuteEntry>[];
+    final allEntries = <PineTimeMinuteEntry>[];
     int index = startIndex < 0 ? 0 : startIndex;
     const chunkSize = 20;
 
@@ -773,7 +776,7 @@ class PineTimeService {
 
     while (index < totalCount) {
       final requestedIndex = index;
-      List<_MinuteEntry> entries = [];
+      List<PineTimeMinuteEntry> entries = [];
       bool gotEntries = false;
       for (int attempt = 0; attempt < 3; attempt++) {
         entries = await _readEntries(index, chunkSize);
@@ -955,12 +958,12 @@ class PineTimeService {
 }
 
 /// Internal data structure for minute entries from PineTime
-class _MinuteEntry {
+class PineTimeMinuteEntry {
   final double count; // Pre-computed acceleration value (counts)
   final int heartRate;
   final int timestamp; // Unix timestamp in seconds
 
-  _MinuteEntry({
+  PineTimeMinuteEntry({
     required this.count,
     required this.heartRate,
     required this.timestamp,
@@ -989,12 +992,12 @@ class _MinuteEntry {
 
   @override
   String toString() {
-    return '_MinuteEntry(count: $count, hr: $heartRate, time: $dateTime)';
+    return 'PineTimeMinuteEntry(count: $count, hr: $heartRate, time: $dateTime)';
   }
 }
 
 /// Convert PineTime minute entries to Counts objects
-List<Counts> countsFromPineTimeData(List<_MinuteEntry> entries) {
+List<Counts> countsFromPineTimeData(List<PineTimeMinuteEntry> entries) {
   if (entries.isEmpty) {
     debugPrint("countsFromPineTimeData: empty entries");
     return [];
@@ -1005,7 +1008,8 @@ List<Counts> countsFromPineTimeData(List<_MinuteEntry> entries) {
 
   // Guard against duplicated packets/chunks by keeping only the latest
   // entry per timestamp.
-  final Map<int, _MinuteEntry> uniqueByTimestamp = <int, _MinuteEntry>{};
+  final Map<int, PineTimeMinuteEntry> uniqueByTimestamp =
+      <int, PineTimeMinuteEntry>{};
   int droppedDuplicates = 0;
   for (final entry in entries) {
     if (uniqueByTimestamp.containsKey(entry.timestamp)) {
@@ -1014,7 +1018,7 @@ List<Counts> countsFromPineTimeData(List<_MinuteEntry> entries) {
     uniqueByTimestamp[entry.timestamp] = entry;
   }
 
-  final List<_MinuteEntry> uniqueEntries =
+  final List<PineTimeMinuteEntry> uniqueEntries =
       uniqueByTimestamp.values.toList()
         ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
 
