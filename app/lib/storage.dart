@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:scimovement/api/classes/counts.dart';
 import 'package:scimovement/models/app_features.dart';
+import 'package:scimovement/models/watch/telemetry.dart';
 import 'package:scimovement/models/watch/watch.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -240,6 +241,35 @@ class Storage {
         parsed.add(Counts.fromJson(jsonDecode(s)));
       } catch (_) {
         // Skip malformed entries (e.g. legacy Dart map strings)
+        continue;
+      }
+    }
+    return parsed;
+  }
+
+  Future<void> storePendingTelemetry(WatchTelemetry telemetry) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final existing = prefs.getStringList('pendingTelemetry') ?? <String>[];
+    final serialized = [...existing, jsonEncode(telemetry.toJson())];
+    await prefs.setStringList('pendingTelemetry', serialized);
+  }
+
+  Future<void> clearPendingTelemetry() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('pendingTelemetry');
+  }
+
+  List<WatchTelemetry> getPendingTelemetry() {
+    final List<String> stored =
+        prefs.getStringList('pendingTelemetry') ?? <String>[];
+    final List<WatchTelemetry> parsed = [];
+    for (final s in stored) {
+      try {
+        parsed.add(
+          WatchTelemetry.fromJson(Map<String, dynamic>.from(jsonDecode(s))),
+        );
+      } catch (_) {
+        // Skip malformed entries (e.g. legacy or partially-written payloads)
         continue;
       }
     }

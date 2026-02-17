@@ -177,6 +177,12 @@ export class Telemetry extends Model<
   declare firmwareVersion: CreationOptional<string>
   declare sentToServer: CreationOptional<boolean>
   declare backgroundSync: CreationOptional<boolean>
+  declare syncAttempted: CreationOptional<boolean>
+  declare syncSucceeded: CreationOptional<boolean>
+  declare syncError: CreationOptional<string>
+  declare bluetoothFailed: CreationOptional<boolean>
+  declare bluetoothFailureReason: CreationOptional<string>
+  declare uploadDeferredReason: CreationOptional<string>
 
   declare UserId?: ForeignKey<User['id']>
 }

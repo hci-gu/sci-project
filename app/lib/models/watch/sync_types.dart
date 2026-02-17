@@ -1,5 +1,6 @@
 enum SyncErrorCode {
   watchNotConfigured('watch_not_configured'),
+  watchNotFound('watch_not_found'),
   bluetoothOff('bluetooth_off'),
   watchConnectFailed('watch_connect_failed'),
   watchSyncLoginRequired('watch_sync_login_required'),

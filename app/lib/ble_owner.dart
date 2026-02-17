@@ -2,7 +2,9 @@
 import 'dart:async';
 import 'dart:isolate';
 import 'dart:ui';
+import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
@@ -57,9 +59,7 @@ class BleOwner {
   static const Duration _dfuTimeout = Duration(minutes: 15);
   static const Duration _bleOpTimeout = Duration(seconds: 45);
   static const Duration _bleReadTimeout = Duration(minutes: 2);
-  // Temporary test mode: skip PineTime telemetry BLE reads and upload
-  // a synthetic empty telemetry payload after sync.
-  static const bool _pinetimeTelemetryDebugNoBle = true;
+  String? _lastUploadBlockReason;
 
   /// If more than this many recordings (ACC+HR combined) are present,
   /// purge device storage and start fresh.
@@ -71,6 +71,56 @@ class BleOwner {
 
   Map<String, dynamic> _errorResult(String code) {
     return {'ok': false, 'error': code};
+  }
+
+  String? _classifyNoInternetReason(Object error) {
+    if (error is SocketException) {
+      return 'no_internet';
+    }
+
+    if (error is DioException) {
+      if (error.error is SocketException) {
+        return 'no_internet';
+      }
+      if (error.type == DioExceptionType.connectionError ||
+          error.type == DioExceptionType.connectionTimeout) {
+        return 'no_internet';
+      }
+      final message = error.message?.toLowerCase() ?? '';
+      if (message.contains('socketexception') ||
+          message.contains('failed host lookup') ||
+          message.contains('network is unreachable')) {
+        return 'no_internet';
+      }
+    }
+
+    final message = error.toString().toLowerCase();
+    if (message.contains('socketexception') ||
+        message.contains('failed host lookup') ||
+        message.contains('network is unreachable')) {
+      return 'no_internet';
+    }
+
+    return null;
+  }
+
+  String? _bluetoothFailureReasonFromSyncError(String? syncError) {
+    switch (syncError) {
+      case kBluetoothOffError:
+        return 'bluetooth_disabled';
+      case kPinetimeConnectTimeout:
+        return 'connect_timeout';
+      case kPinetimeBleError:
+        return 'ble_error';
+      case kPinetimeCharacteristicMissing:
+        return 'characteristic_missing';
+      case kConnectionFailedError:
+        return 'connect_failed';
+      case kWatchNotFoundError:
+        return 'watch_not_found';
+      default:
+        return null;
+    }
   }
 
   Future<T> _withTimeout<T>(
@@ -179,10 +229,7 @@ class BleOwner {
         } else if (msg['cmd'] == 'dfu_start') {
           final SendPort? progressSink = msg['progressSink'];
           final String? version = msg['version'];
-          await _handleDfuStart(
-            progressSink: progressSink,
-            version: version,
-          );
+          await _handleDfuStart(progressSink: progressSink, version: version);
           reply.send({'ok': true});
         } else if (msg['cmd'] == 'dfu_cancel') {
           _dfuCancelToken?.cancel();
@@ -410,15 +457,22 @@ class BleOwner {
     final Credentials? credentials = Storage().getCredentials();
     if (credentials == null) {
       debugPrint('BleOwner: no credentials; cannot upload now');
+      _lastUploadBlockReason = 'no_credentials';
       return false;
     }
 
     try {
       await Api().login(credentials.email, credentials.password);
     } catch (e) {
-      debugPrint('BleOwner: login failed; will keep counts pending: $e');
+      final networkReason = _classifyNoInternetReason(e);
+      _lastUploadBlockReason = networkReason ?? 'login_failed';
+      debugPrint(
+        'BleOwner: login failed; will keep counts pending: $e '
+        '(reason=$_lastUploadBlockReason)',
+      );
       return false;
     }
+    _lastUploadBlockReason = null;
 
     final pendingCounts = Storage().getPendingCounts();
     debugPrint('BleOwner: uploading ${pendingCounts.length} pending counts');
@@ -431,7 +485,37 @@ class BleOwner {
       }
     }
 
+    await _flushPendingTelemetry();
+
     return true;
+  }
+
+  Future<void> _flushPendingTelemetry() async {
+    final pendingTelemetry = Storage().getPendingTelemetry();
+    debugPrint(
+      'BleOwner: uploading ${pendingTelemetry.length} pending telemetry events',
+    );
+    if (pendingTelemetry.isEmpty) {
+      return;
+    }
+
+    for (int i = 0; i < pendingTelemetry.length; i++) {
+      try {
+        await Api().uploadTelemetry(pendingTelemetry[i]);
+      } catch (e) {
+        debugPrint(
+          'BleOwner: failed to upload pending telemetry at index $i: $e',
+        );
+        await Storage().clearPendingTelemetry();
+        final remaining = pendingTelemetry.sublist(i);
+        for (final telemetry in remaining) {
+          await Storage().storePendingTelemetry(telemetry);
+        }
+        return;
+      }
+    }
+
+    await Storage().clearPendingTelemetry();
   }
 
   Future<UploadOutcome> _uploadCountsOrStorePending(
@@ -454,6 +538,37 @@ class BleOwner {
       debugPrint('BleOwner: upload failed, storing counts pending: $e');
       await Storage().storePendingCounts(counts);
       return const UploadOutcome.storedPending();
+    }
+  }
+
+  Future<void> _uploadTelemetryOrStorePending(
+    WatchTelemetry telemetry, {
+    required bool canUploadNow,
+  }) async {
+    if (!canUploadNow) {
+      final deferredReason = _lastUploadBlockReason ?? 'upload_blocked';
+      debugPrint(
+        'BleOwner: cannot upload telemetry now, storing pending '
+        '(reason=$deferredReason)',
+      );
+      await Storage().storePendingTelemetry(
+        telemetry.withContext(uploadDeferredReason: deferredReason),
+      );
+      return;
+    }
+
+    try {
+      await Api().uploadTelemetry(telemetry);
+      debugPrint('BleOwner: telemetry upload ok');
+    } catch (e) {
+      final deferredReason = _classifyNoInternetReason(e) ?? 'upload_failed';
+      debugPrint(
+        'BleOwner: telemetry upload failed, storing pending: $e '
+        '(reason=$deferredReason)',
+      );
+      await Storage().storePendingTelemetry(
+        telemetry.withContext(uploadDeferredReason: deferredReason),
+      );
     }
   }
 
@@ -530,12 +645,10 @@ class BleOwner {
       tryLoginAndFlushPendingCounts: _tryLoginAndFlushPendingCounts,
       uploadCountsOrStorePending: _uploadCountsOrStorePending,
       uploadTelemetry: _uploadPineTimeTelemetry,
-      fetchTelemetryBeforeSync: _fetchPineTimeTelemetryBeforeSync,
       emptyTelemetry: _emptyPineTimeTelemetry,
       withTimeout: _withTimeout,
       bleOpTimeout: _bleOpTimeout,
       bleReadTimeout: _bleReadTimeout,
-      telemetryDebugNoBle: _pinetimeTelemetryDebugNoBle,
     );
     final outcome = await coordinator.run(
       progressReporter: (phase, current, total) {
@@ -555,32 +668,29 @@ class BleOwner {
     required String storedId,
     required int dataCount,
     required bool uploadSucceeded,
+    required bool syncSucceeded,
+    String? syncError,
     WatchTelemetry? telemetry,
     bool backgroundSync = false,
-    bool skipFirmwareRead = false,
   }) async {
-    try {
-      if (telemetry != null) {
-        String? firmwareVersion;
-        if (!skipFirmwareRead) {
-          firmwareVersion =
-              await PineTimeService.instance.getFirmwareRevision();
-        }
-        final enriched = telemetry.withContext(
-          watchId: storedId,
-          firmwareVersion: firmwareVersion,
-          timestamp: DateTime.now(),
-          sentToServer: dataCount > 0 && uploadSucceeded,
-          backgroundSync: backgroundSync,
-        );
-        await Api().uploadTelemetry(enriched);
-        debugPrint('BleOwner: telemetry upload ok');
-      } else {
-        debugPrint('BleOwner: telemetry fetch empty');
-      }
-    } catch (e) {
-      debugPrint('BleOwner: telemetry upload failed: $e');
-    }
+    final baseTelemetry = telemetry ?? _emptyPineTimeTelemetry();
+    final bluetoothFailureReason = _bluetoothFailureReasonFromSyncError(
+      syncError,
+    );
+    final enriched = baseTelemetry.withContext(
+      watchId: storedId,
+      timestamp: DateTime.now(),
+      sentToServer: dataCount > 0 && uploadSucceeded,
+      backgroundSync: backgroundSync,
+      syncAttempted: true,
+      syncSucceeded: syncSucceeded,
+      syncError: syncError,
+      bluetoothFailed: bluetoothFailureReason != null,
+      bluetoothFailureReason: bluetoothFailureReason,
+    );
+
+    final bool canUploadNow = await _tryLoginAndFlushPendingCounts();
+    await _uploadTelemetryOrStorePending(enriched, canUploadNow: canUploadNow);
   }
 
   WatchTelemetry _emptyPineTimeTelemetry() {
@@ -594,35 +704,6 @@ class BleOwner {
       fsFree: 0,
       accelMinutesCount: 0,
     );
-  }
-
-  Future<WatchTelemetry?> _fetchPineTimeTelemetryBeforeSync() async {
-    const maxAttempts = 3;
-    for (int attempt = 0; attempt < maxAttempts; attempt++) {
-      try {
-        debugPrint(
-          'BleOwner: telemetry fetch start (attempt ${attempt + 1}/$maxAttempts)',
-        );
-        final telemetry = await PineTimeService.instance.getTelemetry();
-        if (telemetry != null) {
-          debugPrint('BleOwner: telemetry fetch ok');
-          return telemetry;
-        }
-        debugPrint('BleOwner: telemetry fetch empty');
-      } catch (e) {
-        debugPrint('BleOwner: telemetry fetch failed: $e');
-      }
-
-      if (attempt + 1 < maxAttempts) {
-        // Keep the same connection and just back off. Reconnect here increases
-        // watch_not_found risk when advertisement is brief.
-        final bool busy = PineTimeService.instance.lastTelemetryGattBusy;
-        final int delayMs =
-            busy ? (400 * (attempt + 1)) : (250 * (attempt + 1));
-        await Future.delayed(Duration(milliseconds: delayMs));
-      }
-    }
-    return null;
   }
 
   // ------------------- Public-ish command handlers -------------------

@@ -25,6 +25,12 @@ export default {
         firmwareVersion: DataTypes.STRING,
         sentToServer: DataTypes.BOOLEAN,
         backgroundSync: DataTypes.BOOLEAN,
+        syncAttempted: DataTypes.BOOLEAN,
+        syncSucceeded: DataTypes.BOOLEAN,
+        syncError: DataTypes.STRING,
+        bluetoothFailed: DataTypes.BOOLEAN,
+        bluetoothFailureReason: DataTypes.STRING,
+        uploadDeferredReason: DataTypes.STRING,
       },
       {
         timestamps: false,
@@ -43,9 +49,14 @@ export default {
       onDelete: 'CASCADE',
     })
   },
-  save: (data: any, userId: string) =>
-    TelemetryModel.create({
-      t: data.timestamp ? new Date(data.timestamp) : data.t ? new Date(data.t) : new Date(),
+  save: async (data: any, userId: string) => {
+    const payload = {
+      t:
+        data.timestamp
+          ? new Date(data.timestamp)
+          : data.t
+            ? new Date(data.t)
+            : new Date(),
       batteryPercent: data.batteryPercent,
       batteryMv: data.batteryMv,
       charging: data.charging,
@@ -58,8 +69,45 @@ export default {
       firmwareVersion: data.firmwareVersion,
       sentToServer: data.sentToServer,
       backgroundSync: data.backgroundSync,
+      syncAttempted: data.syncAttempted,
+      syncSucceeded: data.syncSucceeded,
+      syncError: data.syncError,
+      bluetoothFailed: data.bluetoothFailed,
+      bluetoothFailureReason: data.bluetoothFailureReason,
+      uploadDeferredReason: data.uploadDeferredReason,
       UserId: userId,
-    }),
+    }
+
+    try {
+      return await TelemetryModel.create(payload)
+    } catch (e) {
+      const message = e instanceof Error ? e.message.toLowerCase() : ''
+      const columnMissing =
+        message.includes('column') && message.includes('does not exist')
+      if (!columnMissing) {
+        throw e
+      }
+
+      // Backward-compatible fallback for environments where schema updates
+      // have not yet been applied.
+      return TelemetryModel.create({
+        t: payload.t,
+        batteryPercent: payload.batteryPercent,
+        batteryMv: payload.batteryMv,
+        charging: payload.charging,
+        powerPresent: payload.powerPresent,
+        heapFree: payload.heapFree,
+        fsTotal: payload.fsTotal,
+        fsFree: payload.fsFree,
+        accelMinutesCount: payload.accelMinutesCount,
+        watchId: payload.watchId,
+        firmwareVersion: payload.firmwareVersion,
+        sentToServer: payload.sentToServer,
+        backgroundSync: payload.backgroundSync,
+        UserId: payload.UserId,
+      })
+    }
+  },
   find: ({
     userId,
     from,

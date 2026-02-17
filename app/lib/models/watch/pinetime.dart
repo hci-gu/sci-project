@@ -706,28 +706,96 @@ class PineTimeService {
           }
 
           final entriesInPacket = response[10];
+          if (entriesInPacket == 0) {
+            debugPrint('READ_ENTRIES success with zero entries at $startIndex');
+            return <PineTimeMinuteEntry>[];
+          }
+
+          const int float32EntrySize = 10; // 4 count + 2 hr + 4 ts
+          const int float64EntrySize = 14; // 8 count + 2 hr + 4 ts
+          final payloadLength = response.length - 11;
+          int entrySize = float32EntrySize;
+
+          final bool exactFloat32Payload =
+              payloadLength == entriesInPacket * float32EntrySize;
+          final bool exactFloat64Payload =
+              payloadLength == entriesInPacket * float64EntrySize;
+
+          if (exactFloat64Payload && !exactFloat32Payload) {
+            entrySize = float64EntrySize;
+          } else if (!exactFloat32Payload &&
+              !exactFloat64Payload &&
+              entriesInPacket > 0) {
+            // Fallback: infer width from declared count when payload is exact.
+            final inferred = payloadLength ~/ entriesInPacket;
+            if (payloadLength % entriesInPacket == 0 &&
+                (inferred == float32EntrySize ||
+                    inferred == float64EntrySize)) {
+              entrySize = inferred;
+            }
+          }
+
+          final int maxEntriesByPayload = payloadLength ~/ entrySize;
+          final int entriesToParse = min(entriesInPacket, maxEntriesByPayload);
+          if (entriesToParse <= 0) {
+            debugPrint(
+              'READ_ENTRIES payload too short at startIndex=$startIndex '
+              '(declared=$entriesInPacket, payloadLen=$payloadLength, '
+              'entrySize=$entrySize)',
+            );
+            return <PineTimeMinuteEntry>[];
+          }
+          if (entriesToParse < entriesInPacket) {
+            debugPrint(
+              'READ_ENTRIES truncated payload at startIndex=$startIndex '
+              '(declared=$entriesInPacket, parsed=$entriesToParse, '
+              'payloadLen=$payloadLength, entrySize=$entrySize)',
+            );
+          }
+
+          final bytes = Uint8List.fromList(response);
           final entries = <PineTimeMinuteEntry>[];
 
-          for (int i = 0; i < entriesInPacket; i++) {
-            final offset = 11 + (i * 10);
-            if (offset + 10 > response.length) break;
+          for (int i = 0; i < entriesToParse; i++) {
+            final offset = 11 + (i * entrySize);
+            double count;
+            int hrOffset;
+            int tsOffset;
 
-            // float count (little-endian, IEEE 754)
-            final countBytes = ByteData.sublistView(
-              Uint8List.fromList(response.sublist(offset, offset + 4)),
-            );
-            final count = countBytes.getFloat32(0, Endian.little);
+            if (entrySize == float64EntrySize) {
+              final countBytes = ByteData.sublistView(
+                bytes,
+                offset,
+                offset + 8,
+              );
+              count = countBytes.getFloat64(0, Endian.little);
+              hrOffset = offset + 8;
+              tsOffset = offset + 10;
+            } else {
+              final countBytes = ByteData.sublistView(
+                bytes,
+                offset,
+                offset + 4,
+              );
+              count = countBytes.getFloat32(0, Endian.little);
+              hrOffset = offset + 4;
+              tsOffset = offset + 6;
+            }
+
+            if (!count.isFinite) {
+              continue;
+            }
 
             // int16 heartRate (little-endian, signed)
-            int hr = response[offset + 4] | (response[offset + 5] << 8);
+            int hr = response[hrOffset] | (response[hrOffset + 1] << 8);
             if (hr >= 0x8000) hr -= 0x10000;
 
             // uint32 timestamp (little-endian)
             final ts =
-                response[offset + 6] |
-                (response[offset + 7] << 8) |
-                (response[offset + 8] << 16) |
-                (response[offset + 9] << 24);
+                response[tsOffset] |
+                (response[tsOffset + 1] << 8) |
+                (response[tsOffset + 2] << 16) |
+                (response[tsOffset + 3] << 24);
 
             entries.add(
               PineTimeMinuteEntry(
@@ -766,6 +834,9 @@ class PineTimeService {
     final allEntries = <PineTimeMinuteEntry>[];
     int index = startIndex < 0 ? 0 : startIndex;
     const chunkSize = 20;
+    const maxConsecutiveUnreadableSkips = 5;
+    int consecutiveUnreadableSkips = 0;
+    int skippedUnreadable = 0;
 
     if (index >= totalCount) {
       debugPrint(
@@ -778,36 +849,79 @@ class PineTimeService {
       final requestedIndex = index;
       List<PineTimeMinuteEntry> entries = [];
       bool gotEntries = false;
-      for (int attempt = 0; attempt < 3; attempt++) {
-        entries = await _readEntries(index, chunkSize);
-        if (entries.isNotEmpty) {
-          gotEntries = true;
-          break;
+      int requestedCount = chunkSize;
+
+      Future<bool> tryReadWithRetries({
+        required int count,
+        required int attempts,
+      }) async {
+        for (int attempt = 0; attempt < attempts; attempt++) {
+          entries = await _readEntries(index, count);
+          if (entries.isNotEmpty) {
+            requestedCount = count;
+            return true;
+          }
+          debugPrint(
+            'Empty entries packet at index=$index count=$count '
+            'attempt=${attempt + 1}/$attempts',
+          );
+          await Future.delayed(const Duration(milliseconds: 200));
         }
-        debugPrint('Empty entries packet at index=$index attempt=$attempt');
-        await Future.delayed(const Duration(milliseconds: 200));
+        return false;
+      }
+
+      gotEntries = await tryReadWithRetries(count: chunkSize, attempts: 3);
+      if (!gotEntries) {
+        // Some firmware versions can wedge on a single corrupted index.
+        // Narrow reads to isolate readable entries before giving up.
+        for (int narrow = chunkSize ~/ 2; narrow >= 1; narrow = narrow ~/ 2) {
+          gotEntries = await tryReadWithRetries(count: narrow, attempts: 2);
+          if (gotEntries) break;
+        }
       }
       if (!gotEntries) {
+        final skippedIndex = index;
+        index += 1;
+        skippedUnreadable += 1;
+        consecutiveUnreadableSkips += 1;
         debugPrint(
-          'Incomplete PineTime read at index=$index; aborting without clearing',
+          'Skipping unreadable PineTime entry at index=$skippedIndex; '
+          'consecutiveSkips=$consecutiveUnreadableSkips',
         );
-        throw StateError(kPinetimeReadTimeout);
+        if (consecutiveUnreadableSkips >= maxConsecutiveUnreadableSkips) {
+          debugPrint(
+            'Too many consecutive unreadable entries; aborting read loop '
+            'at index=$index',
+          );
+          throw StateError(kPinetimeReadTimeout);
+        }
+        onProgress?.call(min(index, totalCount), totalCount);
+        await Future.delayed(const Duration(milliseconds: 100));
+        continue;
       }
+      consecutiveUnreadableSkips = 0;
       final firstTs = entries.first.timestamp;
       final lastTs = entries.last.timestamp;
       debugPrint(
-        'PineTime chunk: requestStart=$requestedIndex got=${entries.length} '
-        'firstTs=$firstTs lastTs=$lastTs',
+        'PineTime chunk: requestStart=$requestedIndex requested=$requestedCount '
+        'got=${entries.length} firstTs=$firstTs lastTs=$lastTs',
       );
       allEntries.addAll(entries);
       index += entries.length;
       debugPrint('Read ${allEntries.length}/$totalCount entries');
 
       // Report progress after each chunk
-      onProgress?.call(allEntries.length, totalCount);
+      onProgress?.call(min(index, totalCount), totalCount);
 
       // Small delay to avoid overwhelming BLE
       await Future.delayed(const Duration(milliseconds: 100));
+    }
+
+    if (skippedUnreadable > 0) {
+      debugPrint(
+        'PineTime read completed with $skippedUnreadable skipped unreadable '
+        'entries out of $totalCount total',
+      );
     }
 
     return allEntries;
@@ -1029,12 +1143,23 @@ List<Counts> countsFromPineTimeData(List<PineTimeMinuteEntry> entries) {
   }
 
   final List<Counts> counts = [];
+  int droppedInvalidCounts = 0;
 
   for (final entry in uniqueEntries) {
     // PineTime already stores pre-computed acceleration values and heart rate
     // The acceleration value is already "counts" computed on the watch
+    if (!entry.count.isFinite) {
+      droppedInvalidCounts++;
+      continue;
+    }
     counts.add(
       Counts(t: entry.dateTime, hr: entry.heartRate.toDouble(), a: entry.count),
+    );
+  }
+
+  if (droppedInvalidCounts > 0) {
+    debugPrint(
+      "countsFromPineTimeData: dropped $droppedInvalidCounts invalid counts",
     );
   }
 

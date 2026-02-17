@@ -14,9 +14,10 @@ typedef PineTimeUploadTelemetry =
       required String storedId,
       required int dataCount,
       required bool uploadSucceeded,
+      required bool syncSucceeded,
+      String? syncError,
       WatchTelemetry? telemetry,
       bool backgroundSync,
-      bool skipFirmwareRead,
     });
 typedef PineTimeUploadCounts =
     Future<UploadOutcome> Function(
@@ -31,24 +32,20 @@ class PineTimeSyncCoordinator {
   final Future<bool> Function() tryLoginAndFlushPendingCounts;
   final PineTimeUploadCounts uploadCountsOrStorePending;
   final PineTimeUploadTelemetry uploadTelemetry;
-  final Future<WatchTelemetry?> Function() fetchTelemetryBeforeSync;
   final WatchTelemetry Function() emptyTelemetry;
   final PineTimeWithTimeout withTimeout;
   final Duration bleOpTimeout;
   final Duration bleReadTimeout;
-  final bool telemetryDebugNoBle;
 
   PineTimeSyncCoordinator({
     required this.stopScan,
     required this.tryLoginAndFlushPendingCounts,
     required this.uploadCountsOrStorePending,
     required this.uploadTelemetry,
-    required this.fetchTelemetryBeforeSync,
     required this.emptyTelemetry,
     required this.withTimeout,
     required this.bleOpTimeout,
     required this.bleReadTimeout,
-    required this.telemetryDebugNoBle,
   });
 
   Future<SyncOutcome> run({
@@ -57,19 +54,28 @@ class PineTimeSyncCoordinator {
   }) async {
     final stored = Storage().getConnectedWatch();
     String? storedId;
-    WatchTelemetry? preSyncTelemetry;
+    final WatchTelemetry attemptTelemetry = emptyTelemetry();
     bool telemetryUploadAttempted = false;
     SyncMetrics metrics = const SyncMetrics.empty();
+    SyncErrorCode? syncErrorForTelemetry;
+    bool syncSucceededForTelemetry = false;
 
     void sendProgress(String phase, int current, int total) {
       progressReporter?.call(phase, current, total);
     }
 
+    SyncOutcome fail(SyncErrorCode error, {SyncMetrics? failureMetrics}) {
+      syncErrorForTelemetry = error;
+      syncSucceededForTelemetry = false;
+      return SyncOutcome.failure(
+        error: error,
+        metrics: failureMetrics ?? metrics,
+      );
+    }
+
     try {
       if (stored == null) {
-        return const SyncOutcome.failure(
-          error: SyncErrorCode.watchNotConfigured,
-        );
+        return fail(SyncErrorCode.watchNotConfigured);
       }
       final String watchId = stored.id;
       storedId = watchId;
@@ -97,19 +103,7 @@ class PineTimeSyncCoordinator {
       if (!PineTimeService.instance.connected) {
         debugPrint('PineTimeSyncCoordinator: connection failed');
         await _safeStopAndDispose();
-        return const SyncOutcome.failure(
-          error: SyncErrorCode.watchConnectFailed,
-        );
-      }
-
-      if (telemetryDebugNoBle) {
-        debugPrint(
-          'PineTimeSyncCoordinator: telemetry BLE disabled, using empty payload',
-        );
-        preSyncTelemetry = emptyTelemetry();
-      } else {
-        preSyncTelemetry = await fetchTelemetryBeforeSync();
-        await Future.delayed(const Duration(milliseconds: 250));
+        return fail(SyncErrorCode.watchConnectFailed);
       }
 
       final state = await withTimeout(
@@ -132,6 +126,8 @@ class PineTimeSyncCoordinator {
         await Storage().setPineTimeLastTimestamp(watchId, null);
         sendProgress('done', 0, 0);
         await Storage().setLastSync(DateTime.now());
+        syncSucceededForTelemetry = true;
+        syncErrorForTelemetry = null;
         return const SyncOutcome.success(metrics: SyncMetrics.empty());
       }
 
@@ -165,9 +161,9 @@ class PineTimeSyncCoordinator {
             'PineTimeSyncCoordinator: pending clear retry result: $cleared',
           );
           if (!cleared) {
-            return SyncOutcome.failure(
-              error: SyncErrorCode.pinetimeClearFailed,
-              metrics: metrics,
+            return fail(
+              SyncErrorCode.pinetimeClearFailed,
+              failureMetrics: metrics,
             );
           }
           metrics = metrics.copyWith(watchCleared: true);
@@ -179,6 +175,8 @@ class PineTimeSyncCoordinator {
         await tryLoginAndFlushPendingCounts();
         sendProgress('done', 0, 0);
         await Storage().setLastSync(DateTime.now());
+        syncSucceededForTelemetry = true;
+        syncErrorForTelemetry = null;
         return SyncOutcome.success(metrics: metrics);
       }
 
@@ -241,9 +239,9 @@ class PineTimeSyncCoordinator {
         final cleared = await _clearWatchData();
         debugPrint('PineTimeSyncCoordinator: watch data cleared: $cleared');
         if (!cleared) {
-          return SyncOutcome.failure(
-            error: SyncErrorCode.pinetimeClearFailed,
-            metrics: metrics,
+          return fail(
+            SyncErrorCode.pinetimeClearFailed,
+            failureMetrics: metrics,
           );
         }
 
@@ -261,9 +259,9 @@ class PineTimeSyncCoordinator {
             '$cleared',
           );
           if (!cleared) {
-            return SyncOutcome.failure(
-              error: SyncErrorCode.pinetimeClearFailed,
-              metrics: metrics,
+            return fail(
+              SyncErrorCode.pinetimeClearFailed,
+              failureMetrics: metrics,
             );
           }
           metrics = metrics.copyWith(watchCleared: true);
@@ -282,11 +280,14 @@ class PineTimeSyncCoordinator {
         storedId: watchId,
         dataCount: metrics.dataCount,
         uploadSucceeded: metrics.uploaded,
-        telemetry: preSyncTelemetry,
+        syncSucceeded: true,
+        syncError: null,
+        telemetry: attemptTelemetry,
         backgroundSync: backgroundSync,
-        skipFirmwareRead: telemetryDebugNoBle,
       );
       telemetryUploadAttempted = true;
+      syncSucceededForTelemetry = true;
+      syncErrorForTelemetry = null;
       debugPrint('PineTimeSyncCoordinator: sync done');
       return SyncOutcome.success(metrics: metrics);
     } catch (e, st) {
@@ -296,22 +297,22 @@ class PineTimeSyncCoordinator {
       } else {
         code = SyncErrorCode.syncFailed;
       }
+      syncErrorForTelemetry = code;
+      syncSucceededForTelemetry = false;
       debugPrint('PineTimeSyncCoordinator failed: $e\n$st');
       return SyncOutcome.failure(error: code, metrics: metrics);
     } finally {
       try {
         if (storedId != null && !telemetryUploadAttempted) {
-          if (telemetryDebugNoBle && preSyncTelemetry == null) {
-            preSyncTelemetry = emptyTelemetry();
-          }
           final watchId = storedId;
           await uploadTelemetry(
             storedId: watchId,
-            dataCount: 0,
-            uploadSucceeded: false,
-            telemetry: preSyncTelemetry,
+            dataCount: metrics.dataCount,
+            uploadSucceeded: metrics.uploaded,
+            syncSucceeded: syncSucceededForTelemetry,
+            syncError: syncErrorForTelemetry?.code,
+            telemetry: attemptTelemetry,
             backgroundSync: backgroundSync,
-            skipFirmwareRead: telemetryDebugNoBle,
           );
         }
       } catch (_) {}
