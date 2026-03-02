@@ -139,6 +139,9 @@ router.post(
   userBody,
   async (req: ValidatedRequest<UserBodySchema>, res: any) => {
     const { email, password } = req.body
+    if (!email || !password) {
+      return res.sendStatus(400)
+    }
     console.log('POST /users/login', email)
 
     try {

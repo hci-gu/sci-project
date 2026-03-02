@@ -3,7 +3,10 @@ import moment from 'moment'
 import { AccelCount, User } from '../../lib/db/classes'
 import UserModel from '../../lib/db/models/User'
 import AccelCountModel from '../../lib/db/models/AccelCount'
-import BoutModel, { createBoutFromCounts } from '../../lib/db/models/Bout'
+import BoutModel, {
+  createBoutFromCounts,
+  mergeBouts,
+} from '../../lib/db/models/Bout'
 import {
   Activity,
   Condition,
@@ -208,5 +211,83 @@ describe('Bout', () => {
       to: base.clone().add(2, 'minutes').toDate(),
     })
     expect(secondInsert).toHaveLength(2)
+  })
+
+  test('mergeBouts resolves overlapping same-activity bouts', async () => {
+    const base = moment().startOf('day').add(10, 'hours')
+    await BoutModel.save(
+      {
+        t: base.toDate(),
+        minutes: 10,
+        activity: Activity.sedentary,
+        data: {},
+      },
+      user.id
+    )
+    await BoutModel.save(
+      {
+        t: base.clone().add(5, 'minutes').toDate(),
+        minutes: 10,
+        activity: Activity.sedentary,
+        data: {},
+      },
+      user.id
+    )
+
+    await mergeBouts(user.id, {
+      from: base.clone().subtract(5, 'minutes').toDate(),
+      to: base.clone().add(30, 'minutes').toDate(),
+    })
+
+    const bouts = await BoutModel.find({
+      userId: user.id,
+      from: base.clone().subtract(5, 'minutes').toDate(),
+      to: base.clone().add(30, 'minutes').toDate(),
+    })
+
+    expect(bouts).toHaveLength(1)
+    expect(bouts[0].activity).toBe(Activity.sedentary)
+    expect(bouts[0].minutes).toBe(15)
+  })
+
+  test('mergeBouts resolves cross-activity overlaps into a non-overlapping timeline', async () => {
+    const base = moment().startOf('day').add(10, 'hours')
+    await BoutModel.save(
+      {
+        t: base.toDate(),
+        minutes: 30,
+        activity: Activity.sedentary,
+        data: {},
+      },
+      user.id
+    )
+    await BoutModel.save(
+      {
+        t: base.clone().add(10, 'minutes').toDate(),
+        minutes: 10,
+        activity: Activity.moving,
+        data: {},
+      },
+      user.id
+    )
+
+    await mergeBouts(user.id, {
+      from: base.clone().subtract(5, 'minutes').toDate(),
+      to: base.clone().add(40, 'minutes').toDate(),
+    })
+
+    const bouts = await BoutModel.find({
+      userId: user.id,
+      from: base.clone().subtract(5, 'minutes').toDate(),
+      to: base.clone().add(40, 'minutes').toDate(),
+    })
+
+    expect(bouts).toHaveLength(3)
+    expect(bouts[0].activity).toBe(Activity.sedentary)
+    expect(bouts[0].minutes).toBe(10)
+    expect(bouts[1].activity).toBe(Activity.moving)
+    expect(bouts[1].minutes).toBe(10)
+    expect(bouts[2].activity).toBe(Activity.sedentary)
+    expect(bouts[2].minutes).toBe(10)
   })
 })

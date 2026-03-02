@@ -1,4 +1,4 @@
-import { DataTypes, Sequelize, type ModelStatic } from 'sequelize'
+import { DataTypes, Op, Sequelize, type ModelStatic } from 'sequelize'
 import bcrypt from 'bcrypt'
 import { Condition, Gender } from '../../constants.js'
 import { User } from '../classes.js'
@@ -30,6 +30,15 @@ export default {
         deviceId: DataTypes.STRING,
         timezone: DataTypes.STRING,
         notificationSettings: DataTypes.JSONB,
+        features: {
+          type: DataTypes.JSONB,
+          defaultValue: {},
+        },
+        injuryDate: DataTypes.DATEONLY,
+        testType: {
+          type: DataTypes.STRING,
+          field: 'test_type',
+        },
         createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
         email: {
           type: DataTypes.STRING,
@@ -51,13 +60,15 @@ export default {
     return User
   },
   associate: (sequelize: Sequelize) => {},
-  save: ({
+  save: async ({
     email,
     password,
     weight,
     condition,
     gender,
     injuryLevel,
+    features,
+    injuryDate,
   }: {
     email: string
     password: string
@@ -65,7 +76,20 @@ export default {
     condition?: Condition
     gender?: Gender
     injuryLevel?: number
+    features?: Record<string, boolean>
+    injuryDate?: string
   }) => {
+    const lastAssignedUser = await UserModel.findOne({
+      attributes: ['testType'],
+      where: {
+        testType: {
+          [Op.in]: ['A', 'B'],
+        },
+      },
+      order: [['createdAt', 'DESC']],
+    })
+    const nextTestType = lastAssignedUser?.testType === 'A' ? 'B' : 'A'
+
     return UserModel.create({
       email: email?.toLowerCase(),
       password,
@@ -73,11 +97,14 @@ export default {
       condition,
       gender,
       injuryLevel,
+      features: features ?? {},
+      injuryDate,
       notificationSettings: {
         activity: true,
         data: true,
         journal: false,
       },
+      testType: nextTestType,
     }).catch((e) => {
       if (e.name === 'SequelizeUniqueConstraintError') {
         throw new ForbiddenError('Email already exists')

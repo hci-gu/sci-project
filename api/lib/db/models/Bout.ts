@@ -346,9 +346,220 @@ const upsertBoutAtMinute = async (
   }
 }
 
+type NormalizedBout = {
+  id: number
+  t: Date
+  minutes: number
+  activity: Activity
+  data: any
+  isManual: boolean
+  startMs: number
+  endMs: number
+  dataSignature: string
+}
+
+type TimelineSegment = {
+  startMs: number
+  endMs: number
+  activity: Activity
+  isManual: boolean
+  data: any
+  dataSignature: string
+}
+
+const ACTIVITY_PRIORITY: Record<Activity, number> = {
+  [Activity.sedentary]: 1,
+  [Activity.moving]: 2,
+  [Activity.active]: 3,
+  [Activity.weights]: 0,
+  [Activity.skiErgo]: 0,
+  [Activity.armErgo]: 0,
+  [Activity.rollOutside]: 0,
+}
+
+const dataSignature = (data: any) => {
+  try {
+    return JSON.stringify(data ?? {})
+  } catch {
+    return '{}'
+  }
+}
+
+const toNormalizedBout = (bout: Bout): NormalizedBout | null => {
+  const startMs = new Date(bout.t).getTime()
+  const minutes = Number(bout.minutes)
+  if (!Number.isFinite(startMs) || !Number.isFinite(minutes) || minutes <= 0) {
+    return null
+  }
+
+  const endMs = startMs + minutes * 60 * 1000
+  if (endMs <= startMs) {
+    return null
+  }
+
+  const data = bout.data ?? {}
+  const manual = !!(data && typeof data === 'object' && (data as any).manual)
+
+  return {
+    id: Number(bout.id),
+    t: new Date(bout.t),
+    minutes,
+    activity: bout.activity,
+    data,
+    isManual: manual,
+    startMs,
+    endMs,
+    dataSignature: dataSignature(data),
+  }
+}
+
+const chooseWinningBout = (activeBouts: NormalizedBout[]) => {
+  if (!activeBouts.length) return null
+
+  let winner = activeBouts[0]
+  for (let i = 1; i < activeBouts.length; i++) {
+    const candidate = activeBouts[i]
+
+    if (candidate.isManual !== winner.isManual) {
+      if (candidate.isManual) winner = candidate
+      continue
+    }
+
+    if (candidate.startMs !== winner.startMs) {
+      if (candidate.startMs > winner.startMs) winner = candidate
+      continue
+    }
+
+    const candidatePriority = ACTIVITY_PRIORITY[candidate.activity] ?? 0
+    const winnerPriority = ACTIVITY_PRIORITY[winner.activity] ?? 0
+    if (candidatePriority !== winnerPriority) {
+      if (candidatePriority > winnerPriority) winner = candidate
+      continue
+    }
+
+    if (candidate.id > winner.id) winner = candidate
+  }
+
+  return winner
+}
+
+const normalizeTimeline = (bouts: NormalizedBout[]): TimelineSegment[] => {
+  if (!bouts.length) return []
+
+  const starts = new Map<number, NormalizedBout[]>()
+  const ends = new Map<number, number[]>()
+  const boundaries = new Set<number>()
+
+  for (const bout of bouts) {
+    if (!starts.has(bout.startMs)) starts.set(bout.startMs, [])
+    starts.get(bout.startMs)!.push(bout)
+
+    if (!ends.has(bout.endMs)) ends.set(bout.endMs, [])
+    ends.get(bout.endMs)!.push(bout.id)
+
+    boundaries.add(bout.startMs)
+    boundaries.add(bout.endMs)
+  }
+
+  const points = Array.from(boundaries.values()).sort((a, b) => a - b)
+  if (points.length < 2) return []
+
+  const active = new Map<number, NormalizedBout>()
+  const timeline: TimelineSegment[] = []
+
+  for (let i = 0; i < points.length - 1; i++) {
+    const point = points[i]
+    const nextPoint = points[i + 1]
+    if (nextPoint <= point) continue
+
+    const ending = ends.get(point) ?? []
+    for (const id of ending) active.delete(id)
+
+    const starting = starts.get(point) ?? []
+    for (const bout of starting) active.set(bout.id, bout)
+
+    if (active.size === 0) continue
+
+    const winner = chooseWinningBout(Array.from(active.values()))
+    if (!winner) continue
+
+    const previous = timeline[timeline.length - 1]
+    if (
+      previous &&
+      previous.endMs === point &&
+      previous.activity === winner.activity &&
+      previous.isManual === winner.isManual &&
+      previous.dataSignature === winner.dataSignature
+    ) {
+      previous.endMs = nextPoint
+      continue
+    }
+
+    timeline.push({
+      startMs: point,
+      endMs: nextPoint,
+      activity: winner.activity,
+      isManual: winner.isManual,
+      data: winner.data,
+      dataSignature: winner.dataSignature,
+    })
+  }
+
+  return timeline
+}
+
+const mergeCompatibleSegments = (
+  segments: TimelineSegment[],
+  maxGapMinutes: number
+) => {
+  if (segments.length < 2) return segments
+
+  const merged: TimelineSegment[] = [
+    {
+      ...segments[0],
+    },
+  ]
+
+  for (let i = 1; i < segments.length; i++) {
+    const segment = segments[i]
+    const current = merged[merged.length - 1]
+    const gapMinutes = (segment.startMs - current.endMs) / (60 * 1000)
+
+    if (
+      current.activity === segment.activity &&
+      current.isManual === segment.isManual &&
+      current.dataSignature === segment.dataSignature &&
+      gapMinutes >= 0 &&
+      gapMinutes <= maxGapMinutes
+    ) {
+      current.endMs = segment.endMs
+      continue
+    }
+
+    merged.push({ ...segment })
+  }
+
+  return merged
+}
+
+const intervalSignature = (segments: TimelineSegment[]) =>
+  segments
+    .map((segment) => ({
+      startMs: segment.startMs,
+      endMs: segment.endMs,
+      activity: segment.activity,
+      dataSignature: segment.dataSignature,
+    }))
+    .sort((a, b) => {
+      if (a.startMs !== b.startMs) return a.startMs - b.startMs
+      if (a.endMs !== b.endMs) return a.endMs - b.endMs
+      if (a.activity !== b.activity) return a.activity.localeCompare(b.activity)
+      return a.dataSignature.localeCompare(b.dataSignature)
+    })
+
 /**
- * Merge adjacent bouts of the same activity type that have small gaps between them.
- * This repairs fragmented bout data caused by data gaps or timing issues.
+ * Normalize bouts into a non-overlapping timeline and merge adjacent compatible
+ * segments. Manual bouts are preserved and take precedence when overlap exists.
  */
 export const mergeBouts = async (
   userId: string,
@@ -365,50 +576,97 @@ export const mergeBouts = async (
   }
 
   if (options?.from && options?.to) {
-    whereClause.t = { [Op.between]: [options.from, options.to] }
+    // Include earlier starts that can still overlap the target window.
+    whereClause.t = { [Op.lte]: options.to }
+  } else if (options?.to) {
+    whereClause.t = { [Op.lte]: options.to }
+  } else if (options?.from) {
+    whereClause.t = { [Op.gte]: options.from }
   }
 
-  const bouts = await BoutModel.findAll({
-    attributes: ['id', 't', 'activity', 'minutes'],
+  const rawBouts = await BoutModel.findAll({
+    attributes: ['id', 't', 'activity', 'minutes', 'data'],
     where: whereClause,
     order: [['t', 'ASC']],
   })
 
-  if (bouts.length < 2) return { merged: 0, deleted: 0 }
+  const normalizedBouts = rawBouts
+    .map((bout) => toNormalizedBout(bout as Bout))
+    .filter((bout): bout is NormalizedBout => !!bout)
 
-  const toDelete: number[] = []
-  let current = bouts[0]
-  let mergeCount = 0
+  if (normalizedBouts.length < 2) return { merged: 0, deleted: 0 }
 
-  for (let i = 1; i < bouts.length; i++) {
-    const bout = bouts[i]
-    const currentEnd = moment(current.t).add(current.minutes, 'minutes')
-    const gap = moment(bout.t).diff(currentEnd, 'minutes')
+  const fromMs = options?.from ? options.from.getTime() : null
+  const toMs = options?.to ? options.to.getTime() : null
 
-    // Merge if same activity and gap is within tolerance
-    if (current.activity === bout.activity && gap <= maxGap && gap >= 0) {
-      // Extend current bout to include the gap and the next bout
-      current.minutes += gap + bout.minutes
-      toDelete.push(bout.id)
-      mergeCount++
-    } else {
-      // Save the current bout and move to next
-      if (current.changed()) {
-        await current.save()
-      }
-      current = bout
+  const scopedBouts = normalizedBouts.filter((bout) => {
+    if (fromMs != null && bout.endMs <= fromMs) return false
+    if (toMs != null && bout.startMs >= toMs) return false
+    return true
+  })
+
+  if (scopedBouts.length < 2) return { merged: 0, deleted: 0 }
+
+  const mutableBouts = scopedBouts.filter((bout) => !bout.isManual)
+  if (mutableBouts.length === 0) return { merged: 0, deleted: 0 }
+
+  const timeline = mergeCompatibleSegments(normalizeTimeline(scopedBouts), maxGap)
+  const nextMutableTimeline = timeline.filter((segment) => !segment.isManual)
+
+  const currentMutableTimeline: TimelineSegment[] = mutableBouts.map((bout) => ({
+    startMs: bout.startMs,
+    endMs: bout.endMs,
+    activity: bout.activity,
+    isManual: false,
+    data: bout.data,
+    dataSignature: bout.dataSignature,
+  }))
+
+  const currentSignature = intervalSignature(currentMutableTimeline)
+  const nextSignature = intervalSignature(nextMutableTimeline)
+
+  const changed =
+    currentSignature.length !== nextSignature.length ||
+    currentSignature.some((segment, index) => {
+      const next = nextSignature[index]
+      return (
+        segment.startMs !== next.startMs ||
+        segment.endMs !== next.endMs ||
+        segment.activity !== next.activity ||
+        segment.dataSignature !== next.dataSignature
+      )
+    })
+
+  if (!changed) {
+    return { merged: 0, deleted: 0 }
+  }
+
+  const replaceableIds = mutableBouts.map((bout) => bout.id)
+  await sequelizeInstance.transaction(async (transaction) => {
+    await BoutModel.destroy({
+      where: { id: { [Op.in]: replaceableIds } },
+      transaction,
+    })
+
+    if (nextMutableTimeline.length > 0) {
+      await BoutModel.bulkCreate(
+        nextMutableTimeline.map((segment) => ({
+          t: new Date(segment.startMs),
+          minutes: Math.round((segment.endMs - segment.startMs) / (60 * 1000)),
+          activity: segment.activity,
+          UserId: userId,
+          isSleeping: false,
+          data: segment.data ?? {},
+        })),
+        { transaction }
+      )
     }
-  }
+  })
 
-  // Save the last bout if modified
-  if (current.changed()) {
-    await current.save()
+  return {
+    merged: Math.max(0, replaceableIds.length - nextMutableTimeline.length),
+    deleted: replaceableIds.length,
+    inserted: nextMutableTimeline.length,
+    maxGapMinutes: maxGap,
   }
-
-  // Delete merged bouts
-  if (toDelete.length > 0) {
-    await BoutModel.destroy({ where: { id: { [Op.in]: toDelete } } })
-  }
-
-  return { merged: mergeCount, deleted: toDelete.length }
 }

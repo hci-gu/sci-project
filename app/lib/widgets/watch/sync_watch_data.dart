@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:scimovement/models/home_refresh.dart';
 import 'package:scimovement/models/watch/watch.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
@@ -22,9 +23,10 @@ class SyncWatchData extends HookConsumerWidget {
           Builder(
             builder: (context) {
               final lastSync = ref.watch(lastSyncProvider);
-              final lastSyncValue = lastSync != null
-                  ? timeago.format(lastSync)
-                  : AppLocalizations.of(context)!.never;
+              final lastSyncValue =
+                  lastSync != null
+                      ? timeago.format(lastSync)
+                      : AppLocalizations.of(context)!.never;
               return Text(
                 AppLocalizations.of(context)!.lastSynced(lastSyncValue),
                 style: AppTheme.paragraphMedium,
@@ -43,9 +45,10 @@ class SyncWatchData extends HookConsumerWidget {
                   await ref.read(connectedWatchProvider.notifier).syncData();
               if (context.mounted) {
                 if (result.ok) {
-                  ref.read(lastSyncProvider.notifier).setLastSync(
-                        DateTime.now(),
-                      );
+                  ref
+                      .read(lastSyncProvider.notifier)
+                      .setLastSync(DateTime.now());
+                  refreshHomeProviders(ref);
                   final hasData = (result.dataCount ?? 0) > 0;
                   final uploaded = result.uploaded != false;
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -54,8 +57,9 @@ class SyncWatchData extends HookConsumerWidget {
                         hasData
                             ? (uploaded
                                 ? AppLocalizations.of(context)!.syncSuccess
-                                : AppLocalizations.of(context)!
-                                    .syncSavedPending)
+                                : AppLocalizations.of(
+                                  context,
+                                )!.syncSavedPending)
                             : AppLocalizations.of(context)!.syncNoData,
                       ),
                     ),
@@ -64,8 +68,7 @@ class SyncWatchData extends HookConsumerWidget {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
-                        AppLocalizations.of(context)!
-                            .watchNotFoundReconnect,
+                        AppLocalizations.of(context)!.watchNotFoundReconnect,
                       ),
                     ),
                   );
@@ -129,8 +132,9 @@ class SyncWatchData extends HookConsumerWidget {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
-                        AppLocalizations.of(context)!
-                            .pinetimeCharacteristicMissing,
+                        AppLocalizations.of(
+                          context,
+                        )!.pinetimeCharacteristicMissing,
                       ),
                     ),
                   );

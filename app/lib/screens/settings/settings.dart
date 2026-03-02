@@ -49,22 +49,6 @@ class SettingsScreen extends ConsumerWidget {
             style: AppTheme.labelXLarge,
           ),
           const WatchSettings(),
-          if (kDebugMode) ...[
-            AppTheme.separator,
-            Button(
-              onPressed: () async {
-                print("Sending BLE command sync");
-                await sendBleCommand({'cmd': 'sync', 'backgroundSync': false});
-                print("BLE command sync sent");
-
-                List<int> disk = await PolarService.instance.polar.getDiskSpace(
-                  PolarService.instance.identifier,
-                );
-                print("Disk space: $disk");
-              },
-              title: 'Debug watch sync',
-            ),
-          ],
           AppTheme.separator,
           Text(
             AppLocalizations.of(context)!.appSettings,

@@ -163,9 +163,7 @@ Future<bool> _requestPineTimePermissions() async {
     }
 
     final statuses = await permissions.request();
-    print(
-      'PineTime permissions sdk=$sdk os="$osVersion" statuses=$statuses',
-    );
+    print('PineTime permissions sdk=$sdk os="$osVersion" statuses=$statuses');
 
     final bluetoothOk =
         (statuses[Permission.bluetoothScan]?.isGranted ?? false) &&
@@ -178,18 +176,41 @@ Future<bool> _requestPineTimePermissions() async {
   }
 
   if (Platform.isIOS) {
-    final status = await Permission.bluetooth.request();
-    return status.isGranted;
+    var state = await getFirstBluetoothAdapterState();
+    if (state == BluetoothAdapterState.on) {
+      return true;
+    } else if (state == BluetoothAdapterState.off) {
+      return false;
+    } else if (state == BluetoothAdapterState.unauthorized) {
+      return false;
+    }
+    return false;
   }
 
   return true;
 }
 
+Future<BluetoothAdapterState> getFirstBluetoothAdapterState() async {
+  final completer = Completer<BluetoothAdapterState>();
+  late StreamSubscription<BluetoothAdapterState> subscription;
+
+  subscription = FlutterBluePlus.adapterState.listen((
+    BluetoothAdapterState state,
+  ) {
+    if (state == BluetoothAdapterState.unknown) return;
+
+    completer.complete(state);
+    subscription.cancel();
+  });
+
+  return completer.future;
+}
+
 int? _androidSdkInt() {
   if (!Platform.isAndroid) return null;
-  final match = RegExp(r'SDK (\\d+)').firstMatch(
-    Platform.operatingSystemVersion,
-  );
+  final match = RegExp(
+    r'SDK (\\d+)',
+  ).firstMatch(Platform.operatingSystemVersion);
   if (match == null) return null;
   return int.tryParse(match.group(1)!);
 }
@@ -435,6 +456,7 @@ class ConnectWatch extends HookConsumerWidget {
         AppTheme.spacer2x,
         Button(
           onPressed: () async {
+            print("Connect watch button pressed");
             // Check if Bluetooth is supported
             if (await FlutterBluePlus.isSupported == false) {
               print("Bluetooth not supported by this device");
@@ -443,10 +465,12 @@ class ConnectWatch extends HookConsumerWidget {
 
             // First, show the watch type picker
             final WatchType? watchType = await showWatchTypePicker(context);
+            print("watchType selected: $watchType");
             if (watchType == null || !context.mounted) return;
 
             // Then show the device picker for the selected watch type
             final String? watchID = await showDevicePicker(context, watchType);
+            print("watchID selected: $watchID");
 
             if (watchID != null) {
               ref

@@ -583,12 +583,16 @@ class BleOwner {
         throw StateError(kWatchNotConfiguredError);
       }
 
-      PineTimeService.initialize(stored.id);
-      try {
-        await PineTimeService.instance.start();
+      final cancelToken = DfuCancelToken();
+      _dfuCancelToken = cancelToken;
 
-        final cancelToken = DfuCancelToken();
-        _dfuCancelToken = cancelToken;
+      try {
+        final existingPineTime = PineTimeService.instanceOrNull;
+        if (existingPineTime != null) {
+          try {
+            await existingPineTime.stopAndDispose();
+          } catch (_) {}
+        }
 
         String? targetVersion = version;
         if (targetVersion == null) {
@@ -617,22 +621,100 @@ class BleOwner {
         progressSink?.send(const DfuProgress(phase: 'preparing').toMap());
         final package = DfuZipParser.parse(zipBytes, version: targetVersion);
 
-        final transport = DfuTransport(PineTimeService.instance.device);
-        final controller = LegacyDfuController(
-          transport: transport,
-          cancelToken: cancelToken,
-        );
+        const maxAttempts = 2;
+        for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+          BluetoothDevice? device;
+          try {
+            cancelToken.throwIfCancelled();
+            if (attempt > 1) {
+              progressSink?.send(
+                DfuProgress(
+                  phase: 'connecting',
+                  message: 'Retrying DFU connection ($attempt/$maxAttempts)',
+                ).toMap(),
+              );
+            }
 
-        await controller.run(
-          package,
-          onProgress: (progress) => progressSink?.send(progress.toMap()),
-        );
+            device = await _connectDeviceForDfu(stored.id);
+
+            final transport = DfuTransport(device);
+            final controller = LegacyDfuController(
+              transport: transport,
+              cancelToken: cancelToken,
+            );
+
+            await controller.run(
+              package,
+              onProgress: (progress) => progressSink?.send(progress.toMap()),
+            );
+            return;
+          } on TimeoutException catch (e) {
+            final shouldRetry = _isDfuOpTimeout(e, 1) && attempt < maxAttempts;
+            if (!shouldRetry) {
+              rethrow;
+            }
+            await Future.delayed(const Duration(milliseconds: 500));
+          } finally {
+            try {
+              await device?.disconnect();
+            } catch (_) {}
+          }
+        }
       } finally {
-        try {
-          await PineTimeService.instance.stopAndDispose();
-        } catch (_) {}
+        _dfuCancelToken = null;
       }
     });
+  }
+
+  Future<BluetoothDevice> _connectDeviceForDfu(String identifier) async {
+    final adapterState = await FlutterBluePlus.adapterState.first;
+    if (adapterState != BluetoothAdapterState.on) {
+      await FlutterBluePlus.adapterState
+          .where((s) => s == BluetoothAdapterState.on)
+          .first
+          .timeout(
+            const Duration(seconds: 5),
+            onTimeout: () => throw StateError(kBluetoothOffError),
+          );
+    }
+
+    final device = BluetoothDevice.fromId(identifier);
+
+    try {
+      await FlutterBluePlus.stopScan();
+    } catch (_) {}
+
+    try {
+      await device
+          .connect(autoConnect: false)
+          .timeout(const Duration(seconds: 8));
+    } catch (e) {
+      final message = e.toString().toLowerCase();
+      final alreadyConnected =
+          message.contains('already connected') ||
+          message.contains('connection is active');
+      if (!alreadyConnected) {
+        rethrow;
+      }
+    }
+
+    try {
+      await device.connectionState
+          .where((state) => state == BluetoothConnectionState.connected)
+          .first
+          .timeout(const Duration(seconds: 5));
+    } on TimeoutException {
+      // If state stream does not emit current value, proceed; GATT ops will
+      // still fail fast if the device is not actually connected.
+    }
+
+    return device;
+  }
+
+  bool _isDfuOpTimeout(TimeoutException error, int opCode) {
+    final marker = 'dfu_response_timeout_op_$opCode';
+    final message = error.message;
+    return message == marker || error.toString().contains(marker);
   }
 
   /// Handle sync for PineTime watch

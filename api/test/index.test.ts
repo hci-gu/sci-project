@@ -22,6 +22,44 @@ describe('/users', () => {
     expect(response.body.weight).toBe(100)
   })
 
+  test('POST /users alternates testType A/B', async () => {
+    const first = await request(app).post('/users').send({}).expect(200)
+    const second = await request(app).post('/users').send({}).expect(200)
+
+    expect(first.body.testType).toBe('A')
+    expect(second.body.testType).toBe('B')
+  })
+
+  test('POST/PATCH /users supports features and injuryDate', async () => {
+    const created = await request(app)
+      .post('/users')
+      .send({
+        features: { 'pain-smell-reminders': true, 'uti-reminders': false },
+        injuryDate: '2024-01-15',
+      })
+      .expect(200)
+
+    expect(created.body.features).toEqual({
+      'pain-smell-reminders': true,
+      'uti-reminders': false,
+    })
+    expect(created.body.injuryDate).toBe('2024-01-15')
+
+    const updated = await request(app)
+      .patch(`/users/${created.body.id}`)
+      .send({
+        features: { 'pain-smell-reminders': false, 'uti-reminders': true },
+        injuryDate: '2024-02-01',
+      })
+      .expect(200)
+
+    expect(updated.body.features).toEqual({
+      'pain-smell-reminders': false,
+      'uti-reminders': true,
+    })
+    expect(updated.body.injuryDate).toBe('2024-02-01')
+  })
+
   describe('GET /users/:id', () => {
     let userId: string
 

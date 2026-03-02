@@ -7,6 +7,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api/api.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/ble_owner.dart';
+import 'package:scimovement/models/home_refresh.dart';
 import 'package:scimovement/models/watch/watch.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
@@ -55,7 +56,6 @@ class WatchSettings extends HookConsumerWidget {
     final lastDfuError = useState<String?>(null);
     final lastDfuErrorAt = useState<DateTime?>(null);
     Future<List<dynamic>> fetchWatchState() async {
-      print("Fetching watch state...");
       final stateRaw = await sendBleCommand({
         'cmd': 'get_state',
       }).catchError((_) => <String, dynamic>{});
@@ -100,6 +100,7 @@ class WatchSettings extends HookConsumerWidget {
     }, [watch?.id, watch?.type]);
 
     if (watch == null) {
+      print("RENDERING CONNECT WATCH");
       return Padding(
         padding: AppTheme.elementPadding,
         child: const Center(child: ConnectWatch()),
@@ -233,9 +234,7 @@ class WatchSettings extends HookConsumerWidget {
             lastDfuErrorAt.value = DateTime.now();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(
-                  l10n.firmwareUpdateFailed(errorCode),
-                ),
+                content: Text(l10n.firmwareUpdateFailed(errorCode)),
                 backgroundColor: Colors.red,
               ),
             );
@@ -289,6 +288,7 @@ class WatchSettings extends HookConsumerWidget {
         if (context.mounted) {
           if (result['ok'] == true) {
             ref.read(lastSyncProvider.notifier).setLastSync(DateTime.now());
+            refreshHomeProviders(ref);
             final int dataCount = (result['dataCount'] as int?) ?? 0;
             final bool uploaded = (result['uploaded'] as bool?) ?? true;
             ScaffoldMessenger.of(context).showSnackBar(
@@ -904,9 +904,9 @@ class _DfuErrorBanner extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final failedAtText =
         failedAt != null
-            ? MaterialLocalizations.of(context).formatTimeOfDay(
-              TimeOfDay.fromDateTime(failedAt!),
-            )
+            ? MaterialLocalizations.of(
+              context,
+            ).formatTimeOfDay(TimeOfDay.fromDateTime(failedAt!))
             : null;
 
     return Container(

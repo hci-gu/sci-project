@@ -32,6 +32,11 @@ const user = Joi.object({
   })
     .optional()
     .allow(null),
+  features: Joi.object()
+    .pattern(Joi.string(), Joi.boolean())
+    .optional()
+    .allow(null),
+  injuryDate: Joi.string().isoDate().optional().allow(null),
 })
 
 export interface UserBodySchema extends ValidatedRequestSchema {
@@ -39,13 +44,21 @@ export interface UserBodySchema extends ValidatedRequestSchema {
     id: string
   }
   [ContainerTypes.Body]: {
-    weight: number
-    gender: Gender
-    condition: Condition
-    injuryLevel: number
-    deviceId: string
-    email: string
-    password: string
+    weight?: number
+    gender?: Gender
+    condition?: Condition
+    injuryLevel?: number
+    deviceId?: string
+    email?: string
+    password?: string
+    timezone?: string
+    notificationSettings?: {
+      activity?: boolean
+      data?: boolean
+      journal?: boolean
+    }
+    features?: Record<string, boolean>
+    injuryDate?: string
   }
 }
 export const userBody = validator.body(user)

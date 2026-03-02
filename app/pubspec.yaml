@@ -3,7 +3,7 @@ description: A new Flutter project.
 
 publish_to: 'none'
 
-version: 1.18.9+45
+version: 1.18.10+46
 
 environment:
   sdk: ^3.7.2
@@ -43,7 +43,7 @@ dependencies:
   confetti: ^0.8.0
   blur: ^4.0.2
   flutter_foreground_task: ^9.1.0
-  permission_handler: ^11.0.0
+  permission_handler: ^11.4.0
   flutter_blue_plus: ^1.36.6
   archive: ^3.6.1
   polar:

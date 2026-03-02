@@ -78,17 +78,32 @@ class DfuTransport {
     throw StateError('dfu_control_point_write_not_supported');
   }
 
-  Future<void> writePacket(List<int> data) async {
+  Future<void> writePacket(
+    List<int> data, {
+    bool preferWriteWithoutResponse = true,
+  }) async {
     final c = packet;
     final supportsWriteNoResp = c.properties.writeWithoutResponse;
     final supportsWrite = c.properties.write;
 
-    if (supportsWriteNoResp) {
+    if (preferWriteWithoutResponse && supportsWriteNoResp) {
+      await c.write(data, withoutResponse: true);
+      return;
+    }
+    if (!preferWriteWithoutResponse && supportsWrite) {
+      await c.write(data, withoutResponse: false);
+      return;
+    }
+    if (!preferWriteWithoutResponse && supportsWriteNoResp) {
       await c.write(data, withoutResponse: true);
       return;
     }
     if (supportsWrite) {
       await c.write(data, withoutResponse: false);
+      return;
+    }
+    if (supportsWriteNoResp) {
+      await c.write(data, withoutResponse: true);
       return;
     }
 

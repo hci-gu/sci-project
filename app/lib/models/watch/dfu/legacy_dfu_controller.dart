@@ -52,15 +52,18 @@ class LegacyDfuController {
     cancelToken.throwIfCancelled();
     onProgress?.call(const DfuProgress(phase: 'preparing'));
 
-    await _startDfu();
-    await _sendImageSize(package.imageSize);
-    await _awaitResponse(kDfuOpStartDfu);
+    await _awaitResponseAfter(kDfuOpStartDfu, () async {
+      await _startDfu();
+      await _sendImageSize(package.imageSize);
+    });
 
     cancelToken.throwIfCancelled();
     onProgress?.call(const DfuProgress(phase: 'init_packet'));
 
-    await _sendInitPacket(package.datBytes);
-    await _awaitResponse(kDfuOpInitPacket);
+    await _awaitResponseAfter(
+      kDfuOpInitPacket,
+      () => _sendInitPacket(package.datBytes),
+    );
 
     cancelToken.throwIfCancelled();
     onProgress?.call(
@@ -72,15 +75,32 @@ class LegacyDfuController {
     );
 
     await _setPrn(prn);
-    await _sendFirmware(package.binBytes, onProgress: onProgress);
-
-    await _awaitResponse(kDfuOpReceiveFirmware);
+    try {
+      await _awaitResponseAfter(
+        kDfuOpReceiveFirmware,
+        () => _sendFirmware(package.binBytes, onProgress: onProgress),
+      );
+    } on TimeoutException catch (e) {
+      if (!_isResponseTimeoutForOp(e, kDfuOpReceiveFirmware)) {
+        rethrow;
+      }
+      // Some legacy bootloaders occasionally miss the final op_3 response
+      // despite having received all firmware packets. Proceed to validate;
+      // validation will still fail if image transfer was incomplete/corrupt.
+    }
 
     cancelToken.throwIfCancelled();
     onProgress?.call(const DfuProgress(phase: 'validate'));
 
-    await _validate();
-    await _awaitResponse(kDfuOpValidate);
+    try {
+      await _awaitResponseAfter(kDfuOpValidate, _validate);
+    } on TimeoutException catch (e) {
+      if (!_isResponseTimeoutForOp(e, kDfuOpValidate)) {
+        rethrow;
+      }
+      // Some legacy bootloaders do not emit a final op_4 response even when
+      // validation succeeds. Continue with activate/reset as a best effort.
+    }
 
     cancelToken.throwIfCancelled();
     onProgress?.call(const DfuProgress(phase: 'reboot'));
@@ -99,7 +119,10 @@ class LegacyDfuController {
   Future<void> _sendImageSize(int imageSize) async {
     final bytes = ByteData(12);
     bytes.setUint32(8, imageSize, Endian.little);
-    await transport.writePacket(bytes.buffer.asUint8List());
+    await transport.writePacket(
+      bytes.buffer.asUint8List(),
+      preferWriteWithoutResponse: false,
+    );
   }
 
   Future<void> _sendInitPacket(Uint8List datBytes) async {
@@ -153,7 +176,10 @@ class LegacyDfuController {
       cancelToken.throwIfCancelled();
       final next =
           (sent + chunkSize) > bytes.length ? bytes.length : sent + chunkSize;
-      await transport.writePacket(bytes.sublist(sent, next));
+      await transport.writePacket(
+        bytes.sublist(sent, next),
+        preferWriteWithoutResponse: false,
+      );
       sent = next;
     }
   }
@@ -187,6 +213,7 @@ class LegacyDfuController {
   }
 
   Future<void> _awaitResponse(int requestedOp) async {
+    final responseTimeout = _responseTimeoutForOp(requestedOp);
     final response = await transport.controlPointNotifications
         .firstWhere(
           (value) =>
@@ -195,7 +222,7 @@ class LegacyDfuController {
               value[1] == requestedOp,
         )
         .timeout(
-          timeout,
+          responseTimeout,
           onTimeout: () {
             throw TimeoutException('dfu_response_timeout_op_$requestedOp');
           },
@@ -204,6 +231,39 @@ class LegacyDfuController {
     if (response[2] != kDfuStatusSuccess) {
       throw StateError('dfu_error_status_${response[2]}_op_$requestedOp');
     }
+  }
+
+  Future<void> _awaitResponseAfter(
+    int requestedOp,
+    Future<void> Function() action,
+  ) async {
+    final responseFuture = _awaitResponse(requestedOp);
+    try {
+      await action();
+    } catch (error) {
+      // Prevent unhandled timeout from the armed response waiter if action fails.
+      unawaited(responseFuture.catchError((_) {}));
+      rethrow;
+    }
+    await responseFuture;
+  }
+
+  Duration _responseTimeoutForOp(int opCode) {
+    if (opCode == kDfuOpReceiveFirmware) {
+      // Some devices take a long time to finalize flash writes before acking op_3.
+      return timeout * 12;
+    }
+    if (opCode == kDfuOpValidate) {
+      // Flash writes and image validation can take longer than control ops.
+      return timeout * 12;
+    }
+    return timeout;
+  }
+
+  bool _isResponseTimeoutForOp(TimeoutException error, int opCode) {
+    final marker = 'dfu_response_timeout_op_$opCode';
+    final message = error.message;
+    return message == marker || error.toString().contains(marker);
   }
 
   Future<int> _awaitPacketReceipt() async {

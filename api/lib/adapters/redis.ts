@@ -13,3 +13,4 @@ export const set = (key: string, value: any, exp = 60 * 5) =>
   client.set(key, JSON.stringify(value), { EX: exp })
 export const get = (key: string) =>
   client.get(key).then((value) => (value ? JSON.parse(value) : null))
+export const del = (key: string) => client.del(key)

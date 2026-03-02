@@ -20,6 +20,8 @@ export type NotificationSettings = {
   journal: boolean
 }
 
+export type UserFeatures = Record<string, boolean>
+
 export class User extends Model<
   InferAttributes<User>,
   InferCreationAttributes<User>
@@ -32,6 +34,9 @@ export class User extends Model<
   declare deviceId: CreationOptional<string>
   declare timezone: CreationOptional<string>
   declare notificationSettings: CreationOptional<NotificationSettings>
+  declare features: CreationOptional<UserFeatures>
+  declare injuryDate: CreationOptional<string>
+  declare testType: CreationOptional<'A' | 'B'>
   declare createdAt: CreationOptional<Date>
   declare email: CreationOptional<string>
   declare password: CreationOptional<string>
@@ -185,4 +190,16 @@ export class Telemetry extends Model<
   declare uploadDeferredReason: CreationOptional<string>
 
   declare UserId?: ForeignKey<User['id']>
+}
+
+export class NotificationEvent extends Model<
+  InferAttributes<NotificationEvent>,
+  InferCreationAttributes<NotificationEvent>
+> {
+  declare id: CreationOptional<number>
+  declare title: string
+  declare body: string
+  declare timestamp: CreationOptional<Date>
+  declare reason: string
+  declare userId: ForeignKey<User['id']>
 }
