@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -29,14 +28,9 @@ class OnboardingScreen extends ConsumerWidget {
                 left: AppTheme.basePadding * 2,
                 right: AppTheme.basePadding * 2,
               ),
-              children: const [
-                OnboardingStep(),
-              ],
+              children: const [OnboardingStep()],
             ),
-            const Positioned(
-              bottom: 0,
-              child: OnboardingStepper(),
-            ),
+            const Positioned(bottom: 0, child: OnboardingStepper()),
           ],
         ),
       ),
@@ -80,13 +74,12 @@ class OnboardingWelcome extends StatelessWidget {
           style: AppTheme.headLine3,
         ),
         AppTheme.spacer2x,
-        SvgPicture.asset(
-          'assets/svg/person.svg',
-          height: 80,
-        ),
+        SvgPicture.asset('assets/svg/person.svg', height: 80),
         AppTheme.spacer2x,
-        Text(AppLocalizations.of(context)!.onboardingIntro,
-            style: AppTheme.paragraphMedium),
+        Text(
+          AppLocalizations.of(context)!.onboardingIntro,
+          style: AppTheme.paragraphMedium,
+        ),
       ],
     );
   }
@@ -112,8 +105,10 @@ class PressureReleaseFunctions extends ConsumerWidget {
         AppFeatureWidget(
           asset: 'assets/svg/alarm.svg',
           title: AppLocalizations.of(context)!.pressureRelease,
-          description: AppLocalizations.of(context)!
-              .onboardingPressureReleaseDescription,
+          description:
+              AppLocalizations.of(
+                context,
+              )!.onboardingPressureReleaseDescription,
         ),
         AppTheme.spacer,
         AppFeatureWidget(
@@ -159,8 +154,10 @@ class PainFunctions extends ConsumerWidget {
         AppFeatureWidget(
           asset: 'assets/svg/neuropathic.svg',
           title: AppLocalizations.of(context)!.neuropathicPain,
-          description: AppLocalizations.of(context)!
-              .onboardingNeuropathicPainDescription,
+          description:
+              AppLocalizations.of(
+                context,
+              )!.onboardingNeuropathicPainDescription,
         ),
         AppTheme.spacer,
         AppFeatureWidget(
@@ -187,27 +184,35 @@ class BladderFunctions extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       children: [
-        Text(AppLocalizations.of(context)!.onboardingBladderAndBowelFunctions,
-            style: AppTheme.headLine3),
+        Text(
+          AppLocalizations.of(context)!.onboardingBladderAndBowelFunctions,
+          style: AppTheme.headLine3,
+        ),
         const SizedBox(
           height: 200,
-          child: Center(
-            child: Icon(Icons.water_drop_outlined, size: 64),
-          ),
+          child: Center(child: Icon(Icons.water_drop_outlined, size: 64)),
         ),
         AppFeatureWidget(
           icon: AppTheme.iconForJournalType(
-              JournalType.urinaryTractInfection, null, 24),
+            JournalType.urinaryTractInfection,
+            null,
+            24,
+          ),
           title: AppLocalizations.of(context)!.urinaryTractInfection,
           description: AppLocalizations.of(context)!.onboardingUtiDescription,
         ),
         AppTheme.spacer,
         AppFeatureWidget(
           icon: AppTheme.iconForJournalType(
-              JournalType.bladderEmptying, null, 24),
+            JournalType.bladderEmptying,
+            null,
+            24,
+          ),
           title: AppLocalizations.of(context)!.bladderEmptying,
-          description: AppLocalizations.of(context)!
-              .onboardingBladderEmptyingDescription,
+          description:
+              AppLocalizations.of(
+                context,
+              )!.onboardingBladderEmptyingDescription,
         ),
         AppTheme.spacer,
         AppFeatureWidget(
@@ -325,10 +330,7 @@ class AppFeatureWidget extends StatelessWidget {
           ],
         ),
         AppTheme.spacer,
-        Text(
-          description,
-          style: AppTheme.paragraphMedium,
-        ),
+        Text(description, style: AppTheme.paragraphMedium),
       ],
     );
   }
@@ -355,12 +357,29 @@ class FeatureToggle extends ConsumerWidget {
     bool hasFeature = features.contains(feature);
     Selected selection = hasFeature ? Selected.yes : Selected.no;
 
-    didChange(bool remove) {
+    Future<void> didChange(bool remove) async {
+      final bool hasChanged =
+          (!hasFeature && !remove) || (hasFeature && remove);
+      if (!hasChanged) {
+        return;
+      }
+
+      final List<AppFeature> nextFeatures =
+          remove
+              ? features.where((f) => f != feature).toList()
+              : {...features, feature}.toList();
+
       if (!hasFeature && !remove) {
         ref.read(appFeaturesProvider.notifier).addFeature(feature);
       }
       if (hasFeature && remove) {
         ref.read(appFeaturesProvider.notifier).removeFeature(feature);
+      }
+
+      if (ref.read(userProvider) != null) {
+        await ref.read(userProvider.notifier).update({
+          'features': appFeaturesToJson(nextFeatures),
+        });
       }
     }
 

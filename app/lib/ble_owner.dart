@@ -73,6 +73,19 @@ class BleOwner {
     return {'ok': false, 'error': code};
   }
 
+  Future<BluetoothAdapterState> _getResolvedBluetoothState() async {
+    try {
+      return await FlutterBluePlus.adapterState
+          .firstWhere((state) => state != BluetoothAdapterState.unknown)
+          .timeout(
+            const Duration(seconds: 1),
+            onTimeout: () => BluetoothAdapterState.unknown,
+          );
+    } catch (_) {
+      return BluetoothAdapterState.unknown;
+    }
+  }
+
   String? _classifyNoInternetReason(Object error) {
     if (error is SocketException) {
       return 'no_internet';
@@ -318,6 +331,15 @@ class BleOwner {
       if (stored == null) {
         debugPrint('BleOwner: no stored watch');
         return _errorResult(kWatchNotConfiguredError);
+      }
+
+      final adapterState = await _getResolvedBluetoothState();
+      if (adapterState != BluetoothAdapterState.on) {
+        debugPrint(
+          'BleOwner: sync aborted because bluetooth is not on '
+          '(state=$adapterState)',
+        );
+        return _errorResult(kBluetoothOffError);
       }
 
       if (stored.type == WatchType.pinetime) {
@@ -983,7 +1005,7 @@ class BleOwner {
   }
 
   Future<Map<String, dynamic>> _getPineTimeState() async {
-    final adapterState = await FlutterBluePlus.adapterState.first;
+    final adapterState = await _getResolvedBluetoothState();
     final bool? bluetoothEnabled =
         adapterState == BluetoothAdapterState.on
             ? true
@@ -1020,7 +1042,7 @@ class BleOwner {
   }
 
   Future<Map<String, dynamic>> _getPolarState() async {
-    final adapterState = await FlutterBluePlus.adapterState.first;
+    final adapterState = await _getResolvedBluetoothState();
     final bool? bluetoothEnabled =
         adapterState == BluetoothAdapterState.on
             ? true

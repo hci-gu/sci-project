@@ -2,12 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:scimovement/gen_l10n/app_localizations.dart';
 import 'package:scimovement/api/classes/journal/journal.dart';
 
-enum PressureReleaseExercise {
-  forwards,
-  rightSide,
-  leftSide,
-  lying,
-}
+enum PressureReleaseExercise { forwards, rightSide, leftSide, lying }
 
 PressureReleaseExercise prExerciseFromString(String string) {
   switch (string) {
@@ -28,13 +23,13 @@ extension PressureReleaseExerciseExtension on PressureReleaseExercise {
   String get asset {
     switch (this) {
       case PressureReleaseExercise.forwards:
-        return 'assets/images/pressure_release_forward.jpeg';
+        return 'assets/images/pressure_release_forward.png';
       case PressureReleaseExercise.rightSide:
-        return 'assets/images/pressure_release_right.jpeg';
+        return 'assets/images/pressure_release_right.png';
       case PressureReleaseExercise.leftSide:
-        return 'assets/images/pressure_release_left.jpeg';
+        return 'assets/images/pressure_release_left.png';
       case PressureReleaseExercise.lying:
-        return 'assets/images/pressure_release_lying.jpeg';
+        return 'assets/images/pressure_release_lying.png';
     }
   }
 
@@ -54,17 +49,21 @@ extension PressureReleaseExerciseExtension on PressureReleaseExercise {
   String description(BuildContext context) {
     switch (this) {
       case PressureReleaseExercise.forwards:
-        return AppLocalizations.of(context)!
-            .pressureReleaseExerciseLeanForwardDescription;
+        return AppLocalizations.of(
+          context,
+        )!.pressureReleaseExerciseLeanForwardDescription;
       case PressureReleaseExercise.rightSide:
-        return AppLocalizations.of(context)!
-            .pressureReleaseExerciseLeanRightDescription;
+        return AppLocalizations.of(
+          context,
+        )!.pressureReleaseExerciseLeanRightDescription;
       case PressureReleaseExercise.leftSide:
-        return AppLocalizations.of(context)!
-            .pressureReleaseExerciseLeanLeftDescription;
+        return AppLocalizations.of(
+          context,
+        )!.pressureReleaseExerciseLeanLeftDescription;
       case PressureReleaseExercise.lying:
-        return AppLocalizations.of(context)!
-            .pressureReleaseExerciseLyingDescription;
+        return AppLocalizations.of(
+          context,
+        )!.pressureReleaseExerciseLyingDescription;
     }
   }
 }
@@ -97,13 +96,7 @@ class PressureReleaseEntry extends JournalEntry {
   Map<String, dynamic> toJson() {
     return {
       ...super.toJson(),
-      'info': {
-        'exercises': exercises
-            .map(
-              (e) => e.name.toString(),
-            )
-            .toList(),
-      }
+      'info': {'exercises': exercises.map((e) => e.name.toString()).toList()},
     };
   }
 

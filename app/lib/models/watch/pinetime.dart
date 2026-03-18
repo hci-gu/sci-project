@@ -193,17 +193,15 @@ class PineTimeService {
 
     try {
       _resetGattStateForReconnect();
-      // Wait for Bluetooth to be ready
-      final adapterState = await FlutterBluePlus.adapterState.first;
+      // Resolve the adapter state once and fail fast if Bluetooth isn't on.
+      final adapterState = await FlutterBluePlus.adapterState
+          .firstWhere((state) => state != BluetoothAdapterState.unknown)
+          .timeout(
+            const Duration(seconds: 1),
+            onTimeout: () => BluetoothAdapterState.unknown,
+          );
       if (adapterState != BluetoothAdapterState.on) {
-        // Wait up to 5 seconds for Bluetooth to turn on
-        await FlutterBluePlus.adapterState
-            .where((s) => s == BluetoothAdapterState.on)
-            .first
-            .timeout(
-              const Duration(seconds: 5),
-              onTimeout: () => throw StateError(kBluetoothOffError),
-            );
+        throw StateError(kBluetoothOffError);
       }
 
       // Try reusing the known device before scanning again.

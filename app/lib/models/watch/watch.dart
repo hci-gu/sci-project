@@ -2,9 +2,10 @@ import 'dart:async';
 import 'dart:isolate';
 import 'dart:ui';
 
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/ble_owner.dart';
+import 'package:scimovement/models/home_refresh.dart';
 import 'package:scimovement/storage.dart';
 
 enum WatchType { polar, pinetime, demo }
@@ -33,6 +34,24 @@ class WatchSyncResult {
     this.dataCount,
     this.uploaded,
   });
+}
+
+class WatchSyncProgress {
+  final String phase;
+  final int current;
+  final int total;
+
+  const WatchSyncProgress({this.phase = '', this.current = 0, this.total = 0});
+
+  double get progress => total > 0 ? current / total : 0.0;
+  bool get isActive => phase.isNotEmpty;
+}
+
+class WatchSyncNotice {
+  final int id;
+  final String error;
+
+  const WatchSyncNotice({required this.id, required this.error});
 }
 
 class ConnectedWatch {
@@ -86,6 +105,9 @@ class ConnectedWatch {
 }
 
 class ConnectedWatchNotifier extends Notifier<ConnectedWatch?> {
+  Future<WatchSyncResult>? _activeSync;
+  static const Duration _postSyncRefreshDelay = Duration(seconds: 3);
+
   @override
   ConnectedWatch? build() {
     listenSelf((previous, next) {
@@ -116,26 +138,165 @@ class ConnectedWatchNotifier extends Notifier<ConnectedWatch?> {
   }
 
   Future<WatchSyncResult> syncData() async {
+    return syncDataWithOptions();
+  }
+
+  Future<WatchSyncResult> syncDataWithOptions({
+    bool backgroundSync = false,
+    SendPort? progressSink,
+    bool userInitiated = true,
+  }) async {
     if (state == null) {
       return const WatchSyncResult(ok: false);
     }
 
-    // Both Polar and PineTime sync via the same BLE command
-    // BleOwner routes to the correct handler based on watch type
-    if (state?.type == WatchType.polar || state?.type == WatchType.pinetime) {
-      final result = await sendBleCommand({
-        'cmd': 'sync',
-        'backgroundSync': false,
-      });
-      return WatchSyncResult(
-        ok: result['ok'] == true,
-        error: result['error'] as String?,
-        dataCount: result['dataCount'] as int?,
-        uploaded: result['uploaded'] as bool?,
-      );
+    if (_activeSync != null) {
+      return _activeSync!;
     }
 
-    return const WatchSyncResult(ok: false);
+    ref.read(watchSyncInProgressProvider.notifier).state = true;
+    ref
+        .read(watchSyncProgressProvider.notifier)
+        .state = const WatchSyncProgress(phase: 'connecting');
+    ref.read(lastWatchSyncAttemptProvider.notifier).state = DateTime.now();
+
+    // Both Polar and PineTime sync via the same BLE command
+    // BleOwner routes to the correct handler based on watch type
+    if (state?.type != WatchType.polar && state?.type != WatchType.pinetime) {
+      ref.read(watchSyncInProgressProvider.notifier).state = false;
+      ref.read(watchSyncProgressProvider.notifier).state =
+          const WatchSyncProgress();
+      return const WatchSyncResult(ok: false);
+    }
+
+    final future = () async {
+      void dispatchProgress({
+        required String phase,
+        int current = 0,
+        int total = 0,
+      }) {
+        final progress = WatchSyncProgress(
+          phase: phase,
+          current: current,
+          total: total,
+        );
+        ref.read(watchSyncProgressProvider.notifier).state = progress;
+        progressSink?.send({
+          'type': 'sync_progress',
+          'phase': phase,
+          'current': current,
+          'total': total,
+        });
+      }
+
+      final ReceivePort? internalProgressPort =
+          backgroundSync ? null : ReceivePort();
+      final StreamSubscription<dynamic>? progressSubscription =
+          internalProgressPort?.listen((msg) {
+            if (msg is Map && msg['type'] == 'sync_progress') {
+              dispatchProgress(
+                phase: msg['phase']?.toString() ?? '',
+                current: msg['current'] as int? ?? 0,
+                total: msg['total'] as int? ?? 0,
+              );
+            }
+          });
+
+      final result = await sendBleCommand({
+        'cmd': 'sync',
+        'backgroundSync': backgroundSync,
+        if (internalProgressPort != null)
+          'progressSink': internalProgressPort.sendPort
+        else if (progressSink != null)
+          'progressSink': progressSink,
+      });
+
+      try {
+        final watchSyncResult = WatchSyncResult(
+          ok: result['ok'] == true,
+          error: result['error'] as String?,
+          dataCount: result['dataCount'] as int?,
+          uploaded: result['uploaded'] as bool?,
+        );
+
+        if (watchSyncResult.ok) {
+          ref.read(lastSyncProvider.notifier).setLastSync(DateTime.now());
+          if (!backgroundSync) {
+            await _refreshAppDataAfterSync(
+              watchSyncResult,
+              onProgress: dispatchProgress,
+            );
+          }
+        } else if (!userInitiated && watchSyncResult.error != null) {
+          ref.read(watchSyncNoticeProvider.notifier).state = WatchSyncNotice(
+            id: DateTime.now().microsecondsSinceEpoch,
+            error: watchSyncResult.error!,
+          );
+        }
+
+        return watchSyncResult;
+      } finally {
+        await progressSubscription?.cancel();
+        internalProgressPort?.close();
+      }
+    }();
+
+    _activeSync = future;
+    try {
+      return await future;
+    } finally {
+      _activeSync = null;
+      ref.read(watchSyncInProgressProvider.notifier).state = false;
+      ref.read(watchSyncProgressProvider.notifier).state =
+          const WatchSyncProgress();
+    }
+  }
+
+  Future<void> _refreshAppDataAfterSync(
+    WatchSyncResult result, {
+    void Function({required String phase, int current, int total})? onProgress,
+  }) async {
+    final bool waitForServerProcessing =
+        result.ok && (result.dataCount ?? 0) > 0 && result.uploaded != false;
+
+    if (waitForServerProcessing) {
+      onProgress?.call(phase: 'processing');
+      await Future.delayed(_postSyncRefreshDelay);
+    }
+
+    refreshHomeProviders(ref.invalidate);
+  }
+
+  Future<bool> syncIfNeeded({
+    Duration minInterval = const Duration(minutes: 12),
+  }) async {
+    if (kIsWeb ||
+        defaultTargetPlatform != TargetPlatform.iOS ||
+        state == null) {
+      return false;
+    }
+
+    final isSyncing = ref.read(watchSyncInProgressProvider);
+    if (isSyncing) {
+      return false;
+    }
+
+    final now = DateTime.now();
+    final lastSync = ref.read(lastSyncProvider);
+    if (lastSync != null && now.difference(lastSync) < minInterval) {
+      return false;
+    }
+
+    final lastAttempt = ref.read(lastWatchSyncAttemptProvider);
+    if (lastAttempt != null && now.difference(lastAttempt) < minInterval) {
+      return false;
+    }
+
+    final result = await syncDataWithOptions(
+      backgroundSync: false,
+      userInitiated: false,
+    );
+    return result.ok;
   }
 
   Future<bool> startRecording() async {
@@ -172,6 +333,13 @@ final connectedWatchProvider =
     NotifierProvider<ConnectedWatchNotifier, ConnectedWatch?>(
       ConnectedWatchNotifier.new,
     );
+
+final watchSyncInProgressProvider = StateProvider<bool>((ref) => false);
+final watchSyncProgressProvider = StateProvider<WatchSyncProgress>(
+  (ref) => const WatchSyncProgress(),
+);
+final watchSyncNoticeProvider = StateProvider<WatchSyncNotice?>((ref) => null);
+final lastWatchSyncAttemptProvider = StateProvider<DateTime?>((ref) => null);
 
 class LastSyncNotifier extends Notifier<DateTime?> {
   @override

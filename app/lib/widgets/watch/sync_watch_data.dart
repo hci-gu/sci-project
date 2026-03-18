@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/models/home_refresh.dart';
@@ -14,6 +15,9 @@ class SyncWatchData extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     ValueNotifier<bool> loading = useState(false);
+    final syncInProgress = ref.watch(watchSyncInProgressProvider);
+    final bluetoothState = useStream(FlutterBluePlus.adapterState);
+    final bluetoothEnabled = bluetoothState.data == BluetoothAdapterState.on;
 
     return Center(
       child: Column(
@@ -39,16 +43,14 @@ class SyncWatchData extends HookConsumerWidget {
           ),
           AppTheme.spacer2x,
           Button(
+            disabled: syncInProgress || !bluetoothEnabled,
             onPressed: () async {
               loading.value = true;
               final result =
                   await ref.read(connectedWatchProvider.notifier).syncData();
               if (context.mounted) {
                 if (result.ok) {
-                  ref
-                      .read(lastSyncProvider.notifier)
-                      .setLastSync(DateTime.now());
-                  refreshHomeProviders(ref);
+                  refreshHomeProviders(ref.invalidate);
                   final hasData = (result.dataCount ?? 0) > 0;
                   final uploaded = result.uploaded != false;
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -155,7 +157,7 @@ class SyncWatchData extends HookConsumerWidget {
             },
             icon: Icons.sync,
             title: AppLocalizations.of(context)!.sync,
-            loading: loading.value,
+            loading: loading.value || syncInProgress,
           ),
         ],
       ),

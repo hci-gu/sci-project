@@ -7,7 +7,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/api/api.dart';
 import 'package:scimovement/api/classes.dart';
 import 'package:scimovement/ble_owner.dart';
-import 'package:scimovement/models/home_refresh.dart';
 import 'package:scimovement/models/watch/watch.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/button.dart';
@@ -15,17 +14,6 @@ import 'package:scimovement/widgets/confirm_dialog.dart';
 import 'package:scimovement/gen_l10n/app_localizations.dart';
 import 'package:scimovement/widgets/watch/connect_watch.dart';
 import 'package:timeago/timeago.dart' as timeago;
-
-/// Progress state for PineTime sync
-class SyncProgress {
-  final String phase;
-  final int current;
-  final int total;
-
-  const SyncProgress({this.phase = '', this.current = 0, this.total = 0});
-
-  double get progress => total > 0 ? current / total : 0.0;
-}
 
 class DfuProgressState {
   final String phase;
@@ -49,8 +37,10 @@ class WatchSettings extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final watch = ref.watch(connectedWatchProvider);
+    final globalSyncInProgress = ref.watch(watchSyncInProgressProvider);
+    final globalSyncProgress = ref.watch(watchSyncProgressProvider);
     final isSyncing = useState(false);
-    final syncProgress = useState<SyncProgress>(const SyncProgress());
+    final syncProgress = useState<WatchSyncProgress>(const WatchSyncProgress());
     final isUpdating = useState(false);
     final dfuProgress = useState<DfuProgressState>(const DfuProgressState());
     final lastDfuError = useState<String?>(null);
@@ -63,7 +53,12 @@ class WatchSettings extends HookConsumerWidget {
           (stateRaw['data'] as Map?)?.cast<String, dynamic>() ??
           <String, dynamic>{};
       try {
-        final adapterState = await FlutterBluePlus.adapterState.first;
+        final adapterState = await FlutterBluePlus.adapterState
+            .firstWhere((state) => state != BluetoothAdapterState.unknown)
+            .timeout(
+              const Duration(seconds: 1),
+              onTimeout: () => BluetoothAdapterState.unknown,
+            );
         final bool? bluetoothEnabled =
             adapterState == BluetoothAdapterState.on
                 ? true
@@ -263,7 +258,7 @@ class WatchSettings extends HookConsumerWidget {
 
     Future<void> handleSync() async {
       isSyncing.value = true;
-      syncProgress.value = const SyncProgress(phase: 'connecting');
+      syncProgress.value = const WatchSyncProgress(phase: 'connecting');
 
       // Create a receive port for progress updates
       final progressPort = ReceivePort();
@@ -271,7 +266,7 @@ class WatchSettings extends HookConsumerWidget {
       // Listen for progress updates
       progressPort.listen((msg) {
         if (msg is Map && msg['type'] == 'sync_progress') {
-          syncProgress.value = SyncProgress(
+          syncProgress.value = WatchSyncProgress(
             phase: msg['phase'] ?? '',
             current: msg['current'] ?? 0,
             total: msg['total'] ?? 0,
@@ -280,17 +275,13 @@ class WatchSettings extends HookConsumerWidget {
       });
 
       try {
-        final result = await sendBleCommand({
-          'cmd': 'sync',
-          'progressSink': progressPort.sendPort,
-          'backgroundSync': false,
-        });
+        final result = await ref
+            .read(connectedWatchProvider.notifier)
+            .syncDataWithOptions(progressSink: progressPort.sendPort);
         if (context.mounted) {
-          if (result['ok'] == true) {
-            ref.read(lastSyncProvider.notifier).setLastSync(DateTime.now());
-            refreshHomeProviders(ref);
-            final int dataCount = (result['dataCount'] as int?) ?? 0;
-            final bool uploaded = (result['uploaded'] as bool?) ?? true;
+          if (result.ok) {
+            final int dataCount = result.dataCount ?? 0;
+            final bool uploaded = result.uploaded ?? true;
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
@@ -308,7 +299,7 @@ class WatchSettings extends HookConsumerWidget {
             refresh.value = fetchWatchState();
           } else {
             final l10n = AppLocalizations.of(context)!;
-            final error = result['error']?.toString();
+            final error = result.error?.toString();
             String? message;
             if (error == kPinetimeConnectTimeout) {
               message = l10n.pinetimeConnectTimeout;
@@ -353,7 +344,7 @@ class WatchSettings extends HookConsumerWidget {
       } finally {
         progressPort.close();
         isSyncing.value = false;
-        syncProgress.value = const SyncProgress();
+        syncProgress.value = const WatchSyncProgress();
       }
     }
 
@@ -374,9 +365,11 @@ class WatchSettings extends HookConsumerWidget {
                       'firmwareVersion': firmwareData['firmwareVersion'],
                     }
                     : data;
+            final bluetoothEnabled = mergedData['bluetoothEnabled'] as bool?;
             final isLoading =
                 snapshot.connectionState != ConnectionState.done ||
-                isSyncing.value;
+                isSyncing.value ||
+                globalSyncInProgress;
             final firmwareVersion = mergedData['firmwareVersion']?.toString();
 
             return Column(
@@ -392,7 +385,7 @@ class WatchSettings extends HookConsumerWidget {
                           ref,
                           mergedData,
                           watch,
-                          isSyncing: isSyncing.value,
+                          isSyncing: isSyncing.value || globalSyncInProgress,
                         ),
                     Column(
                       children: [
@@ -459,10 +452,15 @@ class WatchSettings extends HookConsumerWidget {
                           lastSync != null &&
                           DateTime.now().difference(lastSync).inMinutes < 3;
 
-                      // Show progress bar when syncing
                       if (isSyncing.value) {
                         return _SyncProgressIndicator(
                           progress: syncProgress.value,
+                        );
+                      }
+
+                      if (globalSyncInProgress && globalSyncProgress.isActive) {
+                        return _SyncProgressIndicator(
+                          progress: globalSyncProgress,
                         );
                       }
 
@@ -475,7 +473,10 @@ class WatchSettings extends HookConsumerWidget {
                         title: AppLocalizations.of(context)!.sync,
                         icon: Icons.sync,
                         loading: false,
-                        disabled: isUpdating.value,
+                        disabled:
+                            isUpdating.value ||
+                            globalSyncInProgress ||
+                            bluetoothEnabled == false,
                       );
                     },
                   ),
@@ -545,8 +546,8 @@ class WatchSettings extends HookConsumerWidget {
                             AppTheme.spacer2x,
                             Text(
                               l10n.firmwareUpdateAvailable(
-                                currentVersion!,
-                                latestVersion!,
+                                currentVersion,
+                                latestVersion,
                               ),
                               style: AppTheme.paragraphSmall,
                             ),
@@ -752,7 +753,7 @@ class WatchSettings extends HookConsumerWidget {
 
 /// Widget to display sync progress with a progress bar
 class _SyncProgressIndicator extends StatelessWidget {
-  final SyncProgress progress;
+  final WatchSyncProgress progress;
 
   const _SyncProgressIndicator({required this.progress});
 

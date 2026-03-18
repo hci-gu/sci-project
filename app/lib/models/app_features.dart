@@ -79,3 +79,11 @@ final appFeaturesProvider =
     NotifierProvider<AppFeaturesNotifier, List<AppFeature>>(
       AppFeaturesNotifier.new,
     );
+
+Map<String, bool> appFeaturesToJson(List<AppFeature> enabledFeatures) {
+  final Set<AppFeature> enabled = enabledFeatures.toSet();
+  return {
+    for (final feature in AppFeature.values)
+      feature.name: enabled.contains(feature),
+  };
+}

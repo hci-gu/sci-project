@@ -12,6 +12,7 @@ import 'package:scimovement/models/locale.dart';
 import 'package:scimovement/router.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:collection/collection.dart';
+import 'package:scimovement/models/watch/watch.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:scimovement/gen_l10n/app_localizations.dart';
 
@@ -25,6 +26,23 @@ class App extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     useEffect(() {
       _startForeGroundService();
+      if (!kIsWeb && Platform.isIOS) {
+        Future<void> syncIfNeeded() async {
+          await ref
+              .read(connectedWatchProvider.notifier)
+              .syncIfNeeded(minInterval: const Duration(minutes: 12));
+        }
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          syncIfNeeded();
+        });
+
+        final observer = _AppLifecycleObserver(onResumed: syncIfNeeded);
+        WidgetsBinding.instance.addObserver(observer);
+        return () {
+          WidgetsBinding.instance.removeObserver(observer);
+        };
+      }
 
       return () {};
     }, []);
@@ -56,7 +74,9 @@ class App extends HookConsumerWidget {
         },
         locale: ref.watch(localeProvider),
         builder: (_, child) {
-          return child ?? const SizedBox.shrink();
+          return WatchSyncFeedbackListener(
+            child: child ?? const SizedBox.shrink(),
+          );
         },
       ),
     );
@@ -71,6 +91,95 @@ class App extends HookConsumerWidget {
       await ForegroundService.instance.ensureStarted();
     } catch (e) {
       print("Error starting foreground service: $e");
+    }
+  }
+}
+
+class WatchSyncFeedbackListener extends HookConsumerWidget {
+  final Widget child;
+
+  const WatchSyncFeedbackListener({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final lastShownNoticeId = useRef<int?>(null);
+    final notice = ref.watch(watchSyncNoticeProvider);
+
+    void showNotice(WatchSyncNotice next) {
+      if (!context.mounted || lastShownNoticeId.value == next.id) {
+        return;
+      }
+      lastShownNoticeId.value = next.id;
+
+      final l10n = AppLocalizations.of(context)!;
+      final String message;
+      switch (next.error) {
+        case kBluetoothOffError:
+          message = l10n.bluetoothOffRetry;
+          break;
+        case kWatchNotFoundError:
+          message = l10n.watchNotFoundReconnect;
+          break;
+        case kWatchNotConfiguredError:
+          message = l10n.watchNotConfigured;
+          break;
+        case kConnectionFailedError:
+          message = l10n.watchConnectFailed;
+          break;
+        case kWatchSyncLoginRequired:
+          message = l10n.watchSyncLoginRequired;
+          break;
+        case kPinetimeConnectTimeout:
+          message = l10n.pinetimeConnectTimeout;
+          break;
+        case kPinetimeReadTimeout:
+          message = l10n.pinetimeReadTimeout;
+          break;
+        case kPinetimeBleError:
+          message = l10n.pinetimeBleError;
+          break;
+        case kPinetimeCharacteristicMissing:
+          message = l10n.pinetimeCharacteristicMissing;
+          break;
+        default:
+          message = l10n.syncFailed(next.error);
+          break;
+      }
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message), backgroundColor: Colors.red),
+        );
+      });
+    }
+
+    ref.listen<WatchSyncNotice?>(watchSyncNoticeProvider, (previous, next) {
+      if (next != null) {
+        showNotice(next);
+      }
+    });
+
+    useEffect(() {
+      if (notice != null) {
+        showNotice(notice);
+      }
+      return null;
+    }, [notice?.id]);
+
+    return child;
+  }
+}
+
+class _AppLifecycleObserver extends WidgetsBindingObserver {
+  final Future<void> Function() onResumed;
+
+  _AppLifecycleObserver({required this.onResumed});
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      onResumed();
     }
   }
 }

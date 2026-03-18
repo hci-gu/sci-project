@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -21,8 +20,10 @@ class AppSettings extends ConsumerWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(AppLocalizations.of(context)!.notifications,
-                style: AppTheme.paragraphMedium),
+            Text(
+              AppLocalizations.of(context)!.notifications,
+              style: AppTheme.paragraphMedium,
+            ),
             CupertinoSwitch(
               thumbColor: AppTheme.colors.white,
               activeTrackColor: AppTheme.colors.primary,
@@ -111,19 +112,27 @@ class AppFeatureToggles extends ConsumerWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          title,
-          style: AppTheme.paragraphMedium,
-        ),
+        Text(title, style: AppTheme.paragraphMedium),
         CupertinoSwitch(
           thumbColor: AppTheme.colors.white,
           activeTrackColor: AppTheme.colors.primary,
           value: features.contains(feature),
           onChanged: (add) async {
+            final List<AppFeature> nextFeatures =
+                add
+                    ? {...features, feature}.toList()
+                    : features.where((f) => f != feature).toList();
+
             if (add) {
               ref.read(appFeaturesProvider.notifier).addFeature(feature);
             } else {
               ref.read(appFeaturesProvider.notifier).removeFeature(feature);
+            }
+
+            if (ref.read(userProvider) != null) {
+              await ref.read(userProvider.notifier).update({
+                'features': appFeaturesToJson(nextFeatures),
+              });
             }
           },
         ),
@@ -159,11 +168,13 @@ class NotificationToggles extends ConsumerWidget {
                   onChanged: (value) async {
                     ref
                         .read(userProvider.notifier)
-                        .updateNotificationSettings(NotificationSettings(
-                          activity: value,
-                          data: user.notificationSettings.data,
-                          journal: user.notificationSettings.journal,
-                        ));
+                        .updateNotificationSettings(
+                          NotificationSettings(
+                            activity: value,
+                            data: user.notificationSettings.data,
+                            journal: user.notificationSettings.journal,
+                          ),
+                        );
                   },
                 ),
               ],
@@ -184,11 +195,13 @@ class NotificationToggles extends ConsumerWidget {
                 onChanged: (value) async {
                   ref
                       .read(userProvider.notifier)
-                      .updateNotificationSettings(NotificationSettings(
-                        activity: user.notificationSettings.activity,
-                        data: user.notificationSettings.data,
-                        journal: value,
-                      ));
+                      .updateNotificationSettings(
+                        NotificationSettings(
+                          activity: user.notificationSettings.activity,
+                          data: user.notificationSettings.data,
+                          journal: value,
+                        ),
+                      );
                 },
               ),
             ],
@@ -209,15 +222,17 @@ class NotificationToggles extends ConsumerWidget {
                   onChanged: (value) async {
                     ref
                         .read(userProvider.notifier)
-                        .updateNotificationSettings(NotificationSettings(
-                          activity: user.notificationSettings.activity,
-                          data: value,
-                          journal: user.notificationSettings.journal,
-                        ));
+                        .updateNotificationSettings(
+                          NotificationSettings(
+                            activity: user.notificationSettings.activity,
+                            data: value,
+                            journal: user.notificationSettings.journal,
+                          ),
+                        );
                   },
                 ),
               ],
-            )
+            ),
         ],
       ),
     );
