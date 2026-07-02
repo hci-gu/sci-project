@@ -14,8 +14,9 @@ class ChartDataPoint {
 class ChartData {
   final List<ChartDataPoint> data;
   final ChartMode mode;
+  final DateTime? rangeStart;
 
-  ChartData(this.data, this.mode);
+  ChartData(this.data, this.mode, {this.rangeStart});
 
   double get maxValue => data.map((e) => e.value).reduce(math.max);
   double get maxY => mode == ChartMode.day ? 60 : maxValue * 1.25;
@@ -37,7 +38,7 @@ class ChartData {
   int get days => (minDate - maxDate) ~/ (1000 * 60 * 60 * 24);
 
   Map<DateTime, List<ChartDataPoint>> get group => {
-        ..._emptyMap(data.last.time),
+        ..._emptyMap(rangeStart ?? data.last.time),
         ...groupData(),
       };
 
@@ -73,12 +74,13 @@ class ChartData {
             DateTime(base.year, base.month, base.day, i): [],
         };
       case ChartMode.week:
+        final DateTime weekStart = DateTime(base.year, base.month, base.day);
         return {
           for (int i = 0; i < 7; i++)
             DateTime(
-              base.subtract(Duration(days: i)).year,
-              base.subtract(Duration(days: i)).month,
-              base.subtract(Duration(days: i)).day,
+              weekStart.add(Duration(days: i)).year,
+              weekStart.add(Duration(days: i)).month,
+              weekStart.add(Duration(days: i)).day,
             ): [],
         };
       case ChartMode.month:

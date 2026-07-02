@@ -34,6 +34,8 @@ class DfuProgressState {
 class WatchSettings extends HookConsumerWidget {
   const WatchSettings({super.key});
 
+  static const String _legacyPineTimeFirmwareFallbackVersion = '1.0.0';
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final watch = ref.watch(connectedWatchProvider);
@@ -375,19 +377,17 @@ class WatchSettings extends HookConsumerWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    isLoading && !isSyncing.value
-                        ? _loadingRow()
-                        : _watchConnectionRow(
-                          ctx,
-                          ref,
-                          mergedData,
-                          watch,
-                          isSyncing: isSyncing.value || globalSyncInProgress,
-                        ),
-                    Column(
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final shouldStack =
+                        MediaQuery.textScalerOf(context).scale(1) > 1.15 ||
+                        constraints.maxWidth < 420;
+
+                    final actions = Wrap(
+                      spacing: AppTheme.basePadding * 2,
+                      runSpacing: AppTheme.basePadding * 2,
+                      alignment:
+                          shouldStack ? WrapAlignment.start : WrapAlignment.end,
                       children: [
                         Button(
                           onPressed: () async {
@@ -426,7 +426,6 @@ class WatchSettings extends HookConsumerWidget {
                           size: ButtonSize.tiny,
                           disabled: isLoading,
                         ),
-                        AppTheme.spacer2x,
                         Button(
                           onPressed: () {
                             latestDfu.value = Api().getLatestDfuRelease();
@@ -440,8 +439,49 @@ class WatchSettings extends HookConsumerWidget {
                           disabled: isLoading,
                         ),
                       ],
-                    ),
-                  ],
+                    );
+
+                    if (shouldStack) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          isLoading && !isSyncing.value
+                              ? _loadingRow()
+                              : _watchConnectionRow(
+                                ctx,
+                                ref,
+                                mergedData,
+                                watch,
+                                isSyncing:
+                                    isSyncing.value || globalSyncInProgress,
+                              ),
+                          AppTheme.spacer2x,
+                          actions,
+                        ],
+                      );
+                    }
+
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child:
+                              isLoading && !isSyncing.value
+                                  ? _loadingRow()
+                                  : _watchConnectionRow(
+                                    ctx,
+                                    ref,
+                                    mergedData,
+                                    watch,
+                                    isSyncing:
+                                        isSyncing.value || globalSyncInProgress,
+                                  ),
+                        ),
+                        AppTheme.spacer2x,
+                        actions,
+                      ],
+                    );
+                  },
                 ),
                 if (watch.type == WatchType.pinetime) ...[
                   AppTheme.spacer2x,
@@ -486,11 +526,13 @@ class WatchSettings extends HookConsumerWidget {
                     builder: (context, snapshot) {
                       final l10n = AppLocalizations.of(context)!;
                       final info = snapshot.data;
+                      final firmwareVersionText = firmwareVersion?.trim();
                       final currentVersion =
-                          firmwareVersion?.trim().isNotEmpty == true &&
-                                  firmwareVersion != 'unknown'
-                              ? firmwareVersion!.trim()
-                              : null;
+                          firmwareVersionText != null &&
+                                  firmwareVersionText.isNotEmpty &&
+                                  firmwareVersionText != 'unknown'
+                              ? firmwareVersionText
+                              : _legacyPineTimeFirmwareFallbackVersion;
 
                       if (isUpdating.value) {
                         return _DfuProgressIndicator(
@@ -531,7 +573,6 @@ class WatchSettings extends HookConsumerWidget {
                               ? info.version.trim()
                               : null;
                       final isUpdateAvailable =
-                          currentVersion != null &&
                           latestVersion != null &&
                           _isNewerVersion(latestVersion, currentVersion);
 
@@ -562,7 +603,10 @@ class WatchSettings extends HookConsumerWidget {
                               title: l10n.firmwareUpdateButton,
                               icon: Icons.system_update,
                               loading: false,
-                              disabled: isUpdating.value || isSyncing.value,
+                              disabled:
+                                  isUpdating.value ||
+                                  isSyncing.value ||
+                                  bluetoothEnabled == false,
                             ),
                           ],
                         ],
@@ -677,15 +721,19 @@ class WatchSettings extends HookConsumerWidget {
             child: Icon(Icons.bluetooth_disabled, color: Colors.red[700]),
           ),
           AppTheme.spacer2x,
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(watch.id, style: AppTheme.paragraphMedium),
-              Text(
-                AppLocalizations.of(context)!.bluetoothOff,
-                style: AppTheme.paragraphSmall.copyWith(color: Colors.red[700]),
-              ),
-            ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(watch.id, style: AppTheme.paragraphMedium),
+                Text(
+                  AppLocalizations.of(context)!.bluetoothOff,
+                  style: AppTheme.paragraphSmall.copyWith(
+                    color: Colors.red[700],
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       );
@@ -796,7 +844,12 @@ class _SyncProgressIndicator extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            Text(_getPhaseText(context), style: AppTheme.paragraphSmall),
+            Expanded(
+              child: Text(
+                _getPhaseText(context),
+                style: AppTheme.paragraphSmall,
+              ),
+            ),
           ],
         ),
         if (showProgressBar) ...[
@@ -867,7 +920,12 @@ class _DfuProgressIndicator extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            Text(_getPhaseText(context), style: AppTheme.paragraphSmall),
+            Expanded(
+              child: Text(
+                _getPhaseText(context),
+                style: AppTheme.paragraphSmall,
+              ),
+            ),
           ],
         ),
         if (showProgressBar) ...[

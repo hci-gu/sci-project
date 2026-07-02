@@ -1,14 +1,10 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:scimovement/api/classes.dart';
-import 'package:scimovement/ble_owner.dart';
 import 'package:scimovement/models/auth.dart';
 import 'package:scimovement/models/onboarding.dart';
-import 'package:scimovement/models/watch/polar.dart';
-import 'package:scimovement/screens/home/widgets/pressure_release_widget.dart';
 import 'package:scimovement/screens/settings/widgets/app_settings.dart';
 import 'package:scimovement/screens/settings/widgets/user_settings.dart';
 import 'package:scimovement/screens/settings/widgets/watch_settings.dart';
@@ -119,11 +115,19 @@ class AboutInfo extends StatelessWidget {
             children: [
               const Icon(Icons.info_outline),
               AppTheme.spacer,
-              Text(info?.appName ?? '', style: AppTheme.labelMedium),
-              AppTheme.spacer,
-              Text(
-                '${info?.version} (${info?.buildNumber})',
-                style: AppTheme.paragraphSmall,
+              Expanded(
+                child: Wrap(
+                  spacing: AppTheme.basePadding,
+                  runSpacing: AppTheme.basePadding / 2,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Text(info?.appName ?? '', style: AppTheme.labelMedium),
+                    Text(
+                      '${info?.version} (${info?.buildNumber})',
+                      style: AppTheme.paragraphSmall,
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

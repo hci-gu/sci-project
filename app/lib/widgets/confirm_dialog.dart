@@ -13,6 +13,7 @@ Future<bool?> confirmDialog(
     context: context,
     builder: (BuildContext ctx) {
       return AlertDialog(
+        scrollable: true,
         title: Text(title, style: AppTheme.headLine3),
         content: body ?? Text(message, style: AppTheme.paragraphMedium),
         titlePadding: EdgeInsets.symmetric(
@@ -27,31 +28,28 @@ Future<bool?> confirmDialog(
         ),
         actionsPadding: EdgeInsets.all(AppTheme.basePadding * 2),
         actions: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: AppTheme.basePadding * 2,
+            runSpacing: AppTheme.basePadding * 2,
             children: [
-              Expanded(
-                child: Button(
-                  onPressed: () {
-                    Navigator.of(ctx).pop(false);
-                  },
-                  secondary: true,
-                  rounded: true,
-                  size: ButtonSize.small,
-                  title: AppLocalizations.of(context)!.cancel,
-                ),
+              Button(
+                onPressed: () {
+                  Navigator.of(ctx).pop(false);
+                },
+                secondary: true,
+                rounded: true,
+                size: ButtonSize.small,
+                title: AppLocalizations.of(context)!.cancel,
               ),
-              SizedBox(width: AppTheme.basePadding * 4),
-              Expanded(
-                child: Button(
-                  onPressed: () {
-                    Navigator.of(ctx).pop(true);
-                  },
-                  rounded: true,
-                  size: ButtonSize.small,
-                  color: AppTheme.colors.error,
-                  title: AppLocalizations.of(context)!.yes,
-                ),
+              Button(
+                onPressed: () {
+                  Navigator.of(ctx).pop(true);
+                },
+                rounded: true,
+                size: ButtonSize.small,
+                color: AppTheme.colors.error,
+                title: AppLocalizations.of(context)!.yes,
               ),
             ],
           ),

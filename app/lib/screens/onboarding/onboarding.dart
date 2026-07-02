@@ -19,20 +19,19 @@ class OnboardingScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       body: SafeArea(
-        child: Stack(
-          children: [
-            ListView(
-              padding: EdgeInsets.only(
-                bottom: 100,
-                top: AppTheme.basePadding * 2,
-                left: AppTheme.basePadding * 2,
-                right: AppTheme.basePadding * 2,
-              ),
-              children: const [OnboardingStep()],
-            ),
-            const Positioned(bottom: 0, child: OnboardingStepper()),
-          ],
+        child: ListView(
+          padding: EdgeInsets.only(
+            top: AppTheme.basePadding * 2,
+            left: AppTheme.basePadding * 2,
+            right: AppTheme.basePadding * 2,
+            bottom: AppTheme.basePadding * 2,
+          ),
+          children: const [OnboardingStep()],
         ),
+      ),
+      bottomNavigationBar: const SafeArea(
+        top: false,
+        child: OnboardingStepper(),
       ),
     );
   }
@@ -255,10 +254,13 @@ class PushNotifications extends ConsumerWidget {
         ),
         AppTheme.spacer2x,
         Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              AppLocalizations.of(context)!.onboardingActivatePush,
-              style: AppTheme.labelLarge,
+            Expanded(
+              child: Text(
+                AppLocalizations.of(context)!.onboardingActivatePush,
+                style: AppTheme.labelLarge,
+              ),
             ),
             AppTheme.spacer2x,
             CupertinoSwitch(
@@ -323,10 +325,11 @@ class AppFeatureWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             icon != null ? icon! : SvgPicture.asset(asset, width: 24),
             AppTheme.spacer,
-            Text(title, style: AppTheme.headLine3),
+            Expanded(child: Text(title, style: AppTheme.headLine3)),
           ],
         ),
         AppTheme.spacer,
@@ -396,13 +399,7 @@ class FeatureToggle extends ConsumerWidget {
                 onChanged: (_) => didChange(false),
               ),
               AppTheme.spacer,
-              Expanded(
-                child: Text(
-                  addText,
-                  style: AppTheme.paragraphMedium,
-                  maxLines: 2,
-                ),
-              ),
+              Expanded(child: Text(addText, style: AppTheme.paragraphMedium)),
             ],
           ),
         ),
@@ -419,11 +416,7 @@ class FeatureToggle extends ConsumerWidget {
               ),
               AppTheme.spacer,
               Expanded(
-                child: Text(
-                  removeText,
-                  style: AppTheme.paragraphMedium,
-                  maxLines: 2,
-                ),
+                child: Text(removeText, style: AppTheme.paragraphMedium),
               ),
             ],
           ),

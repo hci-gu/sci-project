@@ -41,6 +41,24 @@ export default {
   findOne: ({ userId }: { userId: string }) => {
     return ImageModel.findOne({
       where: { UserId: userId },
+      order: [['createdAt', 'DESC']],
+    })
+  },
+  findOneByCacheKey: ({
+    userId,
+    cacheKey,
+  }: {
+    userId: string
+    cacheKey: string
+  }) => {
+    return ImageModel.findOne({
+      where: {
+        UserId: userId,
+        prompt: {
+          [Op.like]: `CACHE_KEY:${cacheKey}\n%`,
+        },
+      },
+      order: [['createdAt', 'DESC']],
     })
   },
 }

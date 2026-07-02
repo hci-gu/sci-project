@@ -6,7 +6,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/ble_owner.dart';
 import 'package:scimovement/models/app_features.dart';
 import 'package:scimovement/models/pagination.dart';
-import 'package:scimovement/models/watch/polar.dart';
 import 'package:scimovement/models/watch/watch.dart';
 import 'package:scimovement/screens/home/widgets/bladder_emptying_widget.dart';
 import 'package:scimovement/screens/home/widgets/energy_widget.dart';
@@ -20,11 +19,8 @@ import 'package:scimovement/screens/onboarding/widgets/onboarding_stepper.dart';
 import 'package:scimovement/storage.dart';
 import 'package:scimovement/theme/theme.dart';
 import 'package:scimovement/widgets/activity_wheel/activity_wheel.dart';
-import 'package:scimovement/widgets/ai/generated_image.dart';
-import 'package:scimovement/widgets/button.dart';
 import 'package:scimovement/widgets/date_select.dart';
 import 'package:scimovement/gen_l10n/app_localizations.dart';
-import 'package:scimovement/widgets/watch/sync_watch_data.dart';
 
 class HomeWidgetPageNotifier extends Notifier<int> {
   @override
@@ -57,6 +53,13 @@ class PagedWidgets extends HookConsumerWidget {
     int page = ref.watch(homeWidgetPageProvider);
     int pageCount = 1 + (hasLogFeatures ? 1 : 0);
     int clampedPage = pageCount > 0 ? page.clamp(0, pageCount - 1) : 0;
+    final textScale = MediaQuery.textScalerOf(context).scale(1);
+    final sectionHeightScale = (textScale - 1).clamp(0, 1.5).toDouble();
+    final extraHeight = (((textScale - 1).clamp(0, 1.5)) * 180).toDouble();
+    final dateHeaderHeight =
+        (100 + (((textScale - 1).clamp(0, 1.5)) * 40)).toDouble();
+    final summaryRowHeight = 91 + (sectionHeightScale * 24);
+    final painRowHeight = 110 + (sectionHeightScale * 72);
 
     useEffect(() {
       if (clampedPage != page) {
@@ -68,8 +71,11 @@ class PagedWidgets extends HookConsumerWidget {
     }, [page, clampedPage]);
 
     bool centerAlignDate = hasLogFeatures && clampedPage == 1;
-    double pageSize = clampedPage == 0 ? 440 : 440;
-    double topPadding = clampedPage == 0 ? 0 : 44;
+    double pageSize = 440 + extraHeight;
+    double topPadding =
+        clampedPage == 0
+            ? 0
+            : (44 + (((textScale - 1).clamp(0, 1.5)) * 20)).toDouble();
     PageController controller = useMemoized(
       () => PageController(initialPage: clampedPage),
       [clampedPage],
@@ -88,7 +94,7 @@ class PagedWidgets extends HookConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(
-                height: 91,
+                height: summaryRowHeight,
                 child: Row(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -115,7 +121,7 @@ class PagedWidgets extends HookConsumerWidget {
               ),
               AppTheme.spacer,
               SizedBox(
-                height: 110,
+                height: painRowHeight,
                 child: ListView(
                   shrinkWrap: true,
                   scrollDirection: Axis.horizontal,
@@ -145,7 +151,7 @@ class PagedWidgets extends HookConsumerWidget {
                 curve: Curves.decelerate,
                 child: SizedBox(
                   width: MediaQuery.of(context).size.width,
-                  height: 100,
+                  height: dateHeaderHeight,
                   child: Padding(
                     padding: EdgeInsets.symmetric(
                       horizontal: AppTheme.basePadding * 2,

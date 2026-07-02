@@ -12,6 +12,7 @@ final energyBarChartProvider =
   return ChartData(
     energy.map((e) => ChartDataPoint(e.time, e.value, e.activity)).toList(),
     ref.watch(paginationProvider).mode,
+    rangeStart: pagination.from,
   );
 });
 
@@ -24,6 +25,7 @@ final activityBarChartProvider =
         .map((e) => ChartDataPoint(e.time, e.minutes.toDouble(), e.activity))
         .toList(),
     ref.watch(paginationProvider).mode,
+    rangeStart: pagination.from,
   );
 });
 
@@ -37,6 +39,7 @@ final movementBarChartProvider =
         .map((e) => ChartDataPoint(e.time, e.minutes.toDouble(), e.activity))
         .toList(),
     pagination.mode,
+    rangeStart: pagination.from,
   );
 });
 
@@ -50,6 +53,7 @@ final sedentaryBarChartProvider =
         .map((e) => ChartDataPoint(e.time, e.minutes.toDouble(), e.activity))
         .toList(),
     ref.watch(paginationProvider).mode,
+    rangeStart: pagination.from,
   );
 });
 

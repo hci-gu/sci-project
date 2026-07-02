@@ -75,9 +75,13 @@ class LocaleSelect extends HookConsumerWidget {
   }
 
   OverlayEntry _overlayEntryBuilder(
-      BuildContext context, WidgetRef ref, isOpen) {
+    BuildContext context,
+    WidgetRef ref,
+    isOpen,
+  ) {
     return OverlayEntry(
       builder: (_) {
+        final itemHeight = buttonSize.height.clamp(40.0, 72.0);
         return Positioned(
           top: buttonPosition.dy + buttonSize.height,
           left: buttonPosition.dx,
@@ -89,7 +93,6 @@ class LocaleSelect extends HookConsumerWidget {
                 Padding(
                   padding: const EdgeInsets.only(top: 15.0),
                   child: Container(
-                    height: 120,
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(4),
@@ -104,7 +107,6 @@ class LocaleSelect extends HookConsumerWidget {
                     ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: List.generate(languages.length, (index) {
                         return GestureDetector(
                           onTap: () {
@@ -114,12 +116,17 @@ class LocaleSelect extends HookConsumerWidget {
                           },
                           child: Container(
                             width: buttonSize.width,
-                            height: buttonSize.height,
+                            constraints: BoxConstraints(minHeight: itemHeight),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 8,
+                            ),
                             alignment: Alignment.center,
                             child: Text(
                               displayLanguage(languages[index]),
                               textAlign: TextAlign.center,
                               style: const TextStyle(fontSize: 16),
+                              maxLines: 2,
                             ),
                           ),
                         );

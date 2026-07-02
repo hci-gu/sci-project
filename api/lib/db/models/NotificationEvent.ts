@@ -1,4 +1,4 @@
-import { DataTypes, Sequelize, type ModelStatic } from 'sequelize'
+import { DataTypes, Op, Sequelize, type ModelStatic } from 'sequelize'
 import { NotificationEvent } from '../classes.js'
 
 let NotificationEventModel: ModelStatic<NotificationEvent>
@@ -70,4 +70,34 @@ export default {
       reason,
       userId,
     }),
+  find: ({
+    userId,
+    from,
+    to,
+  }: {
+    userId: string
+    from?: Date
+    to?: Date
+  }) => {
+    const where: {
+      userId: string
+      timestamp?: {
+        [Op.between]: [Date, Date]
+      }
+    } = {
+      userId,
+    }
+
+    if (from && to) {
+      where.timestamp = {
+        [Op.between]: [from, to],
+      }
+    }
+
+    return NotificationEventModel.findAll({
+      attributes: ['id', 'title', 'body', 'timestamp', 'reason', 'userId'],
+      where,
+      order: [['timestamp', 'ASC']],
+    })
+  },
 }

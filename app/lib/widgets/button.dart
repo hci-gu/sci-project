@@ -3,12 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:scimovement/theme/theme.dart';
 
-enum ButtonSize {
-  tiny,
-  small,
-  medium,
-  large,
-}
+enum ButtonSize { tiny, small, medium, large }
 
 extension SizeToFloat on ButtonSize {
   double get height {
@@ -67,9 +62,9 @@ class Button extends StatelessWidget {
   final bool flipIcon;
   final bool disabled;
   final bool loading;
-  late Color? color;
+  final Color? color;
 
-  Button({
+  const Button({
     super.key,
     required this.onPressed,
     this.title,
@@ -89,50 +84,56 @@ class Button extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget button;
 
-    color ??= AppTheme.primarySwatch;
-    if (disabled) {
-      color = Colors.grey;
-    }
+    final resolvedColor =
+        disabled ? Colors.grey : (color ?? AppTheme.primarySwatch);
     Widget loadingIndicator = Center(
       child: SizedBox(
         width: 24,
         height: 24,
         child: CircularProgressIndicator(
           strokeWidth: 3,
-          color: secondary ? AppTheme.primarySwatch : AppTheme.colors.white,
+          color: secondary ? resolvedColor : AppTheme.colors.white,
         ),
       ),
     );
 
     ButtonStyle style = AppTheme.buttonStyle(
-        rounded: rounded, secondary: secondary, size: size, color: color);
+      rounded: rounded,
+      secondary: secondary,
+      size: size,
+      color: resolvedColor,
+    );
     Widget text = Text(
       title ?? '',
-      style: AppTheme.buttonTextStyle(secondary, color, size),
+      style: AppTheme.buttonTextStyle(secondary, resolvedColor, size),
+      textAlign: TextAlign.center,
+      maxLines: subtitle == null ? 2 : 1,
+      overflow: TextOverflow.ellipsis,
     );
     if (subtitle != null) {
-      text = FittedBox(
-        fit: BoxFit.contain,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            text,
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Text(
-                subtitle ?? '',
-                style: AppTheme.buttonTextStyle(secondary, color, size),
-              ),
+      text = Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          text,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              subtitle ?? '',
+              style: AppTheme.buttonTextStyle(secondary, resolvedColor, size),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
-          ],
-        ),
+          ),
+        ],
       );
     }
 
     if (icon != null) {
-      Widget iconToUse =
-          Icon(icon, color: secondary ? color : AppTheme.colors.white);
+      Widget iconToUse = Icon(
+        icon,
+        color: secondary ? resolvedColor : AppTheme.colors.white,
+      );
       if (title == null) {
         button = TextButton(
           style: style,
@@ -143,9 +144,10 @@ class Button extends StatelessWidget {
         button = TextButton.icon(
           style: style,
           onPressed: onPressed,
-          icon: loading
-              ? loadingIndicator
-              : flipIcon
+          icon:
+              loading
+                  ? loadingIndicator
+                  : flipIcon
                   ? text
                   : iconToUse,
           label: flipIcon ? iconToUse : text,
@@ -168,8 +170,13 @@ class Button extends StatelessWidget {
       absorbing: disabled || loading,
       child: SizedBox(
         width: (width ?? 200) * buttonScaleFactor,
-        height: size.height,
-        child: button,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minHeight: size.height,
+            minWidth: (width ?? 200) * buttonScaleFactor,
+          ),
+          child: button,
+        ),
       ),
     );
   }

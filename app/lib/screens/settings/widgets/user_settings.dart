@@ -16,40 +16,26 @@ class UserSettings extends HookWidget {
 
   const UserSettings({super.key, required this.user});
 
-  FormGroup buildForm() => fb.group(
-        {
-          'email': FormControl<String>(
-            value: user.email ?? '',
-            validators: [
-              Validators.email,
-            ],
-          ),
-          'password': FormControl<String>(
-            value: null,
-            validators: [
-              Validators.minLength(8),
-            ],
-          ),
-          'weight': FormControl<int>(
-            value: user.weight != null ? user.weight!.toInt() : 0,
-            validators: [],
-          ),
-          'injuryLevel': FormControl<int>(
-            value: user.injuryLevel,
-            validators: [
-              Validators.number(),
-            ],
-          ),
-          'gender': FormControl<Gender>(
-            value: user.gender,
-            validators: [],
-          ),
-          'condition': FormControl<Condition>(
-            value: user.condition,
-            validators: [],
-          ),
-        },
-      );
+  FormGroup buildForm() => fb.group({
+    'email': FormControl<String>(
+      value: user.email ?? '',
+      validators: [Validators.email],
+    ),
+    'password': FormControl<String>(
+      value: null,
+      validators: [Validators.minLength(8)],
+    ),
+    'weight': FormControl<int>(
+      value: user.weight != null ? user.weight!.toInt() : 0,
+      validators: [],
+    ),
+    'injuryLevel': FormControl<int>(
+      value: user.injuryLevel,
+      validators: [Validators.number()],
+    ),
+    'gender': FormControl<Gender>(value: user.gender, validators: []),
+    'condition': FormControl<Condition>(value: user.condition, validators: []),
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -76,22 +62,22 @@ class UserSettings extends HookWidget {
               disabled: !editing.value,
             ),
             AppTheme.spacer,
-            ConditionDropDown(
-              form: form,
-              readOnly: !editing.value,
-            ),
+            ConditionDropDown(form: form, readOnly: !editing.value),
             AppTheme.spacer,
             FormDropdown(
               form: form,
               formKey: 'gender',
               title: AppLocalizations.of(context)!.gender,
               readOnly: !editing.value,
-              items: Gender.values
-                  .map((gender) => DropdownMenuItem(
-                        value: gender,
-                        child: Text(gender.name),
-                      ))
-                  .toList(),
+              items:
+                  Gender.values
+                      .map(
+                        (gender) => DropdownMenuItem(
+                          value: gender,
+                          child: Text(gender.name),
+                        ),
+                      )
+                      .toList(),
             ),
             AppTheme.spacer,
             StyledTextField(
@@ -103,33 +89,34 @@ class UserSettings extends HookWidget {
             ),
             AppTheme.spacer,
             editing.value
-                ? Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Button(
-                        title: AppLocalizations.of(context)!.cancel,
-                        width: 120,
-                        secondary: true,
-                        onPressed: () {
-                          editing.value = !editing.value;
-                          form.unfocus();
-                          form.reset(value: buildForm().value);
-                        },
-                      ),
-                      AppTheme.spacer2x,
-                      SubmitButton(
-                        onPressed: () {
-                          editing.value = false;
-                        },
-                      ),
-                    ],
-                  )
+                ? Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: AppTheme.basePadding * 2,
+                  runSpacing: AppTheme.basePadding * 2,
+                  children: [
+                    Button(
+                      title: AppLocalizations.of(context)!.cancel,
+                      width: 120,
+                      secondary: true,
+                      onPressed: () {
+                        editing.value = !editing.value;
+                        form.unfocus();
+                        form.reset(value: buildForm().value);
+                      },
+                    ),
+                    SubmitButton(
+                      onPressed: () {
+                        editing.value = false;
+                      },
+                    ),
+                  ],
+                )
                 : Button(
-                    title: AppLocalizations.of(context)!.editProfile,
-                    width: 200,
-                    secondary: true,
-                    onPressed: () => editing.value = !editing.value,
-                  ),
+                  title: AppLocalizations.of(context)!.editProfile,
+                  width: 200,
+                  secondary: true,
+                  onPressed: () => editing.value = !editing.value,
+                ),
           ],
         );
       },
@@ -150,46 +137,51 @@ class ConditionDropDown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ReactiveFormConsumer(
-      builder: ((context, formGroup, child) => Row(
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              Flexible(
-                child: FormDropdown(
-                  readOnly: readOnly,
-                  form: form,
-                  formKey: 'condition',
-                  title: AppLocalizations.of(context)!.condition,
-                  hint:
-                      '${AppLocalizations.of(context)!.select} ${AppLocalizations.of(context)!.condition.toLowerCase()}',
-                  items: Condition.values
-                      .map((condition) => DropdownMenuItem(
-                            value: condition,
-                            child: Text(condition.name),
-                          ))
+      builder: ((context, formGroup, child) {
+        final showInjuryLevel =
+            form.value['condition'] == Condition.tetraplegic;
+
+        return Column(
+          children: [
+            FormDropdown(
+              readOnly: readOnly,
+              form: form,
+              formKey: 'condition',
+              title: AppLocalizations.of(context)!.condition,
+              hint:
+                  '${AppLocalizations.of(context)!.select} ${AppLocalizations.of(context)!.condition.toLowerCase()}',
+              items:
+                  Condition.values
+                      .map(
+                        (condition) => DropdownMenuItem(
+                          value: condition,
+                          child: Text(condition.name),
+                        ),
+                      )
                       .toList(),
-                ),
-              ),
-              if (form.value['condition'] == Condition.tetraplegic)
-                AppTheme.spacer2x,
-              if (form.value['condition'] == Condition.tetraplegic)
-                Flexible(
-                  child: FormDropdown(
-                    readOnly: readOnly,
-                    form: form,
-                    formKey: 'injuryLevel',
-                    title: AppLocalizations.of(context)!.injuryLevel,
-                    hint:
-                        '${AppLocalizations.of(context)!.select} ${AppLocalizations.of(context)!.injuryLevel.toLowerCase()}',
-                    items: [5, 6, 7, 8, 9]
-                        .map((value) => DropdownMenuItem(
-                              value: value,
-                              child: Text(value.toString()),
-                            ))
+            ),
+            if (showInjuryLevel) AppTheme.spacer2x,
+            if (showInjuryLevel)
+              FormDropdown(
+                readOnly: readOnly,
+                form: form,
+                formKey: 'injuryLevel',
+                title: AppLocalizations.of(context)!.injuryLevel,
+                hint:
+                    '${AppLocalizations.of(context)!.select} ${AppLocalizations.of(context)!.injuryLevel.toLowerCase()}',
+                items:
+                    [5, 6, 7, 8, 9]
+                        .map(
+                          (value) => DropdownMenuItem(
+                            value: value,
+                            child: Text(value.toString()),
+                          ),
+                        )
                         .toList(),
-                  ),
-                )
-            ],
-          )),
+              ),
+          ],
+        );
+      }),
     );
   }
 }
@@ -197,15 +189,13 @@ class ConditionDropDown extends StatelessWidget {
 class SubmitButton extends ConsumerWidget {
   final Function onPressed;
 
-  const SubmitButton({
-    super.key,
-    required this.onPressed,
-  });
+  const SubmitButton({super.key, required this.onPressed});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return ReactiveFormConsumer(
-      builder: ((context, form, child) => Button(
+      builder:
+          ((context, form, child) => Button(
             title: AppLocalizations.of(context)!.save,
             width: 130,
             disabled: form.pristine || !form.valid,

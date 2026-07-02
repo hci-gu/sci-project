@@ -7,7 +7,6 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:scimovement/ble_owner.dart';
-import 'package:scimovement/foreground_service/foreground_service.dart';
 import 'package:scimovement/models/watch/polar.dart';
 import 'package:scimovement/models/watch/watch.dart';
 import 'package:scimovement/theme/theme.dart';
@@ -31,6 +30,7 @@ class _WatchTypePickerDialog extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
 
     return AlertDialog(
+      scrollable: true,
       title: Text(l10n.selectWatchType, style: AppTheme.headLine3),
       content: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 420),
@@ -103,6 +103,7 @@ class _WatchTypeOption extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Icon(icon, size: 40, color: AppTheme.colors.primary),
             SizedBox(width: AppTheme.basePadding),
@@ -115,7 +116,13 @@ class _WatchTypeOption extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(Icons.chevron_right, color: Colors.grey),
+            SizedBox(
+              height: 40,
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: Icon(Icons.chevron_right, color: Colors.grey),
+              ),
+            ),
           ],
         ),
       ),

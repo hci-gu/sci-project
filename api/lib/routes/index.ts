@@ -12,6 +12,7 @@ import goalsRouter from './goals/index.js'
 import chatRouter from './chat/index.js'
 import dfuRouter from './dfu/index.js'
 import telemetryRouter from './telemetry/index.js'
+import notificationEventsRouter from './notification-events/index.js'
 
 router.get('/ping', (_, res: any) => res.send('pong'))
 
@@ -26,5 +27,6 @@ router.use('/goals', goalsRouter)
 router.use('/chat', chatRouter)
 router.use('/dfu', dfuRouter)
 router.use('/telemetry', telemetryRouter)
+router.use('/notification-events', notificationEventsRouter)
 
 export default router

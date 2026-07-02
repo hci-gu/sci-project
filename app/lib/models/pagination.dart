@@ -49,6 +49,11 @@ class Pagination {
     return to.difference(from);
   }
 
+  DateTime _startOfWeek(DateTime date) {
+    final int daysFromMonday = date.weekday - DateTime.monday;
+    return DateTime(date.year, date.month, date.day - daysFromMonday);
+  }
+
   DateTime get from {
     DateTime d = overrideDate ?? DateTime.now();
 
@@ -56,7 +61,12 @@ class Pagination {
       case ChartMode.day:
         return DateTime(d.year, d.month, d.day - page);
       case ChartMode.week:
-        return DateTime(d.year, d.month, d.day - 7 * page);
+        final DateTime weekStart = _startOfWeek(d);
+        return DateTime(
+          weekStart.year,
+          weekStart.month,
+          weekStart.day - 7 * page,
+        );
       case ChartMode.month:
         return DateTime(d.year, d.month - page);
       case ChartMode.quarter:

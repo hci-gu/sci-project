@@ -10,11 +10,7 @@ class StepIndicator extends StatelessWidget {
   final int index;
   final int count;
 
-  const StepIndicator({
-    super.key,
-    this.index = 0,
-    this.count = 3,
-  });
+  const StepIndicator({super.key, this.index = 0, this.count = 3});
 
   @override
   Widget build(BuildContext context) {
@@ -29,9 +25,7 @@ class StepIndicator extends StatelessWidget {
             height: 12,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: AppTheme.colors.primary,
-              ),
+              border: Border.all(color: AppTheme.colors.primary),
               color: index == i ? AppTheme.colors.primary : Colors.transparent,
             ),
           ),
@@ -46,41 +40,48 @@ class OnboardingStepper extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final shouldStack = MediaQuery.textScalerOf(context).scale(1) > 1.2;
+
     return Container(
       width: MediaQuery.of(context).size.width,
-      padding: const EdgeInsets.symmetric(
-        horizontal: 32.0,
-        vertical: 24.0,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 24.0),
       child: Column(
         children: [
-          Row(
+          Flex(
+            direction: shouldStack ? Axis.vertical : Axis.horizontal,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment:
+                shouldStack
+                    ? CrossAxisAlignment.stretch
+                    : CrossAxisAlignment.center,
             children: [
               ref.watch(onboardingStepProvider) == 0
                   ? GestureDetector(
-                      onTap: () {
-                        ref.read(onboardingStepProvider.notifier).state =
-                            onboardingStepCount;
-                        if (ref.watch(onboardingStepProvider) ==
-                            onboardingStepCount) {
-                          context.goNamed('home');
-                        }
-                      },
-                      child: Text(
-                        AppLocalizations.of(context)!.skip,
-                        style: AppTheme.labelLarge.copyWith(
-                          decoration: TextDecoration.underline,
-                        ),
+                    onTap: () {
+                      ref.read(onboardingStepProvider.notifier).state =
+                          onboardingStepCount;
+                      if (ref.watch(onboardingStepProvider) ==
+                          onboardingStepCount) {
+                        context.goNamed('home');
+                      }
+                    },
+                    child: Text(
+                      AppLocalizations.of(context)!.skip,
+                      style: AppTheme.labelLarge.copyWith(
+                        decoration: TextDecoration.underline,
                       ),
-                    )
-                  : Button(
-                      width: 100,
-                      title: AppLocalizations.of(context)!.back,
-                      secondary: true,
-                      onPressed: () =>
-                          ref.read(onboardingStepProvider.notifier).state--,
+                      textAlign:
+                          shouldStack ? TextAlign.center : TextAlign.start,
                     ),
+                  )
+                  : Button(
+                    width: 100,
+                    title: AppLocalizations.of(context)!.back,
+                    secondary: true,
+                    onPressed:
+                        () => ref.read(onboardingStepProvider.notifier).state--,
+                  ),
+              if (shouldStack) AppTheme.spacer2x,
               Button(
                 width: 100,
                 title:
@@ -94,14 +95,14 @@ class OnboardingStepper extends ConsumerWidget {
                     context.goNamed('home');
                   }
                 },
-              )
+              ),
             ],
           ),
           AppTheme.spacer,
           StepIndicator(
             index: ref.watch(onboardingStepProvider),
             count: onboardingStepCount,
-          )
+          ),
         ],
       ),
     );

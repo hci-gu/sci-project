@@ -373,6 +373,7 @@ class Api {
   Future<Uint8List?> getGeneratedImage({String? userId}) async {
     final response = await dio.get(
       '/chat/$_userId/image',
+      queryParameters: {'date': DateTime.now().toUtc().toIso8601String()},
       options: Options(
         responseType: ResponseType.bytes,
         headers: {
