@@ -14,6 +14,8 @@ class StepIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final safeIndex = index.clamp(0, count - 1);
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(
@@ -26,7 +28,8 @@ class StepIndicator extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: AppTheme.colors.primary),
-              color: index == i ? AppTheme.colors.primary : Colors.transparent,
+              color:
+                  safeIndex == i ? AppTheme.colors.primary : Colors.transparent,
             ),
           ),
         ),
@@ -41,11 +44,13 @@ class OnboardingStepper extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final shouldStack = MediaQuery.textScalerOf(context).scale(1) > 1.2;
+    final step = ref.watch(onboardingStepProvider);
 
     return Container(
       width: MediaQuery.of(context).size.width,
       padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 24.0),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Flex(
             direction: shouldStack ? Axis.vertical : Axis.horizontal,
@@ -55,7 +60,7 @@ class OnboardingStepper extends ConsumerWidget {
                     ? CrossAxisAlignment.stretch
                     : CrossAxisAlignment.center,
             children: [
-              ref.watch(onboardingStepProvider) == 0
+              step == 0
                   ? GestureDetector(
                     onTap: () {
                       ref.read(onboardingStepProvider.notifier).state =
@@ -85,7 +90,7 @@ class OnboardingStepper extends ConsumerWidget {
               Button(
                 width: 100,
                 title:
-                    ref.watch(onboardingStepProvider) == onboardingStepCount - 1
+                    step == onboardingStepCount - 1
                         ? AppLocalizations.of(context)!.finish
                         : AppLocalizations.of(context)!.next,
                 onPressed: () {
@@ -99,10 +104,7 @@ class OnboardingStepper extends ConsumerWidget {
             ],
           ),
           AppTheme.spacer,
-          StepIndicator(
-            index: ref.watch(onboardingStepProvider),
-            count: onboardingStepCount,
-          ),
+          StepIndicator(index: step, count: onboardingStepCount),
         ],
       ),
     );

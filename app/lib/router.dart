@@ -340,10 +340,19 @@ class RedirectScreen extends HookConsumerWidget {
 
     useEffect(() {
       if (user != null && redirectUri != null && state != null) {
-        launchUrl(Uri.parse('$redirectUri?state=$state&userId=${user.id}'));
+        final uri = Uri.parse(redirectUri!);
+        final redirectUrl = uri.replace(
+          queryParameters: {
+            ...uri.queryParameters,
+            'state': state!,
+            'userId': user.id,
+          },
+        );
+        launchUrl(redirectUrl);
         WidgetsBinding.instance.addPostFrameCallback((_) {
           context.goNamed('home');
         });
+        return () => {};
       }
       if (user == null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {

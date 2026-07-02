@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:scimovement/ble_owner.dart';
 import 'package:scimovement/models/home_refresh.dart';
+import 'package:scimovement/models/watch/polar.dart';
 import 'package:scimovement/storage.dart';
 
 enum WatchType { polar, pinetime, demo }
@@ -97,10 +98,13 @@ class ConnectedWatch {
 
   void dispose() {
     _disposed = true;
-    // if (type == WatchType.polar) {
-    //   PolarService.instance.stop();
-    //   PolarService.dispose();
-    // }
+    if (type == WatchType.polar) {
+      try {
+        final service = PolarService.instance;
+        unawaited(service.stop().catchError((_) {}));
+      } catch (_) {}
+      PolarService.dispose();
+    }
   }
 }
 
@@ -111,11 +115,12 @@ class ConnectedWatchNotifier extends Notifier<ConnectedWatch?> {
   @override
   ConnectedWatch? build() {
     listenSelf((previous, next) {
-      if (previous == null && next != null) {
-        Storage().storeConnectedWatch(next);
+      previous?.dispose();
+      if (next != null) {
+        unawaited(Storage().storeConnectedWatch(next));
         unawaited(next.initialize());
       } else {
-        previous?.dispose();
+        unawaited(Storage().removeConnectedWatch());
       }
     });
 
@@ -129,12 +134,10 @@ class ConnectedWatchNotifier extends Notifier<ConnectedWatch?> {
 
   void setConnectedWatch(ConnectedWatch watch) {
     state = watch;
-    Storage().storeConnectedWatch(watch);
   }
 
   void removeConnectedWatch() {
     state = null;
-    Storage().removeConnectedWatch();
   }
 
   Future<WatchSyncResult> syncData() async {

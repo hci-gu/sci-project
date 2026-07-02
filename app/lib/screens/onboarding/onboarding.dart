@@ -42,9 +42,15 @@ class OnboardingStep extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    int step = ref.watch(onboardingStepProvider);
+    final int step = ref.watch(onboardingStepProvider);
+    final int visibleStep =
+        step < 0
+            ? 0
+            : step >= onboardingStepCount
+            ? onboardingStepCount - 1
+            : step;
 
-    switch (step) {
+    switch (visibleStep) {
       case 0:
         return const OnboardingWelcome();
       case 1:
@@ -56,7 +62,7 @@ class OnboardingStep extends ConsumerWidget {
       case 4:
         return const PushNotifications();
       default:
-        return Container();
+        return const OnboardingWelcome();
     }
   }
 }

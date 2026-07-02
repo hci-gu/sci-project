@@ -144,7 +144,7 @@ class PressureUlcerModal extends ConsumerWidget {
       behavior: HitTestBehavior.opaque,
       onTap: () {
         Navigator.pop(context);
-        context.goNamed('journal-list', extra: {
+        context.goNamed('journal', extra: {
           'type': JournalType.pressureUlcer,
         });
       },

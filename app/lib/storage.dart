@@ -40,8 +40,8 @@ class Storage {
 
   Future clearCredentials() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.remove('email');
-    prefs.remove('password');
+    await prefs.remove('email');
+    await prefs.remove('password');
   }
 
   Future storeNotificationRequest(bool enabled) async {

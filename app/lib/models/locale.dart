@@ -21,6 +21,10 @@ class LocaleNotifier extends Notifier<Locale?> {
 
     return null;
   }
+
+  void setLocale(Locale? locale) {
+    state = locale;
+  }
 }
 
 final localeProvider =

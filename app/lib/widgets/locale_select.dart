@@ -110,8 +110,9 @@ class LocaleSelect extends HookConsumerWidget {
                       children: List.generate(languages.length, (index) {
                         return GestureDetector(
                           onTap: () {
-                            ref.read(localeProvider.notifier).state =
-                                languages[index];
+                            ref
+                                .read(localeProvider.notifier)
+                                .setLocale(languages[index]);
                             close(isOpen);
                           },
                           child: Container(
