@@ -1,4 +1,6 @@
 PODS:
+  - device_info_plus (0.0.1):
+    - Flutter
   - Flutter (1.0.0)
   - flutter_foreground_task (0.0.1):
     - Flutter
@@ -6,8 +8,8 @@ PODS:
     - Flutter
   - polar (0.0.1):
     - Flutter
-    - PolarBleSdk (~> 6.1.0)
-  - PolarBleSdk (6.1.0):
+    - PolarBleSdk (~> 6.9.0)
+  - PolarBleSdk (6.9.0):
     - RxSwift (~> 6.8.0)
     - SwiftProtobuf (~> 1.0)
     - Zip (~> 2.1.2)
@@ -19,6 +21,7 @@ PODS:
   - Zip (2.1.2)
 
 DEPENDENCIES:
+  - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - Flutter (from `Flutter`)
   - flutter_foreground_task (from `.symlinks/plugins/flutter_foreground_task/ios`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
@@ -33,6 +36,8 @@ SPEC REPOS:
     - Zip
 
 EXTERNAL SOURCES:
+  device_info_plus:
+    :path: ".symlinks/plugins/device_info_plus/ios"
   Flutter:
     :path: Flutter
   flutter_foreground_task:
@@ -45,11 +50,12 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/push/darwin"
 
 SPEC CHECKSUMS:
+  device_info_plus: 71ffc6ab7634ade6267c7a93088ed7e4f74e5896
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   flutter_foreground_task: a159d2c2173b33699ddb3e6c2a067045d7cebb89
   permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
-  polar: 0374f6063ade7e2dd85d626f87cbe2393d3eda7c
-  PolarBleSdk: bfb57cf8350f0c53d441b8632ba6df363ce7c79f
+  polar: fc900c0d24bae5a30b67c1d6eec8495612eba8b5
+  PolarBleSdk: 3f7c535442f4c41592ed30abbfe522db43c608e1
   push: 91373ae39c5341c6de6adefa3fda7f7287d646bf
   RxSwift: 4e28be97cbcfeee614af26d83415febbf2bf6f45
   SwiftProtobuf: 409d3aaec90e51b1705b1dd8065b56893450e77c
